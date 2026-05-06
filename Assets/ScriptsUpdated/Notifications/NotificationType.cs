@@ -8,6 +8,8 @@ public enum NotificationType
     DiscoveryCompleted,
     DiscoveryFailed,
     BuildingCompleted,
+    BuildingDamaged,
+    BuildingDestroyed,
 
     // Future: CraftingCompleted, ProductionCompleted, ResearchCompleted, etc.
 }

@@ -360,7 +360,7 @@ public class PlayerConstructionManager : MonoBehaviour
 
         string title, message;
         if (NotificationMessageCrafterManager.Instance != null)
-            (title, message) = NotificationMessageCrafterManager.Instance.CraftBuilding(buildingName);
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftBuilding(NotificationType.BuildingCompleted, buildingName);
         else
         {
             title   = "Construction Complete";

@@ -35,10 +35,18 @@ public class NotificationMessageCrafter : ScriptableObject
         }
     }
 
-    public (string title, string message) CraftBuilding(string buildingName)
+    public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
-        var set = GetSuccessSet(NotificationType.BuildingCompleted);
-        if (set == null) return ("Construction Complete", $"{buildingName} has been constructed.");
+        var set = GetSuccessSet(type);
+        if (set == null)
+        {
+            return type switch
+            {
+                NotificationType.BuildingDamaged   => ("Building Damaged",   $"{buildingName} has been damaged."),
+                NotificationType.BuildingDestroyed => ("Building Destroyed", $"{buildingName} has been destroyed."),
+                _                                  => ("Construction Complete", $"{buildingName} has been constructed."),
+            };
+        }
 
         string title   = Pick(set.titles);
         string message = Pick(set.messages).Replace("{BUILDING}", buildingName);
@@ -165,6 +173,30 @@ public class NotificationMessageCrafter : ScriptableObject
                     "Your workers finished building {BUILDING}.",
                     "Construction of {BUILDING} is complete.",
                     "{BUILDING} is now operational.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.BuildingDamaged,
+                titles   = new[] { "Building Damaged", "Structure Damaged", "Damage Reported" },
+                messages = new[]
+                {
+                    "{BUILDING} has sustained damage.",
+                    "Your {BUILDING} has been damaged and needs repair.",
+                    "Damage reported at {BUILDING}.",
+                    "{BUILDING} is in a damaged state.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.BuildingDestroyed,
+                titles   = new[] { "Building Destroyed", "Structure Lost", "Total Loss" },
+                messages = new[]
+                {
+                    "{BUILDING} has been destroyed.",
+                    "Your {BUILDING} has been completely destroyed.",
+                    "{BUILDING} is lost — nothing remains.",
+                    "The {BUILDING} has been reduced to rubble.",
                 },
             },
         };

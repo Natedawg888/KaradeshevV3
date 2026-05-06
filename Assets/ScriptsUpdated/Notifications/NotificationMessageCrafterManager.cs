@@ -27,9 +27,17 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.Craft(type, env, populationLost);
     }
 
-    public (string title, string message) CraftBuilding(string buildingName)
+    public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
-        if (crafter == null) return ("Construction Complete", $"{buildingName} has been constructed.");
-        return crafter.CraftBuilding(buildingName);
+        if (crafter == null)
+        {
+            return type switch
+            {
+                NotificationType.BuildingDamaged   => ("Building Damaged",   $"{buildingName} has been damaged."),
+                NotificationType.BuildingDestroyed => ("Building Destroyed", $"{buildingName} has been destroyed."),
+                _                                  => ("Construction Complete", $"{buildingName} has been constructed."),
+            };
+        }
+        return crafter.CraftBuilding(type, buildingName);
     }
 }

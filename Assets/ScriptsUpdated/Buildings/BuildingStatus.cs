@@ -187,8 +187,38 @@ public class BuildingStatus : MonoBehaviour
             }
         }
 
+        PostBuildingStateNotification(newState);
+
         OnStateChanged?.Invoke(newState);
         BroadcastToTypeHandlers(newState);
+    }
+
+    private void PostBuildingStateNotification(BuildingState newState)
+    {
+        if (newState != BuildingState.Damaged && newState != BuildingState.Destroyed) return;
+        if (NotificationManager.Instance == null) return;
+
+        NotificationType notifType = newState == BuildingState.Damaged
+            ? NotificationType.BuildingDamaged
+            : NotificationType.BuildingDestroyed;
+
+        var instance = GetComponent<BuildingInstance>();
+        string buildingName = (instance != null && instance.definition != null)
+            ? instance.definition.buildingName
+            : gameObject.name;
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftBuilding(notifType, buildingName);
+        else
+        {
+            title   = newState == BuildingState.Damaged ? "Building Damaged"   : "Building Destroyed";
+            message = newState == BuildingState.Damaged
+                ? $"{buildingName} has been damaged."
+                : $"{buildingName} has been destroyed.";
+        }
+
+        NotificationManager.Instance.AddNotification(notifType, title, message, transform.position);
     }
 
     private void EnableNormalBuildingMesh(bool on, Transform[] exclude = null)
