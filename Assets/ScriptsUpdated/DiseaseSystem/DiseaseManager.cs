@@ -1430,7 +1430,7 @@ public class DiseaseManager : MonoBehaviour
         if (weatherGrid == null || !weatherGrid.IsInitialized)
             return 0;
 
-        PlayerBuildingManager.Record record = FindBuildingRecordForComponent(buildingComponent);
+        WorldBuildingManager.Record record = FindBuildingRecordForComponent(buildingComponent);
         if (record == null || string.IsNullOrWhiteSpace(record.instanceId))
             return 0;
 
@@ -1575,16 +1575,16 @@ public class DiseaseManager : MonoBehaviour
         return totalInfections;
     }
 
-    private PlayerBuildingManager.Record FindBuildingRecordForComponent(Component component)
+    private WorldBuildingManager.Record FindBuildingRecordForComponent(Component component)
     {
         if (component == null)
             return null;
 
-        PlayerBuildingManager pbm = PlayerBuildingManager.Instance;
-        if (pbm == null)
+        WorldBuildingManager wbm = WorldBuildingManager.Instance;
+        if (wbm == null)
             return null;
 
-        IReadOnlyList<PlayerBuildingManager.Record> records = pbm.GetAll();
+        IReadOnlyList<WorldBuildingManager.Record> records = wbm.GetAll();
         if (records == null)
             return null;
 
@@ -1592,7 +1592,7 @@ public class DiseaseManager : MonoBehaviour
 
         for (int i = 0; i < records.Count; i++)
         {
-            PlayerBuildingManager.Record record = records[i];
+            WorldBuildingManager.Record record = records[i];
 
             if (record == null || record.instance == null)
                 continue;
