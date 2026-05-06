@@ -479,6 +479,11 @@ public class PlayerDiscoveryManager : MonoBehaviour
         MarkDiscoveryStateDirty();
         CivilizationHappinessSystem.Instance?.NotifyTaskResult(success: true, weight: 1f);
 
+        NotificationManager.Instance?.AddNotification(
+            NotificationType.DiscoveryCompleted,
+            "Discovery Complete",
+            $"{env.environmentName} has been discovered.");
+
         OnDiscoveryCompleted?.Invoke(env);
     }
 

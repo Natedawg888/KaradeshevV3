@@ -427,6 +427,11 @@ public class PlayerGatheringManager : MonoBehaviour
 
                     CivilizationHappinessSystem.Instance?.NotifyTaskResult(success: true, weight: 1f);
 
+                    NotificationManager.Instance?.AddNotification(
+                        NotificationType.GatheringCompleted,
+                        "Gathering Complete",
+                        $"{env.environmentName} has been gathered.");
+
                     OnGatheringCompleted?.Invoke(env, loot);
                     toRemove.Add(env);
                 }
