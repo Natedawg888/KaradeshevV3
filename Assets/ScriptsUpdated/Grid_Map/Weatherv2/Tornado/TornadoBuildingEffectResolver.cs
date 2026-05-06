@@ -186,7 +186,7 @@ public class TornadoBuildingEffectResolver : MonoBehaviour
         {
             Vector2Int cell = activeCells[i];
 
-            if (!weatherGridManager.TryGetBuildingAtCell(cell.x, cell.y, out PlayerBuildingManager.Record record) ||
+            if (!weatherGridManager.TryGetBuildingAtCell(cell.x, cell.y, out WorldBuildingManager.Record record) ||
                 record == null)
             {
                 if (debugLogging)
@@ -388,7 +388,7 @@ public class TornadoBuildingEffectResolver : MonoBehaviour
         return Mathf.Max(0, hits);
     }
 
-    private BuildingControl GetBuildingControlFromRecord(PlayerBuildingManager.Record record)
+    private BuildingControl GetBuildingControlFromRecord(WorldBuildingManager.Record record)
     {
         if (record == null || record.instance == null)
             return null;

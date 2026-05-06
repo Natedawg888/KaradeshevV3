@@ -165,7 +165,7 @@ public class VolcanicPrecipitationBuildingEffectResolver : MonoBehaviour
         if (!weatherGridManager.TryGetBuildingAtCell(
                 cell.x,
                 cell.y,
-                out PlayerBuildingManager.Record record) ||
+                out WorldBuildingManager.Record record) ||
             record == null ||
             record.instance == null)
         {

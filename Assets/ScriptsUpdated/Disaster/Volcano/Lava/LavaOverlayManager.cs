@@ -1670,7 +1670,7 @@ public class LavaOverlayManager : MonoBehaviour
         if (!weatherGridManager.TryGetBuildingAtCell(
                 coord.x,
                 coord.y,
-                out PlayerBuildingManager.Record record) ||
+                out WorldBuildingManager.Record record) ||
             record == null ||
             record.instance == null)
         {

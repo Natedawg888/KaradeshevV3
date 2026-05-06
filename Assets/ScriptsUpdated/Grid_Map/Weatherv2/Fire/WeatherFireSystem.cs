@@ -9,7 +9,7 @@ public class WeatherFireSystem : MonoBehaviour
     private struct FireCellTargets
     {
         public EnvironmentControl environment;
-        public PlayerBuildingManager.Record buildingRecord;
+        public WorldBuildingManager.Record buildingRecord;
 
         public bool HasEnvironment => environment != null;
         public bool HasBuilding => buildingRecord != null && buildingRecord.instance != null;
@@ -514,7 +514,7 @@ public class WeatherFireSystem : MonoBehaviour
         if (!fireCanIgniteBuildings)
             return false;
 
-        if (!TryGetBuildingAtIgnitionCell(x, y, out PlayerBuildingManager.Record record) || record == null)
+        if (!TryGetBuildingAtIgnitionCell(x, y, out WorldBuildingManager.Record record) || record == null)
             return false;
 
         GameObject buildingRoot = record.instance;
@@ -611,7 +611,7 @@ public class WeatherFireSystem : MonoBehaviour
         if (weatherGridManager.TryGetEnvironmentAtCell(x, y, out EnvironmentControl env) && env != null)
             targets.environment = env;
 
-        if (weatherGridManager.TryGetBuildingAtCell(x, y, out PlayerBuildingManager.Record building) &&
+        if (weatherGridManager.TryGetBuildingAtCell(x, y, out WorldBuildingManager.Record building) &&
             building != null &&
             building.instance != null)
         {
@@ -650,7 +650,7 @@ public class WeatherFireSystem : MonoBehaviour
         return env != null;
     }
 
-    private bool TryGetBuildingAtIgnitionCell(int x, int y, out PlayerBuildingManager.Record building)
+    private bool TryGetBuildingAtIgnitionCell(int x, int y, out WorldBuildingManager.Record building)
     {
         building = null;
 
@@ -1067,7 +1067,7 @@ public class WeatherFireSystem : MonoBehaviour
         return false;
     }
 
-    private bool IsBuildingFootprintFlooded(PlayerBuildingManager.Record targetBuildingRecord)
+    private bool IsBuildingFootprintFlooded(WorldBuildingManager.Record targetBuildingRecord)
     {
         if (targetBuildingRecord == null || targetBuildingRecord.instance == null)
             return false;
@@ -1089,7 +1089,7 @@ public class WeatherFireSystem : MonoBehaviour
             if (!weatherGridManager.TryGetBuildingAtCell(
                     floodCoord.x,
                     floodCoord.y,
-                    out PlayerBuildingManager.Record floodedBuildingRecord))
+                    out WorldBuildingManager.Record floodedBuildingRecord))
             {
                 continue;
             }
@@ -1563,7 +1563,7 @@ public class WeatherFireSystem : MonoBehaviour
         if (!fireCanIgniteBuildings)
             return false;
 
-        if (!TryGetBuildingAtIgnitionCell(saved.x, saved.y, out PlayerBuildingManager.Record record) ||
+        if (!TryGetBuildingAtIgnitionCell(saved.x, saved.y, out WorldBuildingManager.Record record) ||
             record == null ||
             record.instance == null)
         {

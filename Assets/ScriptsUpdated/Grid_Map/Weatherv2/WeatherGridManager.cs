@@ -438,7 +438,7 @@ public class WeatherGridManager : MonoBehaviour
         {
             for (int i = 0; i < records.Count; i++)
             {
-                PlayerBuildingManager.Record record = records[i];
+                WorldBuildingManager.Record record = records[i];
                 if (record == null)
                     continue;
 

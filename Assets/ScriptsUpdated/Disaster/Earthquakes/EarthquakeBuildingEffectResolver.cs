@@ -8,7 +8,7 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
     public EarthquakeSimulationSystem simulationSystem;
     public MapGenerator mapGenerator;
     public GridManager gridManager;
-    public PlayerBuildingManager playerBuildingManager;
+    public WorldBuildingManager worldBuildingManager;
 
     [Header("Damage")]
     public bool damageBuildings = true;
@@ -116,7 +116,7 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
     EarthquakeSimulationSystem newSimulationSystem,
     MapGenerator newMapGenerator,
     GridManager newGridManager,
-    PlayerBuildingManager newPlayerBuildingManager)
+    WorldBuildingManager newWorldBuildingManager)
     {
         if (newSimulationSystem != null)
             simulationSystem = newSimulationSystem;
@@ -127,8 +127,8 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
         if (newGridManager != null)
             gridManager = newGridManager;
 
-        if (newPlayerBuildingManager != null)
-            playerBuildingManager = newPlayerBuildingManager;
+        if (newWorldBuildingManager != null)
+            worldBuildingManager = newWorldBuildingManager;
 
         RebindSimulationSubscription();
 
@@ -206,7 +206,7 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
             yield break;
         }
 
-        IReadOnlyList<PlayerBuildingManager.Record> records = playerBuildingManager.GetAll();
+        IReadOnlyList<WorldBuildingManager.Record> records = worldBuildingManager.GetAll();
 
         if (records == null || records.Count == 0)
         {
@@ -240,7 +240,7 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
 
         for (int i = 0; i < records.Count; i++)
         {
-            PlayerBuildingManager.Record record = records[i];
+            WorldBuildingManager.Record record = records[i];
 
             if (record == null || record.instance == null)
                 continue;
@@ -643,7 +643,7 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
     }
 
     private void GetBuildingCoveredCells(
-        PlayerBuildingManager.Record record,
+        WorldBuildingManager.Record record,
         List<Vector2Int> results)
     {
         results.Clear();

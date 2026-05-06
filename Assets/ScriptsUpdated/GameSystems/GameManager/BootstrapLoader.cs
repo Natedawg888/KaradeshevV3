@@ -490,25 +490,24 @@ public class BootstrapLoader : MonoBehaviour
             );
         }
 
+        if (WorldBuildingManager.Instance != null)
+        {
+            WorldBuildingManager.Instance.SetPlayerBuildingManager(
+                playerInstaller.PlayerBuildingManager
+            );
+        }
+
         if (WeatherGridManager.Instance != null)
         {
-            WeatherGridManager.Instance.SetPlayerBuildingManager(
-                playerInstaller.PlayerBuildingManager,
+            WeatherGridManager.Instance.SetWorldBuildingManager(
+                WorldBuildingManager.Instance,
                 rebuildCoverage: true
             );
         }
 
-        InstallPlayerBuildingManagerIntoEarthquakeSystems(
-            playerInstaller.PlayerBuildingManager
-        );
-
-        InstallPlayerBuildingManagerIntoTsunamiSystems(
-            playerInstaller.PlayerBuildingManager
-        );
-
-        InstallPlayerBuildingManagerIntoFloodSystems(
-            playerInstaller.PlayerBuildingManager
-        );
+        InstallWorldBuildingManagerIntoEarthquakeSystems(WorldBuildingManager.Instance);
+        InstallWorldBuildingManagerIntoTsunamiSystems(WorldBuildingManager.Instance);
+        InstallWorldBuildingManagerIntoFloodSystems(WorldBuildingManager.Instance);
 
         LevelManager levelManager = _managerInstaller != null ? _managerInstaller.LevelManager : null;
 
@@ -625,11 +624,11 @@ public class BootstrapLoader : MonoBehaviour
         InstallAnimalSimulationIntoFloodSystems();
     }
 
-    private void InstallPlayerBuildingManagerIntoFloodSystems(PlayerBuildingManager playerBuildingManager)
+    private void InstallWorldBuildingManagerIntoFloodSystems(WorldBuildingManager worldBuildingManager)
     {
-        if (playerBuildingManager == null)
+        if (worldBuildingManager == null)
         {
-            Debug.LogWarning("[BootstrapLoader] Cannot install PlayerBuildingManager into flood systems because it is null.");
+            Debug.LogWarning("[BootstrapLoader] Cannot install WorldBuildingManager into flood systems because it is null.");
             return;
         }
 
@@ -661,12 +660,12 @@ public class BootstrapLoader : MonoBehaviour
             resolvers[i].InstallRuntimeRefs(
                 floodSimulationSystem,
                 gridManager,
-                playerBuildingManager
+                worldBuildingManager
             );
         }
 
         Debug.Log(
-            $"[BootstrapLoader] Installed PlayerBuildingManager '{playerBuildingManager.name}' " +
+            $"[BootstrapLoader] Installed WorldBuildingManager '{worldBuildingManager.name}' " +
             $"into {resolvers.Length} flood building resolver(s)."
         );
     }
@@ -765,11 +764,11 @@ public class BootstrapLoader : MonoBehaviour
         );
     }
 
-    private void InstallPlayerBuildingManagerIntoTsunamiSystems(PlayerBuildingManager playerBuildingManager)
+    private void InstallWorldBuildingManagerIntoTsunamiSystems(WorldBuildingManager worldBuildingManager)
     {
-        if (playerBuildingManager == null)
+        if (worldBuildingManager == null)
         {
-            Debug.LogWarning("[BootstrapLoader] Cannot install PlayerBuildingManager into tsunami systems because it is null.");
+            Debug.LogWarning("[BootstrapLoader] Cannot install WorldBuildingManager into tsunami systems because it is null.");
             return;
         }
 
@@ -801,21 +800,21 @@ public class BootstrapLoader : MonoBehaviour
             resolvers[i].InstallRuntimeRefs(
                 simulationSystem,
                 gridManager,
-                playerBuildingManager
+                worldBuildingManager
             );
         }
 
         Debug.Log(
-            $"[BootstrapLoader] Installed PlayerBuildingManager '{playerBuildingManager.name}' " +
+            $"[BootstrapLoader] Installed WorldBuildingManager '{worldBuildingManager.name}' " +
             $"into {resolvers.Length} tsunami building resolver(s)."
         );
     }
 
-    private void InstallPlayerBuildingManagerIntoEarthquakeSystems(PlayerBuildingManager playerBuildingManager)
+    private void InstallWorldBuildingManagerIntoEarthquakeSystems(WorldBuildingManager worldBuildingManager)
     {
-        if (playerBuildingManager == null)
+        if (worldBuildingManager == null)
         {
-            Debug.LogWarning("[BootstrapLoader] Cannot install PlayerBuildingManager into earthquake systems because it is null.");
+            Debug.LogWarning("[BootstrapLoader] Cannot install WorldBuildingManager into earthquake systems because it is null.");
             return;
         }
 
@@ -847,12 +846,12 @@ public class BootstrapLoader : MonoBehaviour
                 simulationSystem,
                 mapGenerator,
                 gridManager,
-                playerBuildingManager
+                worldBuildingManager
             );
         }
 
         Debug.Log(
-            $"[BootstrapLoader] Installed PlayerBuildingManager '{playerBuildingManager.name}' " +
+            $"[BootstrapLoader] Installed WorldBuildingManager '{worldBuildingManager.name}' " +
             $"into {resolvers.Length} earthquake building resolver(s)."
         );
     }

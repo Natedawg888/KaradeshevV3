@@ -632,7 +632,7 @@ public class TornadoSimulationSystem : MonoBehaviour
         if (weatherGridManager == null)
             return;
 
-        if (!weatherGridManager.TryGetBuildingAtCell(cell.x, cell.y, out PlayerBuildingManager.Record record) ||
+        if (!weatherGridManager.TryGetBuildingAtCell(cell.x, cell.y, out WorldBuildingManager.Record record) ||
             record == null)
         {
             return;
@@ -683,7 +683,7 @@ public class TornadoSimulationSystem : MonoBehaviour
                 if (!oldActive && newActive && debugLogging && debugLogBuildingCellActivations)
                 {
                     if (weatherGridManager != null &&
-                        weatherGridManager.TryGetBuildingAtCell(x, y, out PlayerBuildingManager.Record record) &&
+                        weatherGridManager.TryGetBuildingAtCell(x, y, out WorldBuildingManager.Record record) &&
                         record != null)
                     {
                         string buildingName =
@@ -709,7 +709,7 @@ public class TornadoSimulationSystem : MonoBehaviour
         if (!debugLogging || weatherGridManager == null)
             return;
 
-        bool hit = weatherGridManager.TryGetBuildingAtCell(cell.x, cell.y, out PlayerBuildingManager.Record record);
+        bool hit = weatherGridManager.TryGetBuildingAtCell(cell.x, cell.y, out WorldBuildingManager.Record record);
 
         Debug.Log(
             $"[TornadoSimulationSystem] Query building cache at tornado cell {cell} | " +

@@ -70,10 +70,9 @@ public class BuildingControl : MonoBehaviour
             PlayerBuildingManager.Instance?.Register(_tag);
 
         // Refresh cached building footprint coverage now that the record exists
-        if (_tag != null && PlayerBuildingManager.Instance != null && WeatherGridManager.Instance != null)
+        if (_tag != null && WorldBuildingManager.Instance != null && WeatherGridManager.Instance != null)
         {
-            PlayerBuildingManager.Record record = PlayerBuildingManager.Instance.GetById(_tag.instanceId);
-            if (record != null)
+            if (WorldBuildingManager.Instance.TryGetById(_tag.instanceId, out WorldBuildingManager.Record record))
                 WeatherGridManager.Instance.RefreshBuildingCoverage(record);
         }
 

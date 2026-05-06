@@ -7,7 +7,7 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
     [Header("References")]
     public TsunamiSimulationSystem simulationSystem;
     public GridManager gridManager;
-    public PlayerBuildingManager playerBuildingManager;
+    public WorldBuildingManager worldBuildingManager;
 
     [Header("Damage")]
     public bool damageBuildings = true;
@@ -93,7 +93,7 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
     public void InstallRuntimeRefs(
         TsunamiSimulationSystem newSimulationSystem,
         GridManager newGridManager,
-        PlayerBuildingManager newPlayerBuildingManager)
+        WorldBuildingManager newWorldBuildingManager)
     {
         if (newSimulationSystem != null)
             simulationSystem = newSimulationSystem;
@@ -102,7 +102,7 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
             gridManager = newGridManager;
 
         if (newPlayerBuildingManager != null)
-            playerBuildingManager = newPlayerBuildingManager;
+            worldBuildingManager = newPlayerBuildingManager;
 
         RebindSimulationSubscription();
 
@@ -112,22 +112,22 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
                 $"[TsunamiBuildingEffectResolver] Installed refs. " +
                 $"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
                 $"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
-                $"PlayerBuildingManager={(playerBuildingManager != null ? playerBuildingManager.name : "NULL")}");
+                $"PlayerBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
         }
     }
 
     public void SetPlayerBuildingManager(PlayerBuildingManager newPlayerBuildingManager)
     {
-        if (playerBuildingManager == newPlayerBuildingManager)
+        if (worldBuildingManager == newPlayerBuildingManager)
             return;
 
-        playerBuildingManager = newPlayerBuildingManager;
+        worldBuildingManager = newPlayerBuildingManager;
 
         if (debugLogging)
         {
             Debug.Log(
                 $"[TsunamiBuildingEffectResolver] SetPlayerBuildingManager -> " +
-                $"{(playerBuildingManager != null ? playerBuildingManager.name : "NULL")}");
+                $"{(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
         }
     }
 
@@ -171,7 +171,7 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
     {
         ResolveReferences();
 
-        if (gridManager == null || playerBuildingManager == null)
+        if (gridManager == null || worldBuildingManager == null)
         {
             if (debugLogging)
                 Debug.LogWarning("[TsunamiBuildingEffectResolver] Missing references.");
@@ -180,7 +180,7 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
             yield break;
         }
 
-        IReadOnlyList<PlayerBuildingManager.Record> records = playerBuildingManager.GetAll();
+        IReadOnlyList<WorldBuildingManager.Record> records = worldBuildingManager.GetAll();
 
         if (records == null || records.Count == 0)
         {
@@ -218,7 +218,7 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
 
         for (int i = 0; i < records.Count; i++)
         {
-            PlayerBuildingManager.Record record = records[i];
+            WorldBuildingManager.Record record = records[i];
 
             if (record == null || record.instance == null)
                 continue;
@@ -457,7 +457,7 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
     }
 
     private void GetBuildingCoveredCells(
-        PlayerBuildingManager.Record record,
+        WorldBuildingManager.Record record,
         List<TileCoord> results)
     {
         results.Clear();
@@ -607,7 +607,7 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
         if (gridManager == null)
             gridManager = GridManager.Instance;
 
-        if (playerBuildingManager == null)
-            playerBuildingManager = PlayerBuildingManager.Instance;
+        if (worldBuildingManager == null)
+            worldBuildingManager = PlayerBuildingManager.Instance;
     }
 }
