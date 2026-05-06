@@ -34,9 +34,14 @@ public class BuildingHealth : MonoBehaviour
     // Call this helper whenever values change
     private void NotifyChanged() => OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
+    private bool _initializedFromManager;
+
     private void Awake()
     {
         _status = GetComponent<BuildingStatus>();
+
+        // Always subscribe so degeneration fires even if manager is late.
+        TurnSystem.SubscribeToEndOfTurn(OnEndTurn);
 
         if (useManagerDefaults)
             LoadDefaultsFromManager();
@@ -45,19 +50,35 @@ public class BuildingHealth : MonoBehaviour
             ? buildingIDOverride
             : GetComponent<BuildingControl>()?.buildingID;
 
+        InitFromManager(id);
+    }
+
+    private void Start()
+    {
+        // Retry in case BuildingManager wasn't ready during Awake.
+        if (!_initializedFromManager)
+        {
+            string id = !string.IsNullOrEmpty(buildingIDOverride)
+                ? buildingIDOverride
+                : GetComponent<BuildingControl>()?.buildingID;
+
+            InitFromManager(id);
+        }
+    }
+
+    private void InitFromManager(string id)
+    {
         var mgr = BuildingManager.Instance;
         if (mgr == null) return;
 
         var def = mgr.GetBuildingByID(id);
         if (def == null) return;
 
-        maxHealth = Mathf.Max(1, def.defaultMaxHealth);
-
+        maxHealth     = Mathf.Max(1, def.defaultMaxHealth);
         currentHealth = def.defaultMaxHealth;
+        _initializedFromManager = true;
         ApplyThresholdState();
         NotifyChanged();
-
-        TurnSystem.SubscribeToEndOfTurn(OnEndTurn);
     }
 
     private void OnDestroy()
