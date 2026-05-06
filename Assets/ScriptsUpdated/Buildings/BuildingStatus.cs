@@ -287,9 +287,10 @@ public class BuildingStatus : MonoBehaviour
         var currentTile = GetComponentInParent<TileControl>();
         if (currentTile != null)
         {
-            pos = currentTile.transform.position;
-            rot = currentTile.transform.rotation;
+            pos    = currentTile.transform.position;
             parent = currentTile.transform.parent;
+            // Keep rot = transform.rotation (building's rotation) so the replacement
+            // environment tile spawns facing the same direction the building did.
         }
 
         if (environmentTilePrefab == null)
