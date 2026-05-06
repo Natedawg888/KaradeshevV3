@@ -94,6 +94,7 @@ public class SaveSystem : MonoBehaviour
         _closeSaveFilePath = Path.Combine(Application.persistentDataPath, closeSaveFileName);
         _turnAutoSaveFilePath = Path.Combine(Application.persistentDataPath, turnAutoSaveFileName);
 
+        EncryptionHelper.WarmUpKeys();
         RegisterSections();
         RefreshCachedReferences();
     }
@@ -412,50 +413,72 @@ public class SaveSystem : MonoBehaviour
         if (!string.IsNullOrWhiteSpace(rootDir))
             Directory.CreateDirectory(rootDir);
 
-        // Write tile chunks first.
+        // Collect all independent write actions so they can run in parallel.
+        var writeActions = new System.Collections.Generic.List<Action>();
+
         for (int i = 0; i < snapshot.tiles.Count; i += safeChunkSize)
         {
-            TileChunkSaveData chunk = new TileChunkSaveData();
-            int end = Mathf.Min(i + safeChunkSize, snapshot.tiles.Count);
+            int chunkStart = i;
+            int chunkIndex = i / safeChunkSize;
+            string chunkPath = Path.Combine(rootDir, $"{rootStem}.world_tiles_{chunkIndex}.json");
 
-            for (int j = i; j < end; j++)
-                chunk.tiles.Add(snapshot.tiles[j]);
-
-            string path = Path.Combine(rootDir, $"{rootStem}.world_tiles_{i / safeChunkSize}.json");
-            WriteJsonAtomically(path, chunk);
+            writeActions.Add(() =>
+            {
+                TileChunkSaveData chunk = new TileChunkSaveData();
+                int end = System.Math.Min(chunkStart + safeChunkSize, snapshot.tiles.Count);
+                for (int j = chunkStart; j < end; j++)
+                    chunk.tiles.Add(snapshot.tiles[j]);
+                WriteJsonAtomically(chunkPath, chunk);
+            });
         }
 
-        // Then write section files.
         if (snapshot.buildings != null && snapshot.buildings.Count > 0)
         {
-            WriteJsonAtomically(
-                Path.Combine(rootDir, $"{rootStem}.world_buildings.json"),
-                new BuildingSectionSaveData { buildings = snapshot.buildings });
+            string path = Path.Combine(rootDir, $"{rootStem}.world_buildings.json");
+            writeActions.Add(() => WriteJsonAtomically(path,
+                new BuildingSectionSaveData { buildings = snapshot.buildings }));
         }
 
         if (snapshot.constructions != null && snapshot.constructions.Count > 0)
         {
-            WriteJsonAtomically(
-                Path.Combine(rootDir, $"{rootStem}.world_construction.json"),
-                new ConstructionSectionSaveData { constructionTiles = snapshot.constructions });
+            string path = Path.Combine(rootDir, $"{rootStem}.world_construction.json");
+            writeActions.Add(() => WriteJsonAtomically(path,
+                new ConstructionSectionSaveData { constructionTiles = snapshot.constructions }));
         }
 
         if (snapshot.coreSystems != null)
-            WriteJsonAtomically(Path.Combine(rootDir, $"{rootStem}.core_systems.json"), snapshot.coreSystems);
+        {
+            string path = Path.Combine(rootDir, $"{rootStem}.core_systems.json");
+            writeActions.Add(() => WriteJsonAtomically(path, snapshot.coreSystems));
+        }
 
         if (snapshot.knowledge != null)
-            WriteJsonAtomically(Path.Combine(rootDir, $"{rootStem}.knowledge.json"), snapshot.knowledge);
+        {
+            string path = Path.Combine(rootDir, $"{rootStem}.knowledge.json");
+            writeActions.Add(() => WriteJsonAtomically(path, snapshot.knowledge));
+        }
 
         if (snapshot.population != null)
-            WriteJsonAtomically(Path.Combine(rootDir, $"{rootStem}.population.json"), snapshot.population);
+        {
+            string path = Path.Combine(rootDir, $"{rootStem}.population.json");
+            writeActions.Add(() => WriteJsonAtomically(path, snapshot.population));
+        }
 
         if (snapshot.worldSim != null)
-            WriteJsonAtomically(Path.Combine(rootDir, $"{rootStem}.world_sim.json"), snapshot.worldSim);
+        {
+            string path = Path.Combine(rootDir, $"{rootStem}.world_sim.json");
+            writeActions.Add(() => WriteJsonAtomically(path, snapshot.worldSim));
+        }
 
         if (snapshot.jobs != null)
-            WriteJsonAtomically(Path.Combine(rootDir, $"{rootStem}.jobs.json"), snapshot.jobs);
+        {
+            string path = Path.Combine(rootDir, $"{rootStem}.jobs.json");
+            writeActions.Add(() => WriteJsonAtomically(path, snapshot.jobs));
+        }
 
-        // Write meta LAST so the save only becomes official once all parts exist.
+        // Write all sections in parallel, then meta LAST so the save is only
+        // considered complete once every part exists on disk.
+        Parallel.Invoke(writeActions.ToArray());
         WriteJsonAtomically(rootPath, snapshot.meta);
     }
 

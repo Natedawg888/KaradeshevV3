@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 3
+  tags:
+  - BeachTile
+  - OceanTile
+  - RiverTile
+  - LandTile
+  - RiverMouthTile
+  - BeachCornerTile
+  - CameraTop
+  - CameraCornerBL
+  - CameraCornerBR
+  - CameraCornerTL
+  - CameraCornerTR
+  - LakeBlock
+  - LandBlock
+  - SeaBlock
+  - LakeTile
+  - LakeEdgeTile
+  - LakeCornerTile
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - TileClickable
+  - AnimalLayer
+  - WeatherCloud
+  - RainLayer
+  - LightningLayer
+  - LavaLayer
+  - FloodLayer
+  - TsunamiLayer
+  - ConstructionLayer
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  m_RenderingLayers:
+  - Default

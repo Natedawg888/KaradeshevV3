@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 0
+    path: Assets/Scenes/MainScene.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 0
+    path: Assets/Scenes/MainScene 1.unity
+    guid: 81d199a7c8daf1a44a03fc840c8cf5e0
+  - enabled: 1
+    path: Assets/Scenes/TitleScene.unity
+    guid: ace4ecf17ab6a544f987653161a71bdc
+  - enabled: 1
+    path: Assets/Scenes/BootstrapCore.unity
+    guid: ac9111069790eae48ad68301162946b6
+  - enabled: 1
+    path: Assets/Scenes/WorldSetup.unity
+    guid: 1ee73a2303c052b4b9183d6302b7030a
+  - enabled: 1
+    path: Assets/Scenes/ManagerSetup.unity
+    guid: 5e64c3118e0b3ed4bb669d8a95f8d34d
+  - enabled: 1
+    path: Assets/Scenes/PlayerSetup.unity
+    guid: 66d4f43b8a22a734f83f95d8d2ade797
+  - enabled: 1
+    path: Assets/Scenes/UISetup.unity
+    guid: edb16a42213c4b647a3704a989c539dc
+  - enabled: 1
+    path: Assets/Scenes/FinalSetup.unity
+    guid: 601502bc9a581254bbb6621658ed8461
+  - enabled: 1
+    path: Assets/Scenes/TutorialSetup.unity
+    guid: 294bf79b74fd1a74eb2ada6c87dc6250
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 1102972e1c660244c943288c820c9303, type: 2}
+  m_UseUCBPForAssetBundles: 0

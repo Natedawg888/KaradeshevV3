@@ -7,17 +7,52 @@ using System.Text;
 public static class EncryptionHelper
 {
     // Replace before shipping.
-    // Make this long, random, and unique to your game/project.
     private const string MasterSecret = "REPLACE_WITH_YOUR_OWN_LONG_RANDOM_SECRET_64_PLUS_CHARS";
 
     private static readonly byte[] Magic = Encoding.ASCII.GetBytes("KSG2");
-    private const byte Version = 1;
+
+    // Version 1 = legacy (random salt, PBKDF2 per-write).
+    // Version 2 = current (fixed salt, keys derived once at startup).
+    private const byte CurrentVersion = 2;
+    private const byte LegacyVersion = 1;
 
     private const int SaltSize = 16;
     private const int IvSize = 16;
     private const int MacSize = 32;
-    private const int KeySize = 32; // 256-bit AES key
+    private const int KeySize = 32;
     private const int Pbkdf2Iterations = 100000;
+
+    // Fixed salt used for v2 key derivation. Embedded in file header for format consistency.
+    private static readonly byte[] FixedSalt = {
+        0x4B, 0x53, 0x47, 0x32, 0x53, 0x61, 0x76, 0x65,
+        0x53, 0x61, 0x6C, 0x74, 0x5F, 0x76, 0x32, 0x00
+    };
+
+    private static byte[] _encKey;
+    private static byte[] _macKey;
+    private static readonly object _keyLock = new object();
+
+    // Call once from SaveSystem.Awake() to pay the PBKDF2 cost upfront.
+    public static void WarmUpKeys()
+    {
+        lock (_keyLock)
+        {
+            if (_encKey != null) return;
+
+            using (var kdf = new Rfc2898DeriveBytes(MasterSecret, FixedSalt, Pbkdf2Iterations, HashAlgorithmName.SHA256))
+            {
+                _encKey = kdf.GetBytes(KeySize);
+                _macKey = kdf.GetBytes(KeySize);
+            }
+        }
+    }
+
+    private static void GetCachedKeys(out byte[] encKey, out byte[] macKey)
+    {
+        if (_encKey == null) WarmUpKeys();
+        encKey = _encKey;
+        macKey = _macKey;
+    }
 
     public static byte[] EncryptToBytes(string plainText)
     {
@@ -27,16 +62,11 @@ public static class EncryptionHelper
         byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
         byte[] compressedBytes = Compress(plainBytes);
 
-        byte[] salt = new byte[SaltSize];
         byte[] iv = new byte[IvSize];
-
         using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(salt);
             rng.GetBytes(iv);
-        }
 
-        DeriveKeys(salt, out byte[] encKey, out byte[] macKey);
+        GetCachedKeys(out byte[] encKey, out byte[] macKey);
 
         byte[] cipherBytes;
         using (Aes aes = Aes.Create())
@@ -49,19 +79,15 @@ public static class EncryptionHelper
             aes.IV = iv;
 
             using (ICryptoTransform encryptor = aes.CreateEncryptor())
-            {
                 cipherBytes = encryptor.TransformFinalBlock(compressedBytes, 0, compressedBytes.Length);
-            }
         }
 
-        byte[] header = BuildHeader(salt, iv, cipherBytes.Length);
+        byte[] header = BuildHeader(FixedSalt, iv, cipherBytes.Length);
         byte[] body = Combine(header, cipherBytes);
 
         byte[] mac;
         using (HMACSHA256 hmac = new HMACSHA256(macKey))
-        {
             mac = hmac.ComputeHash(body);
-        }
 
         return Combine(body, mac);
     }
@@ -79,7 +105,7 @@ public static class EncryptionHelper
                 throw new CryptographicException("Invalid save header.");
 
             byte version = br.ReadByte();
-            if (version != Version)
+            if (version != CurrentVersion && version != LegacyVersion)
                 throw new CryptographicException($"Unsupported save version: {version}");
 
             byte[] salt = br.ReadBytes(SaltSize);
@@ -101,16 +127,24 @@ public static class EncryptionHelper
             byte[] cipherBytes = br.ReadBytes(cipherLength);
             byte[] sentMac = br.ReadBytes(MacSize);
 
-            DeriveKeys(salt, out byte[] encKey, out byte[] macKey);
+            byte[] encKey, macKey;
+            if (version == LegacyVersion)
+            {
+                // Legacy saves used a random per-file salt — must re-derive.
+                DeriveKeys(salt, out encKey, out macKey);
+            }
+            else
+            {
+                // Current saves use the cached keys derived at startup.
+                GetCachedKeys(out encKey, out macKey);
+            }
 
             byte[] body = new byte[fileBytes.Length - MacSize];
             Buffer.BlockCopy(fileBytes, 0, body, 0, body.Length);
 
             byte[] computedMac;
             using (HMACSHA256 hmac = new HMACSHA256(macKey))
-            {
                 computedMac = hmac.ComputeHash(body);
-            }
 
             if (!FixedTimeEquals(sentMac, computedMac))
                 throw new CryptographicException("Save failed integrity check and may have been modified.");
@@ -126,13 +160,10 @@ public static class EncryptionHelper
                 aes.IV = iv;
 
                 using (ICryptoTransform decryptor = aes.CreateDecryptor())
-                {
                     plainCompressed = decryptor.TransformFinalBlock(cipherBytes, 0, cipherBytes.Length);
-                }
             }
 
-            byte[] plainBytes = Decompress(plainCompressed);
-            return Encoding.UTF8.GetString(plainBytes);
+            return Encoding.UTF8.GetString(Decompress(plainCompressed));
         }
     }
 
@@ -156,7 +187,7 @@ public static class EncryptionHelper
         using (BinaryWriter bw = new BinaryWriter(ms))
         {
             bw.Write(Magic);
-            bw.Write(Version);
+            bw.Write(CurrentVersion);
             bw.Write(salt);
             bw.Write(iv);
             bw.Write(cipherLength);
@@ -165,13 +196,11 @@ public static class EncryptionHelper
         }
     }
 
+    // Used only for decrypting legacy v1 saves.
     private static void DeriveKeys(byte[] salt, out byte[] encKey, out byte[] macKey)
     {
         using (Rfc2898DeriveBytes kdf = new Rfc2898DeriveBytes(
-            MasterSecret,
-            salt,
-            Pbkdf2Iterations,
-            HashAlgorithmName.SHA256))
+            MasterSecret, salt, Pbkdf2Iterations, HashAlgorithmName.SHA256))
         {
             encKey = kdf.GetBytes(KeySize);
             macKey = kdf.GetBytes(KeySize);
@@ -182,10 +211,9 @@ public static class EncryptionHelper
     {
         using (MemoryStream output = new MemoryStream())
         {
-            using (GZipStream gzip = new GZipStream(output, CompressionLevel.Optimal, true))
-            {
+            using (GZipStream gzip = new GZipStream(output, CompressionLevel.Fastest, true))
                 gzip.Write(data, 0, data.Length);
-            }
+
             return output.ToArray();
         }
     }
