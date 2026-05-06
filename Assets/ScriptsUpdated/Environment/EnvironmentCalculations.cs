@@ -47,6 +47,8 @@ public class EnvironmentCalculations : ScriptableObject
         [Range(0f, 1f)] public float maxDryness01 = 0.85f;
         [Range(0.05f, 3f)] public float fireIgnitionMultiplier = 1f;
         [Range(0.05f, 3f)] public float burnSpeedMultiplier = 1f;
+
+        public override string ToString() => environmentType.ToString();
     }
 
     [Serializable]
@@ -74,6 +76,8 @@ public class EnvironmentCalculations : ScriptableObject
         [Range(0f, 1f)] public float tileMaxDryness01 = 0f;
         [Range(0f, 3f)] public float tileFireIgnitionMultiplier = 0f;
         [Range(0f, 3f)] public float tileBurnSpeedMultiplier = 0f;
+
+        public override string ToString() => tileType.ToString();
     }
 
     [Serializable]
@@ -95,6 +99,8 @@ public class EnvironmentCalculations : ScriptableObject
         public int gatheringPopBase = 2;
         public int surveyPopBase = 3;
         public int discoveryPenaltyBase = 2;
+
+        public override string ToString() => tileSize.ToString();
     }
 
     // ------------------------------------------------------------------
