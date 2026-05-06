@@ -50,6 +50,26 @@ public class NotificationMessageCrafter : ScriptableObject
         return (title, message);
     }
 
+    public (string title, string message) CraftBirth(NotificationType type, string motherSurname, int bornAlive, bool motherDied)
+    {
+        var set = GetSuccessSet(type);
+        if (set == null)
+        {
+            return type switch
+            {
+                NotificationType.BirthSucceeded       => ("A Child is Born",        $"The {motherSurname} family welcomes {bornAlive} newborn(s)."),
+                NotificationType.BirthFailedWithDeath => ("Birth Failed — Life Lost", $"A mother of the {motherSurname} family died during pregnancy."),
+                _                                     => ("Pregnancy Lost",           $"A pregnancy in the {motherSurname} family has failed."),
+            };
+        }
+
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{MOTHER}", motherSurname)
+            .Replace("{COUNT}",  bornAlive.ToString());
+        return (title, message);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         var set = GetSuccessSet(type);
@@ -236,6 +256,40 @@ public class NotificationMessageCrafter : ScriptableObject
                     "Your {BUILDING} has been completely destroyed.",
                     "{BUILDING} is lost — nothing remains.",
                     "The {BUILDING} has been reduced to rubble.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.BirthSucceeded,
+                titles   = new[] { "A Child is Born", "New Life", "Birth Successful" },
+                messages = new[]
+                {
+                    "The {MOTHER} family welcomes {COUNT} newborn(s).",
+                    "A healthy child has joined the {MOTHER} family.",
+                    "New life brightens the {MOTHER} household.",
+                    "{COUNT} child(ren) born to the {MOTHER} family.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.BirthFailed,
+                titles   = new[] { "Pregnancy Lost", "Birth Failed", "A Sad Loss" },
+                messages = new[]
+                {
+                    "A pregnancy in the {MOTHER} family has failed.",
+                    "The {MOTHER} family suffered a pregnancy loss.",
+                    "Complications ended a pregnancy for the {MOTHER} family.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.BirthFailedWithDeath,
+                titles   = new[] { "Mother Lost", "Birth Failed — Life Lost", "A Tragic End" },
+                messages = new[]
+                {
+                    "A mother of the {MOTHER} family died during pregnancy.",
+                    "The {MOTHER} family lost a mother to pregnancy complications.",
+                    "A failed birth has claimed the life of a mother in the {MOTHER} family.",
                 },
             },
         };

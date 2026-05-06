@@ -119,6 +119,7 @@ public class PregnancyService : IPregnancyService
                 AbortPregnancy(motherId);
                 _pregnancies.Remove(motherId);
 
+                PostBirthNotification(NotificationType.BirthFailedWithDeath, mother, 0, true);
                 OnPregnancyFailed?.Invoke(motherId);
                 continue;
             }
@@ -151,6 +152,9 @@ public class PregnancyService : IPregnancyService
 
                 CivilizationHappinessSystem.Instance?.NotifyPregnancyFailure(motherDies);
 
+                PostBirthNotification(
+                    motherDies ? NotificationType.BirthFailedWithDeath : NotificationType.BirthFailed,
+                    mother, 0, motherDies);
                 OnPregnancyFailed?.Invoke(motherId);
                 continue;
             }
@@ -416,6 +420,7 @@ public class PregnancyService : IPregnancyService
 
         CivilizationHappinessSystem.Instance?.NotifyBirthSuccess(bornAlive, babiesDied, motherDiedOnSuccess);
 
+        PostBirthNotification(NotificationType.BirthSucceeded, mother, bornAlive, motherDiedOnSuccess);
         return bornAlive;
     }
 
@@ -752,6 +757,27 @@ public class PregnancyService : IPregnancyService
                 _pregnantMothers.Add(saved.motherId);
             }
         }
+    }
+
+    private static void PostBirthNotification(NotificationType type, Individual mother, int bornAlive, bool motherDied)
+    {
+        if (NotificationManager.Instance == null) return;
+        string surname = !string.IsNullOrEmpty(mother?.Surname) ? mother.Surname : "the mother";
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftBirth(type, surname, bornAlive, motherDied);
+        else
+        {
+            (title, message) = type switch
+            {
+                NotificationType.BirthSucceeded       => ("A Child is Born",         $"The {surname} family welcomes {bornAlive} newborn(s)."),
+                NotificationType.BirthFailedWithDeath => ("Birth Failed — Life Lost", $"A mother of the {surname} family died during pregnancy."),
+                _                                     => ("Pregnancy Lost",            $"A pregnancy in the {surname} family has failed."),
+            };
+        }
+
+        NotificationManager.Instance.AddNotification(type, title, message);
     }
 
     private float GetReligionBirthSuccessBonus()

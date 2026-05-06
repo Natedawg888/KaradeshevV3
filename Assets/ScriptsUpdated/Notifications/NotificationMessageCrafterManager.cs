@@ -38,6 +38,20 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.CraftResearch(type, techName);
     }
 
+    public (string title, string message) CraftBirth(NotificationType type, string motherSurname, int bornAlive, bool motherDied)
+    {
+        if (crafter == null)
+        {
+            return type switch
+            {
+                NotificationType.BirthSucceeded       => ("A Child is Born",        $"The {motherSurname} family welcomes {bornAlive} newborn(s)."),
+                NotificationType.BirthFailedWithDeath => ("Birth Failed — Life Lost", $"A mother of the {motherSurname} family died during pregnancy."),
+                _                                     => ("Pregnancy Lost",           $"A pregnancy in the {motherSurname} family has failed."),
+            };
+        }
+        return crafter.CraftBirth(type, motherSurname, bornAlive, motherDied);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         if (crafter == null)

@@ -12,6 +12,9 @@ public enum NotificationType
     BuildingDestroyed,
     ResearchCompleted,
     ResearchFailed,
+    BirthSucceeded,
+    BirthFailed,
+    BirthFailedWithDeath,
 
     // Future: CraftingCompleted, ProductionCompleted, etc.
 }
