@@ -71,6 +71,7 @@ public class NotificationRowUI : MonoBehaviour
         var cam = FindObjectOfType<CameraControl>();
         if (cam == null || _data == null) return;
         cam.FocusOnPoint(_data.worldPosition, Vector3.forward, 10f);
+        NotificationManager.Instance?.RemoveNotification(_data);
         _panel?.Close();
     }
 }
