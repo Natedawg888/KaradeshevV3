@@ -292,6 +292,10 @@ public class PlayerGatheringManager : MonoBehaviour
 
         inProgress.Remove(env);
         MarkJobsDirty();
+
+        PostGatheringNotification(NotificationType.GatheringFailed, env, 0, "Gathering Failed",
+            $"The gathering at {env.environmentName} was cancelled.");
+
         OnGatheringFailed?.Invoke(env);
     }
 
@@ -383,6 +387,11 @@ public class PlayerGatheringManager : MonoBehaviour
                     CivilizationHappinessSystem.Instance?.NotifyTaskResult(success: false, weight: 2f);
 
                     OnGatheringFailedDetailed?.Invoke(env, lost);
+
+                    string lossMsg = lost > 0 ? $" {lost} population lost." : "";
+                    PostGatheringNotification(NotificationType.GatheringFailed, env, lost, "Gathering Failed",
+                        $"Gathering at {env.environmentName} failed.{lossMsg}");
+
                     OnGatheringFailed?.Invoke(env);
 
                     toRemove.Add(env);
@@ -427,9 +436,7 @@ public class PlayerGatheringManager : MonoBehaviour
 
                     CivilizationHappinessSystem.Instance?.NotifyTaskResult(success: true, weight: 1f);
 
-                    NotificationManager.Instance?.AddNotification(
-                        NotificationType.GatheringCompleted,
-                        "Gathering Complete",
+                    PostGatheringNotification(NotificationType.GatheringCompleted, env, 0, "Gathering Complete",
                         $"{env.environmentName} has been gathered.");
 
                     OnGatheringCompleted?.Invoke(env, loot);
@@ -751,5 +758,30 @@ public class PlayerGatheringManager : MonoBehaviour
         }
 
         return ids;
+    }
+
+    private static void PostGatheringNotification(NotificationType type, EnvironmentControl env,
+        int populationLost, string fallbackTitle, string fallbackMessage)
+    {
+        if (NotificationManager.Instance == null) return;
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+        {
+            (title, message) = NotificationMessageCrafterManager.Instance.Craft(type, env, populationLost);
+        }
+        else if (type == NotificationType.GatheringFailed && TaskFailureStoryManager.Instance != null)
+        {
+            title   = fallbackTitle;
+            message = TaskFailureStoryManager.Instance.BuildStory(env, TaskFailureType.Gathering, populationLost);
+            if (string.IsNullOrWhiteSpace(message)) message = fallbackMessage;
+        }
+        else
+        {
+            title   = fallbackTitle;
+            message = fallbackMessage;
+        }
+
+        NotificationManager.Instance.AddNotification(type, title, message, env.transform.position);
     }
 }

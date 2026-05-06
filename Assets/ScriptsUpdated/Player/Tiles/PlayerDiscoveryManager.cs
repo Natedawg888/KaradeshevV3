@@ -287,6 +287,9 @@ public class PlayerDiscoveryManager : MonoBehaviour
 
         SetTileInteractable(env, true);
 
+        PostDiscoveryNotification(NotificationType.DiscoveryFailed, env, 0, "Discovery Failed",
+            $"Discovery at {env.environmentName} was cancelled.");
+
         OnDiscoveryFailed?.Invoke(env);
         env.FailDiscoveryVisuals();
 
@@ -398,7 +401,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
 
                     env.discoveryTurnsRequired = env.BaseDiscoveryTurnsRequired;
 
-                    HandleFailure(env);
+                    HandleFailure(env, lost);
                     MarkDiscoveryStateDirty();
 
                     toRemove.Add(env);
@@ -442,12 +445,16 @@ public class PlayerDiscoveryManager : MonoBehaviour
         discoveryProcessingCoroutine = null;
     }
 
-    private void HandleFailure(EnvironmentControl env)
+    private void HandleFailure(EnvironmentControl env, int populationLost = 0)
     {
         env.isBeingDiscovered = false;
 
         var box = env.GetComponent<BoxCollider>();
         if (box != null) box.enabled = true;
+
+        string lossNote = populationLost > 0 ? $" {populationLost} population lost." : "";
+        PostDiscoveryNotification(NotificationType.DiscoveryFailed, env, populationLost, "Discovery Failed",
+            $"Discovery at {env.environmentName} failed.{lossNote}");
 
         CivilizationHappinessSystem.Instance?.NotifyTaskResult(success: false, weight: 2f);
         MarkDiscoveryStateDirty();
@@ -479,9 +486,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
         MarkDiscoveryStateDirty();
         CivilizationHappinessSystem.Instance?.NotifyTaskResult(success: true, weight: 1f);
 
-        NotificationManager.Instance?.AddNotification(
-            NotificationType.DiscoveryCompleted,
-            "Discovery Complete",
+        PostDiscoveryNotification(NotificationType.DiscoveryCompleted, env, 0, "Discovery Complete",
             $"{env.environmentName} has been discovered.");
 
         OnDiscoveryCompleted?.Invoke(env);
@@ -642,5 +647,30 @@ public class PlayerDiscoveryManager : MonoBehaviour
         }
 
         return ids;
+    }
+
+    private static void PostDiscoveryNotification(NotificationType type, EnvironmentControl env,
+        int populationLost, string fallbackTitle, string fallbackMessage)
+    {
+        if (NotificationManager.Instance == null) return;
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+        {
+            (title, message) = NotificationMessageCrafterManager.Instance.Craft(type, env, populationLost);
+        }
+        else if (type == NotificationType.DiscoveryFailed && TaskFailureStoryManager.Instance != null)
+        {
+            title   = fallbackTitle;
+            message = TaskFailureStoryManager.Instance.BuildStory(env, TaskFailureType.Discovery, populationLost);
+            if (string.IsNullOrWhiteSpace(message)) message = fallbackMessage;
+        }
+        else
+        {
+            title   = fallbackTitle;
+            message = fallbackMessage;
+        }
+
+        NotificationManager.Instance.AddNotification(type, title, message, env.transform.position);
     }
 }

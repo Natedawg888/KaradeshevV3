@@ -4,7 +4,9 @@
 public enum NotificationType
 {
     GatheringCompleted,
+    GatheringFailed,
     DiscoveryCompleted,
+    DiscoveryFailed,
 
     // Future: CraftingCompleted, ProductionCompleted, ResearchCompleted, BuildingCompleted, etc.
 }

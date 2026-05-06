@@ -4,17 +4,20 @@ using UnityEngine.UI;
 /// <summary>
 /// Attach to the notification button GameObject on your main UI Canvas.
 /// Swaps the button image between normal and unread sprites automatically.
-/// Call MarkRead() (e.g. from an OnClick event) to clear unread state.
+/// Call Toggle() from the button's OnClick event to open/close the panel.
 /// </summary>
 public class NotificationButtonUI : MonoBehaviour
 {
     [Header("Button Reference")]
-    [Tooltip("The Image component on the notification button.")]
     [SerializeField] private Image buttonImage;
 
     [Header("Sprites")]
     [SerializeField] private Sprite normalSprite;
     [SerializeField] private Sprite unreadSprite;
+
+    [Header("Panel")]
+    [Tooltip("The NotificationPanelUI that this button controls.")]
+    [SerializeField] private NotificationPanelUI notificationPanel;
 
     private void OnEnable()
     {
@@ -32,7 +35,6 @@ public class NotificationButtonUI : MonoBehaviour
 
     private void Start()
     {
-        // Late-bind in case NotificationManager was not yet alive in OnEnable.
         if (NotificationManager.Instance != null)
         {
             NotificationManager.Instance.OnNotificationsChanged -= RefreshSprite;
@@ -43,7 +45,16 @@ public class NotificationButtonUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Call this from the button's OnClick event or when the notification panel opens.
+    /// Wire this to the button's OnClick event.
+    /// Opens the panel (or closes it if already open) and marks all as read.
+    /// </summary>
+    public void Toggle()
+    {
+        notificationPanel?.Toggle();
+    }
+
+    /// <summary>
+    /// Kept for backward compatibility — marks all notifications read without toggling.
     /// </summary>
     public void MarkRead()
     {
@@ -52,14 +63,11 @@ public class NotificationButtonUI : MonoBehaviour
 
     private void RefreshSprite()
     {
-        if (buttonImage == null)
-            return;
+        if (buttonImage == null) return;
 
         bool hasUnread = NotificationManager.Instance != null &&
                          NotificationManager.Instance.HasUnreadNotifications();
 
         buttonImage.sprite = hasUnread ? unreadSprite : normalSprite;
-
-        Debug.Log($"[NotificationButtonUI] Sprite updated — hasUnread={hasUnread}");
     }
 }

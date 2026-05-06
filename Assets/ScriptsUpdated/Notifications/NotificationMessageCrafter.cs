@@ -1,0 +1,152 @@
+using System;
+using System.Text;
+using UnityEngine;
+
+/// <summary>
+/// ScriptableObject that crafts notification titles and messages.
+/// Success types use randomised template arrays.
+/// Failure types delegate to TaskFailureStoryManager so they reuse the same flavour text.
+/// Create via Assets → Create → Game → Notification Message Crafter.
+/// </summary>
+[CreateAssetMenu(fileName = "NotificationMessageCrafter", menuName = "Game/Notification Message Crafter")]
+public class NotificationMessageCrafter : ScriptableObject
+{
+    [Serializable]
+    public class SuccessTemplateSet
+    {
+        public NotificationType type;
+        [TextArea] public string[] titles;
+        [TextArea] public string[] messages;
+    }
+
+    [SerializeField] private SuccessTemplateSet[] successSets;
+
+    // Supports {ENV_NAME}, {ENV}, {TILE}, {SIZE}
+    public (string title, string message) Craft(NotificationType type, EnvironmentControl env, int populationLost = 0)
+    {
+        switch (type)
+        {
+            case NotificationType.GatheringFailed:
+                return CraftFailure(TaskFailureType.Gathering, env, populationLost);
+            case NotificationType.DiscoveryFailed:
+                return CraftFailure(TaskFailureType.Discovery, env, populationLost);
+            default:
+                return CraftSuccess(type, env);
+        }
+    }
+
+    // ------------------------------------------------------------------
+
+    private (string title, string message) CraftSuccess(NotificationType type, EnvironmentControl env)
+    {
+        var set = GetSuccessSet(type);
+        if (set == null) return (Fallback(type), env != null ? env.environmentName : "");
+
+        string title   = Replace(Pick(set.titles),   env);
+        string message = Replace(Pick(set.messages), env);
+        return (title, message);
+    }
+
+    private static (string title, string message) CraftFailure(TaskFailureType failType, EnvironmentControl env, int populationLost)
+    {
+        string title = failType == TaskFailureType.Gathering ? "Gathering Failed" : "Discovery Failed";
+
+        string message = "";
+        if (TaskFailureStoryManager.Instance != null && env != null)
+            message = TaskFailureStoryManager.Instance.BuildStory(env, failType, populationLost);
+
+        if (string.IsNullOrWhiteSpace(message) && env != null)
+        {
+            string kind = failType == TaskFailureType.Gathering ? "gathering" : "discovery";
+            message = $"The {kind} at {env.environmentName} failed.";
+            if (populationLost > 0) message += $" {populationLost} lost.";
+        }
+
+        return (title, message);
+    }
+
+    private SuccessTemplateSet GetSuccessSet(NotificationType type)
+    {
+        if (successSets == null) return null;
+        for (int i = 0; i < successSets.Length; i++)
+            if (successSets[i] != null && successSets[i].type == type) return successSets[i];
+        return null;
+    }
+
+    private static string Pick(string[] arr)
+    {
+        if (arr == null || arr.Length == 0) return "";
+        return arr[UnityEngine.Random.Range(0, arr.Length)] ?? "";
+    }
+
+    private static string Replace(string s, EnvironmentControl env)
+    {
+        if (string.IsNullOrEmpty(s) || env == null) return s ?? "";
+        return s
+            .Replace("{ENV_NAME}", string.IsNullOrEmpty(env.environmentName) ? "the area" : env.environmentName)
+            .Replace("{ENV}",  Nicify(env.environmentType.ToString()))
+            .Replace("{TILE}", Nicify(env.environmentTileType.ToString()))
+            .Replace("{SIZE}", Nicify(env.tileSize.ToString()));
+    }
+
+    private static string Nicify(string raw)
+    {
+        if (string.IsNullOrEmpty(raw)) return "";
+        var sb = new StringBuilder(raw.Length + 8);
+        sb.Append(raw[0]);
+        for (int i = 1; i < raw.Length; i++)
+        {
+            if (char.IsUpper(raw[i]) && !char.IsUpper(raw[i - 1])) sb.Append(' ');
+            sb.Append(raw[i]);
+        }
+        return sb.ToString();
+    }
+
+    private static string Fallback(NotificationType type)
+    {
+        switch (type)
+        {
+            case NotificationType.GatheringCompleted: return "Gathering Complete";
+            case NotificationType.DiscoveryCompleted: return "Discovery Complete";
+            default:                                  return type.ToString();
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Inspector defaults
+    // ------------------------------------------------------------------
+
+    [ContextMenu("Populate Defaults")]
+    private void PopulateDefaults()
+    {
+        successSets = new SuccessTemplateSet[]
+        {
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.GatheringCompleted,
+                titles   = new[] { "Gathering Complete", "Resources Secured", "Haul Successful" },
+                messages = new[]
+                {
+                    "Your people gathered resources from {ENV_NAME}.",
+                    "The {ENV} at {ENV_NAME} has been harvested.",
+                    "A successful haul from the {TILE} region of {ENV_NAME}.",
+                    "Resources from the {SIZE} {ENV} site are ready.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.DiscoveryCompleted,
+                titles   = new[] { "Discovery Complete", "New Land Charted", "Area Revealed" },
+                messages = new[]
+                {
+                    "{ENV_NAME} has been fully discovered.",
+                    "Your scouts mapped the {ENV} at {ENV_NAME}.",
+                    "The {TILE} region known as {ENV_NAME} is now charted.",
+                    "A {SIZE} {ENV} site — {ENV_NAME} — has been revealed.",
+                },
+            },
+        };
+    }
+
+    private void Reset() => PopulateDefaults();
+}

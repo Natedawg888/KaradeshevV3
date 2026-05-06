@@ -38,12 +38,19 @@ public class NotificationManager : MonoBehaviour
 
     public void AddNotification(NotificationType type, string title, string message)
     {
-        int turn = TurnSystem.Instance != null ? TurnSystem.Instance.CurrentTurn : 0;
+        AddNotificationInternal(new NotificationData(type, title, message, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0));
+    }
 
-        var notification = new NotificationData(type, title, message, turn);
+    public void AddNotification(NotificationType type, string title, string message, UnityEngine.Vector3 worldPosition)
+    {
+        AddNotificationInternal(new NotificationData(type, title, message, worldPosition, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0));
+    }
+
+    private void AddNotificationInternal(NotificationData notification)
+    {
         _notifications.Add(notification);
 
-        Debug.Log($"[NotificationManager] Added: [{type}] {title} — {message}");
+        Debug.Log($"[NotificationManager] Added: [{notification.type}] {notification.title} — {notification.message}");
 
         OnNotificationAdded?.Invoke(notification);
         OnNotificationsChanged?.Invoke();
@@ -93,6 +100,12 @@ public class NotificationManager : MonoBehaviour
         }
 
         return unread;
+    }
+
+    public void RemoveNotification(NotificationData notification)
+    {
+        if (_notifications.Remove(notification))
+            OnNotificationsChanged?.Invoke();
     }
 
     public void ClearAll()
