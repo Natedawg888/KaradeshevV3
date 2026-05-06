@@ -240,32 +240,40 @@ public class EnvironmentControl : MonoBehaviour
         ApplyFireDefaultsFromTile();
         ResetFireRuntimeState();
 
-        // --- Discovery settings ---
-        discoveryTurnsRequired = DiscoveryTurnCalculator.CalculateDiscoveryTurns(
-            taskEnvType, environmentTileType, tileSize);
-        DiscoveryFailureChance = DiscoveryFailureCalculator.CalculateFailureChance(
-            taskEnvType, environmentTileType, tileSize);
-        requireDiscoveryPopulation = DiscoveryPopulationRequirementCalculator.CalculateRequiredPopulation(
-            taskEnvType, environmentTileType, tileSize);
-        DiscoveryPopPenaltyOnFailure = DiscoveryPenaltyCalculator.CalculatePopulationPenalty(
-            taskEnvType, environmentTileType, tileSize);
+        // --- Task settings (SO if available, static calculators as fallback) ---
+        var calc = EnvironmentCalculations.Instance;
+        if (calc != null)
+        {
+            discoveryTurnsRequired       = calc.GetDiscoveryTurns(taskEnvType, environmentTileType, tileSize);
+            DiscoveryFailureChance       = calc.GetDiscoveryFailureChance(taskEnvType, environmentTileType, tileSize);
+            requireDiscoveryPopulation   = calc.GetDiscoveryRequiredPop(taskEnvType, environmentTileType, tileSize);
+            DiscoveryPopPenaltyOnFailure = calc.GetDiscoveryPopPenalty(taskEnvType, environmentTileType, tileSize);
 
-        gatheringTurnsRequired = GatheringTurnCalculator.CalculateGatheringTurns(
-            taskEnvType, environmentTileType, tileSize);
-        requireGatheringPopulation = GatheringPopulationRequirementCalculator.CalculateRequiredPopulation(
-            taskEnvType, environmentTileType, tileSize);
-        GatheringFailureChance = GatheringFailureCalculator.CalculateFailureChance(
-            taskEnvType, environmentTileType, tileSize);
-        GatheringPopPenaltyOnFailure = GatheringPenaltyCalculator.CalculatePopulationPenalty(
-            taskEnvType, environmentTileType, tileSize);
+            gatheringTurnsRequired       = calc.GetGatheringTurns(taskEnvType, environmentTileType, tileSize);
+            requireGatheringPopulation   = calc.GetGatheringRequiredPop(taskEnvType, environmentTileType, tileSize);
+            GatheringFailureChance       = calc.GetGatheringFailureChance(taskEnvType, environmentTileType, tileSize);
+            GatheringPopPenaltyOnFailure = calc.GetGatheringPopPenalty(taskEnvType, environmentTileType, tileSize);
 
-        surveyTurnsRequired = SurveyTurnCalculator.CalculateSurveyTurns(
-            taskEnvType, environmentTileType, tileSize);
-        requireSurveyPopulation = SurveyPopulationRequirementCalculator.CalculateRequiredPopulation(
-            taskEnvType, environmentTileType, tileSize);
+            surveyTurnsRequired      = calc.GetSurveyTurns(taskEnvType, environmentTileType, tileSize);
+            requireSurveyPopulation  = calc.GetSurveyRequiredPop(taskEnvType, environmentTileType, tileSize);
+            resurveyInterval         = calc.GetResurveyInterval(taskEnvType, environmentTileType, tileSize);
+        }
+        else
+        {
+            discoveryTurnsRequired       = DiscoveryTurnCalculator.CalculateDiscoveryTurns(taskEnvType, environmentTileType, tileSize);
+            DiscoveryFailureChance       = DiscoveryFailureCalculator.CalculateFailureChance(taskEnvType, environmentTileType, tileSize);
+            requireDiscoveryPopulation   = DiscoveryPopulationRequirementCalculator.CalculateRequiredPopulation(taskEnvType, environmentTileType, tileSize);
+            DiscoveryPopPenaltyOnFailure = DiscoveryPenaltyCalculator.CalculatePopulationPenalty(taskEnvType, environmentTileType, tileSize);
 
-        resurveyInterval = ResurveyIntervalCalculator.CalculateResurveyInterval(
-            taskEnvType, environmentTileType, tileSize);
+            gatheringTurnsRequired       = GatheringTurnCalculator.CalculateGatheringTurns(taskEnvType, environmentTileType, tileSize);
+            requireGatheringPopulation   = GatheringPopulationRequirementCalculator.CalculateRequiredPopulation(taskEnvType, environmentTileType, tileSize);
+            GatheringFailureChance       = GatheringFailureCalculator.CalculateFailureChance(taskEnvType, environmentTileType, tileSize);
+            GatheringPopPenaltyOnFailure = GatheringPenaltyCalculator.CalculatePopulationPenalty(taskEnvType, environmentTileType, tileSize);
+
+            surveyTurnsRequired     = SurveyTurnCalculator.CalculateSurveyTurns(taskEnvType, environmentTileType, tileSize);
+            requireSurveyPopulation = SurveyPopulationRequirementCalculator.CalculateRequiredPopulation(taskEnvType, environmentTileType, tileSize);
+            resurveyInterval        = ResurveyIntervalCalculator.CalculateResurveyInterval(taskEnvType, environmentTileType, tileSize);
+        }
 
         _baseDiscoveryTurnsRequired = discoveryTurnsRequired;
         _baseDiscoveryFailChance = DiscoveryFailureChance;
@@ -829,7 +837,7 @@ public class EnvironmentControl : MonoBehaviour
 
     private bool IsCurrentlySelectedTile()
     {
-        // If this tile is already selected when it fails, we treat it as already “acknowledged”.
+        // If this tile is already selected when it fails, we treat it as already ï¿½acknowledgedï¿½.
         var sel = TileInteraction.SelectedTile;
         return sel != null && sel.EnvironmentControl == this;
     }
@@ -1066,6 +1074,15 @@ public class EnvironmentControl : MonoBehaviour
 
     private void ApplyFireDefaultsFromTile()
     {
+        // Delegate to SO if available â€” all fire values become inspector-tunable.
+        var calc = EnvironmentCalculations.Instance;
+        if (calc != null)
+        {
+            calc.ApplyFireDefaults(this, environmentType, environmentTileType);
+            return;
+        }
+
+        // Hardcoded fallback when no SO is assigned.
         canCatchFire = true;
         baseBurnTurns = 4;
         baseDryness01 = 0.50f;
