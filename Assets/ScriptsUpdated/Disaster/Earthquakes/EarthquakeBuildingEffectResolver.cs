@@ -197,7 +197,7 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
     {
         ResolveReferences();
 
-        if (mapGenerator == null || gridManager == null || playerBuildingManager == null)
+        if (mapGenerator == null || gridManager == null || worldBuildingManager == null)
         {
             if (debugLogging)
                 Debug.LogWarning("EarthquakeBuildingEffectResolver: Missing references.");
