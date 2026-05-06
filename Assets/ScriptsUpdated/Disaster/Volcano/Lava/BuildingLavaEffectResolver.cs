@@ -1,29 +1,22 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[DisallowMultipleComponent]
 public class BuildingLavaEffectResolver : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private LavaOverlayManager lavaOverlayManager;
-    [SerializeField] private WeatherGridManager weatherGridManager;
-
     [Header("Timing")]
-    [Tooltip("Apply lava impact immediately when a new lava cell activates.")]
+    [Tooltip("Apply lava impact immediately when a new lava cell activates on this building.")]
     [SerializeField] private bool applyWhenLavaCellActivates = true;
 
-    [Tooltip("Apply ongoing lava impact each end of turn to buildings still under lava.")]
+    [Tooltip("Apply ongoing lava impact each end of turn while this building is under lava.")]
     [SerializeField] private bool applyOngoingEffectsEachTurn = true;
 
     [Header("Damage")]
-    [Tooltip("Damage applied when lava first reaches a building cell.")]
+    [Tooltip("Damage applied when lava first reaches this building.")]
     [Min(0)][SerializeField] private int activationLavaDamage = 20;
 
-    [Tooltip("Damage applied each turn while the building remains under lava.")]
+    [Tooltip("Damage applied each turn while this building remains under lava.")]
     [Min(0)][SerializeField] private int ongoingLavaDamagePerTurn = 10;
-
-    [Tooltip("If true, a multi-cell building is only damaged once per lava pass, even if multiple lava cells touch it.")]
-    [SerializeField] private bool damageEachBuildingOnlyOncePerPass = true;
 
     [Header("Fire Ignition")]
     [SerializeField] private bool igniteBuildingFire = true;
@@ -49,63 +42,54 @@ public class BuildingLavaEffectResolver : MonoBehaviour
     [Header("Storage Lava Effects")]
     [Min(0f)][SerializeField] private float storageResourceLossMultiplier = 0.50f;
 
-    [Tooltip("Maximum total resource units destroyed from this storage building per lava step. 0 = no cap.")]
+    [Tooltip("Maximum total resource units destroyed from this building per lava step. 0 = no cap.")]
     [Min(0)][SerializeField] private int maxStorageResourcesDestroyedPerStep = 12;
 
     [SerializeField] private bool lavaCanDestroySpoiledFood = true;
 
-    [Header("Over-Frame Processing")]
-    [SerializeField] private bool processOngoingEffectsOverFrames = true;
-
-    [Min(1)]
-    [SerializeField] private int lavaCellsProcessedPerFrame = 8;
-
     [Header("Debug")]
     [SerializeField] private bool debugLogging = false;
 
-    private readonly List<TileCoord> activeLavaCellsScratch = new List<TileCoord>(128);
-    private readonly HashSet<int> processedBuildingsThisPass = new HashSet<int>();
+    private BuildingControl building;
+    private BuildingLavaResistance resistance;
+    private LavaOverlayManager lavaOverlayManager;
+    private WeatherGridManager weatherGridManager;
 
-    private Coroutine ongoingRoutine;
-    private LavaOverlayManager subscribedLavaOverlayManager;
-
-    private void Awake()
-    {
-        EnsureLinks();
-    }
+    private readonly List<TileCoord> activeLavaCellsScratch = new List<TileCoord>(32);
+    private LavaOverlayManager subscribedManager;
 
     private void OnEnable()
     {
-        EnsureLinks();
-        RebindLavaEvents();
+        EnsureRefs();
+        BindLavaEvent();
 
         if (applyOngoingEffectsEachTurn)
             TurnSystem.SubscribeToEndOfTurn(HandleEndOfTurn);
     }
 
-    private void Start()
-    {
-        EnsureLinks();
-        RebindLavaEvents();
-    }
-
     private void OnDisable()
     {
-        UnbindLavaEvents();
+        UnbindLavaEvent();
         TurnSystem.UnsubscribeFromEndOfTurn(HandleEndOfTurn);
-
-        if (ongoingRoutine != null)
-        {
-            StopCoroutine(ongoingRoutine);
-            ongoingRoutine = null;
-        }
-
-        processedBuildingsThisPass.Clear();
         activeLavaCellsScratch.Clear();
     }
 
-    private void EnsureLinks()
+    private void EnsureRefs()
     {
+        if (building == null)
+            building = GetComponent<BuildingControl>();
+        if (building == null)
+            building = GetComponentInChildren<BuildingControl>(true);
+        if (building == null)
+            building = GetComponentInParent<BuildingControl>();
+
+        if (resistance == null)
+            resistance = GetComponent<BuildingLavaResistance>();
+        if (resistance == null)
+            resistance = GetComponentInChildren<BuildingLavaResistance>(true);
+        if (resistance == null)
+            resistance = GetComponentInParent<BuildingLavaResistance>();
+
         if (lavaOverlayManager == null)
             lavaOverlayManager = LavaOverlayManager.Instance;
 
@@ -113,28 +97,23 @@ public class BuildingLavaEffectResolver : MonoBehaviour
             weatherGridManager = WeatherGridManager.Instance;
     }
 
-    private void RebindLavaEvents()
+    private void BindLavaEvent()
     {
-        if (subscribedLavaOverlayManager == lavaOverlayManager)
+        if (lavaOverlayManager == null || subscribedManager == lavaOverlayManager)
             return;
 
-        UnbindLavaEvents();
-
-        subscribedLavaOverlayManager = lavaOverlayManager;
-
-        if (subscribedLavaOverlayManager == null)
-            return;
-
-        subscribedLavaOverlayManager.OnLavaCellActivated += HandleLavaCellActivated;
+        UnbindLavaEvent();
+        subscribedManager = lavaOverlayManager;
+        subscribedManager.OnLavaCellActivated += HandleLavaCellActivated;
     }
 
-    private void UnbindLavaEvents()
+    private void UnbindLavaEvent()
     {
-        if (subscribedLavaOverlayManager == null)
+        if (subscribedManager == null)
             return;
 
-        subscribedLavaOverlayManager.OnLavaCellActivated -= HandleLavaCellActivated;
-        subscribedLavaOverlayManager = null;
+        subscribedManager.OnLavaCellActivated -= HandleLavaCellActivated;
+        subscribedManager = null;
     }
 
     private void HandleLavaCellActivated(TileCoord coord)
@@ -142,11 +121,12 @@ public class BuildingLavaEffectResolver : MonoBehaviour
         if (!applyWhenLavaCellActivates)
             return;
 
-        EnsureLinks();
+        EnsureRefs();
 
-        processedBuildingsThisPass.Clear();
-        ApplyLavaEffectsAtCell(coord, activationLavaDamage, isActivation: true);
-        processedBuildingsThisPass.Clear();
+        if (!IsThisBuildingAtCoord(coord))
+            return;
+
+        ApplyLavaEffectsToSelf(activationLavaDamage, isActivation: true);
     }
 
     private void HandleEndOfTurn()
@@ -154,7 +134,7 @@ public class BuildingLavaEffectResolver : MonoBehaviour
         if (!applyOngoingEffectsEachTurn)
             return;
 
-        EnsureLinks();
+        EnsureRefs();
 
         if (lavaOverlayManager == null)
             return;
@@ -162,98 +142,41 @@ public class BuildingLavaEffectResolver : MonoBehaviour
         if (!lavaOverlayManager.CopyActiveLavaCells(activeLavaCellsScratch))
             return;
 
-        if (processOngoingEffectsOverFrames)
-        {
-            if (ongoingRoutine == null)
-                ongoingRoutine = StartCoroutine(ProcessOngoingLavaEffectsRoutine());
-        }
-        else
-        {
-            ProcessOngoingLavaEffectsImmediate();
-        }
-    }
-
-    private IEnumerator ProcessOngoingLavaEffectsRoutine()
-    {
-        processedBuildingsThisPass.Clear();
-
-        int processed = 0;
-        int maxPerFrame = Mathf.Max(1, lavaCellsProcessedPerFrame);
-
         for (int i = 0; i < activeLavaCellsScratch.Count; i++)
         {
-            ApplyLavaEffectsAtCell(
-                activeLavaCellsScratch[i],
-                ongoingLavaDamagePerTurn,
-                isActivation: false);
-
-            processed++;
-
-            if (processed >= maxPerFrame)
+            if (IsThisBuildingAtCoord(activeLavaCellsScratch[i]))
             {
-                processed = 0;
-                yield return null;
+                // Apply once even if multiple lava cells touch this building.
+                ApplyLavaEffectsToSelf(ongoingLavaDamagePerTurn, isActivation: false);
+                return;
             }
         }
-
-        processedBuildingsThisPass.Clear();
-        ongoingRoutine = null;
     }
 
-    private void ProcessOngoingLavaEffectsImmediate()
-    {
-        processedBuildingsThisPass.Clear();
-
-        for (int i = 0; i < activeLavaCellsScratch.Count; i++)
-        {
-            ApplyLavaEffectsAtCell(
-                activeLavaCellsScratch[i],
-                ongoingLavaDamagePerTurn,
-                isActivation: false);
-        }
-
-        processedBuildingsThisPass.Clear();
-    }
-
-    private void ApplyLavaEffectsAtCell(TileCoord coord, int baseDamage, bool isActivation)
+    private bool IsThisBuildingAtCoord(TileCoord coord)
     {
         if (weatherGridManager == null)
-            return;
+            return false;
 
-        if (!weatherGridManager.TryGetBuildingAtCell(
-                coord.x,
-                coord.y,
-                out PlayerBuildingManager.Record record) ||
+        if (!weatherGridManager.TryGetBuildingAtCell(coord.x, coord.y, out WorldBuildingManager.Record record) ||
             record == null ||
             record.instance == null)
         {
-            return;
+            return false;
         }
 
-        int buildingKey = record.instance.GetInstanceID();
+        return record.instance == gameObject ||
+               (building != null && record.instance == building.gameObject);
+    }
 
-        if (damageEachBuildingOnlyOncePerPass && processedBuildingsThisPass.Contains(buildingKey))
-            return;
-
-        if (damageEachBuildingOnlyOncePerPass)
-            processedBuildingsThisPass.Add(buildingKey);
-
-        GameObject buildingObject = record.instance;
-
-        BuildingLavaResistance resistance = buildingObject.GetComponent<BuildingLavaResistance>();
-        if (resistance == null)
-            resistance = buildingObject.GetComponentInChildren<BuildingLavaResistance>(true);
-        if (resistance == null)
-            resistance = buildingObject.GetComponentInParent<BuildingLavaResistance>();
+    private void ApplyLavaEffectsToSelf(int baseDamage, bool isActivation)
+    {
+        EnsureRefs();
 
         if (resistance != null && resistance.lavaImmune)
         {
             if (debugLogging || resistance.debugLogging)
-            {
-                Debug.Log(
-                    $"[BuildingLavaEffectResolver] Lava ignored immune building '{buildingObject.name}' at ({coord.x},{coord.y}).");
-            }
-
+                Debug.Log($"[BuildingLavaEffectResolver] Lava ignored immune building '{name}'.");
             return;
         }
 
@@ -268,37 +191,30 @@ public class BuildingLavaEffectResolver : MonoBehaviour
         if (resistance != null)
             severity01 = resistance.ModifySecondarySeverity(severity01);
 
-        ApplyCoreBuildingDamage(buildingObject, finalDamage);
-        TryIgniteBuildingFire(buildingObject, resistance);
-        ApplySecondaryEffects(buildingObject, buildingKey, severity01);
+        ApplyCoreBuildingDamage(finalDamage);
+        TryIgniteBuildingFire();
+        ApplySecondaryEffects(severity01);
 
         if (debugLogging || (resistance != null && resistance.debugLogging))
         {
             Debug.Log(
-                $"[BuildingLavaEffectResolver] Lava affected building '{buildingObject.name}' " +
-                $"cell=({coord.x},{coord.y}) activation={isActivation} " +
-                $"baseDamage={baseDamage} finalDamage={finalDamage} severity={severity01:0.00}");
+                $"[BuildingLavaEffectResolver] Lava affected '{name}' " +
+                $"activation={isActivation} baseDamage={baseDamage} " +
+                $"finalDamage={finalDamage} severity={severity01:0.00}");
         }
     }
 
-    private void ApplyCoreBuildingDamage(GameObject buildingObject, int finalDamage)
+    private void ApplyCoreBuildingDamage(int finalDamage)
     {
-        if (finalDamage <= 0 || buildingObject == null)
+        if (finalDamage <= 0 || building == null)
             return;
 
-        BuildingControl building = buildingObject.GetComponent<BuildingControl>();
-        if (building == null)
-            building = buildingObject.GetComponentInChildren<BuildingControl>(true);
-        if (building == null)
-            building = buildingObject.GetComponentInParent<BuildingControl>();
-
-        if (building != null)
-            building.ApplyDamage(finalDamage);
+        building.ApplyDamage(finalDamage);
     }
 
-    private void TryIgniteBuildingFire(GameObject buildingObject, BuildingLavaResistance resistance)
+    private void TryIgniteBuildingFire()
     {
-        if (!igniteBuildingFire || buildingObject == null)
+        if (!igniteBuildingFire)
             return;
 
         float finalChance = resistance != null
@@ -312,72 +228,50 @@ public class BuildingLavaEffectResolver : MonoBehaviour
         if (finalChance <= 0f || finalBurnTurns <= 0)
             return;
 
-        BuildingFireState fireState = buildingObject.GetComponent<BuildingFireState>();
+        BuildingFireState fireState = GetComponent<BuildingFireState>();
         if (fireState == null)
-            fireState = buildingObject.GetComponentInChildren<BuildingFireState>(true);
+            fireState = GetComponentInChildren<BuildingFireState>(true);
         if (fireState == null)
-            fireState = buildingObject.GetComponentInParent<BuildingFireState>();
+            fireState = GetComponentInParent<BuildingFireState>();
 
         if (fireState != null)
             fireState.TryIgnite(finalChance, finalBurnTurns);
     }
 
-    private void ApplySecondaryEffects(GameObject buildingObject, int buildingKey, float severity01)
+    private void ApplySecondaryEffects(float severity01)
     {
-        if (buildingObject == null || severity01 <= 0f)
+        if (building == null || severity01 <= 0f)
             return;
 
-        BuildingControl building = buildingObject.GetComponent<BuildingControl>();
-        if (building == null)
-            building = buildingObject.GetComponentInChildren<BuildingControl>(true);
-        if (building == null)
-            building = buildingObject.GetComponentInParent<BuildingControl>();
-
-        if (building == null)
-            return;
+        int buildingKey = building.GetInstanceID();
 
         ShelterControl shelter = building.GetComponent<ShelterControl>();
         if (shelter == null)
             shelter = building.GetComponentInChildren<ShelterControl>(true);
-
         if (applyShelterEffects && shelter != null)
             shelter.TryApplyFireCasualties(severity01 * shelterCasualtyMultiplier, debugLogging);
 
         CraftingBuildingControl crafting = building.GetComponent<CraftingBuildingControl>();
         if (crafting == null)
             crafting = building.GetComponentInChildren<CraftingBuildingControl>(true);
-
         if (applyCraftingEffects && crafting != null)
             crafting.TryApplyFireCraftingImpact(severity01 * craftingImpactMultiplier, debugLogging);
 
         ProductionBuildingControl production = building.GetComponent<ProductionBuildingControl>();
         if (production == null)
             production = building.GetComponentInChildren<ProductionBuildingControl>(true);
-
         if (applyProductionEffects && production != null)
-        {
-            production.RegisterFireImpact(
-                buildingKey,
-                severity01 * productionImpactMultiplier,
-                debugLogging);
-        }
+            production.RegisterFireImpact(buildingKey, severity01 * productionImpactMultiplier, debugLogging);
 
         KineticWarfareControl training = building.GetComponent<KineticWarfareControl>();
         if (training == null)
             training = building.GetComponentInChildren<KineticWarfareControl>(true);
-
         if (applyTrainingEffects && training != null)
-        {
-            training.RegisterFireImpact(
-                buildingKey,
-                severity01 * trainingImpactMultiplier,
-                debugLogging);
-        }
+            training.RegisterFireImpact(buildingKey, severity01 * trainingImpactMultiplier, debugLogging);
 
         StorageBuildingControl storage = building.GetComponent<StorageBuildingControl>();
         if (storage == null)
             storage = building.GetComponentInChildren<StorageBuildingControl>(true);
-
         if (applyStorageEffects && storage != null)
         {
             storage.TryApplyFireStorageLoss(

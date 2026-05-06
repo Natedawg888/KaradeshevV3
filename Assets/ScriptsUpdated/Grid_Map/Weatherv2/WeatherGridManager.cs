@@ -62,7 +62,7 @@ public class WeatherGridManager : MonoBehaviour
     [SerializeField] private MonoEnvironmentDataSource environmentDataSource;
 
     [Header("Late Runtime References")]
-    [SerializeField] private PlayerBuildingManager playerBuildingManager;
+    [SerializeField] private WorldBuildingManager worldBuildingManager;
 
     [Header("Weather Space")]
     [SerializeField] private float weatherGridBaseHeight = 6f;
@@ -93,7 +93,7 @@ public class WeatherGridManager : MonoBehaviour
 
     private WeatherCellState[,] _cellStates;
     private EnvironmentControl[,] _environmentByCell;
-    private PlayerBuildingManager.Record[,] _buildingByCell;
+    private WorldBuildingManager.Record[,] _buildingByCell;
 
     private readonly Dictionary<EnvironmentControl, EnvironmentCoverage> _environmentCoverageByEnv =
         new Dictionary<EnvironmentControl, EnvironmentCoverage>();
@@ -109,7 +109,7 @@ public class WeatherGridManager : MonoBehaviour
     // Track the exact objects we are currently subscribed to so late rebinding is safe.
     private ClimateManager _subscribedClimateManager;
     private MonoEnvironmentDataSource _subscribedEnvironmentDataSource;
-    private PlayerBuildingManager _subscribedPlayerBuildingManager;
+    private WorldBuildingManager _subscribedWorldBuildingManager;
 
     [Header("Gizmos")]
     [SerializeField] private bool drawWeatherGridGizmos = true;
@@ -149,7 +149,7 @@ public class WeatherGridManager : MonoBehaviour
     private sealed class BuildingCoverage
     {
         public string instanceId;
-        public PlayerBuildingManager.Record record;
+        public WorldBuildingManager.Record record;
         public readonly List<TileCoord> cells = new List<TileCoord>(4);
     }
 
@@ -221,18 +221,18 @@ public class WeatherGridManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Late-bind the PlayerBuildingManager after the PlayerSetup additive scene is loaded.
+    /// Late-bind the WorldBuildingManager after the player/world setup scenes are loaded.
     /// This is the important hook for your bootstrap flow.
     /// </summary>
-    public void SetPlayerBuildingManager(PlayerBuildingManager newPlayerBuildingManager, bool rebuildCoverage = true)
+    public void SetWorldBuildingManager(WorldBuildingManager newWorldBuildingManager, bool rebuildCoverage = true)
     {
-        if (ReferenceEquals(playerBuildingManager, newPlayerBuildingManager) &&
-            ReferenceEquals(_subscribedPlayerBuildingManager, newPlayerBuildingManager))
+        if (ReferenceEquals(worldBuildingManager, newWorldBuildingManager) &&
+            ReferenceEquals(_subscribedWorldBuildingManager, newWorldBuildingManager))
         {
             return;
         }
 
-        playerBuildingManager = newPlayerBuildingManager;
+        worldBuildingManager = newWorldBuildingManager;
         RebindSubscriptions();
 
         if (rebuildCoverage)
@@ -240,8 +240,8 @@ public class WeatherGridManager : MonoBehaviour
 
         if (debugLogging)
         {
-            string name = playerBuildingManager != null ? playerBuildingManager.name : "null";
-            Debug.Log($"[WeatherGridManager] SetPlayerBuildingManager -> {name}");
+            string n = worldBuildingManager != null ? worldBuildingManager.name : "null";
+            Debug.Log($"[WeatherGridManager] SetWorldBuildingManager -> {n}");
         }
     }
 
@@ -277,7 +277,7 @@ public class WeatherGridManager : MonoBehaviour
         {
             _cellStates = new WeatherCellState[_cols, _rows];
             _environmentByCell = new EnvironmentControl[_cols, _rows];
-            _buildingByCell = new PlayerBuildingManager.Record[_cols, _rows];
+            _buildingByCell = new WorldBuildingManager.Record[_cols, _rows];
         }
         else
         {
@@ -418,22 +418,22 @@ public class WeatherGridManager : MonoBehaviour
         _buildingCoverageById.Clear();
 
         // Important for additive loading:
-        // allow a late singleton resolve if the player scene has now loaded.
-        if (playerBuildingManager == null)
-            playerBuildingManager = PlayerBuildingManager.Instance;
+        // allow a late singleton resolve if the world building manager is now available.
+        if (worldBuildingManager == null)
+            worldBuildingManager = WorldBuildingManager.Instance;
 
         RebindSubscriptions();
 
-        if (playerBuildingManager == null)
+        if (worldBuildingManager == null)
         {
             if (debugLogging)
-                Debug.Log("[WeatherGridManager] Building coverage rebuild skipped: PlayerBuildingManager not available yet.");
+                Debug.Log("[WeatherGridManager] Building coverage rebuild skipped: WorldBuildingManager not available yet.");
 
             OnBuildingCoverageRebuilt?.Invoke();
             return;
         }
 
-        IReadOnlyList<PlayerBuildingManager.Record> records = playerBuildingManager.GetAll();
+        IReadOnlyList<WorldBuildingManager.Record> records = worldBuildingManager.GetAll();
         if (records != null)
         {
             for (int i = 0; i < records.Count; i++)
@@ -460,7 +460,7 @@ public class WeatherGridManager : MonoBehaviour
         RegisterOrUpdateEnvironmentCoverage(primaryCoord, env, raiseChangedEvent: true);
     }
 
-    public void RefreshBuildingCoverage(PlayerBuildingManager.Record record)
+    public void RefreshBuildingCoverage(WorldBuildingManager.Record record)
     {
         if (!EnsureInitialized())
             return;
@@ -522,7 +522,7 @@ public class WeatherGridManager : MonoBehaviour
         return environment != null;
     }
 
-    public bool TryGetBuildingAtCell(int x, int y, out PlayerBuildingManager.Record building)
+    public bool TryGetBuildingAtCell(int x, int y, out WorldBuildingManager.Record building)
     {
         building = null;
 
@@ -622,7 +622,7 @@ public class WeatherGridManager : MonoBehaviour
     // Building coverage queries
     // ---------------------------------------------------------------------
 
-    public bool TryGetBuildingCoveredCells(PlayerBuildingManager.Record record, List<TileCoord> results)
+    public bool TryGetBuildingCoveredCells(WorldBuildingManager.Record record, List<TileCoord> results)
     {
         if (results == null)
             return false;
@@ -652,7 +652,7 @@ public class WeatherGridManager : MonoBehaviour
         return results.Count > 0;
     }
 
-    public bool TryGetBuildingWeatherSample(PlayerBuildingManager.Record record, out WeatherAreaSample sample)
+    public bool TryGetBuildingWeatherSample(WorldBuildingManager.Record record, out WeatherAreaSample sample)
     {
         sample = default;
 
@@ -694,12 +694,12 @@ public class WeatherGridManager : MonoBehaviour
         RemoveEnvironmentCoverageInternal(env, raiseChangedEvent: true);
     }
 
-    private void HandleBuildingPlaced(PlayerBuildingManager.Record record)
+    private void HandleBuildingPlaced(WorldBuildingManager.Record record)
     {
         RefreshBuildingCoverage(record);
     }
 
-    private void HandleBuildingRemoved(PlayerBuildingManager.Record record)
+    private void HandleBuildingRemoved(WorldBuildingManager.Record record)
     {
         if (record == null)
             return;
@@ -764,7 +764,7 @@ public class WeatherGridManager : MonoBehaviour
             OnEnvironmentCoverageChanged?.Invoke(env);
     }
 
-    private void RegisterOrUpdateBuildingCoverage(PlayerBuildingManager.Record record, bool raiseChangedEvent)
+    private void RegisterOrUpdateBuildingCoverage(WorldBuildingManager.Record record, bool raiseChangedEvent)
     {
         if (record == null || string.IsNullOrEmpty(record.instanceId))
             return;
@@ -856,7 +856,7 @@ public class WeatherGridManager : MonoBehaviour
     /// Builds a building footprint from instance bounds if possible.
     /// Falls back to record.worldPos if no bounds are available.
     /// </summary>
-    private void BuildBuildingFootprint(PlayerBuildingManager.Record record, List<TileCoord> results)
+    private void BuildBuildingFootprint(WorldBuildingManager.Record record, List<TileCoord> results)
     {
         results.Clear();
 
@@ -1088,21 +1088,21 @@ public class WeatherGridManager : MonoBehaviour
 
     private void RebindBuildingSubscription()
     {
-        if (_subscribedPlayerBuildingManager == playerBuildingManager)
+        if (_subscribedWorldBuildingManager == worldBuildingManager)
             return;
 
-        if (_subscribedPlayerBuildingManager != null)
+        if (_subscribedWorldBuildingManager != null)
         {
-            _subscribedPlayerBuildingManager.OnBuildingPlaced -= HandleBuildingPlaced;
-            _subscribedPlayerBuildingManager.OnBuildingRemoved -= HandleBuildingRemoved;
+            _subscribedWorldBuildingManager.OnBuildingPlaced -= HandleBuildingPlaced;
+            _subscribedWorldBuildingManager.OnBuildingRemoved -= HandleBuildingRemoved;
         }
 
-        _subscribedPlayerBuildingManager = playerBuildingManager;
+        _subscribedWorldBuildingManager = worldBuildingManager;
 
-        if (_subscribedPlayerBuildingManager != null)
+        if (_subscribedWorldBuildingManager != null)
         {
-            _subscribedPlayerBuildingManager.OnBuildingPlaced += HandleBuildingPlaced;
-            _subscribedPlayerBuildingManager.OnBuildingRemoved += HandleBuildingRemoved;
+            _subscribedWorldBuildingManager.OnBuildingPlaced += HandleBuildingPlaced;
+            _subscribedWorldBuildingManager.OnBuildingRemoved += HandleBuildingRemoved;
         }
     }
 
@@ -1117,15 +1117,15 @@ public class WeatherGridManager : MonoBehaviour
             _subscribedEnvironmentDataSource.OnEnvironmentUnregistered -= HandleEnvironmentUnregistered;
         }
 
-        if (_subscribedPlayerBuildingManager != null)
+        if (_subscribedWorldBuildingManager != null)
         {
-            _subscribedPlayerBuildingManager.OnBuildingPlaced -= HandleBuildingPlaced;
-            _subscribedPlayerBuildingManager.OnBuildingRemoved -= HandleBuildingRemoved;
+            _subscribedWorldBuildingManager.OnBuildingPlaced -= HandleBuildingPlaced;
+            _subscribedWorldBuildingManager.OnBuildingRemoved -= HandleBuildingRemoved;
         }
 
         _subscribedClimateManager = null;
         _subscribedEnvironmentDataSource = null;
-        _subscribedPlayerBuildingManager = null;
+        _subscribedWorldBuildingManager = null;
     }
 
     private bool EnsureInitialized()
