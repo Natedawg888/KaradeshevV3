@@ -27,6 +27,17 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.Craft(type, env, populationLost);
     }
 
+    public (string title, string message) CraftResearch(NotificationType type, string techName)
+    {
+        if (crafter == null)
+        {
+            return type == NotificationType.ResearchFailed
+                ? ("Research Failed",   $"Research on {techName} has failed.")
+                : ("Research Complete", $"{techName} has been researched.");
+        }
+        return crafter.CraftResearch(type, techName);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         if (crafter == null)

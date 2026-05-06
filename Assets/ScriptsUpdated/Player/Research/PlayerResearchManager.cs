@@ -419,6 +419,8 @@ public class PlayerResearchManager : MonoBehaviour
             PlayerLevel.Instance.AddXP(xp);
         }
 
+        PostResearchNotification(NotificationType.ResearchCompleted, ar.tech);
+
         MarkKnowledgeDirty();
     }
 
@@ -552,6 +554,8 @@ public class PlayerResearchManager : MonoBehaviour
         Debug.Log($"[Research] FAILED: '{ar.tech?.techName ?? ar?.tech?.techID}' " +
                 $"(reason={(failThisTick >= 1f ? "StationDestroyed" : "TickFail")}, " +
                 $"p={failThisTick:P0}, progress={progress01:P0})");
+
+        PostResearchNotification(NotificationType.ResearchFailed, ar.tech);
     }
 
     public List<Technology> FilterOutResearchedAndActive(IEnumerable<Technology> source, BuildingControl optionalStation = null)
@@ -1076,5 +1080,26 @@ public class PlayerResearchManager : MonoBehaviour
 
         if (newResearchTasksContentRoot != null)
             researchTasksContentRoot = newResearchTasksContentRoot;
+    }
+
+    private static void PostResearchNotification(NotificationType type, Technology tech)
+    {
+        if (NotificationManager.Instance == null || tech == null) return;
+
+        string techName = !string.IsNullOrEmpty(tech.techName) ? tech.techName : tech.techID;
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftResearch(type, techName);
+        else
+        {
+            title   = type == NotificationType.ResearchFailed ? "Research Failed"   : "Research Complete";
+            message = type == NotificationType.ResearchFailed
+                ? $"Research on {techName} has failed."
+                : $"{techName} has been researched.";
+        }
+
+        // No world position — Go To button will not show for research notifications.
+        NotificationManager.Instance.AddNotification(type, title, message);
     }
 }

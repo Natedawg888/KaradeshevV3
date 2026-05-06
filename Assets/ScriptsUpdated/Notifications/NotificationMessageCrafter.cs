@@ -35,6 +35,21 @@ public class NotificationMessageCrafter : ScriptableObject
         }
     }
 
+    public (string title, string message) CraftResearch(NotificationType type, string techName)
+    {
+        var set = GetSuccessSet(type);
+        if (set == null)
+        {
+            return type == NotificationType.ResearchFailed
+                ? ("Research Failed",   $"Research on {techName} has failed.")
+                : ("Research Complete", $"{techName} has been researched.");
+        }
+
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages).Replace("{TECH}", techName);
+        return (title, message);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         var set = GetSuccessSet(type);
@@ -185,6 +200,30 @@ public class NotificationMessageCrafter : ScriptableObject
                     "Your {BUILDING} has been damaged and needs repair.",
                     "Damage reported at {BUILDING}.",
                     "{BUILDING} is in a damaged state.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.ResearchCompleted,
+                titles   = new[] { "Research Complete", "Technology Unlocked", "Discovery Made" },
+                messages = new[]
+                {
+                    "{TECH} has been researched.",
+                    "Your researchers have completed {TECH}.",
+                    "Knowledge of {TECH} is now yours.",
+                    "{TECH} has been unlocked.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.ResearchFailed,
+                titles   = new[] { "Research Failed", "Setback in Research", "Research Lost" },
+                messages = new[]
+                {
+                    "Research on {TECH} has failed.",
+                    "Your researchers failed to complete {TECH}.",
+                    "The research into {TECH} came to nothing.",
+                    "{TECH} could not be completed this time.",
                 },
             },
             new SuccessTemplateSet

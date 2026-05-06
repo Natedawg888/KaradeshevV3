@@ -36,6 +36,8 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.BuildingCompleted  },
             new Entry { type = NotificationType.BuildingDamaged    },
             new Entry { type = NotificationType.BuildingDestroyed  },
+            new Entry { type = NotificationType.ResearchCompleted  },
+            new Entry { type = NotificationType.ResearchFailed     },
         };
     }
 }
