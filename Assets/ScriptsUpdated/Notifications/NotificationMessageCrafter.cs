@@ -35,6 +35,16 @@ public class NotificationMessageCrafter : ScriptableObject
         }
     }
 
+    public (string title, string message) CraftBuilding(string buildingName)
+    {
+        var set = GetSuccessSet(NotificationType.BuildingCompleted);
+        if (set == null) return ("Construction Complete", $"{buildingName} has been constructed.");
+
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages).Replace("{BUILDING}", buildingName);
+        return (title, message);
+    }
+
     // ------------------------------------------------------------------
 
     private (string title, string message) CraftSuccess(NotificationType type, EnvironmentControl env)
@@ -143,6 +153,18 @@ public class NotificationMessageCrafter : ScriptableObject
                     "Your scouts mapped the {ENV} at {ENV_NAME}.",
                     "The {TILE} region known as {ENV_NAME} is now charted.",
                     "A {SIZE} {ENV} site — {ENV_NAME} — has been revealed.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.BuildingCompleted,
+                titles   = new[] { "Construction Complete", "Building Ready", "Structure Finished" },
+                messages = new[]
+                {
+                    "{BUILDING} has been constructed.",
+                    "Your workers finished building {BUILDING}.",
+                    "Construction of {BUILDING} is complete.",
+                    "{BUILDING} is now operational.",
                 },
             },
         };

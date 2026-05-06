@@ -33,6 +33,7 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.GatheringFailed    },
             new Entry { type = NotificationType.DiscoveryCompleted },
             new Entry { type = NotificationType.DiscoveryFailed    },
+            new Entry { type = NotificationType.BuildingCompleted  },
         };
     }
 }

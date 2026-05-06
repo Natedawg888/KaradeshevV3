@@ -26,4 +26,10 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         if (crafter == null) return (type.ToString(), env != null ? env.environmentName : "");
         return crafter.Craft(type, env, populationLost);
     }
+
+    public (string title, string message) CraftBuilding(string buildingName)
+    {
+        if (crafter == null) return ("Construction Complete", $"{buildingName} has been constructed.");
+        return crafter.CraftBuilding(buildingName);
+    }
 }

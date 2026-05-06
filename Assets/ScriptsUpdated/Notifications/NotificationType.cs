@@ -7,6 +7,7 @@ public enum NotificationType
     GatheringFailed,
     DiscoveryCompleted,
     DiscoveryFailed,
+    BuildingCompleted,
 
-    // Future: CraftingCompleted, ProductionCompleted, ResearchCompleted, BuildingCompleted, etc.
+    // Future: CraftingCompleted, ProductionCompleted, ResearchCompleted, etc.
 }

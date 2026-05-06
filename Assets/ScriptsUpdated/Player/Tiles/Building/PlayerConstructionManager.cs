@@ -240,6 +240,8 @@ public class PlayerConstructionManager : MonoBehaviour
                     if (bdef != null)
                         playerLevel?.AddXP(Mathf.RoundToInt(bdef.buildTurnsRequired * 2f));
 
+                    PostBuildingNotification(bdef, finalGO);
+
                     active.Remove(bc);
                     Destroy(bc.gameObject);
                     toRemove.Add(bc);
@@ -343,7 +345,28 @@ public class PlayerConstructionManager : MonoBehaviour
             playerBuildingManager?.Register(tag);
         }
 
+        PostBuildingNotification(bc.Definition, finalGO);
+
         active.Remove(bc);
         Destroy(bc.gameObject);
+    }
+
+    private static void PostBuildingNotification(Building bdef, GameObject finalGO)
+    {
+        if (NotificationManager.Instance == null) return;
+
+        string buildingName = bdef != null ? bdef.buildingName : "Building";
+        UnityEngine.Vector3 pos = finalGO != null ? finalGO.transform.position : UnityEngine.Vector3.zero;
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftBuilding(buildingName);
+        else
+        {
+            title   = "Construction Complete";
+            message = $"{buildingName} has been constructed.";
+        }
+
+        NotificationManager.Instance.AddNotification(NotificationType.BuildingCompleted, title, message, pos);
     }
 }
