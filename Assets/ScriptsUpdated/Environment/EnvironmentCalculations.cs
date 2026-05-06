@@ -20,6 +20,8 @@ public class EnvironmentCalculations : ScriptableObject
     [Serializable]
     public class EnvironmentTypeSettings
     {
+        public string debugName = "";
+
         public EnvironmentType environmentType;
 
         [Header("Discovery")]
@@ -54,6 +56,7 @@ public class EnvironmentCalculations : ScriptableObject
     [Serializable]
     public class TileTypeModifierEntry
     {
+        public string debugName = "";
         public EnvironmentTileType tileType;
 
         [Header("Turn Multipliers")]
@@ -83,6 +86,8 @@ public class EnvironmentCalculations : ScriptableObject
     [Serializable]
     public class TileSizeEntry
     {
+        public string debugName = "";
+
         public TileSize tileSize;
 
         [Header("Turn Multipliers")]
@@ -196,6 +201,7 @@ public class EnvironmentCalculations : ScriptableObject
     {
         return new EnvironmentTypeSettings
         {
+            debugName                    = type.ToString(),
             environmentType              = type,
             discoveryBaseTurns           = discTurns,
             discoveryBaseFailureChance   = discFail,
@@ -227,6 +233,7 @@ public class EnvironmentCalculations : ScriptableObject
     {
         return new TileTypeModifierEntry
         {
+            debugName                   = type.ToString(),
             tileType                    = type,
             discoveryTurnMultiplier     = discTrn,
             gatheringTurnMultiplier     = gthTrn,
@@ -254,6 +261,7 @@ public class EnvironmentCalculations : ScriptableObject
     {
         return new TileSizeEntry
         {
+            debugName                   = size.ToString(),
             tileSize                    = size,
             discoveryTurnMultiplier     = discTrn,
             gatheringTurnMultiplier     = gthTrn,
