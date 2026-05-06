@@ -139,23 +139,23 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
                 $"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
                 $"MapGenerator={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
                 $"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
-                $"PlayerBuildingManager={(playerBuildingManager != null ? playerBuildingManager.name : "NULL")}"
+                $"WorldBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}"
             );
         }
     }
 
-    public void SetPlayerBuildingManager(PlayerBuildingManager newPlayerBuildingManager)
+    public void SetWorldBuildingManager(WorldBuildingManager newWorldBuildingManager)
     {
-        if (playerBuildingManager == newPlayerBuildingManager)
+        if (worldBuildingManager == newWorldBuildingManager)
             return;
 
-        playerBuildingManager = newPlayerBuildingManager;
+        worldBuildingManager = newWorldBuildingManager;
 
         if (debugLogging)
         {
             Debug.Log(
-                $"EarthquakeBuildingEffectResolver: SetPlayerBuildingManager -> " +
-                $"{(playerBuildingManager != null ? playerBuildingManager.name : "NULL")}"
+                $"EarthquakeBuildingEffectResolver: SetWorldBuildingManager -> " +
+                $"{(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}"
             );
         }
     }
@@ -788,7 +788,7 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
         if (mapGenerator == null)
             mapGenerator = FindObjectOfType<MapGenerator>();
 
-        if (playerBuildingManager == null)
-            playerBuildingManager = PlayerBuildingManager.Instance;
+        if (worldBuildingManager == null)
+            worldBuildingManager = WorldBuildingManager.Instance;
     }
 }

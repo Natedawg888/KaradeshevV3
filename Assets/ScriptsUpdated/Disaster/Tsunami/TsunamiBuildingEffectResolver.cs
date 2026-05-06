@@ -101,8 +101,8 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
         if (newGridManager != null)
             gridManager = newGridManager;
 
-        if (newPlayerBuildingManager != null)
-            worldBuildingManager = newPlayerBuildingManager;
+        if (newWorldBuildingManager != null)
+            worldBuildingManager = newWorldBuildingManager;
 
         RebindSimulationSubscription();
 
@@ -112,21 +112,21 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
                 $"[TsunamiBuildingEffectResolver] Installed refs. " +
                 $"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
                 $"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
-                $"PlayerBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
+                $"WorldBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
         }
     }
 
-    public void SetPlayerBuildingManager(PlayerBuildingManager newPlayerBuildingManager)
+    public void SetWorldBuildingManager(WorldBuildingManager newWorldBuildingManager)
     {
-        if (worldBuildingManager == newPlayerBuildingManager)
+        if (worldBuildingManager == newWorldBuildingManager)
             return;
 
-        worldBuildingManager = newPlayerBuildingManager;
+        worldBuildingManager = newWorldBuildingManager;
 
         if (debugLogging)
         {
             Debug.Log(
-                $"[TsunamiBuildingEffectResolver] SetPlayerBuildingManager -> " +
+                $"[TsunamiBuildingEffectResolver] SetWorldBuildingManager -> " +
                 $"{(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
         }
     }
@@ -608,6 +608,6 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
             gridManager = GridManager.Instance;
 
         if (worldBuildingManager == null)
-            worldBuildingManager = PlayerBuildingManager.Instance;
+            worldBuildingManager = WorldBuildingManager.Instance;
     }
 }

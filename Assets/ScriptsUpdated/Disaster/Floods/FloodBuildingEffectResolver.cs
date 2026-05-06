@@ -111,8 +111,8 @@ public class FloodBuildingEffectResolver : MonoBehaviour
         if (newGridManager != null)
             gridManager = newGridManager;
 
-        if (newPlayerBuildingManager != null)
-            worldBuildingManager = newPlayerBuildingManager;
+        if (newWorldBuildingManager != null)
+            worldBuildingManager = newWorldBuildingManager;
 
         RebindFloodSubscription();
 
@@ -122,21 +122,21 @@ public class FloodBuildingEffectResolver : MonoBehaviour
                 $"[FloodBuildingEffectResolver] Installed refs. " +
                 $"Flood={(floodSimulationSystem != null ? floodSimulationSystem.name : "NULL")}, " +
                 $"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
-                $"PlayerBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
+                $"WorldBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
         }
     }
 
-    public void SetPlayerBuildingManager(PlayerBuildingManager newPlayerBuildingManager)
+    public void SetWorldBuildingManager(WorldBuildingManager newWorldBuildingManager)
     {
-        if (worldBuildingManager == newPlayerBuildingManager)
+        if (worldBuildingManager == newWorldBuildingManager)
             return;
 
-        worldBuildingManager = newPlayerBuildingManager;
+        worldBuildingManager = newWorldBuildingManager;
 
         if (debugLogging)
         {
             Debug.Log(
-                $"[FloodBuildingEffectResolver] SetPlayerBuildingManager -> " +
+                $"[FloodBuildingEffectResolver] SetWorldBuildingManager -> " +
                 $"{(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
         }
     }
@@ -686,6 +686,6 @@ public class FloodBuildingEffectResolver : MonoBehaviour
             gridManager = GridManager.Instance;
 
         if (worldBuildingManager == null)
-            worldBuildingManager = PlayerBuildingManager.Instance;
+            worldBuildingManager = WorldBuildingManager.Instance;
     }
 }
