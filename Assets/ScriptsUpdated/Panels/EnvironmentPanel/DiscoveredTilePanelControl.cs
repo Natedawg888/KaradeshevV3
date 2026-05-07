@@ -60,7 +60,11 @@ public class DiscoveredTilePanelControl : MonoBehaviour
     public Button gatherBlockedOverlay;
     public LowDiscoveryPopupPanel lowDiscoveryPopup;
 
+    [Header("Fire")]
+    public TileFireOverlayControl fireOverlayPanel;
+
     private EnvironmentControl currentEnv;
+    private EnvironmentFireState currentFireState;
     public event Action OnClose;
 
     public bool IsShowing => root != null ? root.activeInHierarchy : gameObject.activeInHierarchy;
@@ -177,10 +181,19 @@ public class DiscoveredTilePanelControl : MonoBehaviour
         Hide();
     }
 
+    private void OnDisable() => UnsubscribeFireState();
+    private void OnDestroy() => UnsubscribeFireState();
+
     public void Show(EnvironmentControl env)
     {
         if (env == null) return;
+
+        UnsubscribeFireState();
         currentEnv = env;
+        currentFireState = env.GetComponent<EnvironmentFireState>();
+
+        if (currentFireState != null)
+            currentFireState.OnIgnited += HandleFireIgnited;
 
         root.SetActive(true);
 
@@ -281,6 +294,14 @@ public class DiscoveredTilePanelControl : MonoBehaviour
 
         if (surveyButton != null)
             surveyButton.interactable = !currentEnv.isSurveying;
+
+        if (fireOverlayPanel != null)
+        {
+            if (currentFireState != null && currentFireState.IsOnFire)
+                fireOverlayPanel.ShowFor(currentEnv);
+            else
+                fireOverlayPanel.Hide();
+        }
     }
 
     private void Update()
@@ -422,9 +443,25 @@ public class DiscoveredTilePanelControl : MonoBehaviour
         SuppressSelectionReenableOnHide = false;
 
         root.SetActive(false);
+
+        fireOverlayPanel?.Hide();
+        UnsubscribeFireState();
         currentEnv = null;
         OnClose?.Invoke();
         surveyPanel.Hide();
+    }
+
+    private void HandleFireIgnited(EnvironmentFireState state)
+    {
+        if (fireOverlayPanel != null && currentEnv != null)
+            fireOverlayPanel.ShowFor(currentEnv);
+    }
+
+    private void UnsubscribeFireState()
+    {
+        if (currentFireState == null) return;
+        currentFireState.OnIgnited -= HandleFireIgnited;
+        currentFireState = null;
     }
 
     private void BeginRename()

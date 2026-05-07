@@ -23,6 +23,9 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
     public Button discoverBlockedOverlay;        // transparent overlay, enabled only when blocked
     public LowDiscoveryPopupPanel lowDiscoveryPopup;
 
+    [Header("Fire")]
+    public GameObject fireBlockOverlay;
+
     public bool IsShowing => root != null ? root.activeInHierarchy : gameObject.activeInHierarchy;
     public EnvironmentControl CurrentEnvironment => currentEnv;
     public Func<EnvironmentControl, bool> TutorialDiscoverOverride;
@@ -30,6 +33,7 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
     public bool SuppressSelectionReenableOnHide { get; set; }
 
     private EnvironmentControl currentEnv;
+    private EnvironmentFireState currentFireState;
 
     public event Action OnClose;
 
@@ -67,10 +71,21 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
             cameraControl = FindObjectOfType<CameraControl>();
     }
 
+    private void OnDisable() => UnsubscribeFireState();
+    private void OnDestroy() => UnsubscribeFireState();
+
     public void Show(EnvironmentControl env)
     {
         if (env == null) return;
+
+        UnsubscribeFireState();
         currentEnv = env;
+        currentFireState = env.GetComponent<EnvironmentFireState>();
+
+        if (currentFireState != null)
+            currentFireState.OnIgnited      += HandleFireIgnited;
+        if (currentFireState != null)
+            currentFireState.OnExtinguished += HandleFireExtinguished;
 
         if (root != null) root.SetActive(true);
         else gameObject.SetActive(true);
@@ -114,6 +129,8 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
             discoverBlockedOverlay.gameObject.SetActive(blocked);
 
         cameraControl.PushInputLock();
+
+        RefreshFireBlock();
     }
 
     private void ShowBlockedPopup()
@@ -158,8 +175,28 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
         SuppressSelectionReenableOnHide = false;
 
         if (root != null) root.SetActive(false);
+
+        UnsubscribeFireState();
         currentEnv = null;
         OnClose?.Invoke();
+    }
+
+    private void RefreshFireBlock()
+    {
+        if (fireBlockOverlay == null) return;
+        bool onFire = currentFireState != null && currentFireState.IsOnFire;
+        fireBlockOverlay.SetActive(onFire);
+    }
+
+    private void HandleFireIgnited(EnvironmentFireState state)     => RefreshFireBlock();
+    private void HandleFireExtinguished(EnvironmentFireState state) => RefreshFireBlock();
+
+    private void UnsubscribeFireState()
+    {
+        if (currentFireState == null) return;
+        currentFireState.OnIgnited      -= HandleFireIgnited;
+        currentFireState.OnExtinguished -= HandleFireExtinguished;
+        currentFireState = null;
     }
 
     private void OnDiscoverClicked()

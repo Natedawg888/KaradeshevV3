@@ -17,6 +17,15 @@ public class EnvironmentFireState : MonoBehaviour
     [Tooltip("How strongly rain reduces dryness each step.")]
     [Range(0f, 1f)][SerializeField] private float rainDrynessReductionPerStep = 0.35f;
 
+    [Header("Extinguish Cost")]
+    public List<ResourceCost> extinguishCost = new();
+
+    [Header("Firefighting")]
+    public int populationRequired = 2;
+    public int baseFightTurns = 4;
+    public int rollMin = -1;
+    public int rollMax = 3;
+
     [Header("Fire Visuals")]
     [SerializeField] private GameObject[] fireVisualObjects;
     [SerializeField] private bool autoFindFireChildByName = true;
@@ -28,8 +37,15 @@ public class EnvironmentFireState : MonoBehaviour
     public int BaseBurnTurns { get; private set; }
     public float CurrentDryness01 { get; private set; } = 0.5f;
 
-    public event Action<EnvironmentFireState> OnIgnited;
-    public event Action<EnvironmentFireState> OnExtinguished;
+    public bool IsFighting          { get; private set; }
+    public int  FightTurnsRemaining { get; private set; }
+    public int  LastRollResult      { get; private set; }
+
+    public event Action<EnvironmentFireState>           OnIgnited;
+    public event Action<EnvironmentFireState>           OnExtinguished;
+    public event Action<EnvironmentFireState, int, int> OnFightProgress;
+
+    private string _populationReservationId;
 
     private readonly Dictionary<Renderer, Material[]> originalFireMaterials = new();
 
@@ -38,6 +54,12 @@ public class EnvironmentFireState : MonoBehaviour
         CacheFireVisualsIfNeeded();
         CacheOriginalFireMaterials();
         RefreshVisuals();
+    }
+
+    private void OnDestroy()
+    {
+        ReleasePopulationReservation();
+        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn_FightFire);
     }
 
     private void OnValidate()
@@ -158,11 +180,100 @@ public class EnvironmentFireState : MonoBehaviour
         if (!IsOnFire)
             return;
 
+        StopFighting();
+
         IsOnFire = false;
         BurnTurnsRemaining = 0;
 
         RefreshVisuals();
         OnExtinguished?.Invoke(this);
+    }
+
+    // ------------------------------------------------------------------
+    // Firefighting
+    // ------------------------------------------------------------------
+
+    public bool TryBeginFighting()
+    {
+        if (!IsOnFire || IsFighting) return false;
+
+        if (extinguishCost != null && extinguishCost.Count > 0)
+            if (!ResourceDeduction.Deduct(extinguishCost)) return false;
+
+        if (populationRequired > 0)
+        {
+            var pop = PlayersPopulationManager.Instance;
+            if (pop == null || !pop.TryReservePopulation(populationRequired, out _populationReservationId))
+            {
+                RefundExtinguishCost();
+                return false;
+            }
+        }
+
+        IsFighting          = true;
+        FightTurnsRemaining = Mathf.Max(1, baseFightTurns);
+        LastRollResult      = 0;
+
+        TurnSystem.SubscribeToEndOfTurn(OnEndTurn_FightFire);
+        return true;
+    }
+
+    public void CancelFighting() => StopFighting();
+
+    public bool CanAffordFight()
+    {
+        if (extinguishCost == null || extinguishCost.Count == 0) return true;
+        return InventoryQuery.CanAfford(extinguishCost);
+    }
+
+    public bool HasEnoughPopulation()
+    {
+        if (populationRequired <= 0) return true;
+        var pop = PlayersPopulationManager.Instance;
+        return pop != null && pop.GetAvailableTaskPopulation() >= populationRequired;
+    }
+
+    private void OnEndTurn_FightFire()
+    {
+        if (!IsOnFire || !IsFighting) { StopFighting(); return; }
+
+        int lo = Mathf.Min(rollMin, rollMax);
+        int hi = Mathf.Max(rollMin, rollMax);
+        LastRollResult      = UnityEngine.Random.Range(lo, hi + 1);
+        FightTurnsRemaining = Mathf.Max(0, FightTurnsRemaining - LastRollResult);
+
+        OnFightProgress?.Invoke(this, LastRollResult, FightTurnsRemaining);
+
+        if (FightTurnsRemaining <= 0)
+            Extinguish();
+    }
+
+    private void StopFighting()
+    {
+        if (!IsFighting) return;
+        IsFighting = false;
+        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn_FightFire);
+        ReleasePopulationReservation();
+    }
+
+    private void ReleasePopulationReservation()
+    {
+        if (string.IsNullOrEmpty(_populationReservationId)) return;
+        PlayersPopulationManager.Instance?.ReleaseReservation(_populationReservationId);
+        _populationReservationId = null;
+    }
+
+    private void RefundExtinguishCost()
+    {
+        if (extinguishCost == null) return;
+        var inv = PlayerInventoryManager.Instance;
+        if (inv == null) return;
+        for (int i = 0; i < extinguishCost.Count; i++)
+        {
+            var c = extinguishCost[i];
+            if (c?.resource != null && c.amount > 0)
+                inv.TryAdd(c.resource, c.amount);
+        }
     }
 
     private void CacheFireVisualsIfNeeded()
