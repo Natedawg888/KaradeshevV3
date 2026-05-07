@@ -69,6 +69,20 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.CraftProduction(type, buildingName, planName);
     }
 
+    public (string title, string message) CraftCrafting(NotificationType type, string recipeName, string buildingName)
+    {
+        if (crafter == null)
+        {
+            return type switch
+            {
+                NotificationType.CraftingCompleted     => ("Crafting Complete",     $"{buildingName} finished crafting {recipeName}."),
+                NotificationType.CraftingFailedWeather => ("Crafting Interrupted",  $"Bad weather stopped {buildingName} from completing {recipeName}."),
+                _                                      => ("Crafting", buildingName),
+            };
+        }
+        return crafter.CraftCrafting(type, recipeName, buildingName);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         if (crafter == null)

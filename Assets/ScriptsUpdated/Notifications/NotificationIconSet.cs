@@ -35,6 +35,7 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.DiscoveryCompleted },
             new Entry { type = NotificationType.DiscoveryFailed    },
             new Entry { type = NotificationType.BuildingCompleted  },
+            new Entry { type = NotificationType.BuildingOnFire     },
             new Entry { type = NotificationType.BuildingDamaged    },
             new Entry { type = NotificationType.BuildingDestroyed  },
             new Entry { type = NotificationType.ResearchCompleted      },
@@ -44,6 +45,8 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.ProductionCompleted              },
             new Entry { type = NotificationType.ProductionPausedLackOfResources },
             new Entry { type = NotificationType.ProductionPausedLackOfWorkers   },
+            new Entry { type = NotificationType.CraftingCompleted               },
+            new Entry { type = NotificationType.CraftingFailedWeather           },
         };
     }
 }

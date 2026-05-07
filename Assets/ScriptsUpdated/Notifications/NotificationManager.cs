@@ -48,14 +48,41 @@ public class NotificationManager : MonoBehaviour
         AddNotificationInternal(data);
     }
 
-    public void AddProductionCompletedNotification(string title, string message, List<ProductionOutputEntry> outputs)
+    public void AddProductionCompletedNotification(string title, string message, List<ProductionOutputEntry> outputs, Vector3 worldPosition = default)
     {
-        var data = new NotificationData(NotificationType.ProductionCompleted, title, message, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0);
+        var data = worldPosition != Vector3.zero
+            ? new NotificationData(NotificationType.ProductionCompleted, title, message, worldPosition, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0)
+            : new NotificationData(NotificationType.ProductionCompleted, title, message, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0);
         data.producedOutputs = outputs;
         AddNotificationInternal(data);
     }
 
-    public void AddNotification(NotificationType type, string title, string message, UnityEngine.Vector3 worldPosition)
+    public void AddProductionPausedNotification(NotificationType type, string title, string message, Vector3 worldPosition = default)
+    {
+        var data = worldPosition != Vector3.zero
+            ? new NotificationData(type, title, message, worldPosition, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0)
+            : new NotificationData(type, title, message, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0);
+        AddNotificationInternal(data);
+    }
+
+    public void AddCraftingCompletedNotification(string title, string message, List<ProductionOutputEntry> outputs, Vector3 worldPosition = default)
+    {
+        var data = worldPosition != Vector3.zero
+            ? new NotificationData(NotificationType.CraftingCompleted, title, message, worldPosition, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0)
+            : new NotificationData(NotificationType.CraftingCompleted, title, message, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0);
+        data.producedOutputs = outputs;
+        AddNotificationInternal(data);
+    }
+
+    public void AddCraftingFailedNotification(string title, string message, Vector3 worldPosition = default)
+    {
+        var data = worldPosition != Vector3.zero
+            ? new NotificationData(NotificationType.CraftingFailedWeather, title, message, worldPosition, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0)
+            : new NotificationData(NotificationType.CraftingFailedWeather, title, message, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0);
+        AddNotificationInternal(data);
+    }
+
+    public void AddNotification(NotificationType type, string title, string message, Vector3 worldPosition)
     {
         AddNotificationInternal(new NotificationData(type, title, message, worldPosition, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0));
     }

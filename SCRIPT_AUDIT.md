@@ -942,6 +942,7 @@ Earthquake/
 | **Technology** | Technology | 3 | 🟢 Standard |
 | **Religion** | Religion | 8 | 🟢 Standard |
 | **Player** | Player/* | 8 | 🟢 Standard |
+| **Notifications** | Notifications | 9 | 🟢 Standard |
 | **UI** | Panels | 20+ | 🟢 Standard |
 
 ### By Dependency Level
@@ -967,6 +968,7 @@ Earthquake/
 **Tier 4 (UI/Polish - independent):**
 - PlayerInventoryManager
 - SeasonDisplay
+- NotificationManager
 - Various UI panels
 
 ---
@@ -1069,6 +1071,142 @@ Grid_Map/
   ├─ MapGenerator.cs
   ├─ EnvironmentPresetManager.cs
   └─ TileActivator.cs, TileScript.cs
+
+Notifications/
+  ├─ NotificationManager.cs         (Singleton — stores List<NotificationData>, fires events)
+  ├─ NotificationData.cs            (Data class + ProductionOutputEntry)
+  ├─ NotificationType.cs            (Enum — 16 types)
+  ├─ NotificationMessageCrafter.cs  (ScriptableObject — randomised templates, token replacement)
+  ├─ NotificationMessageCrafterManager.cs (Singleton MonoBehaviour wrapper for crafter SO)
+  ├─ NotificationButtonUI.cs        (HUD button, swaps sprite on unread)
+  ├─ NotificationPanelUI.cs         (Scroll panel, Open/Close/Toggle, rebuilds rows on change)
+  ├─ NotificationRowUI.cs           (Single row — see architecture note below)
+  └─ NotificationIconSet.cs         (ScriptableObject — type → sprite map)
+
+NotificationManager public API (as of May 7, 2026):
+  AddNotification(type, title, message)
+  AddNotification(type, title, message, bool showDeathIcon)
+  AddNotification(type, title, message, Vector3 worldPosition)
+  AddProductionCompletedNotification(title, message, List<ProductionOutputEntry>, Vector3 worldPosition = default)
+  AddProductionPausedNotification(type, title, message, Vector3 worldPosition = default)
+    └─ accepts ProductionPausedLackOfResources or ProductionPausedLackOfWorkers
+  AddCraftingCompletedNotification(title, message, List<ProductionOutputEntry>, Vector3 worldPosition = default)
+  AddCraftingFailedNotification(title, message, Vector3 worldPosition = default)
+    └─ fires CraftingFailedWeather type
+  Passing worldPosition sets hasTileTarget = true → goToButton shows in row UI
+
+NotificationMessageCrafterManager craft methods:
+  Craft(type, EnvironmentControl, int populationLost)     — gathering / discovery
+  CraftResearch(type, techName)
+  CraftBirth(type, motherSurname, bornAlive, motherDied)
+  CraftProduction(type, buildingName, planName)
+  CraftBuilding(type, buildingName)
+  CraftCrafting(type, recipeName, buildingName)           — tokens: {RECIPE}, {BUILDING}
+
+NotificationRowUI architecture (as of May 7, 2026):
+  Fields:
+    titleText, messageText, turnText   — TMP labels
+    deleteButton                       — removes notification from manager
+    typeIcon, deathIcon                — sprites from NotificationIconSet
+    iconSet                            — NotificationIconSet SO reference
+    goToButton                         — camera jump; shown when data.hasTileTarget is true
+    viewOutputButton (Button)          — shows/hides outputPanel; active for ProductionCompleted + CraftingCompleted
+    outputPanel (GameObject)           — ScrollView; toggled by viewOutputButton click
+    resourceItemPrefab (GameObject)    — ResourceEntryPrefab; spawned into outputContainer
+    outputContainer (Transform)        — Content transform inside outputPanel; spawn target
+
+  Prefab: Resources/UI_Assets/(New) Prefabs/Notifications/NotificationItemPrefab.prefab
+    NotificationItemPrefab (root, NotificationRowUI)
+    ├─ NotificationItemTitleCard
+    ├─ NotificationItemTurnTitleCard / NotificationItemTurnText
+    ├─ NotificationItemClear            (deleteButton)
+    ├─ NotificationItemDeath            (deathIcon)
+    ├─ NotificationItemGoToTile         (goToButton)
+    ├─ NotificationItemMessageScrollView
+    ├─ NotificationItemIconImage        (typeIcon)
+    └─ NotificationItemViewOutput       (viewOutputButton — Button; shown for ProductionCompleted + CraftingCompleted)
+        └─ ScrollView                   (outputPanel)
+            └─ Viewport → Content       (outputContainer)
+```
+
+---
+
+## 11. Changelog
+
+### May 7, 2026 — Notification System Refactor
+
+**Files changed:**
+- `ScriptsUpdated/Notifications/NotificationRowUI.cs`
+- `Resources/UI_Assets/(New) Prefabs/Notifications/NotificationItemPrefab.prefab`
+
+**What changed:**
+
+`NotificationRowUI` previously held a `SurveyPanelControl outputPanel` reference and delegated production output display to `SurveyPanelControl.ShowTutorialEntries()`. This created a hard dependency on the environment survey panel for unrelated notification UI.
+
+**Replaced with direct inline rendering:**
+- Removed `SurveyPanelControl outputPanel`
+- Added `GameObject resourceItemPrefab` — references `ResourceEntryPrefab` directly
+- Added `Transform outputContainer` — the ScrollView `Content` transform; items are `Instantiate`d here
+- Added `GameObject outputPanel` — the `ScrollView` GameObject; this is what the button shows/hides
+
+**Behaviour:**
+- `Populate()` hides `outputPanel` on init (collapsed by default)
+- `viewOutputButton` is only shown for `ProductionCompleted` notifications that have output entries
+- Clicking `viewOutputButton` toggles `outputPanel` (show/hide the whole ScrollView)
+- Items are spawned fresh into `outputContainer` on each expand; destroyed on collapse
+- `ResourceEntryUI.Initialize(ResourceSpawnEntry)` is called per entry — spoilage slider will show 0 remaining (no spoilage context in a notification)
+
+**Prefab additions:**
+- `NotificationItemViewOutput` child added to root — Image + Button (the viewOutputButton)
+- `ScrollView` child inside it — the outputPanel
+- `outputPanel`, `resourceItemPrefab`, `outputContainer` wired in the `NotificationRowUI` component
+- `resourceItemPrefab` → `ResourceEntryPrefab` (guid `cdbbc2fb23ca7f04a8cecfc1de1b47c7`)
+
+### May 7, 2026 — Crafting Notifications + Go-To Tile for Production & Crafting
+
+**Files changed:**
+- `ScriptsUpdated/Notifications/NotificationType.cs`
+- `ScriptsUpdated/Notifications/NotificationManager.cs`
+- `ScriptsUpdated/Notifications/NotificationMessageCrafter.cs`
+- `ScriptsUpdated/Notifications/NotificationMessageCrafterManager.cs`
+- `ScriptsUpdated/Notifications/NotificationIconSet.cs`
+- `ScriptsUpdated/Notifications/NotificationRowUI.cs`
+
+**New notification types added:**
+- `CraftingCompleted` — fires when a crafting recipe finishes; shows viewOutputButton with crafted items
+- `CraftingFailedWeather` — fires when bad weather interrupts a craft; no output list
+
+**New `NotificationManager` API:**
+- `AddCraftingCompletedNotification(title, message, List<ProductionOutputEntry>, Vector3 worldPosition = default)`
+- `AddCraftingFailedNotification(title, message, Vector3 worldPosition = default)`
+- `AddProductionPausedNotification(type, title, message, Vector3 worldPosition = default)` — dedicated helper for the two paused types
+- `AddProductionCompletedNotification` updated with optional `worldPosition` parameter
+
+**Go-To Tile button extended:**  
+All four production/crafting event types now support the go-to tile button. The button activates automatically when `worldPosition` is passed to the notification (sets `hasTileTarget = true`). Pass the building's `transform.position` at the call site. No row UI change was needed — `goToButton` already gates on `hasTileTarget`.
+
+**`NotificationMessageCrafter` / `NotificationMessageCrafterManager`:**
+- New `CraftCrafting(type, recipeName, buildingName)` method added to both
+- Tokens: `{RECIPE}`, `{BUILDING}`
+- Template sets added for both `CraftingCompleted` and `CraftingFailedWeather` in `PopulateDefaults()`
+
+**`NotificationRowUI`:**
+- `viewOutputButton` visibility condition extended: now also active for `CraftingCompleted` (with non-empty `producedOutputs`)
+
+**`NotificationIconSet`:**
+- Two new entries added to `Reset()`: `CraftingCompleted`, `CraftingFailedWeather` — sprites unassigned, assign in Inspector
+
+**Wiring crafting notifications in `PlayerCraftingManager`:**
+```csharp
+// On completion (inside ProcessCompletions, after inventory add):
+var crafter = NotificationMessageCrafterManager.Instance;
+var (title, msg) = crafter.CraftCrafting(NotificationType.CraftingCompleted, recipeName, buildingName);
+var outputs = /* convert cc.payout (List<ResourceAmount>) to List<ProductionOutputEntry> */;
+NotificationManager.Instance?.AddCraftingCompletedNotification(title, msg, outputs, buildingPosition);
+
+// On weather failure:
+var (title, msg) = crafter.CraftCrafting(NotificationType.CraftingFailedWeather, recipeName, buildingName);
+NotificationManager.Instance?.AddCraftingFailedNotification(title, msg, buildingPosition);
 ```
 
 ---
@@ -1076,5 +1214,5 @@ Grid_Map/
 **End of Report**
 
 *Status: Ready for Ruflo Integration*  
-*Last Updated: May 6, 2026*  
+*Last Updated: May 7, 2026*  
 *Audit Confidence: High (comprehensive read-only scan)*

@@ -19,7 +19,9 @@ public class NotificationRowUI : MonoBehaviour
     [SerializeField] private NotificationIconSet iconSet;
     [SerializeField] private Button goToButton;
     [SerializeField] private Button viewOutputButton;
-    [SerializeField] private SurveyPanelControl outputPanel;
+    [SerializeField] private GameObject outputPanel;
+    [SerializeField] private GameObject resourceItemPrefab;
+    [SerializeField] private Transform outputContainer;
 
     private static readonly Color UnreadColor = new Color(0.2f, 0.8f, 1f, 1f);
     private static readonly Color ReadColor   = new Color(0.35f, 0.35f, 0.35f, 1f);
@@ -73,7 +75,7 @@ public class NotificationRowUI : MonoBehaviour
 
         if (viewOutputButton != null)
         {
-            bool show = data.type == NotificationType.ProductionCompleted
+            bool show = (data.type == NotificationType.ProductionCompleted || data.type == NotificationType.CraftingCompleted)
                         && data.producedOutputs != null
                         && data.producedOutputs.Count > 0;
             viewOutputButton.gameObject.SetActive(show);
@@ -83,6 +85,9 @@ public class NotificationRowUI : MonoBehaviour
                 viewOutputButton.onClick.AddListener(OnViewOutputClicked);
             }
         }
+
+        if (outputPanel != null)
+            outputPanel.SetActive(false);
     }
 
     private void OnDeleteClicked()
@@ -101,20 +106,28 @@ public class NotificationRowUI : MonoBehaviour
 
     private void OnViewOutputClicked()
     {
-        if (outputPanel == null || _data?.producedOutputs == null) return;
+        if (outputPanel == null || outputContainer == null || resourceItemPrefab == null || _data?.producedOutputs == null) return;
 
-        var entries = new List<SurveyPanelControl.TutorialSurveyEntry>(_data.producedOutputs.Count);
+        if (outputPanel.activeSelf)
+        {
+            outputPanel.SetActive(false);
+            return;
+        }
+
+        for (int i = outputContainer.childCount - 1; i >= 0; i--)
+            Destroy(outputContainer.GetChild(i).gameObject);
+
         for (int i = 0; i < _data.producedOutputs.Count; i++)
         {
             var e = _data.producedOutputs[i];
             if (e?.resource == null || e.amount <= 0) continue;
-            entries.Add(new SurveyPanelControl.TutorialSurveyEntry
-            {
-                definition = e.resource,
-                amount     = e.amount,
-            });
+
+            var go = Instantiate(resourceItemPrefab, outputContainer);
+            var ui = go.GetComponent<ResourceEntryUI>();
+            if (ui != null)
+                ui.Initialize(new ResourceSpawnEntry { definition = e.resource, amount = e.amount });
         }
 
-        outputPanel.ShowTutorialEntries(entries);
+        outputPanel.SetActive(true);
     }
 }

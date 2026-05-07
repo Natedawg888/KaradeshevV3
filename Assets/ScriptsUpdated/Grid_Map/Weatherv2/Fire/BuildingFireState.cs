@@ -66,6 +66,7 @@ public class BuildingFireState : MonoBehaviour
 
         RefreshVisuals();
         OnIgnited?.Invoke(this);
+        PostFireNotification();
 
         return true;
     }
@@ -152,5 +153,26 @@ public class BuildingFireState : MonoBehaviour
             if (fireVisualObjects[i] != null)
                 fireVisualObjects[i].SetActive(IsOnFire);
         }
+    }
+
+    private void PostFireNotification()
+    {
+        if (NotificationManager.Instance == null) return;
+
+        var building = GetComponent<BuildingControl>();
+        string buildingName = building != null && !string.IsNullOrWhiteSpace(building.buildingName)
+            ? building.buildingName
+            : gameObject.name;
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftBuilding(NotificationType.BuildingOnFire, buildingName);
+        else
+        {
+            title   = "Building on Fire!";
+            message = $"{buildingName} is on fire!";
+        }
+
+        NotificationManager.Instance.AddNotification(NotificationType.BuildingOnFire, title, message, transform.position);
     }
 }

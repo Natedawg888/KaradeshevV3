@@ -8,6 +8,7 @@ public enum NotificationType
     DiscoveryCompleted,
     DiscoveryFailed,
     BuildingCompleted,
+    BuildingOnFire,
     BuildingDamaged,
     BuildingDestroyed,
     ResearchCompleted,
@@ -19,5 +20,6 @@ public enum NotificationType
     ProductionPausedLackOfResources,
     ProductionPausedLackOfWorkers,
 
-    // Future: CraftingCompleted, ProductionCompleted, etc.
+    CraftingCompleted,
+    CraftingFailedWeather,
 }

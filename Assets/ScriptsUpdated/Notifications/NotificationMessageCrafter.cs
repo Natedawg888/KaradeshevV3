@@ -92,6 +92,26 @@ public class NotificationMessageCrafter : ScriptableObject
         return (title, message);
     }
 
+    public (string title, string message) CraftCrafting(NotificationType type, string recipeName, string buildingName)
+    {
+        var set = GetSuccessSet(type);
+        if (set == null)
+        {
+            return type switch
+            {
+                NotificationType.CraftingCompleted    => ("Crafting Complete",      $"{buildingName} finished crafting {recipeName}."),
+                NotificationType.CraftingFailedWeather => ("Crafting Interrupted",  $"Bad weather stopped {buildingName} from completing {recipeName}."),
+                _                                     => ("Crafting", buildingName),
+            };
+        }
+
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{RECIPE}",   recipeName)
+            .Replace("{BUILDING}", buildingName);
+        return (title, message);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         var set = GetSuccessSet(type);
@@ -99,6 +119,7 @@ public class NotificationMessageCrafter : ScriptableObject
         {
             return type switch
             {
+                NotificationType.BuildingOnFire    => ("Building on Fire",   $"{buildingName} is on fire!"),
                 NotificationType.BuildingDamaged   => ("Building Damaged",   $"{buildingName} has been damaged."),
                 NotificationType.BuildingDestroyed => ("Building Destroyed", $"{buildingName} has been destroyed."),
                 _                                  => ("Construction Complete", $"{buildingName} has been constructed."),
@@ -234,6 +255,18 @@ public class NotificationMessageCrafter : ScriptableObject
             },
             new SuccessTemplateSet
             {
+                type     = NotificationType.BuildingOnFire,
+                titles   = new[] { "Building on Fire!", "Fire Detected!", "Structure Ablaze" },
+                messages = new[]
+                {
+                    "{BUILDING} is on fire — act quickly!",
+                    "Fire has broken out at {BUILDING}.",
+                    "{BUILDING} is burning. Send help before it's too late.",
+                    "Flames have engulfed {BUILDING}.",
+                },
+            },
+            new SuccessTemplateSet
+            {
                 type     = NotificationType.BuildingDamaged,
                 titles   = new[] { "Building Damaged", "Structure Damaged", "Damage Reported" },
                 messages = new[]
@@ -334,6 +367,30 @@ public class NotificationMessageCrafter : ScriptableObject
                     "{BUILDING} has stopped {PLAN} — not enough workers.",
                     "Insufficient workers to staff {PLAN} at {BUILDING}.",
                     "{BUILDING} is idle — {PLAN} needs more hands.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.CraftingCompleted,
+                titles   = new[] { "Crafting Complete", "Item Ready", "Craft Successful" },
+                messages = new[]
+                {
+                    "{BUILDING} finished crafting {RECIPE}.",
+                    "Your crafters completed {RECIPE} at {BUILDING}.",
+                    "A batch of {RECIPE} is ready at {BUILDING}.",
+                    "{RECIPE} has been crafted — collect it from {BUILDING}.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.CraftingFailedWeather,
+                titles   = new[] { "Crafting Interrupted", "Weather Halts Work", "Storm Disrupts Craft" },
+                messages = new[]
+                {
+                    "Bad weather forced {BUILDING} to stop work on {RECIPE}.",
+                    "Harsh conditions at {BUILDING} interrupted {RECIPE}.",
+                    "The weather has disrupted crafting of {RECIPE} at {BUILDING}.",
+                    "{BUILDING} could not complete {RECIPE} — weather conditions too severe.",
                 },
             },
         };
