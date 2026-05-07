@@ -24,6 +24,12 @@ public class BuildingFireState : MonoBehaviour
     public int rollMin = -1;
     public int rollMax = 3;
 
+    [Header("Casualty Risk")]
+    [Tooltip("Base chance per turn of losing a worker at full fire strength.")]
+    [Range(0f, 1f)] public float baseCasualtyChance = 0.30f;
+    [Tooltip("How much the casualty chance drops per safe turn (no casualty).")]
+    [Range(0f, 1f)] public float casualtyReductionPerSafeRoll = 0.05f;
+
     [Header("Fire Visuals")]
     [SerializeField] private GameObject[] fireVisualObjects;
     [SerializeField] private bool autoFindFireChildByName = true;
@@ -36,16 +42,19 @@ public class BuildingFireState : MonoBehaviour
     public int  BaseBurnTurns   { get; private set; }
 
     // --- fight state ---
-    public bool IsFighting          { get; private set; }
-    public int  FightTurnsRemaining { get; private set; }
-    public int  LastRollResult      { get; private set; }
+    public bool  IsFighting            { get; private set; }
+    public int   FightTurnsRemaining   { get; private set; }
+    public int   LastRollResult        { get; private set; }
+    public int   CasualtiesSoFar       { get; private set; }
+    public float CurrentCasualtyChance { get; private set; }
 
     // --- events ---
     public event Action<BuildingFireState>           OnIgnited;
     public event Action<BuildingFireState, int>      OnFireDamageStep;
     public event Action<BuildingFireState>           OnExtinguished;
-    // roll result + new fight turns remaining
     public event Action<BuildingFireState, int, int> OnFightProgress;
+    // state, total casualties so far
+    public event Action<BuildingFireState, int>      OnFightCasualty;
 
     private string _populationReservationId;
 
@@ -181,9 +190,11 @@ public class BuildingFireState : MonoBehaviour
             }
         }
 
-        IsFighting          = true;
-        FightTurnsRemaining = Mathf.Max(1, baseFightTurns);
-        LastRollResult      = 0;
+        IsFighting            = true;
+        FightTurnsRemaining   = Mathf.Max(1, baseFightTurns);
+        LastRollResult        = 0;
+        CasualtiesSoFar       = 0;
+        CurrentCasualtyChance = baseCasualtyChance;
 
         TurnSystem.SubscribeToEndOfTurn(OnEndTurn_FightFire);
         return true;
@@ -197,16 +208,36 @@ public class BuildingFireState : MonoBehaviour
 
     private void OnEndTurn_FightFire()
     {
-        if (!IsOnFire || !IsFighting)
-        {
-            StopFighting();
-            return;
-        }
+        if (!IsOnFire || !IsFighting) { StopFighting(); return; }
 
+        // Progress roll
         int clampedMin = Mathf.Min(rollMin, rollMax);
         int clampedMax = Mathf.Max(rollMin, rollMax);
-        LastRollResult       = UnityEngine.Random.Range(clampedMin, clampedMax + 1);
-        FightTurnsRemaining  = Mathf.Max(0, FightTurnsRemaining - LastRollResult);
+        LastRollResult      = UnityEngine.Random.Range(clampedMin, clampedMax + 1);
+        FightTurnsRemaining = Mathf.Max(0, FightTurnsRemaining - LastRollResult);
+
+        // Casualty roll — risk scales with remaining fire strength
+        float fireStrength  = BaseBurnTurns > 0 ? (float)BurnTurnsRemaining / BaseBurnTurns : 0f;
+        float effectiveRisk = Mathf.Clamp01(CurrentCasualtyChance * fireStrength);
+
+        if (UnityEngine.Random.value < effectiveRisk)
+        {
+            CasualtiesSoFar++;
+            OnFightCasualty?.Invoke(this, CasualtiesSoFar);
+
+            if (CasualtiesSoFar >= populationRequired)
+            {
+                // All workers lost — fight collapses
+                OnFightProgress?.Invoke(this, LastRollResult, FightTurnsRemaining);
+                StopFighting();
+                return;
+            }
+        }
+        else
+        {
+            // Safe roll — reduce future risk as fight progresses
+            CurrentCasualtyChance = Mathf.Max(0f, CurrentCasualtyChance - casualtyReductionPerSafeRoll);
+        }
 
         OnFightProgress?.Invoke(this, LastRollResult, FightTurnsRemaining);
 

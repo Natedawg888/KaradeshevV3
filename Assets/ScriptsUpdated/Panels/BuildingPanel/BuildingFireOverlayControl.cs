@@ -28,6 +28,8 @@ public class BuildingFireOverlayControl : MonoBehaviour
     [Header("Fight Progress")]
     public GameObject progressSection;
     public Slider fightProgressSlider;
+    public TMP_Text casualtyText;
+    public TMP_Text riskText;
 
     [Header("Buttons")]
     public Button fightButton;
@@ -163,8 +165,22 @@ public class BuildingFireOverlayControl : MonoBehaviour
             fightProgressSlider.interactable = false;
         }
 
+        int active = Mathf.Max(0, _fireState.populationRequired - _fireState.CasualtiesSoFar);
         if (populationText != null)
-            populationText.text = $"Workers fighting: {_fireState.populationRequired}";
+            populationText.text = $"Workers fighting: {active} / {_fireState.populationRequired}";
+
+        if (casualtyText != null)
+        {
+            casualtyText.text  = $"Lost: {_fireState.CasualtiesSoFar}";
+            casualtyText.color = _fireState.CasualtiesSoFar > 0 ? Color.red : Color.white;
+        }
+
+        if (riskText != null)
+        {
+            int riskPct = Mathf.RoundToInt(_fireState.CurrentCasualtyChance * 100f);
+            riskText.text  = $"Risk: {riskPct}%";
+            riskText.color = Color.Lerp(Color.green, Color.red, _fireState.CurrentCasualtyChance);
+        }
     }
 
     private void RefreshFightButtonState()
