@@ -1352,6 +1352,167 @@ Events handled:
 3. Add `BuildingFireWorldIcon` to building's world canvas child; wire `fireIcon`, `fightTimerRoot`, `fightTimerUI`
 4. Set `extinguishCost`, `populationRequired`, `baseFightTurns`, `rollMin`/`rollMax` on each `BuildingFireState`
 
+### May 7, 2026 — Complete Fire System (Buildings + Tiles)
+
+All fire-related work is committed and pushed. Below is the consolidated reference for the full system.
+
+---
+
+#### Fire State Components
+
+Both `BuildingFireState` and `EnvironmentFireState` share an identical fight mechanic:
+
+```
+Designer fields:
+  extinguishCost (List<ResourceCost>)      — resources spent to start fighting
+  populationRequired (int)                 — workers reserved for the duration
+  baseFightTurns (int)                     — starting fight turn estimate
+  rollMin / rollMax (int)                  — progress roll range per turn
+  baseCasualtyChance (float 0-1)           — base worker risk at full fire strength (default 0.30)
+  casualtyReductionPerSafeRoll (float 0-1) — risk drop per safe turn (default 0.05)
+
+Runtime state:
+  IsFighting, FightTurnsRemaining, LastRollResult
+  CasualtiesSoFar, CurrentCasualtyChance
+
+Events:
+  OnIgnited(state)
+  OnExtinguished(state)
+  OnFightProgress(state, rollResult, turnsRemaining)
+  OnFightCasualty(state, totalCasualties)
+  OnFireDamageStep(state, damage)           — BuildingFireState only
+
+TryBeginFighting():
+  1. ResourceDeduction.Deduct(extinguishCost) — refunds on population failure
+  2. PlayersPopulationManager.TryReservePopulation(populationRequired)
+  3. Subscribes TurnSystem.onTurnEnd → OnEndTurn_FightFire()
+  4. Resets CasualtiesSoFar=0, CurrentCasualtyChance=baseCasualtyChance
+
+OnEndTurn_FightFire() — per-turn logic:
+  1. Progress roll: Random.Range(rollMin, rollMax+1) → FightTurnsRemaining -= roll
+  2. Casualty roll:
+     fireStrength = BurnTurnsRemaining / BaseBurnTurns
+     effectiveRisk = CurrentCasualtyChance * fireStrength
+     — casualty: CasualtiesSoFar++, OnFightCasualty fired
+       if CasualtiesSoFar >= populationRequired → PostFightOutcomeNotification(false) → StopFighting()
+     — safe: CurrentCasualtyChance -= casualtyReductionPerSafeRoll (floor 0)
+  3. OnFightProgress fired
+  4. if FightTurnsRemaining <= 0 → PostFightOutcomeNotification(true) → Extinguish()
+
+PostFightOutcomeNotification(bool succeeded):
+  — succeeded: FireFightSucceeded notification with casualty count
+  — failed:    FireFightFailed notification (all workers lost)
+  — uses transform.position → Go-To Tile button activates in row UI
+
+CancelFighting(): releases population reservation, unsubscribes from TurnSystem
+Extinguish(): calls StopFighting() before clearing fire state
+
+BuildingFireState extras:
+  — PostFireNotification() in TryIgnite() → BuildingOnFire notification
+  — Auto-binds BuildingFireWorldIcon in Awake() via GetComponentInChildren
+```
+
+---
+
+#### Overlay Panels
+
+**`BuildingFireOverlayControl`** — blocks building panel while burning:
+```
+Phase 1 (idle):
+  costSection       — BuildingCostEntry items (extinguishCost)
+  populationText    — workers needed + available count
+  turnsEstimateText — ~baseFightTurns estimate
+  fightButton       — gated on CanAffordFight() + HasEnoughPopulation()
+
+Phase 2 (fighting):
+  fightProgressSlider — value = baseFightTurns - FightTurnsRemaining (fills on progress)
+  populationText      — "Workers fighting: active / total"
+  casualtyText        — "Lost: N" (red when > 0)
+  riskText            — "Risk: N%" (green → red gradient)
+  cancelButton        — CancelFighting() → returns to Phase 1
+
+Auto: OnFightProgress → RefreshFightProgress() | OnExtinguished → Hide()
+```
+
+**`TileFireOverlayControl`** — identical to above but typed to `EnvironmentFireState`.
+Only shown on discovered tiles. Undiscovered tiles use a plain `fireBlockOverlay` (no interaction).
+
+---
+
+#### World Canvas Icons
+
+**`BuildingFireWorldIcon`** — attach to building world canvas:
+```
+fireIcon (GameObject)    — shown while IsOnFire
+fightTimerUI (TimerUI)   — radial fill, SetState(baseFightTurns, FightTurnsRemaining)
+fightTimerRoot           — parent of fightTimerUI, only shown while IsFighting
+Auto-bound from BuildingFireState.Awake() via GetComponentInChildren
+```
+
+**`EnvironmentControl`** — fire UI added directly alongside discovery/survey/gathering timers:
+```
+fireIcon (GameObject)    — shown on OnIgnited, hidden on OnExtinguished
+fireTimerUI (TimerUI)    — shown + updated on OnFightProgress, hidden on OnExtinguished
+Auto-find: "FireIcon" and "FireFightIconTimer" children by name in OnValidate()
+```
+
+---
+
+#### Panel Wiring
+
+**`BuildingPanelControl`:**
+- `fireOverlayPanel (BuildingFireOverlayControl)` in Mode.cs
+- Caches `currentFireState`; subscribes `OnIgnited` → `HandleFireIgnited`
+- Shows overlay immediately if burning on `Show()`; hides + unsubscribes on `Hide()`
+
+**`UndiscoveredTilePanelControl`:**
+- `fireBlockOverlay (GameObject)` — shown when `EnvironmentFireState.IsOnFire`
+- Subscribes `OnIgnited` / `OnExtinguished` reactively while panel is open
+- No fight interaction — tile is undiscovered
+
+**`DiscoveredTilePanelControl`:**
+- `fireOverlayPanel (TileFireOverlayControl)` — full fight UI
+- Shows immediately if burning on `Show()`; `HandleFireIgnited` for reactive show
+- `Hide()` closes overlay and unsubscribes
+
+---
+
+#### Notification Types Added (Fire System)
+
+| Type | Fired by | Notes |
+|------|----------|-------|
+| `BuildingOnFire` | `BuildingFireState.TryIgnite()` | Includes world position → Go-To Tile |
+| `FireFightSucceeded` | `PostFightOutcomeNotification(true)` | Includes casualty count |
+| `FireFightFailed` | `PostFightOutcomeNotification(false)` | All workers lost |
+
+**`NotificationMessageCrafterManager.CraftFireFight(type, targetName, casualties)`**
+- Tokens: `{NAME}`, `{CASUALTIES}`
+- Success handles zero-casualty case separately
+- Used by both `BuildingFireState` and `EnvironmentFireState`
+
+---
+
+#### Inspector Setup Checklist
+
+**Per building with `BuildingFireState`:**
+- Set `extinguishCost`, `populationRequired`, `baseFightTurns`, `rollMin`, `rollMax`
+- Set `baseCasualtyChance`, `casualtyReductionPerSafeRoll`
+- Add `BuildingFireWorldIcon` child to world canvas; wire `fireIcon`, `fightTimerRoot`, `fightTimerUI`
+
+**`BuildingPanelControl` scene object:**
+- Add `BuildingFireOverlayControl` child panel; wire all fields
+- Assign to `fireOverlayPanel`
+
+**Environment tiles (`EnvironmentControl` / `EnvironmentFireState`):**
+- Set fight fields on `EnvironmentFireState`
+- Add `"FireIcon"` and `"FireFightIconTimer"` children to the environment canvas (auto-found by name)
+
+**Tile panels:**
+- `UndiscoveredTilePanelControl` → assign `fireBlockOverlay`
+- `DiscoveredTilePanelControl` → assign `fireOverlayPanel` (`TileFireOverlayControl`)
+
+**`NotificationIconSet` SO:** assign sprites for `BuildingOnFire`, `FireFightSucceeded`, `FireFightFailed`
+
 ---
 
 **End of Report**
