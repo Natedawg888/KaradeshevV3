@@ -41,6 +41,20 @@ public class NotificationManager : MonoBehaviour
         AddNotificationInternal(new NotificationData(type, title, message, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0));
     }
 
+    public void AddNotification(NotificationType type, string title, string message, bool showDeathIcon)
+    {
+        var data = new NotificationData(type, title, message, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0);
+        data.showDeathIcon = showDeathIcon;
+        AddNotificationInternal(data);
+    }
+
+    public void AddProductionCompletedNotification(string title, string message, List<ProductionOutputEntry> outputs)
+    {
+        var data = new NotificationData(NotificationType.ProductionCompleted, title, message, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0);
+        data.producedOutputs = outputs;
+        AddNotificationInternal(data);
+    }
+
     public void AddNotification(NotificationType type, string title, string message, UnityEngine.Vector3 worldPosition)
     {
         AddNotificationInternal(new NotificationData(type, title, message, worldPosition, TurnSystem.Instance != null ? TurnSystem.CurrentTurn : 0));

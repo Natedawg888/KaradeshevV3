@@ -73,6 +73,9 @@ public class ProductionBuildingControl : MonoBehaviour
     [SerializeField] private string _populationReservationId;
     [SerializeField] private int _populationReservedAmount;
 
+    private BuildingControl _buildingControl;
+    private int _pendingWorkerDeathsForNotification;
+
     public bool IsProducing =>
         _activePlan != null &&
         _turnsLeftInCycle > 0 &&
@@ -186,6 +189,8 @@ public class ProductionBuildingControl : MonoBehaviour
 
         if (_tile == null)
             _tile = GetComponentInParent<TileControl>();
+
+        _buildingControl = GetComponent<BuildingControl>() ?? GetComponentInParent<BuildingControl>();
     }
 
     private void Start()
@@ -467,6 +472,7 @@ public class ProductionBuildingControl : MonoBehaviour
         _cooldownTurnsLeft = 0;
         _completedCyclesSinceCooldown = 0;
         _pendingCompletedCycleOutputMultiplier = 1f;
+        _pendingWorkerDeathsForNotification = 0;
 
         if (!EnsurePopulationReservation(_activePlan))
         {
@@ -509,6 +515,7 @@ public class ProductionBuildingControl : MonoBehaviour
         _cooldownTurnsLeft = 0;
         _completedCyclesSinceCooldown = 0;
         _pendingCompletedCycleOutputMultiplier = 1f;
+        _pendingWorkerDeathsForNotification = 0;
 
         HideRuntimeUI();
         DestroyRuntimePlanInstance();
@@ -547,6 +554,7 @@ public class ProductionBuildingControl : MonoBehaviour
         if (_activePlan == null)
             return;
 
+        bool wasFresh = _pauseReason == ProductionPauseReason.None;
         _pauseReason = reason;
 
         if (!keepCurrentTurns)
@@ -560,6 +568,9 @@ public class ProductionBuildingControl : MonoBehaviour
             productionStoppedIcon.SetActive(true);
 
         Debug.Log($"[ProductionBuildingControl] Production paused on {name}: {logReason}");
+
+        if (wasFresh && reason == ProductionPauseReason.MissingResources)
+            PostProductionPausedNotification(NotificationType.ProductionPausedLackOfResources, false);
     }
 
     public void TickProductionTurn()
@@ -638,7 +649,9 @@ public class ProductionBuildingControl : MonoBehaviour
             return;
         }
 
+        float completedMultiplier = _pendingCompletedCycleOutputMultiplier;
         _pendingCompletedCycleOutputMultiplier = 1f;
+        PostProductionCompletedNotification(completedMultiplier);
 
         if (_activePlan == null || IsPaused)
             return;
@@ -797,6 +810,7 @@ public class ProductionBuildingControl : MonoBehaviour
                 return false;
             }
 
+            PostProductionCompletedNotification(1f);
             _completedCyclesSinceCooldown++;
 
             if (_activePlan == null || IsPaused)
@@ -942,6 +956,7 @@ public class ProductionBuildingControl : MonoBehaviour
         }
 
         Debug.Log($"[ProductionBuildingControl] Cancelling {_activePlan.productionID} on {name} because reserved workers could not be backfilled.");
+        PostProductionPausedNotification(NotificationType.ProductionPausedLackOfWorkers, _pendingWorkerDeathsForNotification > 0);
         StopProduction();
         RefreshPopulationUI();
         return false;
@@ -1158,6 +1173,8 @@ public class ProductionBuildingControl : MonoBehaviour
 
         if (actualDeaths > 0)
         {
+            _pendingWorkerDeathsForNotification += actualDeaths;
+
             Debug.Log(
                 $"[ProductionBuildingControl] {name} lost {actualDeaths} worker(s) " +
                 $"from production plan {_activePlan.productionID}."
@@ -2074,5 +2091,81 @@ public class ProductionBuildingControl : MonoBehaviour
     public float GetCompletedCycleOutputMultiplier()
     {
         return Mathf.Clamp(_pendingCompletedCycleOutputMultiplier, productionMinimumOutputMultiplier, 1f);
+    }
+
+    // ----------------- NOTIFICATIONS -----------------
+
+    private void PostProductionCompletedNotification(float outputMultiplier)
+    {
+        if (NotificationManager.Instance == null || _activePlan == null) return;
+
+        string buildingDisplayName = GetBuildingDisplayName();
+        string planName = !string.IsNullOrWhiteSpace(_activePlan.productionID)
+            ? _activePlan.productionID
+            : "production";
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftProduction(
+                NotificationType.ProductionCompleted, buildingDisplayName, planName);
+        else
+            (title, message) = ("Production Complete", $"{buildingDisplayName} finished a cycle of {planName}.");
+
+        NotificationManager.Instance.AddProductionCompletedNotification(
+            title, message, BuildOutputList(Mathf.Max(0f, outputMultiplier)));
+    }
+
+    private List<ProductionOutputEntry> BuildOutputList(float multiplier)
+    {
+        if (_activePlan == null) return null;
+
+        var active = _activePlan.GetActiveOutputs();
+        if (active == null || active.Count == 0) return null;
+
+        var list = new List<ProductionOutputEntry>(active.Count);
+        for (int i = 0; i < active.Count; i++)
+        {
+            var item = active[i];
+            if (item?.resource == null || item.amountPerCycle <= 0) continue;
+            int produced = multiplier >= 0.999f
+                ? item.amountPerCycle
+                : Mathf.Max(1, Mathf.RoundToInt(item.amountPerCycle * multiplier));
+            list.Add(new ProductionOutputEntry { resource = item.resource, amount = produced });
+        }
+        return list.Count > 0 ? list : null;
+    }
+
+    private string GetBuildingDisplayName()
+    {
+        if (_buildingControl != null && !string.IsNullOrWhiteSpace(_buildingControl.buildingName))
+            return _buildingControl.buildingName;
+        return name;
+    }
+
+    private void PostProductionPausedNotification(NotificationType type, bool showDeathIcon)
+    {
+        if (NotificationManager.Instance == null || _activePlan == null) return;
+
+        string buildingDisplayName = GetBuildingDisplayName();
+        string planName = !string.IsNullOrWhiteSpace(_activePlan.productionID)
+            ? _activePlan.productionID
+            : "production";
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftProduction(type, buildingDisplayName, planName);
+        else
+        {
+            (title, message) = type switch
+            {
+                NotificationType.ProductionPausedLackOfResources =>
+                    ("Production Paused",  $"{buildingDisplayName} paused — not enough resources for {planName}."),
+                NotificationType.ProductionPausedLackOfWorkers =>
+                    ("Production Stopped", $"{buildingDisplayName} stopped — not enough workers for {planName}."),
+                _ => ("Production Issue", buildingDisplayName),
+            };
+        }
+
+        NotificationManager.Instance.AddNotification(type, title, message, showDeathIcon);
     }
 }

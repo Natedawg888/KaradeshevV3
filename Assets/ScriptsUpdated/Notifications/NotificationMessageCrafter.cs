@@ -57,9 +57,8 @@ public class NotificationMessageCrafter : ScriptableObject
         {
             return type switch
             {
-                NotificationType.BirthSucceeded       => ("A Child is Born",        $"The {motherSurname} family welcomes {bornAlive} newborn(s)."),
-                NotificationType.BirthFailedWithDeath => ("Birth Failed — Life Lost", $"A mother of the {motherSurname} family died during pregnancy."),
-                _                                     => ("Pregnancy Lost",           $"A pregnancy in the {motherSurname} family has failed."),
+                NotificationType.BirthSucceeded => ("A Child is Born", $"The {motherSurname} family welcomes {bornAlive} newborn(s)."),
+                _                               => ("Pregnancy Lost",   $"A pregnancy in the {motherSurname} family has failed."),
             };
         }
 
@@ -67,6 +66,29 @@ public class NotificationMessageCrafter : ScriptableObject
         string message = Pick(set.messages)
             .Replace("{MOTHER}", motherSurname)
             .Replace("{COUNT}",  bornAlive.ToString());
+        return (title, message);
+    }
+
+    public (string title, string message) CraftProduction(NotificationType type, string buildingName, string planName)
+    {
+        var set = GetSuccessSet(type);
+        if (set == null)
+        {
+            return type switch
+            {
+                NotificationType.ProductionCompleted =>
+                    ("Production Complete", $"{buildingName} has finished a cycle of {planName}."),
+                NotificationType.ProductionPausedLackOfResources =>
+                    ("Production Paused",  $"{buildingName} paused — not enough resources to run {planName}."),
+                NotificationType.ProductionPausedLackOfWorkers =>
+                    ("Production Stopped", $"{buildingName} stopped — not enough workers available for {planName}."),
+                _ => ("Production Issue", buildingName),
+            };
+        }
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{BUILDING}", buildingName)
+            .Replace("{PLAN}",     planName);
         return (title, message);
     }
 
@@ -283,13 +305,35 @@ public class NotificationMessageCrafter : ScriptableObject
             },
             new SuccessTemplateSet
             {
-                type     = NotificationType.BirthFailedWithDeath,
-                titles   = new[] { "Mother Lost", "Birth Failed — Life Lost", "A Tragic End" },
+                type     = NotificationType.ProductionCompleted,
+                titles   = new[] { "Production Complete", "Cycle Finished", "Output Ready" },
                 messages = new[]
                 {
-                    "A mother of the {MOTHER} family died during pregnancy.",
-                    "The {MOTHER} family lost a mother to pregnancy complications.",
-                    "A failed birth has claimed the life of a mother in the {MOTHER} family.",
+                    "{BUILDING} has completed a cycle of {PLAN}.",
+                    "A {PLAN} cycle at {BUILDING} is done — output is ready.",
+                    "{BUILDING} finished producing {PLAN}.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.ProductionPausedLackOfResources,
+                titles   = new[] { "Production Paused", "Resources Depleted", "Work Halted" },
+                messages = new[]
+                {
+                    "{BUILDING} has paused {PLAN} — resources ran out.",
+                    "Not enough resources to continue {PLAN} at {BUILDING}.",
+                    "{BUILDING} is idle — {PLAN} requires more supplies.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.ProductionPausedLackOfWorkers,
+                titles   = new[] { "Production Stopped", "Workers Unavailable", "Workforce Shortage" },
+                messages = new[]
+                {
+                    "{BUILDING} has stopped {PLAN} — not enough workers.",
+                    "Insufficient workers to staff {PLAN} at {BUILDING}.",
+                    "{BUILDING} is idle — {PLAN} needs more hands.",
                 },
             },
         };

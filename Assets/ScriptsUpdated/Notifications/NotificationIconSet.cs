@@ -16,6 +16,7 @@ public class NotificationIconSet : ScriptableObject
     }
 
     [SerializeField] private Entry[] entries;
+    [SerializeField] public Sprite deathIcon;
 
     public Sprite GetIcon(NotificationType type)
     {
@@ -38,9 +39,11 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.BuildingDestroyed  },
             new Entry { type = NotificationType.ResearchCompleted      },
             new Entry { type = NotificationType.ResearchFailed         },
-            new Entry { type = NotificationType.BirthSucceeded         },
-            new Entry { type = NotificationType.BirthFailed            },
-            new Entry { type = NotificationType.BirthFailedWithDeath   },
+            new Entry { type = NotificationType.BirthSucceeded                 },
+            new Entry { type = NotificationType.BirthFailed                  },
+            new Entry { type = NotificationType.ProductionCompleted              },
+            new Entry { type = NotificationType.ProductionPausedLackOfResources },
+            new Entry { type = NotificationType.ProductionPausedLackOfWorkers   },
         };
     }
 }

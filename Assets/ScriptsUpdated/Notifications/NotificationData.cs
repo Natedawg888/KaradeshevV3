@@ -1,5 +1,13 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+
+[Serializable]
+public class ProductionOutputEntry
+{
+    public ResourceDefinition resource;
+    public int amount;
+}
 
 [Serializable]
 public class NotificationData
@@ -11,6 +19,8 @@ public class NotificationData
     public int turnNumber;
     public bool hasTileTarget;
     public Vector3 worldPosition;
+    public bool showDeathIcon;
+    public List<ProductionOutputEntry> producedOutputs;
 
     public NotificationData(NotificationType type, string title, string message, int turnNumber = 0)
     {

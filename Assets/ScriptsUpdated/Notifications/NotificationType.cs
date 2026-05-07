@@ -14,7 +14,10 @@ public enum NotificationType
     ResearchFailed,
     BirthSucceeded,
     BirthFailed,
-    BirthFailedWithDeath,
+
+    ProductionCompleted,
+    ProductionPausedLackOfResources,
+    ProductionPausedLackOfWorkers,
 
     // Future: CraftingCompleted, ProductionCompleted, etc.
 }

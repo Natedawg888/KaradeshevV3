@@ -44,12 +44,29 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         {
             return type switch
             {
-                NotificationType.BirthSucceeded       => ("A Child is Born",        $"The {motherSurname} family welcomes {bornAlive} newborn(s)."),
-                NotificationType.BirthFailedWithDeath => ("Birth Failed — Life Lost", $"A mother of the {motherSurname} family died during pregnancy."),
-                _                                     => ("Pregnancy Lost",           $"A pregnancy in the {motherSurname} family has failed."),
+                NotificationType.BirthSucceeded => ("A Child is Born", $"The {motherSurname} family welcomes {bornAlive} newborn(s)."),
+                _                               => ("Pregnancy Lost",   $"A pregnancy in the {motherSurname} family has failed."),
             };
         }
         return crafter.CraftBirth(type, motherSurname, bornAlive, motherDied);
+    }
+
+    public (string title, string message) CraftProduction(NotificationType type, string buildingName, string planName)
+    {
+        if (crafter == null)
+        {
+            return type switch
+            {
+                NotificationType.ProductionCompleted =>
+                    ("Production Complete", $"{buildingName} has finished a cycle of {planName}."),
+                NotificationType.ProductionPausedLackOfResources =>
+                    ("Production Paused",  $"{buildingName} paused — not enough resources for {planName}."),
+                NotificationType.ProductionPausedLackOfWorkers =>
+                    ("Production Stopped", $"{buildingName} stopped — not enough workers for {planName}."),
+                _ => ("Production Issue", buildingName),
+            };
+        }
+        return crafter.CraftProduction(type, buildingName, planName);
     }
 
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)

@@ -119,7 +119,7 @@ public class PregnancyService : IPregnancyService
                 AbortPregnancy(motherId);
                 _pregnancies.Remove(motherId);
 
-                PostBirthNotification(NotificationType.BirthFailedWithDeath, mother, 0, true);
+                PostBirthNotification(NotificationType.BirthFailed, mother, 0, true);
                 OnPregnancyFailed?.Invoke(motherId);
                 continue;
             }
@@ -152,9 +152,7 @@ public class PregnancyService : IPregnancyService
 
                 CivilizationHappinessSystem.Instance?.NotifyPregnancyFailure(motherDies);
 
-                PostBirthNotification(
-                    motherDies ? NotificationType.BirthFailedWithDeath : NotificationType.BirthFailed,
-                    mother, 0, motherDies);
+                PostBirthNotification(NotificationType.BirthFailed, mother, 0, motherDies);
                 OnPregnancyFailed?.Invoke(motherId);
                 continue;
             }
@@ -771,13 +769,12 @@ public class PregnancyService : IPregnancyService
         {
             (title, message) = type switch
             {
-                NotificationType.BirthSucceeded       => ("A Child is Born",         $"The {surname} family welcomes {bornAlive} newborn(s)."),
-                NotificationType.BirthFailedWithDeath => ("Birth Failed — Life Lost", $"A mother of the {surname} family died during pregnancy."),
-                _                                     => ("Pregnancy Lost",            $"A pregnancy in the {surname} family has failed."),
+                NotificationType.BirthSucceeded => ("A Child is Born", $"The {surname} family welcomes {bornAlive} newborn(s)."),
+                _                               => ("Pregnancy Lost",   $"A pregnancy in the {surname} family has failed."),
             };
         }
 
-        NotificationManager.Instance.AddNotification(type, title, message);
+        NotificationManager.Instance.AddNotification(type, title, message, motherDied);
     }
 
     private float GetReligionBirthSuccessBonus()
