@@ -80,6 +80,10 @@ public class EnvironmentControl : MonoBehaviour
     public TimerUI surveyTimerUI;    // optional UI to reflect remaining survey turns
     public GameObject canvas;        // discovery/gather/survey canvas / overlay
 
+    [Header("Fire UI")]
+    public GameObject fireIcon;      // shown while tile is burning
+    public TimerUI fireTimerUI;      // radial fight-progress timer, shown while actively fighting
+
     [Header("Failure UI")]
     public GameObject discoveryFailedIcon;
     public GameObject gatheringFailedIcon;
@@ -315,13 +319,62 @@ public class EnvironmentControl : MonoBehaviour
     {
         envStatus = GetComponent<EnvironmentStatus>();
 
-        // In case someone drops the prefab manually under a Tile in the scene,
-        // auto-init once here.
         var tile = GetComponentInParent<TileScript>();
         if (tile != null)
-        {
             InitializeForTile(tile);
+
+        var envFire = GetComponent<EnvironmentFireState>();
+        if (envFire != null)
+        {
+            envFire.OnIgnited      += HandleFireIgnited;
+            envFire.OnExtinguished += HandleFireExtinguished;
+            envFire.OnFightProgress += HandleFireFightProgress;
         }
+
+        SetFireIconActive(false);
+        SetFireTimerActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        var envFire = GetComponent<EnvironmentFireState>();
+        if (envFire != null)
+        {
+            envFire.OnIgnited       -= HandleFireIgnited;
+            envFire.OnExtinguished  -= HandleFireExtinguished;
+            envFire.OnFightProgress -= HandleFireFightProgress;
+        }
+    }
+
+    private void HandleFireIgnited(EnvironmentFireState state)
+    {
+        SetFireIconActive(true);
+        SetFireTimerActive(false);
+    }
+
+    private void HandleFireExtinguished(EnvironmentFireState state)
+    {
+        SetFireIconActive(false);
+        SetFireTimerActive(false);
+    }
+
+    private void HandleFireFightProgress(EnvironmentFireState state, int rollResult, int turnsRemaining)
+    {
+        SetFireIconActive(true);
+        SetFireTimerActive(true);
+
+        if (fireTimerUI != null)
+            fireTimerUI.SetState(state.baseFightTurns, state.FightTurnsRemaining);
+    }
+
+    private void SetFireIconActive(bool on)
+    {
+        if (fireIcon != null) fireIcon.SetActive(on);
+    }
+
+    private void SetFireTimerActive(bool on)
+    {
+        if (fireTimerUI != null) fireTimerUI.gameObject.SetActive(on);
     }
 
     private void OnValidate()
@@ -368,6 +421,23 @@ public class EnvironmentControl : MonoBehaviour
                 gatheringTimerUI = gatherTransform.GetComponent<TimerUI>()
                                 ?? gatherTransform.GetComponentInChildren<TimerUI>();
             }
+        }
+
+        // auto-find fire timer
+        if (fireTimerUI == null)
+        {
+            var fireTransform = Array.Find(GetComponentsInChildren<Transform>(true),
+                                           t => t.name == "FireFightIconTimer");
+            if (fireTransform != null)
+                fireTimerUI = fireTransform.GetComponent<TimerUI>()
+                           ?? fireTransform.GetComponentInChildren<TimerUI>();
+        }
+
+        if (fireIcon == null)
+        {
+            var t = Array.Find(GetComponentsInChildren<Transform>(true),
+                               x => x.name == "FireIcon");
+            if (t != null) fireIcon = t.gameObject;
         }
 
         // Try to auto-find a child named "CollectReadyIcon" if not assigned
