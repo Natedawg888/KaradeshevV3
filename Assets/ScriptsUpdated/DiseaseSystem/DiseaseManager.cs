@@ -303,6 +303,8 @@ public class DiseaseManager : MonoBehaviour
             state.strainContagionMultiplier = 1f;
         }
 
+        bool isFirstCase = !HasAnyActiveCaseOfDisease(disease.diseaseId);
+
         activeIndividualDiseases.Add(state);
 
         if (!_statesByTargetKey.TryGetValue(targetKey, out List<IndividualDiseaseState> list))
@@ -318,6 +320,9 @@ public class DiseaseManager : MonoBehaviour
         Log(
             $"[DiseaseManager] Infected target. " +
             $"Target={targetKey}, Disease={state.GetDisplayName(disease)}, Source={sourceType}, Chance={finalChance:F2}");
+
+        if (isFirstCase)
+            PostDiseaseOutbreakNotification(disease);
 
         return true;
     }
@@ -2433,6 +2438,32 @@ public class DiseaseManager : MonoBehaviour
                 $"ActiveDiseases={activeIndividualDiseases.Count}, " +
                 $"ImmunityTargets={_immunityTurnsByTargetKey.Count}");
         }
+    }
+
+    private bool HasAnyActiveCaseOfDisease(string diseaseId)
+    {
+        for (int i = 0; i < activeIndividualDiseases.Count; i++)
+        {
+            var s = activeIndividualDiseases[i];
+            if (s != null && string.Equals(s.diseaseId, diseaseId, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+
+    private void PostDiseaseOutbreakNotification(DiseaseDefinitionSO disease)
+    {
+        if (NotificationManager.Instance == null) return;
+        string diseaseName = disease != null && !string.IsNullOrWhiteSpace(disease.displayName)
+            ? disease.displayName
+            : "Unknown Disease";
+        string causeType = disease != null ? disease.causeType.ToString() : "";
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftDiseaseOutbreak(diseaseName, causeType);
+        else
+            (title, message) = ("Disease Outbreak!", $"{diseaseName} has appeared in your population.");
+        NotificationManager.Instance.AddNotification(NotificationType.DiseaseOutbreak, title, message, true);
     }
 
     private void MarkDiseaseSaveDirty()

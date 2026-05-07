@@ -178,6 +178,18 @@ public class NotificationMessageCrafter : ScriptableObject
         return (title, message);
     }
 
+    public (string title, string message) CraftDiseaseOutbreak(string diseaseName, string causeType)
+    {
+        var set = GetSuccessSet(NotificationType.DiseaseOutbreak);
+        if (set == null)
+            return ("Disease Outbreak!", $"{diseaseName} has appeared in your population.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{DISEASE}", diseaseName)
+            .Replace("{CAUSE}",   causeType);
+        return (title, message);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         var set = GetSuccessSet(type);
@@ -493,6 +505,18 @@ public class NotificationMessageCrafter : ScriptableObject
                     "Flood waters have reached {BUILDING} — {DEPTH} flooding reported.",
                     "{BUILDING} is taking flood damage. Water level: {DEPTH}.",
                     "Rising {DEPTH} waters are flooding {BUILDING}.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.DiseaseOutbreak,
+                titles   = new[] { "Disease Outbreak!", "Sickness Spreads", "Illness Detected" },
+                messages = new[]
+                {
+                    "{DISEASE} has broken out among your people.",
+                    "A {CAUSE} known as {DISEASE} has been detected in your population.",
+                    "Your people are suffering from {DISEASE}. Act quickly.",
+                    "An outbreak of {DISEASE} threatens your settlement.",
                 },
             },
             new SuccessTemplateSet
