@@ -1240,6 +1240,54 @@ Passing `transform.position` sets `hasTileTarget = true` — the Go-To Tile butt
 
 **Pattern note:** Follows the identical pattern to `BuildingStatus.PostBuildingStateNotification()` (used for `BuildingDamaged` / `BuildingDestroyed`). Both use `CraftBuilding()` + `AddNotification(..., transform.position)`.
 
+### May 7, 2026 — Building Fire Overlay Panel
+
+**Files changed:**
+- `ScriptsUpdated/Grid_Map/Weatherv2/Fire/BuildingFireState.cs`
+- `ScriptsUpdated/Panels/BuildingPanel/BuildingFireOverlayControl.cs` *(new)*
+- `ScriptsUpdated/Panels/BuildingPanel/BuildingPanelControl/BuildingPanelControl.Mode.cs`
+- `ScriptsUpdated/Panels/BuildingPanel/BuildingPanelControl/BuildingPanelControl.Events.cs`
+
+**`BuildingFireState`:** added `public List<ResourceCost> extinguishCost` — configured per building in the Inspector. Defines what the player must spend to manually extinguish.
+
+**`BuildingFireOverlayControl`** (new script):
+
+Blocks the building panel while the building is on fire. Follows the same pattern as `RepairPanelControl` for cost display.
+
+```
+Fields:
+  root                — blocking overlay panel root
+  titleText           — "{BuildingName} is on Fire!"
+  costsContentRoot    — spawn target for BuildingCostEntry items
+  costEntryPrefab     — BuildingCostEntry prefab (shared with repair panel)
+  extinguishButton    — disabled when player can't afford cost
+
+ShowFor(BuildingControl):
+  └─ Guards: fireState must exist + IsOnFire
+  └─ Subscribes to BuildingFireState.OnExtinguished → Hide()
+  └─ RebuildCosts(): spawns BuildingCostEntry per ResourceCost,
+       InventoryQuery.GetOwned() for have-amount, red/green colouring,
+       extinguishButton.interactable = canAfford
+
+OnExtinguishClicked():
+  └─ ResourceDeduction.Deduct(extinguishCost) — if fails, RebuildCosts()
+  └─ BuildingFireState.Extinguish() on success
+  └─ HandleExtinguished() hides overlay (also fires if fire burns out naturally)
+```
+
+**`BuildingPanelControl` changes:**
+- `fireOverlayPanel (BuildingFireOverlayControl)` field added to `BuildingPanelControl.Mode.cs`
+- `currentFireState (BuildingFireState)` cached in `Show()` alongside other components
+- Subscribes to `currentFireState.OnIgnited` → `HandleFireIgnited` → `fireOverlayPanel.ShowFor(currentBuilding)`
+- On `Show()`: if building is already on fire, overlay shown immediately; otherwise hidden
+- `Unsubscribe()` cleans up fire event and nulls `currentFireState`
+
+**Inspector setup:**
+1. Add a child panel to the building panel canvas, attach `BuildingFireOverlayControl`
+2. Wire `costsContentRoot`, `costEntryPrefab` (same prefab as repair panel), `extinguishButton`, `cantAffordHint`
+3. Assign to `BuildingPanelControl.fireOverlayPanel`
+4. Set `extinguishCost` on each `BuildingFireState` component in the scene
+
 ---
 
 **End of Report**

@@ -3,6 +3,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Overlays the building panel when a building is on fire.
+/// Phase 1 (idle):   shows resource cost, population needed, estimated turns → "Fight Fire" button.
+/// Phase 2 (fighting): shows live turns remaining, last roll result, population in use → "Cancel" button.
+/// </summary>
 public class BuildingFireOverlayControl : MonoBehaviour
 {
     [Header("Root")]
@@ -11,13 +16,23 @@ public class BuildingFireOverlayControl : MonoBehaviour
     [Header("Header")]
     public TMP_Text titleText;
 
-    [Header("Costs")]
+    [Header("Cost Section")]
+    public GameObject costSection;
     public Transform costsContentRoot;
     public BuildingCostEntry costEntryPrefab;
 
-    [Header("Actions")]
-    public Button extinguishButton;
-    public TMP_Text cantAffordHint;
+    [Header("Requirements")]
+    public TMP_Text populationText;
+    public TMP_Text turnsEstimateText;
+
+    [Header("Fight Progress")]
+    public GameObject progressSection;
+    public Slider fightProgressSlider;
+
+    [Header("Buttons")]
+    public Button fightButton;
+    public TMP_Text fightButtonLabel;
+    public Button cancelButton;
 
     private BuildingControl _building;
     private BuildingFireState _fireState;
@@ -28,38 +43,45 @@ public class BuildingFireOverlayControl : MonoBehaviour
 
     private void Awake()
     {
-        if (extinguishButton != null)
+        if (fightButton != null)
         {
-            extinguishButton.onClick.RemoveAllListeners();
-            extinguishButton.onClick.AddListener(OnExtinguishClicked);
+            fightButton.onClick.RemoveAllListeners();
+            fightButton.onClick.AddListener(OnFightClicked);
+        }
+
+        if (cancelButton != null)
+        {
+            cancelButton.onClick.RemoveAllListeners();
+            cancelButton.onClick.AddListener(OnCancelClicked);
         }
 
         RootGO.SetActive(false);
     }
+
+    // ------------------------------------------------------------------
+    // Public API
+    // ------------------------------------------------------------------
 
     public void ShowFor(BuildingControl building)
     {
         if (!building) return;
 
         var fireState = building.GetComponent<BuildingFireState>();
-        if (fireState == null || !fireState.IsOnFire)
-        {
-            Hide();
-            return;
-        }
+        if (fireState == null || !fireState.IsOnFire) { Hide(); return; }
 
         Unsubscribe();
 
         _building  = building;
         _fireState = fireState;
 
-        _fireState.OnExtinguished += HandleExtinguished;
+        _fireState.OnExtinguished  += HandleExtinguished;
+        _fireState.OnFightProgress += HandleFightProgress;
 
         if (titleText != null)
             titleText.text = $"{GetBuildingName()} is on Fire!";
 
         RootGO.SetActive(true);
-        RebuildCosts();
+        Refresh();
     }
 
     public void Hide()
@@ -72,38 +94,113 @@ public class BuildingFireOverlayControl : MonoBehaviour
     }
 
     // ------------------------------------------------------------------
+    // Internal refresh
+    // ------------------------------------------------------------------
+
+    private void Refresh()
+    {
+        if (_fireState == null) return;
+
+        if (_fireState.IsFighting)
+            ShowFightingPhase();
+        else
+            ShowIdlePhase();
+    }
+
+    private void ShowIdlePhase()
+    {
+        SetSection(costSection,     true);
+        SetSection(progressSection, false);
+
+        if (cancelButton != null) cancelButton.gameObject.SetActive(false);
+        if (fightButton  != null) fightButton.gameObject.SetActive(true);
+
+        RebuildCosts();
+        RefreshRequirementsText();
+        RefreshFightButtonState();
+    }
+
+    private void ShowFightingPhase()
+    {
+        SetSection(costSection,     false);
+        SetSection(progressSection, true);
+
+        if (fightButton  != null) fightButton.gameObject.SetActive(false);
+        if (cancelButton != null) cancelButton.gameObject.SetActive(true);
+
+        RefreshFightProgress();
+    }
+
+    private void RefreshRequirementsText()
+    {
+        if (_fireState == null) return;
+
+        if (populationText != null)
+        {
+            int avail = PlayersPopulationManager.Instance != null
+                ? PlayersPopulationManager.Instance.GetAvailableTaskPopulation()
+                : 0;
+            populationText.text = $"Workers needed: {_fireState.populationRequired}  (available: {avail})";
+        }
+
+        if (turnsEstimateText != null)
+            turnsEstimateText.text = $"Est. turns to extinguish: ~{_fireState.baseFightTurns}";
+    }
+
+    private void RefreshFightProgress()
+    {
+        if (_fireState == null) return;
+
+        if (fightProgressSlider != null)
+        {
+            int max      = Mathf.Max(1, _fireState.baseFightTurns);
+            int progress = Mathf.Clamp(max - _fireState.FightTurnsRemaining, 0, max);
+
+            fightProgressSlider.minValue     = 0;
+            fightProgressSlider.maxValue     = max;
+            fightProgressSlider.value        = progress;
+            fightProgressSlider.wholeNumbers = true;
+            fightProgressSlider.interactable = false;
+        }
+
+        if (populationText != null)
+            populationText.text = $"Workers fighting: {_fireState.populationRequired}";
+    }
+
+    private void RefreshFightButtonState()
+    {
+        if (_fireState == null || fightButton == null) return;
+
+        bool canAffordResources = _fireState.CanAffordFight();
+        bool canAffordPop       = _fireState.HasEnoughPopulation();
+        bool canFight           = canAffordResources && canAffordPop;
+
+        fightButton.interactable = canFight;
+    }
+
+    // ------------------------------------------------------------------
+    // Cost entries
+    // ------------------------------------------------------------------
 
     private void RebuildCosts()
     {
         ClearCosts();
 
-        if (_fireState == null || costEntryPrefab == null || costsContentRoot == null)
-            return;
+        if (_fireState == null || costEntryPrefab == null || costsContentRoot == null) return;
 
         var costs = _fireState.extinguishCost;
-        bool canAfford = true;
+        if (costs == null || costs.Count == 0) return;
 
-        if (costs != null)
+        for (int i = 0; i < costs.Count; i++)
         {
-            for (int i = 0; i < costs.Count; i++)
-            {
-                var c = costs[i];
-                if (c?.resource == null) continue;
+            var c = costs[i];
+            if (c?.resource == null) continue;
 
-                int have = InventoryQuery.GetOwned(c.resource);
-                if (have < c.amount) canAfford = false;
-
-                var entry = Instantiate(costEntryPrefab, costsContentRoot);
-                entry.Bind(c.resource, c.amount, have);
-                _spawned.Add(entry);
-            }
+            int have  = InventoryQuery.GetOwned(c.resource);
+            var entry = Instantiate(costEntryPrefab, costsContentRoot);
+            entry.Bind(c.resource, c.amount, have);
+            _spawned.Add(entry);
         }
-
-        if (extinguishButton != null)
-            extinguishButton.interactable = canAfford;
-
-        if (cantAffordHint != null)
-            cantAffordHint.gameObject.SetActive(!canAfford);
     }
 
     private void ClearCosts()
@@ -113,29 +210,56 @@ public class BuildingFireOverlayControl : MonoBehaviour
         _spawned.Clear();
     }
 
-    private void OnExtinguishClicked()
-    {
-        if (_fireState == null || !_fireState.IsOnFire) return;
+    // ------------------------------------------------------------------
+    // Button handlers
+    // ------------------------------------------------------------------
 
-        var costs = _fireState.extinguishCost;
-        if (costs != null && costs.Count > 0 && !ResourceDeduction.Deduct(costs))
+    private void OnFightClicked()
+    {
+        if (_fireState == null || _fireState.IsFighting) return;
+
+        if (!_fireState.TryBeginFighting())
         {
             RebuildCosts();
+            RefreshFightButtonState();
             return;
         }
 
-        _fireState.Extinguish();
+        ShowFightingPhase();
     }
 
-    private void HandleExtinguished(BuildingFireState state)
+    private void OnCancelClicked()
     {
-        Hide();
+        if (_fireState == null) return;
+        _fireState.CancelFighting();
+        ShowIdlePhase();
     }
+
+    // ------------------------------------------------------------------
+    // Event handlers
+    // ------------------------------------------------------------------
+
+    private void HandleExtinguished(BuildingFireState state) => Hide();
+
+    private void HandleFightProgress(BuildingFireState state, int rollResult, int turnsRemaining)
+    {
+        RefreshFightProgress();
+    }
+
+    // ------------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------------
 
     private void Unsubscribe()
     {
-        if (_fireState != null)
-            _fireState.OnExtinguished -= HandleExtinguished;
+        if (_fireState == null) return;
+        _fireState.OnExtinguished  -= HandleExtinguished;
+        _fireState.OnFightProgress -= HandleFightProgress;
+    }
+
+    private void SetSection(GameObject section, bool on)
+    {
+        if (section != null) section.SetActive(on);
     }
 
     private string GetBuildingName()
