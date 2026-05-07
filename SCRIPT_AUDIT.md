@@ -1240,53 +1240,117 @@ Passing `transform.position` sets `hasTileTarget = true` — the Go-To Tile butt
 
 **Pattern note:** Follows the identical pattern to `BuildingStatus.PostBuildingStateNotification()` (used for `BuildingDamaged` / `BuildingDestroyed`). Both use `CraftBuilding()` + `AddNotification(..., transform.position)`.
 
-### May 7, 2026 — Building Fire Overlay Panel
+### May 7, 2026 — Building Fire Overlay Panel + Fight Mechanic + World Icon
 
 **Files changed:**
 - `ScriptsUpdated/Grid_Map/Weatherv2/Fire/BuildingFireState.cs`
 - `ScriptsUpdated/Panels/BuildingPanel/BuildingFireOverlayControl.cs` *(new)*
+- `ScriptsUpdated/Buildings/BuildingFireWorldIcon.cs` *(new)*
 - `ScriptsUpdated/Panels/BuildingPanel/BuildingPanelControl/BuildingPanelControl.Mode.cs`
 - `ScriptsUpdated/Panels/BuildingPanel/BuildingPanelControl/BuildingPanelControl.Events.cs`
 
-**`BuildingFireState`:** added `public List<ResourceCost> extinguishCost` — configured per building in the Inspector. Defines what the player must spend to manually extinguish.
+---
 
-**`BuildingFireOverlayControl`** (new script):
+**`BuildingFireState` — full fire fighting system:**
 
-Blocks the building panel while the building is on fire. Follows the same pattern as `RepairPanelControl` for cost display.
+```
+Designer fields:
+  extinguishCost (List<ResourceCost>)  — resources spent to start fighting
+  populationRequired (int)             — workers reserved for the duration
+  baseFightTurns (int)                 — starting turn estimate
+  rollMin / rollMax (int)              — roll range each turn (positive = progress,
+                                         negative = setback)
+
+Fight state (runtime):
+  IsFighting (bool)
+  FightTurnsRemaining (int)            — decrements/increments with each roll
+  LastRollResult (int)                 — result of the most recent roll
+
+Events:
+  OnIgnited(BuildingFireState)
+  OnFireDamageStep(BuildingFireState, int damage)
+  OnExtinguished(BuildingFireState)
+  OnFightProgress(BuildingFireState, int rollResult, int turnsRemaining)
+
+TryBeginFighting():
+  1. ResourceDeduction.Deduct(extinguishCost) — refunds on failure
+  2. PlayersPopulationManager.TryReservePopulation(populationRequired, out reservationId)
+  3. Subscribes to TurnSystem.onTurnEnd → OnEndTurn_FightFire()
+
+OnEndTurn_FightFire():
+  roll = Random.Range(rollMin, rollMax + 1)
+  FightTurnsRemaining -= roll          — can go up (negative roll) or down
+  fires OnFightProgress
+  calls Extinguish() if FightTurnsRemaining <= 0
+
+CancelFighting():
+  releases population reservation, unsubscribes from TurnSystem
+
+Extinguish():
+  also calls StopFighting() to clean up any active fight reservation
+
+Awake():
+  auto-binds BuildingFireWorldIcon if found in children
+```
+
+---
+
+**`BuildingFireOverlayControl` — two-phase overlay:**
+
+Blocks the building panel while on fire. Two distinct phases:
+
+```
+Phase 1 — Idle (not yet fighting):
+  costSection (active)    — BuildingCostEntry items from extinguishCost
+  populationText          — "Workers needed: X  (available: Y)"
+  turnsEstimateText       — "Est. turns to extinguish: ~N"
+  fightButton             — gated on CanAffordFight() + HasEnoughPopulation()
+  hintText                — "Not enough resources." / "Need X available workers."
+
+Phase 2 — Fighting (after Fight Fire clicked):
+  progressSection (active)
+  fightProgressSlider     — value = baseFightTurns - FightTurnsRemaining
+                            fills right on progress rolls, drops on setbacks
+  populationText          — "Workers fighting: X"
+  cancelButton            — calls CancelFighting(), returns to Phase 1
+
+Auto-transitions:
+  OnFightProgress → RefreshFightProgress() (slider update each turn)
+  OnExtinguished  → Hide()
+```
+
+---
+
+**`BuildingFireWorldIcon` (new) — world canvas icon:**
+
+Attach to the building's world canvas (same as `ProductionBuildingControl` icons).
+Auto-bound from `BuildingFireState.Awake()` via `GetComponentInChildren`.
 
 ```
 Fields:
-  root                — blocking overlay panel root
-  titleText           — "{BuildingName} is on Fire!"
-  costsContentRoot    — spawn target for BuildingCostEntry items
-  costEntryPrefab     — BuildingCostEntry prefab (shared with repair panel)
-  extinguishButton    — disabled when player can't afford cost
+  fireIcon (GameObject)    — fire sprite, shown while IsOnFire
+  fightTimerUI (TimerUI)   — radial fill, SetState(baseFightTurns, FightTurnsRemaining)
+  fightTimerRoot (GameObject) — parent of fightTimerUI, shown only while IsFighting
 
-ShowFor(BuildingControl):
-  └─ Guards: fireState must exist + IsOnFire
-  └─ Subscribes to BuildingFireState.OnExtinguished → Hide()
-  └─ RebuildCosts(): spawns BuildingCostEntry per ResourceCost,
-       InventoryQuery.GetOwned() for have-amount, red/green colouring,
-       extinguishButton.interactable = canAfford
-
-OnExtinguishClicked():
-  └─ ResourceDeduction.Deduct(extinguishCost) — if fails, RebuildCosts()
-  └─ BuildingFireState.Extinguish() on success
-  └─ HandleExtinguished() hides overlay (also fires if fire burns out naturally)
+Events handled:
+  OnIgnited      → show fireIcon, hide fightTimerRoot
+  OnFightProgress → show fightTimerRoot, update TimerUI fill
+  OnExtinguished → hide both
 ```
 
+---
+
 **`BuildingPanelControl` changes:**
-- `fireOverlayPanel (BuildingFireOverlayControl)` field added to `BuildingPanelControl.Mode.cs`
-- `currentFireState (BuildingFireState)` cached in `Show()` alongside other components
-- Subscribes to `currentFireState.OnIgnited` → `HandleFireIgnited` → `fireOverlayPanel.ShowFor(currentBuilding)`
-- On `Show()`: if building is already on fire, overlay shown immediately; otherwise hidden
-- `Unsubscribe()` cleans up fire event and nulls `currentFireState`
+- `fireOverlayPanel (BuildingFireOverlayControl)` in `BuildingPanelControl.Mode.cs`
+- `currentFireState` cached in `Show()`, subscribed to `OnIgnited` → `HandleFireIgnited`
+- If already burning when panel opens → `fireOverlayPanel.ShowFor()` immediately
+- `Unsubscribe()` releases fire event and nulls `currentFireState`
 
 **Inspector setup:**
-1. Add a child panel to the building panel canvas, attach `BuildingFireOverlayControl`
-2. Wire `costsContentRoot`, `costEntryPrefab` (same prefab as repair panel), `extinguishButton`, `cantAffordHint`
-3. Assign to `BuildingPanelControl.fireOverlayPanel`
-4. Set `extinguishCost` on each `BuildingFireState` component in the scene
+1. Add overlay child panel → attach `BuildingFireOverlayControl`, wire all fields
+2. Assign `BuildingPanelControl.fireOverlayPanel`
+3. Add `BuildingFireWorldIcon` to building's world canvas child; wire `fireIcon`, `fightTimerRoot`, `fightTimerUI`
+4. Set `extinguishCost`, `populationRequired`, `baseFightTurns`, `rollMin`/`rollMax` on each `BuildingFireState`
 
 ---
 
