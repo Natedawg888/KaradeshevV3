@@ -147,6 +147,37 @@ public class NotificationMessageCrafter : ScriptableObject
         return (title, message);
     }
 
+    public (string title, string message) CraftAging(AgeGroup newGroup, int count)
+    {
+        var set = GetSuccessSet(NotificationType.PopulationAgedUp);
+        string groupName = newGroup switch
+        {
+            AgeGroup.Teen  => "teenagers",
+            AgeGroup.Adult => "adults",
+            AgeGroup.Elder => "elders",
+            _              => newGroup.ToString().ToLower() + "s",
+        };
+        if (set == null)
+            return ("People are Growing Up", $"{count} of your people have become {groupName}.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{COUNT}",    count.ToString())
+            .Replace("{AGEGROUP}", groupName);
+        return (title, message);
+    }
+
+    public (string title, string message) CraftElderDeath(int count, int lifespanTurns)
+    {
+        var set = GetSuccessSet(NotificationType.ElderDiedOfOldAge);
+        if (set == null)
+            return ("Elders Passed", $"{count} elder(s) have died of old age after {lifespanTurns} turns.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{COUNT}",    count.ToString())
+            .Replace("{LIFESPAN}", lifespanTurns.ToString());
+        return (title, message);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         var set = GetSuccessSet(type);
@@ -462,6 +493,30 @@ public class NotificationMessageCrafter : ScriptableObject
                     "Flood waters have reached {BUILDING} — {DEPTH} flooding reported.",
                     "{BUILDING} is taking flood damage. Water level: {DEPTH}.",
                     "Rising {DEPTH} waters are flooding {BUILDING}.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.PopulationAgedUp,
+                titles   = new[] { "Growing Up", "A New Generation", "People are Maturing" },
+                messages = new[]
+                {
+                    "{COUNT} of your people have become {AGEGROUP}.",
+                    "{COUNT} citizens have grown into {AGEGROUP}.",
+                    "A new wave of {AGEGROUP} joins your population — {COUNT} in all.",
+                    "{COUNT} people have reached the {AGEGROUP} stage of life.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.ElderDiedOfOldAge,
+                titles   = new[] { "Elders Passed", "End of an Era", "A Life Well Lived" },
+                messages = new[]
+                {
+                    "{COUNT} elder(s) have died of old age after {LIFESPAN} turns.",
+                    "{COUNT} of your elders have reached the end of their lives at {LIFESPAN} turns.",
+                    "After {LIFESPAN} turns of life, {COUNT} elder(s) have passed away.",
+                    "{COUNT} people have lived a full life and passed on at age {LIFESPAN}.",
                 },
             },
         };

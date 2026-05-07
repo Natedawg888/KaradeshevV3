@@ -27,4 +27,7 @@ public enum NotificationType
     FireFightFailed,
 
     BuildingFlooded,
+
+    PopulationAgedUp,
+    ElderDiedOfOldAge,
 }

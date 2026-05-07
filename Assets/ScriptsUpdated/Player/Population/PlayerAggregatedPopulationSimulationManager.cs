@@ -47,8 +47,9 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
 
         var inv = PlayerInventoryManager.Instance;
 
-        // track deaths per group this turn
-        var deathsByGroup = new Dictionary<Guid, int>();
+        var deathsByGroup  = new Dictionary<Guid, int>();
+        var ageUpCounts    = new Dictionary<AgeGroup, int>();
+        int lifespanDeaths = 0;
 
         var all = playerPop.AllPopulations;
         for (int gi = 0; gi < all.Count; gi++)
@@ -61,6 +62,12 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
 
             AgeOneTurn_Player(group);
             LogAgeTransition(turn, group, beforeAgeGroup);
+
+            if (group.ageGroup != beforeAgeGroup && group.count > 0)
+            {
+                if (!ageUpCounts.TryAdd(group.ageGroup, group.count))
+                    ageUpCounts[group.ageGroup] += group.count;
+            }
 
             if (isCycleTick)
                 IncreaseNeeds_Player(group);
@@ -117,6 +124,7 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
                 int extraDeaths = group.count;
                 if (extraDeaths > 0)
                 {
+                    lifespanDeaths += extraDeaths;
                     if (!deathsByGroup.TryAdd(group.GroupID, extraDeaths))
                         deathsByGroup[group.GroupID] += extraDeaths;
                 }
@@ -137,6 +145,12 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
                 );
             }
         }
+
+        foreach (var kv in ageUpCounts)
+            PostAgingNotification(kv.Key, kv.Value);
+
+        if (lifespanDeaths > 0)
+            PostElderDeathNotification(lifespanDeaths, general.lifespan);
 
         // Remove empty / end-of-life groups
         playerPop.PruneDeadOrEmptyGroups();
@@ -243,6 +257,37 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
         return (rules != null)
             ? g.ApplyMortalityThisTurn(rules)                         // player tech-adjusted
             : g.ApplyMortalityThisTurn(GeneralPopulationManager.Instance); // fallback to general
+    }
+
+    private void PostAgingNotification(AgeGroup newGroup, int count)
+    {
+        if (NotificationManager.Instance == null) return;
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftAging(newGroup, count);
+        else
+        {
+            string gn = newGroup switch
+            {
+                AgeGroup.Teen  => "teenagers",
+                AgeGroup.Adult => "adults",
+                AgeGroup.Elder => "elders",
+                _              => newGroup.ToString().ToLower() + "s",
+            };
+            (title, message) = ("People are Growing Up", $"{count} of your people have become {gn}.");
+        }
+        NotificationManager.Instance.AddNotification(NotificationType.PopulationAgedUp, title, message);
+    }
+
+    private void PostElderDeathNotification(int count, int lifespanTurns)
+    {
+        if (NotificationManager.Instance == null) return;
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftElderDeath(count, lifespanTurns);
+        else
+            (title, message) = ("Elders Passed", $"{count} elder(s) have died of old age after {lifespanTurns} turns.");
+        NotificationManager.Instance.AddNotification(NotificationType.ElderDiedOfOldAge, title, message, true);
     }
 
     [SerializeField] private bool debugPopulationTurnLosses = true;

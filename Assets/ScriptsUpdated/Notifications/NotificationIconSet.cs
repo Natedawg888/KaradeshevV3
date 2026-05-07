@@ -50,6 +50,8 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.FireFightSucceeded              },
             new Entry { type = NotificationType.FireFightFailed                 },
             new Entry { type = NotificationType.BuildingFlooded                 },
+            new Entry { type = NotificationType.PopulationAgedUp               },
+            new Entry { type = NotificationType.ElderDiedOfOldAge              },
         };
     }
 }

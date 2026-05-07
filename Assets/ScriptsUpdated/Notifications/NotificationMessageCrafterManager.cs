@@ -106,6 +106,29 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.CraftFireFight(type, targetName, casualties);
     }
 
+    public (string title, string message) CraftAging(AgeGroup newGroup, int count)
+    {
+        if (crafter == null)
+        {
+            string gn = newGroup switch
+            {
+                AgeGroup.Teen  => "teenagers",
+                AgeGroup.Adult => "adults",
+                AgeGroup.Elder => "elders",
+                _              => newGroup.ToString().ToLower() + "s",
+            };
+            return ("People are Growing Up", $"{count} of your people have become {gn}.");
+        }
+        return crafter.CraftAging(newGroup, count);
+    }
+
+    public (string title, string message) CraftElderDeath(int count, int lifespanTurns)
+    {
+        if (crafter == null)
+            return ("Elders Passed", $"{count} elder(s) have died of old age after {lifespanTurns} turns.");
+        return crafter.CraftElderDeath(count, lifespanTurns);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         if (crafter == null)
