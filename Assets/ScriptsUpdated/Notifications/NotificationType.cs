@@ -25,4 +25,6 @@ public enum NotificationType
 
     FireFightSucceeded,
     FireFightFailed,
+
+    BuildingFlooded,
 }

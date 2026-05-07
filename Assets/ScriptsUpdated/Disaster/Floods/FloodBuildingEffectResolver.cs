@@ -411,6 +411,7 @@ public class FloodBuildingEffectResolver : MonoBehaviour
         if (floodEffects != null)
         {
             floodEffects.ApplyFloodDamage(hitData);
+            PostFloodNotification(building, hitData);
             return;
         }
 
@@ -425,6 +426,7 @@ public class FloodBuildingEffectResolver : MonoBehaviour
         if (buildingControl != null)
         {
             buildingControl.ApplyDamage(hitData.finalDamage);
+            PostFloodNotification(building, hitData);
 
             if (debugLogging)
             {
@@ -675,6 +677,33 @@ public class FloodBuildingEffectResolver : MonoBehaviour
                coord.y >= 0 &&
                coord.x < gridManager.columns &&
                coord.y < gridManager.rows;
+    }
+
+    private void PostFloodNotification(GameObject building, FloodBuildingHitData hitData)
+    {
+        if (NotificationManager.Instance == null || building == null || hitData == null) return;
+
+        var control = building.GetComponent<BuildingControl>();
+        if (control == null) control = building.GetComponentInParent<BuildingControl>();
+        string buildingName = control != null && !string.IsNullOrWhiteSpace(control.buildingName)
+            ? control.buildingName
+            : building.name;
+
+        string depthLabel = hitData.maxDepth01 >= 0.66f ? "deep"
+                          : hitData.maxDepth01 >= 0.33f ? "moderate"
+                          : "shallow";
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftFlood(buildingName, depthLabel);
+        else
+        {
+            title   = "Building Flooded";
+            message = $"{buildingName} is being flooded ({depthLabel} water).";
+        }
+
+        NotificationManager.Instance.AddNotification(
+            NotificationType.BuildingFlooded, title, message, building.transform.position);
     }
 
     private void ResolveReferences()

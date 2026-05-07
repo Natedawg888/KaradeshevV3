@@ -83,6 +83,13 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.CraftCrafting(type, recipeName, buildingName);
     }
 
+    public (string title, string message) CraftFlood(string buildingName, string depthLabel)
+    {
+        if (crafter == null)
+            return ("Building Flooded", $"{buildingName} is being flooded ({depthLabel} water).");
+        return crafter.CraftFlood(buildingName, depthLabel);
+    }
+
     public (string title, string message) CraftFireFight(NotificationType type, string targetName, int casualties)
     {
         if (crafter == null)

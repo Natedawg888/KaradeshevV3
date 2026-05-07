@@ -92,6 +92,19 @@ public class NotificationMessageCrafter : ScriptableObject
         return (title, message);
     }
 
+    public (string title, string message) CraftFlood(string buildingName, string depthLabel)
+    {
+        var set = GetSuccessSet(NotificationType.BuildingFlooded);
+        if (set == null)
+            return ("Building Flooded", $"{buildingName} is being flooded ({depthLabel} water).");
+
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{BUILDING}", buildingName)
+            .Replace("{DEPTH}",    depthLabel);
+        return (title, message);
+    }
+
     public (string title, string message) CraftFireFight(NotificationType type, string targetName, int casualties)
     {
         var set = GetSuccessSet(type);
@@ -437,6 +450,18 @@ public class NotificationMessageCrafter : ScriptableObject
                     "The fire at {NAME} proved too fierce — every fighter perished.",
                     "{NAME} claimed the lives of all {CASUALTIES} worker(s) sent to fight it.",
                     "Your firefighters at {NAME} were overcome. The fire rages on.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.BuildingFlooded,
+                titles   = new[] { "Building Flooded", "Flood Damage", "Waters Rising" },
+                messages = new[]
+                {
+                    "{BUILDING} is being flooded ({DEPTH} water).",
+                    "Flood waters have reached {BUILDING} — {DEPTH} flooding reported.",
+                    "{BUILDING} is taking flood damage. Water level: {DEPTH}.",
+                    "Rising {DEPTH} waters are flooding {BUILDING}.",
                 },
             },
         };
