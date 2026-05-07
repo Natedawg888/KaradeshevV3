@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -6,6 +7,10 @@ public class BuildingFireState : MonoBehaviour
 {
     [Header("Fire Rules")]
     [SerializeField] private bool canCatchFire = true;
+
+    [Header("Extinguish Cost")]
+    [Tooltip("Resources the player must spend to manually extinguish this building.")]
+    public List<ResourceCost> extinguishCost = new();
 
     [Header("Fire Visuals")]
     [SerializeField] private GameObject[] fireVisualObjects;

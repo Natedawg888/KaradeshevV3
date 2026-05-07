@@ -10,6 +10,7 @@ public partial class BuildingPanelControl : MonoBehaviour
     private BuildingHealth currentHealth;
     private BuildingStatus currentStatus;
     private BuildingRepair currentRepair;
+    private BuildingFireState currentFireState;
     private TileControl currentTile;
 
     // Cached building-type components
@@ -313,6 +314,7 @@ public partial class BuildingPanelControl : MonoBehaviour
         currentHealth = building.GetComponent<BuildingHealth>();
         currentStatus = building.GetComponent<BuildingStatus>();
         currentRepair = building.GetComponent<BuildingRepair>();
+        currentFireState = building.GetComponent<BuildingFireState>();
         currentTile = tile != null ? tile : building.GetComponentInParent<TileControl>();
 
         // Cache optional building-type components once
@@ -346,6 +348,17 @@ public partial class BuildingPanelControl : MonoBehaviour
             currentRepair.OnRepairStarted += HandleRepairStarted;
             currentRepair.OnRepairProgress += HandleRepairProgress;
             currentRepair.OnRepairCompleted += HandleRepairCompleted;
+        }
+
+        if (currentFireState != null)
+            currentFireState.OnIgnited += HandleFireIgnited;
+
+        if (fireOverlayPanel != null)
+        {
+            if (currentFireState != null && currentFireState.IsOnFire)
+                fireOverlayPanel.ShowFor(currentBuilding);
+            else
+                fireOverlayPanel.Hide();
         }
 
         SoftShowFromChild();
@@ -392,9 +405,13 @@ public partial class BuildingPanelControl : MonoBehaviour
             currentRepair.OnRepairCompleted -= HandleRepairCompleted;
         }
 
+        if (currentFireState != null)
+            currentFireState.OnIgnited -= HandleFireIgnited;
+
         currentHealth = null;
         currentStatus = null;
         currentRepair = null;
+        currentFireState = null;
         currentShelterControl = null;
         currentCraftingControl = null;
         currentProductionControl = null;
@@ -436,6 +453,12 @@ public partial class BuildingPanelControl : MonoBehaviour
         RefreshHealthUI();
         RefreshUpgradeEntryState();
         RefreshModeSpecificButtons();
+    }
+
+    private void HandleFireIgnited(BuildingFireState state)
+    {
+        if (fireOverlayPanel != null && currentBuilding != null)
+            fireOverlayPanel.ShowFor(currentBuilding);
     }
 
     private void HandleTypeApplied(BuildingType t)

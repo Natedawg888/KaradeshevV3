@@ -16,6 +16,9 @@ public partial class BuildingPanelControl : MonoBehaviour
     [Tooltip("Reference to the Damaged panel so we can swap to it when the building becomes Damaged.")]
     public BuildingDamagedPanelControl damagedPanel;
 
+    [Header("Fire")]
+    public BuildingFireOverlayControl fireOverlayPanel;
+
     [Header("Upgrade")]
     public Button openUpgradeButton;
     public BuildingUpgradePanelControl upgradePanel;

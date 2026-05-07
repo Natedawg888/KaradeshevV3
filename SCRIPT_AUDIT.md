@@ -1209,6 +1209,37 @@ var (title, msg) = crafter.CraftCrafting(NotificationType.CraftingFailedWeather,
 NotificationManager.Instance?.AddCraftingFailedNotification(title, msg, buildingPosition);
 ```
 
+### May 7, 2026 — Building Fire Notification
+
+**Files changed:**
+- `ScriptsUpdated/Notifications/NotificationType.cs`
+- `ScriptsUpdated/Notifications/NotificationMessageCrafter.cs`
+- `ScriptsUpdated/Notifications/NotificationIconSet.cs`
+- `ScriptsUpdated/Grid_Map/Weatherv2/Fire/BuildingFireState.cs`
+
+**New notification type:** `BuildingOnFire`
+
+**How it fires:**  
+`BuildingFireState.TryIgnite()` calls `PostFireNotification()` immediately after `OnIgnited` fires. No external subscription or manager needed — the notification is self-contained on the building.
+
+```
+BuildingFireState.TryIgnite()
+  └─ PostFireNotification()
+       ├─ Gets buildingName from BuildingControl.buildingName (falls back to gameObject.name)
+       ├─ CraftBuilding(BuildingOnFire, buildingName) via NotificationMessageCrafterManager
+       └─ NotificationManager.AddNotification(BuildingOnFire, title, message, transform.position)
+```
+
+Passing `transform.position` sets `hasTileTarget = true` — the Go-To Tile button activates automatically in the row UI.
+
+**`NotificationMessageCrafter`:**
+- `BuildingOnFire` fallback added to `CraftBuilding()` switch: `"Building on Fire!" / "{buildingName} is on fire!"`
+- Template set added in `PopulateDefaults()` — token: `{BUILDING}`
+
+**`NotificationIconSet`:** new entry for `BuildingOnFire` — assign fire sprite in Inspector
+
+**Pattern note:** Follows the identical pattern to `BuildingStatus.PostBuildingStateNotification()` (used for `BuildingDamaged` / `BuildingDestroyed`). Both use `CraftBuilding()` + `AddNotification(..., transform.position)`.
+
 ---
 
 **End of Report**
