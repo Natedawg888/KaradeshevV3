@@ -92,6 +92,28 @@ public class NotificationMessageCrafter : ScriptableObject
         return (title, message);
     }
 
+    public (string title, string message) CraftFireFight(NotificationType type, string targetName, int casualties)
+    {
+        var set = GetSuccessSet(type);
+        if (set == null)
+        {
+            return type switch
+            {
+                NotificationType.FireFightSucceeded => ("Fire Extinguished!",  casualties > 0
+                    ? $"Your people put out the fire at {targetName}. {casualties} worker(s) were lost."
+                    : $"Your people put out the fire at {targetName} without casualties."),
+                NotificationType.FireFightFailed    => ("Fire Fight Failed",   $"All workers at {targetName} were lost to the flames."),
+                _                                   => ("Fire", targetName),
+            };
+        }
+
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{NAME}",       targetName)
+            .Replace("{CASUALTIES}", casualties.ToString());
+        return (title, message);
+    }
+
     public (string title, string message) CraftCrafting(NotificationType type, string recipeName, string buildingName)
     {
         var set = GetSuccessSet(type);
@@ -391,6 +413,30 @@ public class NotificationMessageCrafter : ScriptableObject
                     "Harsh conditions at {BUILDING} interrupted {RECIPE}.",
                     "The weather has disrupted crafting of {RECIPE} at {BUILDING}.",
                     "{BUILDING} could not complete {RECIPE} — weather conditions too severe.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.FireFightSucceeded,
+                titles   = new[] { "Fire Extinguished!", "Flames Defeated", "Fire Under Control" },
+                messages = new[]
+                {
+                    "Your people put out the fire at {NAME}. {CASUALTIES} worker(s) were lost.",
+                    "The fire at {NAME} has been extinguished. {CASUALTIES} paid with their lives.",
+                    "{NAME} is safe — the flames are out. Lost: {CASUALTIES}.",
+                    "Victory against the fire at {NAME}. {CASUALTIES} casualty(ies) sustained.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.FireFightFailed,
+                titles   = new[] { "Fire Fight Failed", "Workers Lost to Fire", "Overwhelmed by Flames" },
+                messages = new[]
+                {
+                    "All workers at {NAME} were lost to the flames.",
+                    "The fire at {NAME} proved too fierce — every fighter perished.",
+                    "{NAME} claimed the lives of all {CASUALTIES} worker(s) sent to fight it.",
+                    "Your firefighters at {NAME} were overcome. The fire rages on.",
                 },
             },
         };

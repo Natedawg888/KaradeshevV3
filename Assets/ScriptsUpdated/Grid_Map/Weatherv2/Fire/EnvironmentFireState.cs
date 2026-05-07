@@ -268,6 +268,7 @@ public class EnvironmentFireState : MonoBehaviour
             {
                 // All workers lost — fight collapses
                 OnFightProgress?.Invoke(this, LastRollResult, FightTurnsRemaining);
+                PostFightOutcomeNotification(succeeded: false);
                 StopFighting();
                 return;
             }
@@ -281,7 +282,35 @@ public class EnvironmentFireState : MonoBehaviour
         OnFightProgress?.Invoke(this, LastRollResult, FightTurnsRemaining);
 
         if (FightTurnsRemaining <= 0)
+        {
+            PostFightOutcomeNotification(succeeded: true);
             Extinguish();
+        }
+    }
+
+    private void PostFightOutcomeNotification(bool succeeded)
+    {
+        if (NotificationManager.Instance == null) return;
+
+        var env = GetComponent<EnvironmentControl>();
+        string name = env != null && !string.IsNullOrWhiteSpace(env.environmentName)
+            ? env.environmentName
+            : gameObject.name;
+
+        NotificationType type = succeeded ? NotificationType.FireFightSucceeded : NotificationType.FireFightFailed;
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftFireFight(type, name, CasualtiesSoFar);
+        else
+        {
+            title   = succeeded ? "Fire Extinguished!" : "Fire Fight Failed";
+            message = succeeded
+                ? $"{name} fire put out. {CasualtiesSoFar} lost."
+                : $"All workers at {name} were lost to the flames.";
+        }
+
+        NotificationManager.Instance.AddNotification(type, title, message, transform.position);
     }
 
     private void StopFighting()

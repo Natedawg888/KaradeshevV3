@@ -229,6 +229,7 @@ public class BuildingFireState : MonoBehaviour
             {
                 // All workers lost — fight collapses
                 OnFightProgress?.Invoke(this, LastRollResult, FightTurnsRemaining);
+                PostFightOutcomeNotification(succeeded: false);
                 StopFighting();
                 return;
             }
@@ -242,7 +243,10 @@ public class BuildingFireState : MonoBehaviour
         OnFightProgress?.Invoke(this, LastRollResult, FightTurnsRemaining);
 
         if (FightTurnsRemaining <= 0)
+        {
+            PostFightOutcomeNotification(succeeded: true);
             Extinguish();
+        }
     }
 
     private void StopFighting()
@@ -335,6 +339,31 @@ public class BuildingFireState : MonoBehaviour
             if (fireVisualObjects[i] != null)
                 fireVisualObjects[i].SetActive(IsOnFire);
         }
+    }
+
+    private void PostFightOutcomeNotification(bool succeeded)
+    {
+        if (NotificationManager.Instance == null) return;
+
+        var building = GetComponent<BuildingControl>();
+        string name = building != null && !string.IsNullOrWhiteSpace(building.buildingName)
+            ? building.buildingName
+            : gameObject.name;
+
+        NotificationType type = succeeded ? NotificationType.FireFightSucceeded : NotificationType.FireFightFailed;
+
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftFireFight(type, name, CasualtiesSoFar);
+        else
+        {
+            title   = succeeded ? "Fire Extinguished!" : "Fire Fight Failed";
+            message = succeeded
+                ? $"{name} fire put out. {CasualtiesSoFar} lost."
+                : $"All workers at {name} were lost to the flames.";
+        }
+
+        NotificationManager.Instance.AddNotification(type, title, message, transform.position);
     }
 
     private void PostFireNotification()

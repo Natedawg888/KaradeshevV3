@@ -83,6 +83,22 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.CraftCrafting(type, recipeName, buildingName);
     }
 
+    public (string title, string message) CraftFireFight(NotificationType type, string targetName, int casualties)
+    {
+        if (crafter == null)
+        {
+            return type switch
+            {
+                NotificationType.FireFightSucceeded => ("Fire Extinguished!", casualties > 0
+                    ? $"Your people put out the fire at {targetName}. {casualties} worker(s) were lost."
+                    : $"Your people put out the fire at {targetName} without casualties."),
+                NotificationType.FireFightFailed    => ("Fire Fight Failed",  $"All workers at {targetName} were lost to the flames."),
+                _                                   => ("Fire", targetName),
+            };
+        }
+        return crafter.CraftFireFight(type, targetName, casualties);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         if (crafter == null)

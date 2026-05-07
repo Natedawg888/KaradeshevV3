@@ -47,6 +47,8 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.ProductionPausedLackOfWorkers   },
             new Entry { type = NotificationType.CraftingCompleted               },
             new Entry { type = NotificationType.CraftingFailedWeather           },
+            new Entry { type = NotificationType.FireFightSucceeded              },
+            new Entry { type = NotificationType.FireFightFailed                 },
         };
     }
 }

@@ -22,4 +22,7 @@ public enum NotificationType
 
     CraftingCompleted,
     CraftingFailedWeather,
+
+    FireFightSucceeded,
+    FireFightFailed,
 }
