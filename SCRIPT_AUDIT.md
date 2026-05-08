@@ -1096,14 +1096,19 @@ NotificationManager public API (as of May 8, 2026):
   Passing worldPosition sets hasTileTarget = true → goToButton shows in row UI
 
 NotificationMessageCrafterManager craft methods:
-  Craft(type, EnvironmentControl, int populationLost)     — gathering / discovery
+  Craft(type, EnvironmentControl, int populationLost)             — gathering / discovery
   CraftResearch(type, techName)
   CraftBirth(type, motherSurname, bornAlive, motherDied)
   CraftProduction(type, buildingName, planName)
   CraftBuilding(type, buildingName)
-  CraftCrafting(type, recipeName, buildingName)           — tokens: {RECIPE}, {BUILDING}
-  CraftDiseaseOutbreak(diseaseName, causeType)            — tokens: {DISEASE}, {CAUSE}
-  CraftDiseaseKilled(diseaseName, surname)                — tokens: {DISEASE}, {NAME}
+  CraftCrafting(type, recipeName, buildingName)                   — tokens: {RECIPE}, {BUILDING}
+  CraftFireFight(type, targetName, casualties)                    — tokens: {NAME}, {CASUALTIES}
+  CraftDiseaseOutbreak(diseaseName, causeType)                    — tokens: {DISEASE}, {CAUSE}
+  CraftDiseaseKilled(diseaseName, surname)                        — tokens: {DISEASE}, {NAME}
+  CraftUnitTrainingCompleted(unitName, count)                     — tokens: {UNIT}, {COUNT}
+  CraftUnitSkillTrainingCompleted(groupName, unitName, skillLevel)— tokens: {GROUP}, {UNIT}, {LEVEL}
+  CraftUnitTrainingFailedWeather(unitName, count, cause)          — tokens: {UNIT}, {COUNT}, {CAUSE}
+  CraftUnitMovementCompleted(groupName, unitName)                 — tokens: {GROUP}, {UNIT}
 
 NotificationRowUI architecture (as of May 7, 2026):
   Fields:
@@ -1134,6 +1139,39 @@ NotificationRowUI architecture (as of May 7, 2026):
 ---
 
 ## 11. Changelog
+
+### May 8, 2026 — Warfare Notifications (Training, Skill Training, Weather Failure, Movement)
+
+**Files changed:**
+- `ScriptsUpdated/Player/Tiles/Building/PlayerTrainingManager.cs`
+- `ScriptsUpdated/Buildings/BuildingsTypes/Warfare/KineticWarfareControl/KineticWarfareControl.GroupSkillTraining.cs`
+- `ScriptsUpdated/Buildings/BuildingsTypes/Warfare/KineticWarfareControl/KineticWarfareControl.Tornado.cs`
+- `ScriptsUpdated/Buildings/BuildingsTypes/Warfare/UnitGroupMovementManager.cs`
+- `ScriptsUpdated/Notifications/NotificationType.cs`
+- `ScriptsUpdated/Notifications/NotificationMessageCrafter.cs`
+- `ScriptsUpdated/Notifications/NotificationMessageCrafterManager.cs`
+- `ScriptsUpdated/Notifications/NotificationIconSet.cs`
+
+**New notification types:**
+
+| Type | Fired by | Notes |
+|------|----------|-------|
+| `UnitTrainingCompleted` | `PlayerTrainingManager.ProcessCompletions` | Fires when new units successfully spawn; world pos = tile |
+| `UnitSkillTrainingCompleted` | `KineticWarfareControl.CompleteGroupSkillTraining` | Fires after skill or advancement training; world pos = building tile |
+| `UnitTrainingFailedWeather` | `KineticWarfareControl.CancelTrainingOrderForTornado` | Fires on tornado or fire cancellation; cause inferred from reason string |
+| `UnitMovementCompleted` | `UnitGroupMovementManager.ProcessGroupMovementForTurn` | Fires only when non-patrol path is fully exhausted; world pos = destination tile |
+
+All four pass world position → Go-To Tile button activates in the row UI.
+
+**Craft methods added to `NotificationMessageCrafterManager`:**
+- `CraftUnitTrainingCompleted(unitName, count)` — tokens: `{UNIT}`, `{COUNT}`
+- `CraftUnitSkillTrainingCompleted(groupName, unitName, skillLevel)` — tokens: `{GROUP}`, `{UNIT}`, `{LEVEL}`
+- `CraftUnitTrainingFailedWeather(unitName, count, cause)` — tokens: `{UNIT}`, `{COUNT}`, `{CAUSE}`
+- `CraftUnitMovementCompleted(groupName, unitName)` — tokens: `{GROUP}`, `{UNIT}`
+
+**`NotificationIconSet`:** four new entries — assign sprites in Inspector
+
+---
 
 ### May 8, 2026 — Disease Death Notification + DiseaseOutbreak Death Icon Fix
 
@@ -1552,5 +1590,5 @@ Auto-find: "FireIcon" and "FireFightIconTimer" children by name in OnValidate()
 **End of Report**
 
 *Status: Ready for Ruflo Integration*  
-*Last Updated: May 8, 2026*  
+*Last Updated: May 8, 2026 (warfare notifications)*  
 *Audit Confidence: High (comprehensive read-only scan)*
