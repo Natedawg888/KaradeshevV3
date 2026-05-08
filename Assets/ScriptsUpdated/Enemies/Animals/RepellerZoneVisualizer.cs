@@ -5,8 +5,9 @@ using UnityEngine.UI;
 
 /// <summary>
 /// Highlights every environment tile within the square repel radius of each AnimalRepeller.
-/// The repeller's own tile is excluded (radius 1 = ring of adjacent tiles, 2 = two tiles out, etc.).
-/// Cache is built in a startup coroutine; overlays are created in batches to avoid frame freezes.
+/// The building's own tile is excluded (radius 1 = adjacent ring, 2 = two tiles out, etc.).
+/// Cache is built on first show — after all additive scenes are loaded — to avoid empty results.
+/// Overlays are created in batches to avoid frame freezes.
 /// </summary>
 public class RepellerZoneVisualizer : MonoBehaviour
 {
@@ -15,9 +16,6 @@ public class RepellerZoneVisualizer : MonoBehaviour
     [SerializeField] private Color overlayColor = new Color(1f, 0.15f, 0.15f, 0.35f);
 
     [Header("Performance")]
-    [Tooltip("Tiles to scan into the cache per frame during startup.")]
-    [SerializeField] private int cacheBuildPerFrame = 50;
-
     [Tooltip("Overlay quads to create per frame when showing the zone.")]
     [SerializeField] private int overlaysPerFrame = 20;
 
@@ -25,19 +23,14 @@ public class RepellerZoneVisualizer : MonoBehaviour
     private bool     _highlightActive;
     private Material _overlayMaterial;
 
-    private Coroutine _cacheRoutine;
     private Coroutine _showRoutine;
 
-    private readonly List<GameObject>            _overlays  = new List<GameObject>();
-    private readonly Dictionary<(int,int), TileControl> _tileCache = new Dictionary<(int,int), TileControl>();
-    private bool _cacheReady;
+    private readonly List<GameObject>                   _overlays  = new List<GameObject>();
+    private readonly Dictionary<(int, int), TileControl> _tileCache = new Dictionary<(int, int), TileControl>();
 
     // ------------------------------------------------------------------
-
-    private void Start()
-    {
-        _cacheRoutine = StartCoroutine(BuildCacheRoutine());
-    }
+    // Lifecycle
+    // ------------------------------------------------------------------
 
     private void OnEnable()  => WorldCanvasMode.OnChanged += HandleModeChanged;
     private void OnDisable()
@@ -103,47 +96,30 @@ public class RepellerZoneVisualizer : MonoBehaviour
     }
 
     // ------------------------------------------------------------------
-    // Cache — built once at startup in batches
+    // Cache — built lazily on first show so all additive scenes are loaded
     // ------------------------------------------------------------------
 
-    private IEnumerator BuildCacheRoutine()
+    private void RebuildTileCache()
     {
-        _cacheReady = false;
         _tileCache.Clear();
 
-        var envControls = FindObjectsOfType<EnvironmentControl>(true);
-        int count = 0;
-
-        for (int i = 0; i < envControls.Length; i++)
+        var allTiles = FindObjectsOfType<TileControl>(true);
+        for (int i = 0; i < allTiles.Length; i++)
         {
-            var env = envControls[i];
-            if (env == null) continue;
-
-            var tile = env.GetComponentInParent<TileControl>(true);
+            var tile = allTiles[i];
             if (tile == null) continue;
+            if (tile.tileContentType != TileContentType.Environment) continue;
 
             var gp  = tile.GetGridPosition();
             var key = (gp.x, gp.y);
             if (!_tileCache.ContainsKey(key))
                 _tileCache[key] = tile;
-
-            if (++count >= cacheBuildPerFrame)
-            {
-                count = 0;
-                yield return null;
-            }
         }
 
-        _cacheReady = true;
-        _cacheRoutine = null;
+        Debug.Log($"[RepellerZoneVisualizer] Cache built: {_tileCache.Count} environment tiles.");
     }
 
-    public void InvalidateTileCache()
-    {
-        _cacheReady = false;
-        if (_cacheRoutine != null) StopCoroutine(_cacheRoutine);
-        _cacheRoutine = StartCoroutine(BuildCacheRoutine());
-    }
+    public void InvalidateTileCache() => _tileCache.Clear();
 
     // ------------------------------------------------------------------
     // Show / Hide
@@ -154,6 +130,10 @@ public class RepellerZoneVisualizer : MonoBehaviour
         StopShowRoutine();
         HideHighlight();
         EnsureMaterial();
+
+        // Rebuild cache every show — ensures it's populated after additive scene loads
+        RebuildTileCache();
+
         _showRoutine = StartCoroutine(ShowHighlightRoutine());
     }
 
@@ -168,19 +148,22 @@ public class RepellerZoneVisualizer : MonoBehaviour
 
     private IEnumerator ShowHighlightRoutine()
     {
-        // Wait for cache if still building
-        while (!_cacheReady)
-            yield return null;
-
         if (AnimalRepellerRegistry.Active.Count == 0)
+        {
+            Debug.Log("[RepellerZoneVisualizer] No active repellers found.");
             yield break;
+        }
+
+        if (_tileCache.Count == 0)
+        {
+            Debug.LogWarning("[RepellerZoneVisualizer] Tile cache is empty — no environment tiles found.");
+            yield break;
+        }
 
         var grid = GridManager.Instance;
-
         var visited = new HashSet<(int, int)>();
+        var toSpawn = new List<TileControl>();
 
-        // Collect all unique coords to overlay
-        var coords = new List<(int, int)>();
         foreach (var repeller in AnimalRepellerRegistry.Active)
         {
             if (repeller == null) continue;
@@ -194,30 +177,28 @@ public class RepellerZoneVisualizer : MonoBehaviour
             for (int dx = -radius; dx <= radius; dx++)
             for (int dy = -radius; dy <= radius; dy++)
             {
-                if (dx == 0 && dy == 0) continue; // exclude the building's own tile
+                if (dx == 0 && dy == 0) continue;
 
                 int tx = center.x + dx;
                 int ty = center.y + dy;
 
-                if (visited.Add((tx, ty)))
-                    coords.Add((tx, ty));
+                if (!visited.Add((tx, ty))) continue;
+
+                if (_tileCache.TryGetValue((tx, ty), out var tile) && tile != null)
+                    toSpawn.Add(tile);
             }
         }
 
-        // Create overlays in batches
-        int batchCount = 0;
-        for (int i = 0; i < coords.Count; i++)
+        Debug.Log($"[RepellerZoneVisualizer] Spawning {toSpawn.Count} overlay(s).");
+
+        int batch = 0;
+        for (int i = 0; i < toSpawn.Count; i++)
         {
-            var (tx, ty) = coords[i];
+            CreateOverlayForTile(toSpawn[i]);
 
-            if (!_tileCache.TryGetValue((tx, ty), out var tile) || tile == null)
-                continue;
-
-            CreateOverlayForTile(tile);
-
-            if (++batchCount >= overlaysPerFrame)
+            if (++batch >= overlaysPerFrame)
             {
-                batchCount = 0;
+                batch = 0;
                 yield return null;
             }
         }
@@ -245,8 +226,10 @@ public class RepellerZoneVisualizer : MonoBehaviour
         Vector3 center = tile.transform.position;
 
         var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        go.name  = "RepellerZoneOverlay";
-        go.layer = LayerMask.NameToLayer("UI");
+        go.name = "RepellerZoneOverlay";
+
+        int uiLayer = LayerMask.NameToLayer("UI");
+        go.layer = uiLayer >= 0 ? uiLayer : 0;
 
         go.transform.position   = new Vector3(center.x, center.y + yOffset, center.z);
         go.transform.rotation   = Quaternion.Euler(90f, 0f, 0f);
@@ -272,8 +255,7 @@ public class RepellerZoneVisualizer : MonoBehaviour
         }
 
         var rend = tile.GetComponentInChildren<Renderer>(true);
-        if (rend != null)
-            return rend.bounds.size;
+        if (rend != null) return rend.bounds.size;
 
         float cell = GridManager.Instance != null ? GridManager.Instance.cellSize : 1f;
         return new Vector3(cell, cell, cell);
