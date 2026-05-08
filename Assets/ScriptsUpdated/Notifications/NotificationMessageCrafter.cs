@@ -202,6 +202,56 @@ public class NotificationMessageCrafter : ScriptableObject
         return (title, message);
     }
 
+    public (string title, string message) CraftUnitTrainingCompleted(string unitName, int count)
+    {
+        var set = GetSuccessSet(NotificationType.UnitTrainingCompleted);
+        if (set == null)
+            return ("Training Complete", $"{count} {unitName}(s) are ready for deployment.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{UNIT}",  unitName)
+            .Replace("{COUNT}", count.ToString());
+        return (title, message);
+    }
+
+    public (string title, string message) CraftUnitMovementCompleted(string groupName, string unitName)
+    {
+        var set = GetSuccessSet(NotificationType.UnitMovementCompleted);
+        if (set == null)
+            return ("Movement Complete", $"{groupName} has reached their destination.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{GROUP}", groupName)
+            .Replace("{UNIT}",  unitName);
+        return (title, message);
+    }
+
+    public (string title, string message) CraftUnitTrainingFailedWeather(string unitName, int count, string cause)
+    {
+        var set = GetSuccessSet(NotificationType.UnitTrainingFailedWeather);
+        if (set == null)
+            return ("Training Disrupted", $"{count} {unitName}(s) lost their training due to {cause}.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{UNIT}",  unitName)
+            .Replace("{COUNT}", count.ToString())
+            .Replace("{CAUSE}", cause);
+        return (title, message);
+    }
+
+    public (string title, string message) CraftUnitSkillTrainingCompleted(string groupName, string unitName, int skillLevel)
+    {
+        var set = GetSuccessSet(NotificationType.UnitSkillTrainingCompleted);
+        if (set == null)
+            return ("Training Complete", $"{groupName} has completed training and reached skill level {skillLevel}.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{GROUP}", groupName)
+            .Replace("{UNIT}",  unitName)
+            .Replace("{LEVEL}", skillLevel.ToString());
+        return (title, message);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         var set = GetSuccessSet(type);
@@ -541,6 +591,54 @@ public class NotificationMessageCrafter : ScriptableObject
                     "{DISEASE} has claimed the life of {NAME}.",
                     "{NAME} could not survive {DISEASE}.",
                     "The settlement mourns {NAME}, taken by {DISEASE}.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.UnitTrainingCompleted,
+                titles   = new[] { "Training Complete", "Units Ready", "Troops Prepared" },
+                messages = new[]
+                {
+                    "{COUNT} {UNIT}(s) have completed training and are ready for deployment.",
+                    "Your {UNIT} training is done — {COUNT} unit(s) stand ready.",
+                    "{COUNT} {UNIT}(s) have finished their training.",
+                    "A group of {COUNT} {UNIT}(s) is ready to be deployed.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.UnitSkillTrainingCompleted,
+                titles   = new[] { "Training Complete", "Skills Sharpened", "Group Ready" },
+                messages = new[]
+                {
+                    "{GROUP} has completed training and reached skill level {LEVEL}.",
+                    "Your {UNIT} group '{GROUP}' has finished training — now at skill level {LEVEL}.",
+                    "{GROUP} emerges from training stronger, reaching skill level {LEVEL}.",
+                    "Skill training complete: {GROUP} ({UNIT}) is now level {LEVEL}.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.UnitTrainingFailedWeather,
+                titles   = new[] { "Training Disrupted", "Training Lost", "Recruits Scattered" },
+                messages = new[]
+                {
+                    "{COUNT} {UNIT}(s) could not complete training due to {CAUSE}.",
+                    "A {CAUSE} has disrupted training — {COUNT} {UNIT}(s) lost.",
+                    "{CAUSE} struck the training grounds. {COUNT} {UNIT} recruit(s) have been lost.",
+                    "Training interrupted by {CAUSE}. {COUNT} {UNIT}(s) could not be recovered.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.UnitMovementCompleted,
+                titles   = new[] { "Movement Complete", "Destination Reached", "Units Arrived" },
+                messages = new[]
+                {
+                    "{GROUP} has reached their destination.",
+                    "Your {UNIT} group '{GROUP}' has arrived at their destination.",
+                    "{GROUP} has completed their march and is now in position.",
+                    "The {UNIT} group '{GROUP}' has finished moving.",
                 },
             },
             new SuccessTemplateSet

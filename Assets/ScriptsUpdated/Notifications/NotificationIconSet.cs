@@ -54,6 +54,10 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.ElderDiedOfOldAge              },
             new Entry { type = NotificationType.DiseaseOutbreak                },
             new Entry { type = NotificationType.DiseaseKilledPopulation        },
+            new Entry { type = NotificationType.UnitTrainingCompleted          },
+            new Entry { type = NotificationType.UnitSkillTrainingCompleted     },
+            new Entry { type = NotificationType.UnitTrainingFailedWeather      },
+            new Entry { type = NotificationType.UnitMovementCompleted         },
         };
     }
 }

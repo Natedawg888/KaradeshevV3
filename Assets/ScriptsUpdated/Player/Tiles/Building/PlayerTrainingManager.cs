@@ -163,6 +163,9 @@ public class PlayerTrainingManager : MonoBehaviour
                     }
 
                     spawned = (group != null);
+
+                    if (spawned)
+                        PostUnitTrainingNotification(tc);
                 }
                 else
                 {
@@ -369,6 +372,19 @@ public class PlayerTrainingManager : MonoBehaviour
 
         _unitById.TryGetValue(unitID.Trim(), out MilitiaUnit result);
         return result;
+    }
+
+    private static void PostUnitTrainingNotification(KineticWarfareControl.TrainingCompletion tc)
+    {
+        if (NotificationManager.Instance == null) return;
+        string unitName = !string.IsNullOrWhiteSpace(tc.unit?.unitName) ? tc.unit.unitName : "Unit";
+        Vector3 pos = tc.tileGroupControl != null ? tc.tileGroupControl.transform.position : default;
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftUnitTrainingCompleted(unitName, tc.totalUnits);
+        else
+            (title, message) = ("Training Complete", $"{tc.totalUnits} {unitName}(s) are ready for deployment.");
+        NotificationManager.Instance.AddNotification(NotificationType.UnitTrainingCompleted, title, message, pos);
     }
 
     private void ApplyTrainingFatigueToSpawnedGroup(

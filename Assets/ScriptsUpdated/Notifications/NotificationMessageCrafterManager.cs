@@ -143,6 +143,34 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.CraftDiseaseKilled(diseaseName, surname);
     }
 
+    public (string title, string message) CraftUnitTrainingCompleted(string unitName, int count)
+    {
+        if (crafter == null)
+            return ("Training Complete", $"{count} {unitName}(s) are ready for deployment.");
+        return crafter.CraftUnitTrainingCompleted(unitName, count);
+    }
+
+    public (string title, string message) CraftUnitMovementCompleted(string groupName, string unitName)
+    {
+        if (crafter == null)
+            return ("Movement Complete", $"{groupName} has reached their destination.");
+        return crafter.CraftUnitMovementCompleted(groupName, unitName);
+    }
+
+    public (string title, string message) CraftUnitTrainingFailedWeather(string unitName, int count, string cause)
+    {
+        if (crafter == null)
+            return ("Training Disrupted", $"{count} {unitName}(s) lost their training due to {cause}.");
+        return crafter.CraftUnitTrainingFailedWeather(unitName, count, cause);
+    }
+
+    public (string title, string message) CraftUnitSkillTrainingCompleted(string groupName, string unitName, int skillLevel)
+    {
+        if (crafter == null)
+            return ("Training Complete", $"{groupName} has completed training and reached skill level {skillLevel}.");
+        return crafter.CraftUnitSkillTrainingCompleted(groupName, unitName, skillLevel);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         if (crafter == null)

@@ -308,11 +308,28 @@ public partial class KineticWarfareControl
         // the reservation as UnitGroup.
         order.owner.AddExistingGroup(group);
 
+        PostSkillTrainingNotification(order, group);
+
         Debug.Log(
             $"[KineticWarfare] Completed {(order.isAdvancementOrder ? "advancement" : "skill training")} " +
             $"order {order.orderId} for group {group.groupId}. " +
             $"New unit = {group.unitType.unitName}, skill = {group.skillLevel}."
         );
+    }
+
+    private static void PostSkillTrainingNotification(GroupSkillTrainingOrder order, TileUnitGroupData group)
+    {
+        if (NotificationManager.Instance == null) return;
+        string groupName = !string.IsNullOrWhiteSpace(group.groupName) ? group.groupName : "Unit Group";
+        string unitName  = group.unitType != null && !string.IsNullOrWhiteSpace(group.unitType.unitName)
+            ? group.unitType.unitName : "Unit";
+        Vector3 pos = order.owner != null ? order.owner.transform.position : default;
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftUnitSkillTrainingCompleted(groupName, unitName, group.skillLevel);
+        else
+            (title, message) = ("Training Complete", $"{groupName} has completed training and reached skill level {group.skillLevel}.");
+        NotificationManager.Instance.AddNotification(NotificationType.UnitSkillTrainingCompleted, title, message, pos);
     }
 
     private void ApplyAdvancementToGroup(GroupSkillTrainingOrder order, TileUnitGroupData group)

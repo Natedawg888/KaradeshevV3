@@ -716,6 +716,7 @@ public class UnitGroupMovementManager : MonoBehaviour
             }
             else
             {
+                PostMovementCompletedNotification(group, nextTile);
                 ClearRouteOnGroup(group);
             }
 
@@ -728,6 +729,21 @@ public class UnitGroupMovementManager : MonoBehaviour
 
             NotifyGroupMovementUpdated(group);
         }
+    }
+
+    private static void PostMovementCompletedNotification(TileUnitGroupData group, TileControl destinationTile)
+    {
+        if (NotificationManager.Instance == null) return;
+        string groupName = !string.IsNullOrWhiteSpace(group.groupName) ? group.groupName : "Unit Group";
+        string unitName  = group.unitType != null && !string.IsNullOrWhiteSpace(group.unitType.unitName)
+            ? group.unitType.unitName : "Unit";
+        Vector3 pos = destinationTile != null ? destinationTile.transform.position : default;
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftUnitMovementCompleted(groupName, unitName);
+        else
+            (title, message) = ("Movement Complete", $"{groupName} has reached their destination.");
+        NotificationManager.Instance.AddNotification(NotificationType.UnitMovementCompleted, title, message, pos);
     }
 
     private void ClearRouteOnGroup(TileUnitGroupData group)

@@ -33,4 +33,9 @@ public enum NotificationType
 
     DiseaseOutbreak,
     DiseaseKilledPopulation,
+
+    UnitTrainingCompleted,
+    UnitSkillTrainingCompleted,
+    UnitTrainingFailedWeather,
+    UnitMovementCompleted,
 }

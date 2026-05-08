@@ -318,14 +318,32 @@ public partial class KineticWarfareControl
 
         bool removed = activeOrders.Remove(order);
 
-        if (removed && !string.IsNullOrWhiteSpace(reason))
+        if (removed)
         {
-            Debug.Log(
-                $"[KineticWarfare] Cancelled training order {order.orderID} " +
-                $"({(order.unit != null ? order.unit.unitName : "Unknown Unit")}) بسبب tornado: {reason}");
+            if (!string.IsNullOrWhiteSpace(reason))
+                Debug.Log(
+                    $"[KineticWarfare] Cancelled training order {order.orderID} " +
+                    $"({(order.unit != null ? order.unit.unitName : "Unknown Unit")}): {reason}");
+
+            PostTrainingWeatherFailureNotification(order, reason);
         }
 
         return removed;
+    }
+
+    private void PostTrainingWeatherFailureNotification(TrainingOrder order, string reason)
+    {
+        if (NotificationManager.Instance == null) return;
+        string unitName = order.unit != null && !string.IsNullOrWhiteSpace(order.unit.unitName)
+            ? order.unit.unitName : "Unit";
+        int count = order.TotalUnits;
+        string cause = !string.IsNullOrWhiteSpace(reason) && reason.Contains("fire") ? "fire" : "tornado";
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftUnitTrainingFailedWeather(unitName, count, cause);
+        else
+            (title, message) = ("Training Disrupted", $"{count} {unitName}(s) lost their training due to {cause}.");
+        NotificationManager.Instance.AddNotification(NotificationType.UnitTrainingFailedWeather, title, message, transform.position);
     }
 
     private void PauseTrainingForTornado()
