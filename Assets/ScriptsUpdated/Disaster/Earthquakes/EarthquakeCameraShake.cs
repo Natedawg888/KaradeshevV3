@@ -110,12 +110,12 @@ public class EarthquakeCameraShake : MonoBehaviour
             cameraTransform = found.transform;
 
             if (debugLogging)
-                Debug.Log($"EarthquakeCameraShake: Found camera '{found.name}'.");
+                //Debug.Log($"EarthquakeCameraShake: Found camera '{found.name}'.");
         }
         else
         {
             if (debugLogging)
-                Debug.LogWarning("EarthquakeCameraShake: Could not find a Camera in the scene.");
+                //Debug.LogWarning("EarthquakeCameraShake: Could not find a Camera in the scene.");
         }
     }
 
@@ -128,7 +128,7 @@ public class EarthquakeCameraShake : MonoBehaviour
         if (target == null)
         {
             if (debugLogging)
-                Debug.LogWarning("EarthquakeCameraShake: No camera target found.");
+                //Debug.LogWarning("EarthquakeCameraShake: No camera target found.");
 
             return;
         }
@@ -157,10 +157,10 @@ public class EarthquakeCameraShake : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeCameraShake: Shaking '{target.name}', " +
-                $"magnitude={magnitude:0.0}, duration={duration:0.00}"
-            );
+            //Debug.Log(
+                //$"EarthquakeCameraShake: Shaking '{target.name}', " +
+                //$"magnitude={magnitude:0.0}, duration={duration:0.00}"
+            //);
         }
 
         float elapsed = 0f;

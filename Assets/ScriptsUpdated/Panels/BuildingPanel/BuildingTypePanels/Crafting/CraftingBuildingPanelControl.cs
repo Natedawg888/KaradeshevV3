@@ -96,7 +96,7 @@ public class CraftingBuildingPanelControl : MonoBehaviour
 
         if (_crafting == null)
         {
-            Debug.LogError("[CraftingPanel] Building has no CraftingBuildingControl.");
+            //Debug.LogError("[CraftingPanel] Building has no CraftingBuildingControl.");
             return;
         }
 
@@ -185,7 +185,7 @@ public class CraftingBuildingPanelControl : MonoBehaviour
             CraftingRecipe recipe = craftingRecipeManager.GetByID(knownId);
             if (recipe == null)
             {
-                Debug.LogWarning($"[CraftingPanel] Known crafting id '{knownId}' NOT found in CraftingRecipeManager.");
+                //Debug.LogWarning($"[CraftingPanel] Known crafting id '{knownId}' NOT found in CraftingRecipeManager.");
                 continue;
             }
 

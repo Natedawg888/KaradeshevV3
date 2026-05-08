@@ -128,7 +128,7 @@ public class PopulationTutorial : MonoBehaviour
             return;
         }
 
-        Debug.LogWarning("[PopulationTutorial] DiscoveryTutorial was not found or could not start.");
+        //Debug.LogWarning("[PopulationTutorial] DiscoveryTutorial was not found or could not start.");
 
         if (resumeTurnTimerWhenFinished)
         {

@@ -124,8 +124,8 @@ public class AnimalGroupState
 
         if (before != currentHealth)
         {
-            Debug.Log(
-                $"[AnimalHealthClamp] {species?.displayName} group {id} HP clamped {before}->{currentHealth} | size={size} | maxHP={max}");
+            //Debug.Log(
+                //$"[AnimalHealthClamp] {species?.displayName} group {id} HP clamped {before}->{currentHealth} | size={size} | maxHP={max}");
         }
     }
 }

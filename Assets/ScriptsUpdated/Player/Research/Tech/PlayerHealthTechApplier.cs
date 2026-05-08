@@ -37,9 +37,9 @@ public class PlayerHealthTechApplier : MonoBehaviour
         if (!_byTech.TryGetValue(techID, out var list) || list.Count == 0) return;
 
         var rules = PlayerHealthRulebook.Instance;
-        if (rules == null) { Debug.LogWarning("[PlayerHealthTechApplier] Missing PlayerHealthRulebook."); return; }
-
-        int dCH=0, dTH=0, dAH=0, dEH=0;
+        //if (rules == null) { Debug.LogWarning("[PlayerHealthTechApplier] Missing PlayerHealthRulebook."); return; }
+//
+        //int dCH=0, dTH=0, dAH=0, dEH=0;
         int dC2T=0, dT2A=0, dA2E=0, dLife=0;
         float dCR=0, dTR=0, dAR=0, dER=0;
 
@@ -113,9 +113,9 @@ public class PlayerHealthTechApplier : MonoBehaviour
         if (!_byTech.TryGetValue(techID, out var list) || list == null || list.Count == 0) return;
 
         var rules = PlayerHealthRulebook.Instance;
-        if (rules == null) { Debug.LogWarning("[PlayerHealthTechApplier] Missing PlayerHealthRulebook."); return; }
-
-        int dCH=0, dTH=0, dAH=0, dEH=0;
+        //if (rules == null) { Debug.LogWarning("[PlayerHealthTechApplier] Missing PlayerHealthRulebook."); return; }
+//
+        //int dCH=0, dTH=0, dAH=0, dEH=0;
         int dC2T=0, dT2A=0, dA2E=0, dLife=0;
         float dCR=0, dTR=0, dAR=0, dER=0;
         float dResC=0f, dResT=0f, dResA=0f, dResE=0f;
@@ -159,7 +159,7 @@ public class PlayerHealthTechApplier : MonoBehaviour
         {
             // If some tech replaced/patch family config, the safest is to re-derive config
             // from remaining researched techs. (Optional to implement depending on your rulebook API.)
-            Debug.LogWarning("[PlayerHealthTechApplier] Tech removal touched family config. Consider reapplying remaining researched techs to rebuild config exactly.");
+            //Debug.LogWarning("[PlayerHealthTechApplier] Tech removal touched family config. Consider reapplying remaining researched techs to rebuild config exactly.");
         }
 
         var pop = PlayersPopulationManager.Instance;

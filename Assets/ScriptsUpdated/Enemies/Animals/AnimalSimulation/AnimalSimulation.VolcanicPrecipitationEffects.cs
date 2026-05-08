@@ -35,9 +35,9 @@ public partial class AnimalSimulation
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[AnimalSimulation] {kind} killed animal group {groupId} at {originalTile}. " +
-                    $"Damage={finalDamage}");
+                //Debug.Log(
+                    //$"[AnimalSimulation] {kind} killed animal group {groupId} at {originalTile}. " +
+                    //$"Damage={finalDamage}");
             }
 
             CleanupTargetsOnDeath(ref group);
@@ -54,9 +54,9 @@ public partial class AnimalSimulation
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[AnimalSimulation] {kind} damaged animal group {groupId} at {originalTile}. " +
-                $"Damage={finalDamage} RemainingSize={group.size}");
+            //Debug.Log(
+                //$"[AnimalSimulation] {kind} damaged animal group {groupId} at {originalTile}. " +
+                //$"Damage={finalDamage} RemainingSize={group.size}");
         }
 
         return true;

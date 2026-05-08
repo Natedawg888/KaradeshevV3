@@ -160,7 +160,7 @@ public class CollectedGoodsPanelControl : MonoBehaviour
         var typed = prefab.GetComponent<CollectedItemEntry>();
         if (!typed)
         {
-            Debug.LogWarning("[CollectedGoodsPanelControl] Provided prefab has no CollectedItemEntry component.");
+            //Debug.LogWarning("[CollectedGoodsPanelControl] Provided prefab has no CollectedItemEntry component.");
             return;
         }
 

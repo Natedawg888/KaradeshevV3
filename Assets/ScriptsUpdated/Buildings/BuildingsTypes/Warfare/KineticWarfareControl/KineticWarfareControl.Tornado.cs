@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -321,9 +321,9 @@ public partial class KineticWarfareControl
         if (removed)
         {
             if (!string.IsNullOrWhiteSpace(reason))
-                Debug.Log(
-                    $"[KineticWarfare] Cancelled training order {order.orderID} " +
-                    $"({(order.unit != null ? order.unit.unitName : "Unknown Unit")}): {reason}");
+                //Debug.Log(
+                    //$"[KineticWarfare] Cancelled training order {order.orderID} " +
+                    //$"({(order.unit != null ? order.unit.unitName : "Unknown Unit")}): {reason}");
 
             PostTrainingWeatherFailureNotification(order, reason);
         }
@@ -433,13 +433,13 @@ public partial class KineticWarfareControl
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[KineticWarfare] Tornado impacted training on '{name}' | " +
-                $"Paused={result.paused} | " +
-                $"TraineesRolled={result.traineesRolled} | " +
-                $"TraineesKilled={result.traineesKilled} | " +
-                $"Orders={activeOrders.Count}"
-            );
+            //Debug.Log(
+                //$"[KineticWarfare] Tornado impacted training on '{name}' | " +
+                //$"Paused={result.paused} | " +
+                //$"TraineesRolled={result.traineesRolled} | " +
+                //$"TraineesKilled={result.traineesKilled} | " +
+                //$"Orders={activeOrders.Count}"
+            //);
         }
 
         return result;
@@ -488,11 +488,11 @@ public partial class KineticWarfareControl
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[KineticWarfare] Tornado cleared for '{name}' | " +
-                $"CancelledOrdersOnResume={cancelled} | " +
-                $"RemainingOrders={activeOrders.Count}"
-            );
+            //Debug.Log(
+                //$"[KineticWarfare] Tornado cleared for '{name}' | " +
+                //$"CancelledOrdersOnResume={cancelled} | " +
+                //$"RemainingOrders={activeOrders.Count}"
+            //);
         }
 
         return true;
@@ -585,13 +585,13 @@ public partial class KineticWarfareControl
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[KineticWarfare] Fire impacted training on '{name}' | " +
-                $"Paused={result.paused} | " +
-                $"TraineesRolled={result.traineesRolled} | " +
-                $"TraineesKilled={result.traineesKilled} | " +
-                $"Orders={activeOrders.Count}"
-            );
+            //Debug.Log(
+                //$"[KineticWarfare] Fire impacted training on '{name}' | " +
+                //$"Paused={result.paused} | " +
+                //$"TraineesRolled={result.traineesRolled} | " +
+                //$"TraineesKilled={result.traineesKilled} | " +
+                //$"Orders={activeOrders.Count}"
+            //);
         }
 
         return result;
@@ -640,11 +640,11 @@ public partial class KineticWarfareControl
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[KineticWarfare] Fire cleared for '{name}' | " +
-                $"CancelledOrdersOnResume={cancelled} | " +
-                $"RemainingOrders={activeOrders.Count}"
-            );
+            //Debug.Log(
+                //$"[KineticWarfare] Fire cleared for '{name}' | " +
+                //$"CancelledOrdersOnResume={cancelled} | " +
+                //$"RemainingOrders={activeOrders.Count}"
+            //);
         }
 
         return true;

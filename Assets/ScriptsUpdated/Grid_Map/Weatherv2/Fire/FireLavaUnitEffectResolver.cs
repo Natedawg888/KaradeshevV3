@@ -581,9 +581,9 @@ public class FireLavaUnitEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[FireLavaUnitEffectResolver] {hazard} destroyed unit group {group.groupId} " +
-                    $"at ({coord.x},{coord.y}). Damage={finalDamage}");
+                //Debug.Log(
+                    //$"[FireLavaUnitEffectResolver] {hazard} destroyed unit group {group.groupId} " +
+                    //$"at ({coord.x},{coord.y}). Damage={finalDamage}");
             }
 
             unitControl.RemoveGroupDueToFatalities(group);
@@ -597,9 +597,9 @@ public class FireLavaUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[FireLavaUnitEffectResolver] {hazard} damaged unit group {group.groupId} " +
-                $"at ({coord.x},{coord.y}). Damage={finalDamage} UnitsLost={unitsLost}");
+            //Debug.Log(
+                //$"[FireLavaUnitEffectResolver] {hazard} damaged unit group {group.groupId} " +
+                //$"at ({coord.x},{coord.y}). Damage={finalDamage} UnitsLost={unitsLost}");
         }
     }
 

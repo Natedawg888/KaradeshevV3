@@ -190,7 +190,7 @@ public class TornadoBuildingEffectResolver : MonoBehaviour
                 record == null)
             {
                 if (debugLogging)
-                    Debug.Log($"[TornadoBuildingEffectResolver] Cell {cell} has no building record.");
+                    //Debug.Log($"[TornadoBuildingEffectResolver] Cell {cell} has no building record.");
 
                 continue;
             }
@@ -200,9 +200,9 @@ public class TornadoBuildingEffectResolver : MonoBehaviour
             {
                 if (debugLogging)
                 {
-                    Debug.Log(
-                        $"[TornadoBuildingEffectResolver] Cell {cell} matched building record '{record.instanceId}', " +
-                        $"but no BuildingControl was found on instance '{(record.instance != null ? record.instance.name : "null")}'.");
+                    //Debug.Log(
+                        //$"[TornadoBuildingEffectResolver] Cell {cell} matched building record '{record.instanceId}', " +
+                        //$"but no BuildingControl was found on instance '{(record.instance != null ? record.instance.name : "null")}'.");
                 }
 
                 continue;
@@ -248,9 +248,9 @@ public class TornadoBuildingEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TornadoBuildingEffectResolver] Cell {cell} matched building '{building.name}' " +
-                    $"from record '{record.instanceId}'.");
+                //Debug.Log(
+                    //$"[TornadoBuildingEffectResolver] Cell {cell} matched building '{building.name}' " +
+                    //$"from record '{record.instanceId}'.");
             }
         }
 
@@ -319,8 +319,8 @@ public class TornadoBuildingEffectResolver : MonoBehaviour
                 {
                     if (debugLogging)
                     {
-                        Debug.Log(
-                            $"[TornadoBuildingEffectResolver] Building '{building.name}' reached max hits for turn {currentTurn}.");
+                        //Debug.Log(
+                            //$"[TornadoBuildingEffectResolver] Building '{building.name}' reached max hits for turn {currentTurn}.");
                     }
 
                     continue;
@@ -353,9 +353,9 @@ public class TornadoBuildingEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TornadoBuildingEffectResolver] Applied {hitsToApply} timed tornado hit(s) to '{building.name}'. " +
-                    $"NextAllowed={runtime.nextAllowedHitTime:F2} Turn={currentTurn} HitsThisTurn={runtime.hitsAppliedThisTurn}");
+                //Debug.Log(
+                    //$"[TornadoBuildingEffectResolver] Applied {hitsToApply} timed tornado hit(s) to '{building.name}'. " +
+                    //$"NextAllowed={runtime.nextAllowedHitTime:F2} Turn={currentTurn} HitsThisTurn={runtime.hitsAppliedThisTurn}");
             }
         }
     }
@@ -485,9 +485,9 @@ public class TornadoBuildingEffectResolver : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TornadoBuildingEffectResolver] {building.name} resisted tornado hit " +
-                    $"{hitNumberThisInterval}/{totalHitsThisInterval}.");
+                //Debug.Log(
+                    //$"[TornadoBuildingEffectResolver] {building.name} resisted tornado hit " +
+                    //$"{hitNumberThisInterval}/{totalHitsThisInterval}.");
             }
 
             return;
@@ -557,17 +557,17 @@ public class TornadoBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TornadoBuildingEffectResolver] Tornado hit {building.name} " +
-                $"({hitNumberThisInterval}/{totalHitsThisInterval}) for {finalDamage}. " +
-                $"Storm={maxStormIntensity01:F2} Lifetime={maxLifetimeRemaining} Cells={impactedCellCount} | " +
-                $"ShelterDeaths={killedInShelter} | " +
-                $"CancelledCraftOrders={cancelledCraftOrders} | " +
-                $"CrafterDeaths={killedCrafters} | " +
-                $"ProductionPaused={productionPaused} | " +
-                $"ProductionWorkerDeaths={killedProductionWorkers} | " +
-                $"TrainingPaused={trainingPaused} | " +
-                $"TrainingDeaths={killedTrainees}");
+            //Debug.Log(
+                //$"[TornadoBuildingEffectResolver] Tornado hit {building.name} " +
+                //$"({hitNumberThisInterval}/{totalHitsThisInterval}) for {finalDamage}. " +
+                //$"Storm={maxStormIntensity01:F2} Lifetime={maxLifetimeRemaining} Cells={impactedCellCount} | " +
+                //$"ShelterDeaths={killedInShelter} | " +
+                //$"CancelledCraftOrders={cancelledCraftOrders} | " +
+                //$"CrafterDeaths={killedCrafters} | " +
+                //$"ProductionPaused={productionPaused} | " +
+                //$"ProductionWorkerDeaths={killedProductionWorkers} | " +
+                //$"TrainingPaused={trainingPaused} | " +
+                //$"TrainingDeaths={killedTrainees}");
         }
     }
 

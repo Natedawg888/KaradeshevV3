@@ -186,19 +186,19 @@ public class BuildingEarthquakeSecondaryEffects : MonoBehaviour
         {
             string buildingName = building != null ? building.name : name;
 
-            Debug.Log(
-                $"[BuildingEarthquakeSecondaryEffects] Earthquake damaged '{buildingName}'. " +
-                $"IncomingEarthquakeDamage={finalDamage} | " +
-                $"AppliedBuildingDamage={actualBuildingDamage} | " +
-                $"ShelterDeaths={killedInShelter} | " +
-                $"CancelledCraftOrders={cancelledCraftOrders} | " +
-                $"CrafterDeaths={killedCrafters} | " +
-                $"ProductionPaused={productionPaused} | " +
-                $"ProductionWorkerDeaths={killedProductionWorkers} | " +
-                $"TrainingPaused={trainingPaused} | " +
-                $"TrainingDeaths={killedTrainees} | " +
-                $"StorageDestroyed={storageResourcesDestroyed}"
-            );
+            //Debug.Log(
+                //$"[BuildingEarthquakeSecondaryEffects] Earthquake damaged '{buildingName}'. " +
+                //$"IncomingEarthquakeDamage={finalDamage} | " +
+                //$"AppliedBuildingDamage={actualBuildingDamage} | " +
+                //$"ShelterDeaths={killedInShelter} | " +
+                //$"CancelledCraftOrders={cancelledCraftOrders} | " +
+                //$"CrafterDeaths={killedCrafters} | " +
+                //$"ProductionPaused={productionPaused} | " +
+                //$"ProductionWorkerDeaths={killedProductionWorkers} | " +
+                //$"TrainingPaused={trainingPaused} | " +
+                //$"TrainingDeaths={killedTrainees} | " +
+                //$"StorageDestroyed={storageResourcesDestroyed}"
+            //);
         }
     }
 
@@ -210,9 +210,9 @@ public class BuildingEarthquakeSecondaryEffects : MonoBehaviour
 
         string buildingName = building != null ? building.name : name;
 
-        Debug.Log(
-            $"[BuildingEarthquakeSecondaryEffects] '{buildingName}' received earthquake hit. " +
-            $"Magnitude={data.magnitude:0.0}, Epicentre={data.epicentreBlock}"
-        );
+        //Debug.Log(
+            //$"[BuildingEarthquakeSecondaryEffects] '{buildingName}' received earthquake hit. " +
+            //$"Magnitude={data.magnitude:0.0}, Epicentre={data.epicentreBlock}"
+        //);
     }
 }

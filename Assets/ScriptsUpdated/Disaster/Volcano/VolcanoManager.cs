@@ -114,7 +114,7 @@ public class VolcanoManager : MonoBehaviour
         RefreshEruptingList();
 
         if (debugLogging)
-            Debug.Log($"[VolcanoManager] Registered scene volcano states. Found={found.Length} Added={added}");
+            //Debug.Log($"[VolcanoManager] Registered scene volcano states. Found={found.Length} Added={added}");
     }
 
     public bool RegisterVolcano(VolcanoTileState volcano)
@@ -128,7 +128,7 @@ public class VolcanoManager : MonoBehaviour
             eruptingVolcanoes.Add(volcano);
 
         if (debugLogging && added)
-            Debug.Log($"[VolcanoManager] Registered {volcano.name}");
+            //Debug.Log($"[VolcanoManager] Registered {volcano.name}");
 
         return added;
     }
@@ -142,7 +142,7 @@ public class VolcanoManager : MonoBehaviour
         eruptingVolcanoes.Remove(volcano);
 
         if (debugLogging && removed)
-            Debug.Log($"[VolcanoManager] Unregistered {volcano.name}");
+            //Debug.Log($"[VolcanoManager] Unregistered {volcano.name}");
 
         return removed;
     }
@@ -234,7 +234,7 @@ public class VolcanoManager : MonoBehaviour
         OnVolcanoTurnAdvanceStarted?.Invoke();
 
         if (debugLogging)
-            Debug.Log($"[VolcanoManager] Volcano turn started. Count={advanceBuffer.Count}");
+            //Debug.Log($"[VolcanoManager] Volcano turn started. Count={advanceBuffer.Count}");
     }
 
     private void FinishSingleTurn()
@@ -245,7 +245,7 @@ public class VolcanoManager : MonoBehaviour
         OnVolcanoTurnAdvanceFinished?.Invoke();
 
         if (debugLogging)
-            Debug.Log($"[VolcanoManager] Volcano turn finished. Erupting={eruptingVolcanoes.Count}");
+            //Debug.Log($"[VolcanoManager] Volcano turn finished. Erupting={eruptingVolcanoes.Count}");
 
         advanceBuffer.Clear();
     }
@@ -343,7 +343,7 @@ public class VolcanoManager : MonoBehaviour
         OnVolcanoCreated?.Invoke(volcano);
 
         if (debugLogging && volcano != null)
-            Debug.Log($"[VolcanoManager] Volcano created: {volcano.name}");
+            //Debug.Log($"[VolcanoManager] Volcano created: {volcano.name}");
     }
 
     public void NotifyVolcanoBecameDormant(VolcanoTileState volcano)
@@ -354,7 +354,7 @@ public class VolcanoManager : MonoBehaviour
         OnVolcanoBecameDormant?.Invoke(volcano);
 
         if (debugLogging && volcano != null)
-            Debug.Log($"[VolcanoManager] Volcano became Dormant: {volcano.name}");
+            //Debug.Log($"[VolcanoManager] Volcano became Dormant: {volcano.name}");
     }
 
     public void NotifyEruptionStarted(VolcanoTileState volcano)
@@ -367,7 +367,7 @@ public class VolcanoManager : MonoBehaviour
         OnEruptionStarted?.Invoke(volcano);
 
         if (debugLogging && volcano != null)
-            Debug.Log($"[VolcanoManager] Eruption started: {volcano.name}");
+            //Debug.Log($"[VolcanoManager] Eruption started: {volcano.name}");
     }
 
     public void NotifyEruptingVolcanoAdvanced(VolcanoTileState volcano)
@@ -384,7 +384,7 @@ public class VolcanoManager : MonoBehaviour
         OnEruptionEnded?.Invoke(volcano);
 
         if (debugLogging && volcano != null)
-            Debug.Log($"[VolcanoManager] Eruption ended: {volcano.name}");
+            //Debug.Log($"[VolcanoManager] Eruption ended: {volcano.name}");
     }
 
     public void NotifyVolcanoRevertedToMountain(VolcanoTileState volcano)
@@ -393,7 +393,7 @@ public class VolcanoManager : MonoBehaviour
         OnVolcanoRevertedToMountain?.Invoke(volcano);
 
         if (debugLogging && volcano != null)
-            Debug.Log($"[VolcanoManager] Volcano reverted to Mountain: {volcano.name}");
+            //Debug.Log($"[VolcanoManager] Volcano reverted to Mountain: {volcano.name}");
     }
 
     public VolcanoManagerSaveData SaveState()
@@ -463,10 +463,10 @@ public class VolcanoManager : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[VolcanoManager] Loaded manager state. " +
-                $"Registered={registeredVolcanoes.Count}, Erupting={eruptingVolcanoes.Count}, " +
-                $"QueuedTurns={queuedAdvanceTurns}");
+            //Debug.Log(
+                //$"[VolcanoManager] Loaded manager state. " +
+                //$"Registered={registeredVolcanoes.Count}, Erupting={eruptingVolcanoes.Count}, " +
+                //$"QueuedTurns={queuedAdvanceTurns}");
         }
     }
 
@@ -498,10 +498,10 @@ public class VolcanoManager : MonoBehaviour
             {
                 if (debugLogging)
                 {
-                    Debug.LogWarning(
-                        $"[VolcanoManager] Could not find live volcano for saved state. " +
-                        $"HasCell={saved.hasPrimaryCell}, Cell=({saved.primaryCellX},{saved.primaryCellY}), " +
-                        $"StateValue={saved.activityStateValue}");
+                    //Debug.LogWarning(
+                        //$"[VolcanoManager] Could not find live volcano for saved state. " +
+                        //$"HasCell={saved.hasPrimaryCell}, Cell=({saved.primaryCellX},{saved.primaryCellY}), " +
+                        //$"StateValue={saved.activityStateValue}");
                 }
 
                 continue;

@@ -295,7 +295,7 @@ public class TornadoUnitEffectResolver : MonoBehaviour
                 _knownEmptyActiveTornadoUnitTileKeys.Add(tileKey);
 
                 if (debugLogging)
-                    Debug.Log($"[TornadoUnitEffectResolver] Cached empty tornado unit tile at {tile.x},{tile.y}.");
+                    //Debug.Log($"[TornadoUnitEffectResolver] Cached empty tornado unit tile at {tile.x},{tile.y}.");
 
                 continue;
             }
@@ -348,8 +348,8 @@ public class TornadoUnitEffectResolver : MonoBehaviour
                     {
                         if (debugLogging)
                         {
-                            Debug.Log(
-                                $"[TornadoUnitEffectResolver] Tornado destroyed unit group {group.groupId} at {tile.x},{tile.y}.");
+                            //Debug.Log(
+                                //$"[TornadoUnitEffectResolver] Tornado destroyed unit group {group.groupId} at {tile.x},{tile.y}.");
                         }
 
                         unitControl.RemoveGroupDueToFatalities(group);
@@ -373,9 +373,9 @@ public class TornadoUnitEffectResolver : MonoBehaviour
 
                                 if (debugLogging && target.TryGetOwningGridPosition(out Vector2Int targetGrid))
                                 {
-                                    Debug.Log(
-                                        $"[TornadoUnitEffectResolver] Tornado pushed unit group {group.groupId} " +
-                                        $"from {tile.x},{tile.y} to {targetGrid.x},{targetGrid.y}.");
+                                    //Debug.Log(
+                                        //$"[TornadoUnitEffectResolver] Tornado pushed unit group {group.groupId} " +
+                                        //$"from {tile.x},{tile.y} to {targetGrid.x},{targetGrid.y}.");
                                 }
                             }
                         }
@@ -398,7 +398,7 @@ public class TornadoUnitEffectResolver : MonoBehaviour
                 _knownEmptyActiveTornadoUnitTileKeys.Add(tileKey);
 
                 if (debugLogging)
-                    Debug.Log($"[TornadoUnitEffectResolver] Tile became empty after unit tornado processing at {tile.x},{tile.y}.");
+                    //Debug.Log($"[TornadoUnitEffectResolver] Tile became empty after unit tornado processing at {tile.x},{tile.y}.");
             }
             else
             {

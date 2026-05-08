@@ -607,7 +607,7 @@ public class ReligiousRitualItemUI : MonoBehaviour
 
         if (!_control.TryStartRitual(_ritual, selectedSpirit, out string reason))
         {
-            Debug.LogWarning($"[ReligiousRitualItemUI] Failed to start ritual '{_ritual.displayName}': {reason}");
+            //Debug.LogWarning($"[ReligiousRitualItemUI] Failed to start ritual '{_ritual.displayName}': {reason}");
 
             if (HasDisplayableCost() && !CanAffordDisplayedCost() && costPanelRoot != null && !costPanelRoot.activeSelf)
             {

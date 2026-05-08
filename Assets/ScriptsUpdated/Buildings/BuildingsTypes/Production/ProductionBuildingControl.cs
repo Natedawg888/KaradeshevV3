@@ -400,7 +400,7 @@ public class ProductionBuildingControl : MonoBehaviour
 
         _extractionTilesByPlanId[key] = list;
 
-        Debug.Log($"[ProductionBuildingControl] Stored {list.Count} extraction tiles for plan {key} on {name}.");
+        //Debug.Log($"[ProductionBuildingControl] Stored {list.Count} extraction tiles for plan {key} on {name}.");
     }
 
     public IReadOnlyList<EnvironmentControl> GetExtractionTilesForPlan(ProductionPlan plan)
@@ -456,7 +456,7 @@ public class ProductionBuildingControl : MonoBehaviour
 
         if (runtimePlan.isExternalExtractor && !HasExtractionTilesForPlan(runtimePlan))
         {
-            Debug.LogWarning($"[ProductionBuildingControl] Cannot start {runtimePlan.productionID} on {name}: no extraction tiles stored.");
+            //Debug.LogWarning($"[ProductionBuildingControl] Cannot start {runtimePlan.productionID} on {name}: no extraction tiles stored.");
             Destroy(runtimePlan);
             return false;
         }
@@ -476,14 +476,14 @@ public class ProductionBuildingControl : MonoBehaviour
 
         if (!EnsurePopulationReservation(_activePlan))
         {
-            Debug.LogWarning($"[ProductionBuildingControl] Failed to reserve population for {_activePlan.productionID} on {name}.");
+            //Debug.LogWarning($"[ProductionBuildingControl] Failed to reserve population for {_activePlan.productionID} on {name}.");
             StopProduction();
             return false;
         }
 
         if (PlayerProductionManager.Instance == null)
         {
-            Debug.LogWarning("[ProductionBuildingControl] No PlayerProductionManager found.");
+            //Debug.LogWarning("[ProductionBuildingControl] No PlayerProductionManager found.");
             StopProduction();
             return false;
         }
@@ -497,7 +497,7 @@ public class ProductionBuildingControl : MonoBehaviour
         _turnsLeftInCycle = Mathf.Max(1, _activePlan.requiredTurnsPerCycle);
         ShowProductionTimer(_turnsLeftInCycle);
 
-        Debug.Log($"[ProductionBuildingControl] Started production {_activePlan.productionID} on {name}.");
+        //Debug.Log($"[ProductionBuildingControl] Started production {_activePlan.productionID} on {name}.");
         return true;
     }
 
@@ -567,7 +567,7 @@ public class ProductionBuildingControl : MonoBehaviour
         if (productionStoppedIcon != null)
             productionStoppedIcon.SetActive(true);
 
-        Debug.Log($"[ProductionBuildingControl] Production paused on {name}: {logReason}");
+        //Debug.Log($"[ProductionBuildingControl] Production paused on {name}: {logReason}");
 
         if (wasFresh && reason == ProductionPauseReason.MissingResources)
             PostProductionPausedNotification(NotificationType.ProductionPausedLackOfResources, false);
@@ -688,7 +688,7 @@ public class ProductionBuildingControl : MonoBehaviour
 
         ShowCooldownTimer(_cooldownTurnsLeft);
 
-        Debug.Log($"[ProductionBuildingControl] Cooldown started for {plan.productionID} on {name}. Turns: {_cooldownTurnsLeft}");
+        //Debug.Log($"[ProductionBuildingControl] Cooldown started for {plan.productionID} on {name}. Turns: {_cooldownTurnsLeft}");
     }
 
     private void TickCooldownTurn()
@@ -724,7 +724,7 @@ public class ProductionBuildingControl : MonoBehaviour
 
         if (!EnsurePopulationReservation(plan))
         {
-            Debug.LogWarning($"[ProductionBuildingControl] Could not re-reserve population after cooldown for {plan.productionID} on {name}.");
+            //Debug.LogWarning($"[ProductionBuildingControl] Could not re-reserve population after cooldown for {plan.productionID} on {name}.");
             return false;
         }
 
@@ -742,7 +742,7 @@ public class ProductionBuildingControl : MonoBehaviour
         _turnsLeftInCycle = Mathf.Max(1, plan.requiredTurnsPerCycle);
         ShowProductionTimer(_turnsLeftInCycle);
 
-        Debug.Log($"[ProductionBuildingControl] Cooldown ended. New cycle started for {plan.productionID} on {name}.");
+        //Debug.Log($"[ProductionBuildingControl] Cooldown ended. New cycle started for {plan.productionID} on {name}.");
         return true;
     }
 
@@ -753,7 +753,7 @@ public class ProductionBuildingControl : MonoBehaviour
 
         if (!EnsurePopulationReservation(plan))
         {
-            Debug.LogWarning($"[ProductionBuildingControl] Could not reserve population for next cycle of {plan.productionID} on {name}.");
+            //Debug.LogWarning($"[ProductionBuildingControl] Could not reserve population for next cycle of {plan.productionID} on {name}.");
             return false;
         }
 
@@ -771,7 +771,7 @@ public class ProductionBuildingControl : MonoBehaviour
         _turnsLeftInCycle = Mathf.Max(1, plan.requiredTurnsPerCycle);
         ShowProductionTimer(_turnsLeftInCycle);
 
-        Debug.Log($"[ProductionBuildingControl] New cycle started for {plan.productionID} on {name}.");
+        //Debug.Log($"[ProductionBuildingControl] New cycle started for {plan.productionID} on {name}.");
         return true;
     }
 
@@ -955,7 +955,7 @@ public class ProductionBuildingControl : MonoBehaviour
             return true;
         }
 
-        Debug.Log($"[ProductionBuildingControl] Cancelling {_activePlan.productionID} on {name} because reserved workers could not be backfilled.");
+        //Debug.Log($"[ProductionBuildingControl] Cancelling {_activePlan.productionID} on {name} because reserved workers could not be backfilled.");
         PostProductionPausedNotification(NotificationType.ProductionPausedLackOfWorkers, _pendingWorkerDeathsForNotification > 0);
         StopProduction();
         RefreshPopulationUI();
@@ -1144,7 +1144,7 @@ public class ProductionBuildingControl : MonoBehaviour
         if (HasValidReservedProductionPopulation())
             return false;
 
-        Debug.Log($"[ProductionBuildingControl] Cancelling {_activePlan.productionID} on {name} because reserved workers became ineligible.");
+        //Debug.Log($"[ProductionBuildingControl] Cancelling {_activePlan.productionID} on {name} because reserved workers became ineligible.");
         StopProduction();
         return true;
     }
@@ -1175,10 +1175,10 @@ public class ProductionBuildingControl : MonoBehaviour
         {
             _pendingWorkerDeathsForNotification += actualDeaths;
 
-            Debug.Log(
-                $"[ProductionBuildingControl] {name} lost {actualDeaths} worker(s) " +
-                $"from production plan {_activePlan.productionID}."
-            );
+            //Debug.Log(
+                //$"[ProductionBuildingControl] {name} lost {actualDeaths} worker(s) " +
+                //$"from production plan {_activePlan.productionID}."
+            //);
 
             ReconcileReservedProductionPopulation();
         }
@@ -1284,7 +1284,7 @@ public class ProductionBuildingControl : MonoBehaviour
         ProductionPlan sourcePlan = planResolver != null ? planResolver(data.activePlanID) : null;
         if (sourcePlan == null)
         {
-            Debug.LogWarning($"[ProductionBuildingControl] Could not resolve production plan '{data.activePlanID}' while loading on {name}.");
+            //Debug.LogWarning($"[ProductionBuildingControl] Could not resolve production plan '{data.activePlanID}' while loading on {name}.");
             HideRuntimeUI();
             return;
         }
@@ -1510,13 +1510,13 @@ public class ProductionBuildingControl : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[ProductionBuildingControl] Tornado impacted production on '{name}' | " +
-                $"Plan={(_activePlan != null ? _activePlan.productionID : "None")} | " +
-                $"WorkersRolled={result.workersRolled} | " +
-                $"WorkersKilled={result.workersKilled} | " +
-                $"Paused={result.paused}"
-            );
+            //Debug.Log(
+                //$"[ProductionBuildingControl] Tornado impacted production on '{name}' | " +
+                //$"Plan={(_activePlan != null ? _activePlan.productionID : "None")} | " +
+                //$"WorkersRolled={result.workersRolled} | " +
+                //$"WorkersKilled={result.workersKilled} | " +
+                //$"Paused={result.paused}"
+            //);
         }
 
         return result;
@@ -1550,10 +1550,10 @@ public class ProductionBuildingControl : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[ProductionBuildingControl] Tornado cleared at '{name}', " +
-                    $"but production could not resume because workers were unavailable."
-                );
+                //Debug.Log(
+                    //$"[ProductionBuildingControl] Tornado cleared at '{name}', " +
+                    //$"but production could not resume because workers were unavailable."
+                //);
             }
 
             // Stay paused until population becomes available later.
@@ -1573,7 +1573,7 @@ public class ProductionBuildingControl : MonoBehaviour
             ShowProductionTimer(_turnsLeftInCycle);
 
             if (debugLogging)
-                Debug.Log($"[ProductionBuildingControl] Resumed paused production cycle on '{name}' after tornado cleared.");
+                //Debug.Log($"[ProductionBuildingControl] Resumed paused production cycle on '{name}' after tornado cleared.");
 
             return true;
         }
@@ -1581,7 +1581,7 @@ public class ProductionBuildingControl : MonoBehaviour
         bool resumed = TryResumeProductionInternal(allowManualResumeAnyPause: true);
 
         if (debugLogging && resumed)
-            Debug.Log($"[ProductionBuildingControl] Resumed production on '{name}' after tornado cleared.");
+            //Debug.Log($"[ProductionBuildingControl] Resumed production on '{name}' after tornado cleared.");
 
         return resumed;
     }
@@ -1648,13 +1648,13 @@ public class ProductionBuildingControl : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[ProductionBuildingControl] Fire impacted production on '{name}' | " +
-                $"Plan={(_activePlan != null ? _activePlan.productionID : "None")} | " +
-                $"WorkersRolled={result.workersRolled} | " +
-                $"WorkersKilled={result.workersKilled} | " +
-                $"Paused={result.paused}"
-            );
+            //Debug.Log(
+                //$"[ProductionBuildingControl] Fire impacted production on '{name}' | " +
+                //$"Plan={(_activePlan != null ? _activePlan.productionID : "None")} | " +
+                //$"WorkersRolled={result.workersRolled} | " +
+                //$"WorkersKilled={result.workersKilled} | " +
+                //$"Paused={result.paused}"
+            //);
         }
 
         return result;
@@ -1693,10 +1693,10 @@ public class ProductionBuildingControl : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[ProductionBuildingControl] Fire cleared at '{name}', " +
-                    $"but production could not resume because workers were unavailable."
-                );
+                //Debug.Log(
+                    //$"[ProductionBuildingControl] Fire cleared at '{name}', " +
+                    //$"but production could not resume because workers were unavailable."
+                //);
             }
 
             // Stay paused until population becomes available later.
@@ -1716,7 +1716,7 @@ public class ProductionBuildingControl : MonoBehaviour
             ShowProductionTimer(_turnsLeftInCycle);
 
             if (debugLogging)
-                Debug.Log($"[ProductionBuildingControl] Resumed paused production cycle on '{name}' after fire cleared.");
+                //Debug.Log($"[ProductionBuildingControl] Resumed paused production cycle on '{name}' after fire cleared.");
 
             return true;
         }
@@ -1724,7 +1724,7 @@ public class ProductionBuildingControl : MonoBehaviour
         bool resumed = TryResumeProductionInternal(allowManualResumeAnyPause: true);
 
         if (debugLogging && resumed)
-            Debug.Log($"[ProductionBuildingControl] Resumed production on '{name}' after fire cleared.");
+            //Debug.Log($"[ProductionBuildingControl] Resumed production on '{name}' after fire cleared.");
 
         return resumed;
     }
@@ -1797,11 +1797,11 @@ public class ProductionBuildingControl : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[ProductionBuildingControl] Worker wear | Building='{name}' | " +
-                    $"Person={person.Id} | Age={person.AggregatedAgeGroup} | " +
-                    $"Resistance01={ageResistance01:F2} | " +
-                    $"Health {oldHealth:F3}->{newHealth:F3}");
+                //Debug.Log(
+                    //$"[ProductionBuildingControl] Worker wear | Building='{name}' | " +
+                    //$"Person={person.Id} | Age={person.AggregatedAgeGroup} | " +
+                    //$"Resistance01={ageResistance01:F2} | " +
+                    //$"Health {oldHealth:F3}->{newHealth:F3}");
             }
         }
 
@@ -1813,11 +1813,11 @@ public class ProductionBuildingControl : MonoBehaviour
 
         if (debugLogging && affectedWorkers > 0)
         {
-            Debug.Log(
-                $"[ProductionBuildingControl] Production wear at '{name}' | " +
-                $"Plan={(_activePlan != null ? _activePlan.productionID : "None")} | " +
-                $"AffectedWorkers={affectedWorkers} | " +
-                $"TotalHealthLoss={totalHealthLoss:F3}");
+            //Debug.Log(
+                //$"[ProductionBuildingControl] Production wear at '{name}' | " +
+                //$"Plan={(_activePlan != null ? _activePlan.productionID : "None")} | " +
+                //$"AffectedWorkers={affectedWorkers} | " +
+                //$"TotalHealthLoss={totalHealthLoss:F3}");
         }
 
         return affectedWorkers;
@@ -1857,12 +1857,12 @@ public class ProductionBuildingControl : MonoBehaviour
 
         if (debugDiseaseProductionOutput && diseaseMultiplier < 0.999f)
         {
-            Debug.Log(
-                $"[ProductionBuildingControl] Disease lowered production output. " +
-                $"Building={name}, " +
-                $"HealthMultiplier={healthMultiplier:F3}, " +
-                $"DiseaseMultiplier={diseaseMultiplier:F3}, " +
-                $"FinalMultiplier={finalMultiplier:F3}");
+            //Debug.Log(
+                //$"[ProductionBuildingControl] Disease lowered production output. " +
+                //$"Building={name}, " +
+                //$"HealthMultiplier={healthMultiplier:F3}, " +
+                //$"DiseaseMultiplier={diseaseMultiplier:F3}, " +
+                //$"FinalMultiplier={finalMultiplier:F3}");
         }
 
         return Mathf.Clamp(finalMultiplier, productionMinimumOutputMultiplier, 1f);
@@ -1962,13 +1962,13 @@ public class ProductionBuildingControl : MonoBehaviour
             {
                 if (totalInfections > 0)
                 {
-                    Debug.Log(
-                        $"[ProductionBuildingControl] Extractor tile disease exposure. " +
-                        $"Building={name}, " +
-                        $"Plan={plan.productionID}, " +
-                        $"Tiles={extractionTiles.Count}, " +
-                        $"Workers={_tmpProductionWeatherDiseaseIds.Count}, " +
-                        $"Infections={totalInfections}");
+                    //Debug.Log(
+                        //$"[ProductionBuildingControl] Extractor tile disease exposure. " +
+                        //$"Building={name}, " +
+                        //$"Plan={plan.productionID}, " +
+                        //$"Tiles={extractionTiles.Count}, " +
+                        //$"Workers={_tmpProductionWeatherDiseaseIds.Count}, " +
+                        //$"Infections={totalInfections}");
                 }
             }
 
@@ -1987,12 +1987,12 @@ public class ProductionBuildingControl : MonoBehaviour
         {
             if (totalInfections > 0)
             {
-                Debug.Log(
-                    $"[ProductionBuildingControl] Internal production weather disease exposure. " +
-                    $"Building={name}, " +
-                    $"Plan={plan.productionID}, " +
-                    $"Workers={_tmpProductionWeatherDiseaseIds.Count}, " +
-                    $"Infections={totalInfections}");
+                //Debug.Log(
+                    //$"[ProductionBuildingControl] Internal production weather disease exposure. " +
+                    //$"Building={name}, " +
+                    //$"Plan={plan.productionID}, " +
+                    //$"Workers={_tmpProductionWeatherDiseaseIds.Count}, " +
+                    //$"Infections={totalInfections}");
             }
         }
 

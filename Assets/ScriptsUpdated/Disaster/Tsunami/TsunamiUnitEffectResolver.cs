@@ -109,11 +109,11 @@ public class TsunamiUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiUnitEffectResolver] Installed refs. " +
-                $"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
-                $"GridManager={(gridManager != null ? gridManager.name : "NULL")}"
-            );
+            //Debug.Log(
+                //$"[TsunamiUnitEffectResolver] Installed refs. " +
+                //$"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
+                //$"GridManager={(gridManager != null ? gridManager.name : "NULL")}"
+            //);
         }
     }
 
@@ -161,7 +161,7 @@ public class TsunamiUnitEffectResolver : MonoBehaviour
         if (gridManager == null)
         {
             if (debugLogging)
-                Debug.LogWarning("[TsunamiUnitEffectResolver] Missing GridManager.");
+                //Debug.LogWarning("[TsunamiUnitEffectResolver] Missing GridManager.");
 
             return;
         }
@@ -202,9 +202,9 @@ public class TsunamiUnitEffectResolver : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiUnitEffectResolver] Energy too low for unit effects. " +
-                    $"TsunamiId={data.tsunamiId}, Energy01={data.energy01:0.00}");
+                //Debug.Log(
+                    //$"[TsunamiUnitEffectResolver] Energy too low for unit effects. " +
+                    //$"TsunamiId={data.tsunamiId}, Energy01={data.energy01:0.00}");
             }
 
             processedGroupsThisPass.Clear();
@@ -234,10 +234,10 @@ public class TsunamiUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiUnitEffectResolver] Complete. " +
-                $"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
-                $"AffectedGroups={affectedGroups}, ActiveCells={activeTsunamiCells.Count}");
+            //Debug.Log(
+                //$"[TsunamiUnitEffectResolver] Complete. " +
+                //$"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
+                //$"AffectedGroups={affectedGroups}, ActiveCells={activeTsunamiCells.Count}");
         }
 
         processedGroupsThisPass.Clear();
@@ -257,9 +257,9 @@ public class TsunamiUnitEffectResolver : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiUnitEffectResolver] Energy too low for unit effects. " +
-                    $"TsunamiId={data.tsunamiId}, Energy01={data.energy01:0.00}");
+                //Debug.Log(
+                    //$"[TsunamiUnitEffectResolver] Energy too low for unit effects. " +
+                    //$"TsunamiId={data.tsunamiId}, Energy01={data.energy01:0.00}");
             }
 
             processedGroupsThisPass.Clear();
@@ -277,10 +277,10 @@ public class TsunamiUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiUnitEffectResolver] Complete. " +
-                $"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
-                $"AffectedGroups={affectedGroups}, ActiveCells={activeTsunamiCells.Count}");
+            //Debug.Log(
+                //$"[TsunamiUnitEffectResolver] Complete. " +
+                //$"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
+                //$"AffectedGroups={affectedGroups}, ActiveCells={activeTsunamiCells.Count}");
         }
 
         processedGroupsThisPass.Clear();
@@ -410,12 +410,12 @@ public class TsunamiUnitEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiUnitEffectResolver] Tsunami destroyed unit group {group.groupId} " +
-                    $"at ({coord.x},{coord.y}). " +
-                    $"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
-                    $"Energy01={data.energy01:0.00}, Severity={severity01:0.00}, Damage={finalDamage}"
-                );
+                //Debug.Log(
+                    //$"[TsunamiUnitEffectResolver] Tsunami destroyed unit group {group.groupId} " +
+                    //$"at ({coord.x},{coord.y}). " +
+                    //$"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
+                    //$"Energy01={data.energy01:0.00}, Severity={severity01:0.00}, Damage={finalDamage}"
+                //);
             }
 
             unitControl.RemoveGroupDueToFatalities(group);
@@ -429,13 +429,13 @@ public class TsunamiUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiUnitEffectResolver] Tsunami damaged unit group {group.groupId} " +
-                $"at ({coord.x},{coord.y}). " +
-                $"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
-                $"Energy01={data.energy01:0.00}, Severity={severity01:0.00}, " +
-                $"Damage={finalDamage}, UnitsLost={unitsLost}, RemainingUnits={group.unitCount}"
-            );
+            //Debug.Log(
+                //$"[TsunamiUnitEffectResolver] Tsunami damaged unit group {group.groupId} " +
+                //$"at ({coord.x},{coord.y}). " +
+                //$"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
+                //$"Energy01={data.energy01:0.00}, Severity={severity01:0.00}, " +
+                //$"Damage={finalDamage}, UnitsLost={unitsLost}, RemainingUnits={group.unitCount}"
+            //);
         }
     }
 

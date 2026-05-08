@@ -47,37 +47,37 @@ public class BootstrapLoader : MonoBehaviour
 
         if (gameSceneManager == null)
         {
-            Debug.LogError("[BootstrapLoader] No GameSceneManager found in BootstrapCore.");
+            //Debug.LogError("[BootstrapLoader] No GameSceneManager found in BootstrapCore.");
             yield break;
         }
 
         if (string.IsNullOrEmpty(worldSetupScenePath))
         {
-            Debug.LogError("[BootstrapLoader] WorldSetup scene is not assigned.");
+            //Debug.LogError("[BootstrapLoader] WorldSetup scene is not assigned.");
             yield break;
         }
 
         if (string.IsNullOrEmpty(managerSetupScenePath))
         {
-            Debug.LogError("[BootstrapLoader] ManagerSetup scene is not assigned.");
+            //Debug.LogError("[BootstrapLoader] ManagerSetup scene is not assigned.");
             yield break;
         }
 
         if (string.IsNullOrEmpty(uiSetupScenePath))
         {
-            Debug.LogError("[BootstrapLoader] UISetup scene is not assigned.");
+            //Debug.LogError("[BootstrapLoader] UISetup scene is not assigned.");
             yield break;
         }
 
         if (string.IsNullOrEmpty(playerSetupScenePath))
         {
-            Debug.LogError("[BootstrapLoader] PlayerSetup scene is not assigned.");
+            //Debug.LogError("[BootstrapLoader] PlayerSetup scene is not assigned.");
             yield break;
         }
 
         if (string.IsNullOrEmpty(finalSetupScenePath))
         {
-            Debug.LogError("[BootstrapLoader] FinalSetup scene is not assigned.");
+            //Debug.LogError("[BootstrapLoader] FinalSetup scene is not assigned.");
             yield break;
         }
 
@@ -90,7 +90,7 @@ public class BootstrapLoader : MonoBehaviour
         AsyncOperation worldOp = SceneManager.LoadSceneAsync(worldSetupScenePath, LoadSceneMode.Additive);
         if (worldOp == null)
         {
-            Debug.LogError($"[BootstrapLoader] Failed to start loading scene '{worldSetupScenePath}'.");
+            //Debug.LogError($"[BootstrapLoader] Failed to start loading scene '{worldSetupScenePath}'.");
             yield break;
         }
 
@@ -102,7 +102,7 @@ public class BootstrapLoader : MonoBehaviour
         _worldInstaller = FindFirstObjectByType<WorldSetupInstaller>(FindObjectsInactive.Include);
         if (_worldInstaller == null)
         {
-            Debug.LogError("[BootstrapLoader] WorldSetupInstaller not found after WorldSetup loaded.");
+            //Debug.LogError("[BootstrapLoader] WorldSetupInstaller not found after WorldSetup loaded.");
             yield break;
         }
 
@@ -135,7 +135,7 @@ public class BootstrapLoader : MonoBehaviour
         AsyncOperation managerOp = SceneManager.LoadSceneAsync(managerSetupScenePath, LoadSceneMode.Additive);
         if (managerOp == null)
         {
-            Debug.LogError($"[BootstrapLoader] Failed to start loading scene '{managerSetupScenePath}'.");
+            //Debug.LogError($"[BootstrapLoader] Failed to start loading scene '{managerSetupScenePath}'.");
             yield break;
         }
 
@@ -147,7 +147,7 @@ public class BootstrapLoader : MonoBehaviour
         _managerInstaller = FindFirstObjectByType<ManagerSetupInstaller>(FindObjectsInactive.Include);
         if (_managerInstaller == null)
         {
-            Debug.LogError("[BootstrapLoader] ManagerSetupInstaller not found after ManagerSetup loaded.");
+            //Debug.LogError("[BootstrapLoader] ManagerSetupInstaller not found after ManagerSetup loaded.");
             yield break;
         }
 
@@ -161,7 +161,7 @@ public class BootstrapLoader : MonoBehaviour
         AsyncOperation uiOp = SceneManager.LoadSceneAsync(uiSetupScenePath, LoadSceneMode.Additive);
         if (uiOp == null)
         {
-            Debug.LogError($"[BootstrapLoader] Failed to start loading scene '{uiSetupScenePath}'.");
+            //Debug.LogError($"[BootstrapLoader] Failed to start loading scene '{uiSetupScenePath}'.");
             yield break;
         }
 
@@ -173,7 +173,7 @@ public class BootstrapLoader : MonoBehaviour
         UISetupInstaller uiInstaller = FindFirstObjectByType<UISetupInstaller>(FindObjectsInactive.Include);
         if (uiInstaller == null)
         {
-            Debug.LogError("[BootstrapLoader] UISetupInstaller not found after UISetup loaded.");
+            //Debug.LogError("[BootstrapLoader] UISetupInstaller not found after UISetup loaded.");
             yield break;
         }
 
@@ -187,7 +187,7 @@ public class BootstrapLoader : MonoBehaviour
         AsyncOperation playerOp = SceneManager.LoadSceneAsync(playerSetupScenePath, LoadSceneMode.Additive);
         if (playerOp == null)
         {
-            Debug.LogError($"[BootstrapLoader] Failed to start loading scene '{playerSetupScenePath}'.");
+            //Debug.LogError($"[BootstrapLoader] Failed to start loading scene '{playerSetupScenePath}'.");
             yield break;
         }
 
@@ -199,7 +199,7 @@ public class BootstrapLoader : MonoBehaviour
         _playerInstaller = FindFirstObjectByType<PlayerSetupInstaller>(FindObjectsInactive.Include);
         if (_playerInstaller == null)
         {
-            Debug.LogError("[BootstrapLoader] PlayerSetupInstaller not found after PlayerSetup loaded.");
+            //Debug.LogError("[BootstrapLoader] PlayerSetupInstaller not found after PlayerSetup loaded.");
             yield break;
         }
 
@@ -213,7 +213,7 @@ public class BootstrapLoader : MonoBehaviour
         AsyncOperation finalOp = SceneManager.LoadSceneAsync(finalSetupScenePath, LoadSceneMode.Additive);
         if (finalOp == null)
         {
-            Debug.LogError($"[BootstrapLoader] Failed to start loading scene '{finalSetupScenePath}'.");
+            //Debug.LogError($"[BootstrapLoader] Failed to start loading scene '{finalSetupScenePath}'.");
             yield break;
         }
 
@@ -225,7 +225,7 @@ public class BootstrapLoader : MonoBehaviour
         _finalInstaller = FindFirstObjectByType<FinalSetupInstaller>(FindObjectsInactive.Include);
         if (_finalInstaller == null)
         {
-            Debug.LogError("[BootstrapLoader] FinalSetupInstaller not found after FinalSetup loaded.");
+            //Debug.LogError("[BootstrapLoader] FinalSetupInstaller not found after FinalSetup loaded.");
             yield break;
         }
 
@@ -238,7 +238,7 @@ public class BootstrapLoader : MonoBehaviour
         {
             if (string.IsNullOrEmpty(tutorialSetupScenePath))
             {
-                Debug.LogWarning("[BootstrapLoader] Tutorial was enabled, but TutorialSetup scene is not assigned. Continuing without tutorials.");
+                //Debug.LogWarning("[BootstrapLoader] Tutorial was enabled, but TutorialSetup scene is not assigned. Continuing without tutorials.");
             }
             else
             {
@@ -248,7 +248,7 @@ public class BootstrapLoader : MonoBehaviour
                 AsyncOperation tutorialOp = SceneManager.LoadSceneAsync(tutorialSetupScenePath, LoadSceneMode.Additive);
                 if (tutorialOp == null)
                 {
-                    Debug.LogWarning($"[BootstrapLoader] Failed to start loading scene '{tutorialSetupScenePath}'. Continuing without tutorials.");
+                    //Debug.LogWarning($"[BootstrapLoader] Failed to start loading scene '{tutorialSetupScenePath}'. Continuing without tutorials.");
                 }
                 else
                 {
@@ -260,7 +260,7 @@ public class BootstrapLoader : MonoBehaviour
                     _tutorialInstaller = FindFirstObjectByType<TutorialSetupInstaller>(FindObjectsInactive.Include);
                     if (_tutorialInstaller == null)
                     {
-                        Debug.LogWarning("[BootstrapLoader] TutorialSetupInstaller not found after TutorialSetup loaded. Continuing without tutorials.");
+                        //Debug.LogWarning("[BootstrapLoader] TutorialSetupInstaller not found after TutorialSetup loaded. Continuing without tutorials.");
                     }
                     else
                     {
@@ -628,7 +628,7 @@ public class BootstrapLoader : MonoBehaviour
     {
         if (worldBuildingManager == null)
         {
-            Debug.LogWarning("[BootstrapLoader] Cannot install WorldBuildingManager into flood systems because it is null.");
+            //Debug.LogWarning("[BootstrapLoader] Cannot install WorldBuildingManager into flood systems because it is null.");
             return;
         }
 
@@ -664,10 +664,10 @@ public class BootstrapLoader : MonoBehaviour
             );
         }
 
-        Debug.Log(
-            $"[BootstrapLoader] Installed WorldBuildingManager '{worldBuildingManager.name}' " +
-            $"into {resolvers.Length} flood building resolver(s)."
-        );
+        //Debug.Log(
+            //$"[BootstrapLoader] Installed WorldBuildingManager '{worldBuildingManager.name}' " +
+            //$"into {resolvers.Length} flood building resolver(s)."
+        //);
     }
 
     private void InstallAnimalSimulationIntoFloodSystems()
@@ -676,7 +676,7 @@ public class BootstrapLoader : MonoBehaviour
 
         if (animalSimulation == null)
         {
-            Debug.LogWarning("[BootstrapLoader] Cannot install AnimalSimulation into flood systems because AnimalSimulationAccess.Current is null.");
+            //Debug.LogWarning("[BootstrapLoader] Cannot install AnimalSimulation into flood systems because AnimalSimulationAccess.Current is null.");
             return;
         }
 
@@ -712,9 +712,9 @@ public class BootstrapLoader : MonoBehaviour
             );
         }
 
-        Debug.Log(
-            $"[BootstrapLoader] Installed AnimalSimulation into {resolvers.Length} flood animal resolver(s)."
-        );
+        //Debug.Log(
+            //$"[BootstrapLoader] Installed AnimalSimulation into {resolvers.Length} flood animal resolver(s)."
+        //);
     }
 
     private void InstallAnimalSimulationIntoTsunamiSystems()
@@ -723,7 +723,7 @@ public class BootstrapLoader : MonoBehaviour
 
         if (animalSimulation == null)
         {
-            Debug.LogWarning("[BootstrapLoader] Cannot install AnimalSimulation into tsunami systems because AnimalSimulationAccess.Current is null.");
+            //Debug.LogWarning("[BootstrapLoader] Cannot install AnimalSimulation into tsunami systems because AnimalSimulationAccess.Current is null.");
             return;
         }
 
@@ -759,16 +759,16 @@ public class BootstrapLoader : MonoBehaviour
             );
         }
 
-        Debug.Log(
-            $"[BootstrapLoader] Installed AnimalSimulation into {resolvers.Length} tsunami animal resolver(s)."
-        );
+        //Debug.Log(
+            //$"[BootstrapLoader] Installed AnimalSimulation into {resolvers.Length} tsunami animal resolver(s)."
+        //);
     }
 
     private void InstallWorldBuildingManagerIntoTsunamiSystems(WorldBuildingManager worldBuildingManager)
     {
         if (worldBuildingManager == null)
         {
-            Debug.LogWarning("[BootstrapLoader] Cannot install WorldBuildingManager into tsunami systems because it is null.");
+            //Debug.LogWarning("[BootstrapLoader] Cannot install WorldBuildingManager into tsunami systems because it is null.");
             return;
         }
 
@@ -804,17 +804,17 @@ public class BootstrapLoader : MonoBehaviour
             );
         }
 
-        Debug.Log(
-            $"[BootstrapLoader] Installed WorldBuildingManager '{worldBuildingManager.name}' " +
-            $"into {resolvers.Length} tsunami building resolver(s)."
-        );
+        //Debug.Log(
+            //$"[BootstrapLoader] Installed WorldBuildingManager '{worldBuildingManager.name}' " +
+            //$"into {resolvers.Length} tsunami building resolver(s)."
+        //);
     }
 
     private void InstallWorldBuildingManagerIntoEarthquakeSystems(WorldBuildingManager worldBuildingManager)
     {
         if (worldBuildingManager == null)
         {
-            Debug.LogWarning("[BootstrapLoader] Cannot install WorldBuildingManager into earthquake systems because it is null.");
+            //Debug.LogWarning("[BootstrapLoader] Cannot install WorldBuildingManager into earthquake systems because it is null.");
             return;
         }
 
@@ -850,10 +850,10 @@ public class BootstrapLoader : MonoBehaviour
             );
         }
 
-        Debug.Log(
-            $"[BootstrapLoader] Installed WorldBuildingManager '{worldBuildingManager.name}' " +
-            $"into {resolvers.Length} earthquake building resolver(s)."
-        );
+        //Debug.Log(
+            //$"[BootstrapLoader] Installed WorldBuildingManager '{worldBuildingManager.name}' " +
+            //$"into {resolvers.Length} earthquake building resolver(s)."
+        //);
     }
 
     private void Log(string label, float seconds)
@@ -861,7 +861,7 @@ public class BootstrapLoader : MonoBehaviour
         if (!logBootstrapTimings)
             return;
 
-        Debug.Log($"[BootstrapLoader] {label}: {seconds:0.000}s");
+        //Debug.Log($"[BootstrapLoader] {label}: {seconds:0.000}s");
     }
 
 #if UNITY_EDITOR

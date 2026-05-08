@@ -110,13 +110,13 @@ public class EarthquakeVolcanoEnergyResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeVolcanoEnergyResolver: Installed refs. " +
-                $"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
-                $"VolcanoManager={(volcanoManager != null ? volcanoManager.name : "NULL")}, " +
-                $"MapGenerator={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
-                $"GridManager={(gridManager != null ? gridManager.name : "NULL")}"
-            );
+            //Debug.Log(
+                //$"EarthquakeVolcanoEnergyResolver: Installed refs. " +
+                //$"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
+                //$"VolcanoManager={(volcanoManager != null ? volcanoManager.name : "NULL")}, " +
+                //$"MapGenerator={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
+                //$"GridManager={(gridManager != null ? gridManager.name : "NULL")}"
+            //);
         }
     }
 
@@ -167,7 +167,7 @@ public class EarthquakeVolcanoEnergyResolver : MonoBehaviour
         if (volcanoManager == null || mapGenerator == null || gridManager == null)
         {
             if (debugLogging)
-                Debug.LogWarning("EarthquakeVolcanoEnergyResolver: Missing references.");
+                //Debug.LogWarning("EarthquakeVolcanoEnergyResolver: Missing references.");
 
             return;
         }
@@ -178,9 +178,9 @@ public class EarthquakeVolcanoEnergyResolver : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"EarthquakeVolcanoEnergyResolver: Magnitude {data.magnitude:0.0} too low to affect volcanoes."
-                );
+                //Debug.Log(
+                    //$"EarthquakeVolcanoEnergyResolver: Magnitude {data.magnitude:0.0} too low to affect volcanoes."
+                //);
             }
 
             return;
@@ -220,10 +220,10 @@ public class EarthquakeVolcanoEnergyResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeVolcanoEnergyResolver complete. VolcanoesAffected={affected}, " +
-                $"Magnitude={data.magnitude:0.0}"
-            );
+            //Debug.Log(
+                //$"EarthquakeVolcanoEnergyResolver complete. VolcanoesAffected={affected}, " +
+                //$"Magnitude={data.magnitude:0.0}"
+            //);
         }
 
         processRoutine = null;
@@ -244,10 +244,10 @@ public class EarthquakeVolcanoEnergyResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeVolcanoEnergyResolver complete. VolcanoesAffected={affected}, " +
-                $"Magnitude={data.magnitude:0.0}"
-            );
+            //Debug.Log(
+                //$"EarthquakeVolcanoEnergyResolver complete. VolcanoesAffected={affected}, " +
+                //$"Magnitude={data.magnitude:0.0}"
+            //);
         }
     }
 
@@ -305,12 +305,12 @@ public class EarthquakeVolcanoEnergyResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"Earthquake added volcano energy to '{volcano.name}'. " +
-                $"Zone={zoneName}, Block={volcanoBlock}, Magnitude={data.magnitude:0.0}, " +
-                $"Severity={severity:0.00}, Boost={boost:0.000}, " +
-                $"Energy {oldEnergy:0.000} -> {newEnergy:0.000}"
-            );
+            //Debug.Log(
+                //$"Earthquake added volcano energy to '{volcano.name}'. " +
+                //$"Zone={zoneName}, Block={volcanoBlock}, Magnitude={data.magnitude:0.0}, " +
+                //$"Severity={severity:0.00}, Boost={boost:0.000}, " +
+                //$"Energy {oldEnergy:0.000} -> {newEnergy:0.000}"
+            //);
         }
 
         return true;

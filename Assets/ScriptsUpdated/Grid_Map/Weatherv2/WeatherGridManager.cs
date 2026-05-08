@@ -241,7 +241,7 @@ public class WeatherGridManager : MonoBehaviour
         if (debugLogging)
         {
             string n = worldBuildingManager != null ? worldBuildingManager.name : "null";
-            Debug.Log($"[WeatherGridManager] SetWorldBuildingManager -> {n}");
+            //Debug.Log($"[WeatherGridManager] SetWorldBuildingManager -> {n}");
         }
     }
 
@@ -255,7 +255,7 @@ public class WeatherGridManager : MonoBehaviour
 
         if (gridManager == null)
         {
-            Debug.LogWarning("[WeatherGridManager] Cannot initialize: GridManager is missing.");
+            //Debug.LogWarning("[WeatherGridManager] Cannot initialize: GridManager is missing.");
             return false;
         }
 
@@ -264,7 +264,7 @@ public class WeatherGridManager : MonoBehaviour
 
         if (newCols <= 0 || newRows <= 0)
         {
-            Debug.LogWarning("[WeatherGridManager] Cannot initialize: grid dimensions are invalid.");
+            //Debug.LogWarning("[WeatherGridManager] Cannot initialize: grid dimensions are invalid.");
             return false;
         }
 
@@ -294,7 +294,7 @@ public class WeatherGridManager : MonoBehaviour
         OnWeatherGridInitialized?.Invoke();
 
         if (debugLogging)
-            Debug.Log($"[WeatherGridManager] Initialized weather grid {_cols}x{_rows}");
+            //Debug.Log($"[WeatherGridManager] Initialized weather grid {_cols}x{_rows}");
 
         return true;
     }
@@ -333,7 +333,7 @@ public class WeatherGridManager : MonoBehaviour
             ClearAllCellState();
 
             if (debugLogging)
-                Debug.Log("[WeatherGridManager] Climate refresh skipped: ClimateManager missing or not ready.");
+                //Debug.Log("[WeatherGridManager] Climate refresh skipped: ClimateManager missing or not ready.");
 
             OnWeatherStateRefreshed?.Invoke();
             return;
@@ -360,7 +360,7 @@ public class WeatherGridManager : MonoBehaviour
         }
 
         if (debugLogging)
-            Debug.Log("[WeatherGridManager] Refreshed climate values from ClimateManager.");
+            //Debug.Log("[WeatherGridManager] Refreshed climate values from ClimateManager.");
 
         OnWeatherStateRefreshed?.Invoke();
     }
@@ -382,7 +382,7 @@ public class WeatherGridManager : MonoBehaviour
         if (environmentDataSource == null)
         {
             if (debugLogging)
-                Debug.Log("[WeatherGridManager] Environment coverage rebuild skipped: source missing.");
+                //Debug.Log("[WeatherGridManager] Environment coverage rebuild skipped: source missing.");
 
             OnEnvironmentCoverageRebuilt?.Invoke();
             return;
@@ -400,7 +400,7 @@ public class WeatherGridManager : MonoBehaviour
         }
 
         if (debugLogging)
-            Debug.Log($"[WeatherGridManager] Rebuilt environment coverage. Count={_environmentCoverageByEnv.Count}");
+            //Debug.Log($"[WeatherGridManager] Rebuilt environment coverage. Count={_environmentCoverageByEnv.Count}");
 
         OnEnvironmentCoverageRebuilt?.Invoke();
     }
@@ -427,7 +427,7 @@ public class WeatherGridManager : MonoBehaviour
         if (worldBuildingManager == null)
         {
             if (debugLogging)
-                Debug.Log("[WeatherGridManager] Building coverage rebuild skipped: WorldBuildingManager not available yet.");
+                //Debug.Log("[WeatherGridManager] Building coverage rebuild skipped: WorldBuildingManager not available yet.");
 
             OnBuildingCoverageRebuilt?.Invoke();
             return;
@@ -447,7 +447,7 @@ public class WeatherGridManager : MonoBehaviour
         }
 
         if (debugLogging)
-            Debug.Log($"[WeatherGridManager] Rebuilt building coverage. Count={_buildingCoverageById.Count}");
+            //Debug.Log($"[WeatherGridManager] Rebuilt building coverage. Count={_buildingCoverageById.Count}");
 
         OnBuildingCoverageRebuilt?.Invoke();
     }
@@ -533,9 +533,9 @@ public class WeatherGridManager : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[WeatherGridManager] TryGetBuildingAtCell MISS early | " +
-                    $"Cell=({x},{y}) Initialized={initialized} InBounds={inBounds}");
+                //Debug.Log(
+                    //$"[WeatherGridManager] TryGetBuildingAtCell MISS early | " +
+                    //$"Cell=({x},{y}) Initialized={initialized} InBounds={inBounds}");
             }
 
             return false;
@@ -545,10 +545,10 @@ public class WeatherGridManager : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[WeatherGridManager] TryGetBuildingAtCell | Cell=({x},{y}) " +
-                $"Hit={(building != null)} " +
-                $"Record={(building != null ? building.instanceId : "null")}");
+            //Debug.Log(
+                //$"[WeatherGridManager] TryGetBuildingAtCell | Cell=({x},{y}) " +
+                //$"Hit={(building != null)} " +
+                //$"Record={(building != null ? building.instanceId : "null")}");
         }
 
         return building != null;
@@ -742,9 +742,9 @@ public class WeatherGridManager : MonoBehaviour
                 _environmentByCell[coord.x, coord.y] != null &&
                 _environmentByCell[coord.x, coord.y] != env)
             {
-                Debug.LogWarning(
-                    $"[WeatherGridManager] Environment cell overlap at {coord}. " +
-                    $"Replacing {_environmentByCell[coord.x, coord.y].name} with {env.name}.");
+                //Debug.LogWarning(
+                    //$"[WeatherGridManager] Environment cell overlap at {coord}. " +
+                    //$"Replacing {_environmentByCell[coord.x, coord.y].name} with {env.name}.");
             }
 
             _environmentByCell[coord.x, coord.y] = env;
@@ -791,9 +791,9 @@ public class WeatherGridManager : MonoBehaviour
                 _buildingByCell[coord.x, coord.y] != record)
             {
                 string previousId = _buildingByCell[coord.x, coord.y].instanceId;
-                Debug.LogWarning(
-                    $"[WeatherGridManager] Building cell overlap at {coord}. " +
-                    $"Replacing {previousId} with {record.instanceId}.");
+                //Debug.LogWarning(
+                    //$"[WeatherGridManager] Building cell overlap at {coord}. " +
+                    //$"Replacing {previousId} with {record.instanceId}.");
             }
 
             _buildingByCell[coord.x, coord.y] = record;

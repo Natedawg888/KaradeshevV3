@@ -146,12 +146,12 @@ public class EarthquakeAnimalEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeAnimalEffectResolver: Installed refs. " +
-                $"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
-                $"MapGenerator={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
-                $"GridManager={(gridManager != null ? gridManager.name : "NULL")}, "
-            );
+            //Debug.Log(
+                //$"EarthquakeAnimalEffectResolver: Installed refs. " +
+                //$"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
+                //$"MapGenerator={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
+                //$"GridManager={(gridManager != null ? gridManager.name : "NULL")}, "
+            //);
         }
     }
 
@@ -207,7 +207,7 @@ public class EarthquakeAnimalEffectResolver : MonoBehaviour
         if (animalSimulation == null || mapGenerator == null || gridManager == null)
         {
             if (debugLogging)
-                Debug.LogWarning("EarthquakeAnimalEffectResolver: Missing references.");
+                //Debug.LogWarning("EarthquakeAnimalEffectResolver: Missing references.");
 
             return;
         }
@@ -236,7 +236,7 @@ public class EarthquakeAnimalEffectResolver : MonoBehaviour
         if (magnitude01 <= 0f)
         {
             if (debugLogging)
-                Debug.Log($"EarthquakeAnimalEffectResolver: Magnitude {data.magnitude:0.0}, no animal effects.");
+                //Debug.Log($"EarthquakeAnimalEffectResolver: Magnitude {data.magnitude:0.0}, no animal effects.");
 
             processRoutine = null;
             yield break;
@@ -257,11 +257,11 @@ public class EarthquakeAnimalEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeAnimalEffectResolver complete. " +
-                $"AffectedGroups={affectedGroups}, " +
-                $"FaultCells={faultCells.Count}, InfluenceCells={influenceCells.Count}, AffectedCells={affectedCells.Count}"
-            );
+            //Debug.Log(
+                //$"EarthquakeAnimalEffectResolver complete. " +
+                //$"AffectedGroups={affectedGroups}, " +
+                //$"FaultCells={faultCells.Count}, InfluenceCells={influenceCells.Count}, AffectedCells={affectedCells.Count}"
+            //);
         }
 
         processedGroupsThisPass.Clear();
@@ -278,7 +278,7 @@ public class EarthquakeAnimalEffectResolver : MonoBehaviour
         if (magnitude01 <= 0f)
         {
             if (debugLogging)
-                Debug.Log($"EarthquakeAnimalEffectResolver: Magnitude {data.magnitude:0.0}, no animal effects.");
+                //Debug.Log($"EarthquakeAnimalEffectResolver: Magnitude {data.magnitude:0.0}, no animal effects.");
 
             return;
         }
@@ -288,11 +288,11 @@ public class EarthquakeAnimalEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeAnimalEffectResolver complete. " +
-                $"AffectedGroups={affectedGroups}, " +
-                $"FaultCells={faultCells.Count}, InfluenceCells={influenceCells.Count}, AffectedCells={affectedCells.Count}"
-            );
+            //Debug.Log(
+                //$"EarthquakeAnimalEffectResolver complete. " +
+                //$"AffectedGroups={affectedGroups}, " +
+                //$"FaultCells={faultCells.Count}, InfluenceCells={influenceCells.Count}, AffectedCells={affectedCells.Count}"
+            //);
         }
 
         processedGroupsThisPass.Clear();
@@ -358,11 +358,11 @@ public class EarthquakeAnimalEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"Earthquake animal group {groupId} at {coord}. " +
-                    $"Zone={zoneName}, Severity={severity:0.00}, " +
-                    $"FleeChance={fleeChance:0.00}, DamageIfFail={damageIfFleeFails}"
-                );
+                //Debug.Log(
+                    //$"Earthquake animal group {groupId} at {coord}. " +
+                    //$"Zone={zoneName}, Severity={severity:0.00}, " +
+                    //$"FleeChance={fleeChance:0.00}, DamageIfFail={damageIfFleeFails}"
+                //);
             }
         }
 

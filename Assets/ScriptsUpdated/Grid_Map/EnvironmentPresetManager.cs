@@ -322,8 +322,8 @@ public class EnvironmentPresetManager : MonoBehaviour
 
         if (debugWeatherPresetApply)
         {
-            Debug.Log(
-                $"[EnvironmentPresetManager] Applied weather settings for preset '{GetCurrentPresetName()}'.");
+            //Debug.Log(
+                //$"[EnvironmentPresetManager] Applied weather settings for preset '{GetCurrentPresetName()}'.");
         }
     }
 }

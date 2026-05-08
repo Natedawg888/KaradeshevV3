@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class EnvironmentTaskRewardManager : MonoBehaviour
 {
@@ -78,6 +78,6 @@ public class EnvironmentTaskRewardManager : MonoBehaviour
         }
 
         // 3) No shelter available — family still exists, and will be picked up later by FillFamilySlots()
-        Debug.Log("[Rewards] No shelter could accept the new family right now (capacity/destroyed/none built).");
+        //Debug.Log("[Rewards] No shelter could accept the new family right now (capacity/destroyed/none built).");
     }
 }

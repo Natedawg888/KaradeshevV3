@@ -40,7 +40,7 @@ public class PlayerWorldTechApplier : MonoBehaviour
         }
 
         int total = _effectsByTech.Sum(kv => kv.Value?.Count ?? 0);
-        Debug.Log($"[WorldTechApplier] BuildCache loaded WorldTechEffectSO techKeys={_effectsByTech.Count}, totalEffects={total}");
+        //Debug.Log($"[WorldTechApplier] BuildCache loaded WorldTechEffectSO techKeys={_effectsByTech.Count}, totalEffects={total}");
     }
 
     public void ApplyFor(string techID)
@@ -407,7 +407,7 @@ public class PlayerWorldTechApplier : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[WorldTechApplier] PlayerKnownProductionManager.Instance is NULL (cannot undo production plans).");
+            //Debug.LogError("[WorldTechApplier] PlayerKnownProductionManager.Instance is NULL (cannot undo production plans).");
         }
 
         if (knownUnitMgr != null)

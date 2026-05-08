@@ -403,7 +403,7 @@ public class CivilizationHappinessSystem : MonoBehaviour
                     civ.AdjustHappiness(penalty);
 
                     if (debugFoodGrade)
-                        Debug.Log($"[HAPPY][FoodGrade] bestKnown={expectedKnownGrade} avgEaten={avgGradeNonSpoiled:F2} mismatch={mismatch:F2} => {penalty:0.000;-0.000;0.000}");
+                        //Debug.Log($"[HAPPY][FoodGrade] bestKnown={expectedKnownGrade} avgEaten={avgGradeNonSpoiled:F2} mismatch={mismatch:F2} => {penalty:0.000;-0.000;0.000}");
                 }
                 else if (gradeBonusMax > 0f)
                 {
@@ -413,7 +413,7 @@ public class CivilizationHappinessSystem : MonoBehaviour
                     civ.AdjustHappiness(bonus);
 
                     if (debugFoodGrade)
-                        Debug.Log($"[HAPPY][FoodGrade] bestKnown={expectedKnownGrade} avgEaten={avgGradeNonSpoiled:F2} close => +{bonus:0.000}");
+                        //Debug.Log($"[HAPPY][FoodGrade] bestKnown={expectedKnownGrade} avgEaten={avgGradeNonSpoiled:F2} close => +{bonus:0.000}");
                 }
             }
         }
@@ -428,7 +428,7 @@ public class CivilizationHappinessSystem : MonoBehaviour
             civ.AdjustHappiness(penalty);
 
             if (debugSpoiledFood)
-                Debug.Log($"[HAPPY][SpoiledFood] spoiledUnits={spoiledUnits} spoiledPts={spoiledNutritionPoints:F1} => happiness {penalty:0.000;-0.000;0.000}");
+                //Debug.Log($"[HAPPY][SpoiledFood] spoiledUnits={spoiledUnits} spoiledPts={spoiledNutritionPoints:F1} => happiness {penalty:0.000;-0.000;0.000}");
         }
 
         if (Mathf.Abs(delta) > 1e-6f)
@@ -436,8 +436,8 @@ public class CivilizationHappinessSystem : MonoBehaviour
 
         if (debugFoodVariety)
         {
-            Debug.Log($"[HAPPY][FoodVariety] distinct={distinctConsumedNonSpoiled} expectedPool={expectedPool} knownEdible={knownEdibleFoods} " +
-                      $"frac={varietyFrac:F2} points={nutritionPointsTotal:F1} => happiness {delta:+0.000;-0.000;0.000}");
+            //Debug.Log($"[HAPPY][FoodVariety] distinct={distinctConsumedNonSpoiled} expectedPool={expectedPool} knownEdible={knownEdibleFoods} " +
+                      //$"frac={varietyFrac:F2} points={nutritionPointsTotal:F1} => happiness {delta:+0.000;-0.000;0.000}");
         }
     }
 

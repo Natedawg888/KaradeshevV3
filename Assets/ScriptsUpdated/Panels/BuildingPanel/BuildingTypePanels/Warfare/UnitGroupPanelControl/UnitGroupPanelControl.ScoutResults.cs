@@ -44,7 +44,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
             scoutResultsContentRoot == null ||
             scoutResultItemPrefab == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Scout results UI not wired in inspector.");
+            //Debug.LogWarning("[UnitGroupPanel] Scout results UI not wired in inspector.");
             return;
         }
 

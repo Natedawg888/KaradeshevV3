@@ -172,7 +172,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
         if (preventMultipleRollsPerTurn && lastProcessedTurn == currentTurn)
         {
             if (debugLogging)
-                Debug.Log($"EarthquakeSimulationSystem: Already processed turn {currentTurn}, skipping duplicate roll.");
+                //Debug.Log($"EarthquakeSimulationSystem: Already processed turn {currentTurn}, skipping duplicate roll.");
 
             return;
         }
@@ -190,10 +190,10 @@ public class EarthquakeSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"Earthquake turn roll. Turn={currentTurn}, " +
-                $"Energy={tectonicEnergy01:0.000}, Chance={chance:0.000}, Roll={roll:0.000}"
-            );
+            //Debug.Log(
+                //$"Earthquake turn roll. Turn={currentTurn}, " +
+                //$"Energy={tectonicEnergy01:0.000}, Chance={chance:0.000}, Roll={roll:0.000}"
+            //);
         }
 
         if (roll > chance)
@@ -217,7 +217,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
         MarkEarthquakeSaveDirty();
 
         if (debugLogging)
-            Debug.Log($"EarthquakeSimulationSystem: Added test energy. Energy={tectonicEnergy01:0.000}");
+            //Debug.Log($"EarthquakeSimulationSystem: Added test energy. Energy={tectonicEnergy01:0.000}");
     }
 
     [ContextMenu("Clear Tectonic Energy")]
@@ -228,7 +228,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
         MarkEarthquakeSaveDirty();
 
         if (debugLogging)
-            Debug.Log("EarthquakeSimulationSystem: Cleared tectonic energy.");
+            //Debug.Log("EarthquakeSimulationSystem: Cleared tectonic energy.");
     }
 
     private void AddTectonicEnergyForTurn()
@@ -255,10 +255,10 @@ public class EarthquakeSimulationSystem : MonoBehaviour
 
         if (debugLogging && spike > 0f)
         {
-            Debug.Log(
-                $"EarthquakeSimulationSystem: Stress spike added {spike:0.000} energy. " +
-                $"Energy={tectonicEnergy01:0.000}"
-            );
+            //Debug.Log(
+                //$"EarthquakeSimulationSystem: Stress spike added {spike:0.000} energy. " +
+                //$"Energy={tectonicEnergy01:0.000}"
+            //);
         }
 
         MarkEarthquakeSaveDirty();
@@ -283,13 +283,13 @@ public class EarthquakeSimulationSystem : MonoBehaviour
     {
         if (!IsMapReady())
         {
-            Debug.LogWarning("EarthquakeSimulationSystem: Map is not ready for earthquakes.");
+            //Debug.LogWarning("EarthquakeSimulationSystem: Map is not ready for earthquakes.");
             return;
         }
 
         if (faultLineGenerator == null)
         {
-            Debug.LogWarning("EarthquakeSimulationSystem: Missing EarthquakeFaultLineGenerator.");
+            //Debug.LogWarning("EarthquakeSimulationSystem: Missing EarthquakeFaultLineGenerator.");
             return;
         }
 
@@ -300,7 +300,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
             if (!forced && requireFaultForNaturalEarthquakes)
             {
                 if (debugLogging)
-                    Debug.Log("EarthquakeSimulationSystem: No fault lines, natural earthquake skipped. Energy remains stored.");
+                    //Debug.Log("EarthquakeSimulationSystem: No fault lines, natural earthquake skipped. Energy remains stored.");
 
                 return;
             }
@@ -308,7 +308,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
             if (forced && !forcedCanUseRandomBlockWithoutFault)
             {
                 if (debugLogging)
-                    Debug.Log("EarthquakeSimulationSystem: Forced earthquake skipped because no faults exist.");
+                    //Debug.Log("EarthquakeSimulationSystem: Forced earthquake skipped because no faults exist.");
 
                 return;
             }
@@ -320,7 +320,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
 
         if (!mapGenerator.IsValidBlock(epicentre))
         {
-            Debug.LogWarning($"EarthquakeSimulationSystem: Invalid epicentre block {epicentre}.");
+            //Debug.LogWarning($"EarthquakeSimulationSystem: Invalid epicentre block {epicentre}.");
             return;
         }
 
@@ -359,15 +359,15 @@ public class EarthquakeSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"Earthquake: magnitude={magnitude:0.0}, " +
-                $"energyBeforeRelease={tectonicEnergy01:0.000}, " +
-                $"epicentreBlock={epicentre}, " +
-                $"radiusBlocks={radiusBlocks:0.0}, " +
-                $"affectedBlocks={data.affectedBlocks.Count}, " +
-                $"epicentreWasOnFault={data.epicentreWasOnFault}, " +
-                $"forced={forced}"
-            );
+            //Debug.Log(
+                //$"Earthquake: magnitude={magnitude:0.0}, " +
+                //$"energyBeforeRelease={tectonicEnergy01:0.000}, " +
+                //$"epicentreBlock={epicentre}, " +
+                //$"radiusBlocks={radiusBlocks:0.0}, " +
+                //$"affectedBlocks={data.affectedBlocks.Count}, " +
+                //$"epicentreWasOnFault={data.epicentreWasOnFault}, " +
+                //$"forced={forced}"
+            //);
         }
 
         OnEarthquake?.Invoke(data);
@@ -416,10 +416,10 @@ public class EarthquakeSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeSimulationSystem: Released tectonic energy. " +
-                $"Old={oldEnergy:0.000}, Release={release:0.000}, New={tectonicEnergy01:0.000}"
-            );
+            //Debug.Log(
+                //$"EarthquakeSimulationSystem: Released tectonic energy. " +
+                //$"Old={oldEnergy:0.000}, Release={release:0.000}, New={tectonicEnergy01:0.000}"
+            //);
         }
 
         MarkEarthquakeSaveDirty();
@@ -543,11 +543,11 @@ public class EarthquakeSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeSimulationSystem: Loaded state. " +
-                $"Energy={tectonicEnergy01:0.000}, " +
-                $"LastChance={lastCalculatedChance01:0.000}, " +
-                $"LastProcessedTurn={lastProcessedTurn}");
+            //Debug.Log(
+                //$"EarthquakeSimulationSystem: Loaded state. " +
+                //$"Energy={tectonicEnergy01:0.000}, " +
+                //$"LastChance={lastCalculatedChance01:0.000}, " +
+                //$"LastProcessedTurn={lastProcessedTurn}");
         }
     }
 
@@ -579,7 +579,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
         requireFaultForNaturalEarthquakes = settings.requireFaultForNaturalEarthquakes;
 
         if (debugLogging)
-            Debug.Log("[EarthquakeSimulationSystem] Applied earthquake preset settings.");
+            //Debug.Log("[EarthquakeSimulationSystem] Applied earthquake preset settings.");
     }
 
     private void ApplyPresetSettings()

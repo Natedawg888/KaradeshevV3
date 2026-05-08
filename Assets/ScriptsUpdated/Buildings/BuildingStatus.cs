@@ -181,7 +181,7 @@ public class BuildingStatus : MonoBehaviour
                 var pc = prodControls[i];
                 if (pc != null && pc.HasActivePlan)
                 {
-                    Debug.Log($"[BuildingStatus] Building '{name}' Damaged; cancelling production plan on {pc.name}.");
+                    //Debug.Log($"[BuildingStatus] Building '{name}' Damaged; cancelling production plan on {pc.name}.");
                     pc.CancelCurrentPlan();
                 }
             }
@@ -295,7 +295,7 @@ public class BuildingStatus : MonoBehaviour
 
         if (environmentTilePrefab == null)
         {
-            Debug.LogWarning("[BuildingStatus] environmentTilePrefab not set; destroying building only.");
+            //Debug.LogWarning("[BuildingStatus] environmentTilePrefab not set; destroying building only.");
             Destroy(gameObject);
             return;
         }
@@ -307,7 +307,7 @@ public class BuildingStatus : MonoBehaviour
         var ts = host.GetComponent<TileScript>();
         if (ts == null)
         {
-            Debug.LogError("[BuildingStatus] environmentTilePrefab must contain TileScript.");
+            //Debug.LogError("[BuildingStatus] environmentTilePrefab must contain TileScript.");
             Destroy(host);
             Destroy(gameObject);
             return;

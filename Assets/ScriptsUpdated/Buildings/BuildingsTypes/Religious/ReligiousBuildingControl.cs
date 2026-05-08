@@ -631,7 +631,7 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler
         }
         else
         {
-            Debug.LogWarning($"[ReligiousBuildingControl] Ritual '{ritual?.displayName}' failed on completion: {failureReason}");
+            //Debug.LogWarning($"[ReligiousBuildingControl] Ritual '{ritual?.displayName}' failed on completion: {failureReason}");
         }
 
         activeRitual = null;
@@ -736,14 +736,14 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
             if (failed)
             {
-                Debug.Log($"[ReligiousBuildingControl] Banishment failed for spirit '{spirit.displayName}'.");
+                //Debug.Log($"[ReligiousBuildingControl] Banishment failed for spirit '{spirit.displayName}'.");
                 return true; // ritual completed, but outcome failed
             }
 
             religion.RemoveSpirit(spirit);
             RemoveAffiliatedSpirit(spirit);
 
-            Debug.Log($"[ReligiousBuildingControl] Spirit '{spirit.displayName}' was banished.");
+            //Debug.Log($"[ReligiousBuildingControl] Spirit '{spirit.displayName}' was banished.");
             return true;
         }
 

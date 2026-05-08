@@ -77,7 +77,7 @@ public class MapGenerator : MonoBehaviour
     {
         if (IsGenerating)
         {
-            Debug.LogWarning("MapGenerator is already generating.");
+            //Debug.LogWarning("MapGenerator is already generating.");
             yield break;
         }
 
@@ -119,7 +119,7 @@ public class MapGenerator : MonoBehaviour
 
         if (gridManager == null)
         {
-            Debug.LogWarning("MapGenerator: GridManager is missing.");
+            //Debug.LogWarning("MapGenerator: GridManager is missing.");
             return false;
         }
 

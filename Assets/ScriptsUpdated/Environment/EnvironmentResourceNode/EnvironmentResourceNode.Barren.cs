@@ -26,9 +26,9 @@ public partial class EnvironmentResourceNode : MonoBehaviour
             barrenRecoveryClearThreshold > 0 &&
             barrenRecoveryTurns >= barrenRecoveryClearThreshold)
         {
-            Debug.Log(
-                $"[{name}] Barren recovery ({barrenRecoveryTurns}) exceeded threshold " +
-                $"({barrenRecoveryClearThreshold}). Performing immediate clear (no clearing task timer).");
+            //Debug.Log(
+                //$"[{name}] Barren recovery ({barrenRecoveryTurns}) exceeded threshold " +
+                //$"({barrenRecoveryClearThreshold}). Performing immediate clear (no clearing task timer).");
 
             PerformImmediateClear();
             return; // do NOT enter barren state
@@ -43,8 +43,8 @@ public partial class EnvironmentResourceNode : MonoBehaviour
 
         ApplyBarrenVisuals();
 
-        Debug.Log($"[{name}] Node set to BARREN. Recovery in {barrenTurnsLeft} turns " +
-                  $"(current barrenRecoveryTurns={barrenRecoveryTurns}).");
+        //Debug.Log($"[{name}] Node set to BARREN. Recovery in {barrenTurnsLeft} turns " +
+                  //$"(current barrenRecoveryTurns={barrenRecoveryTurns}).");
 
         // ensure world canvas is visible so the barren icon/timer can be seen
         if (environmentControl != null && environmentControl.canvas != null)
@@ -66,7 +66,7 @@ public partial class EnvironmentResourceNode : MonoBehaviour
 
         ApplyBarrenVisuals();
 
-        Debug.Log($"[{name}] Node recovered from barren state. Environment health reset to {currentEnvironmentHealth}.");
+        //Debug.Log($"[{name}] Node recovered from barren state. Environment health reset to {currentEnvironmentHealth}.");
     }
 
     private void ApplyBarrenVisuals()
@@ -146,7 +146,7 @@ public partial class EnvironmentResourceNode : MonoBehaviour
         // If we just hit 0 and aren't barren yet, enter barren state
         if (!isBarren && currentEnvironmentHealth <= 0)
         {
-            Debug.Log($"[{name}] Environment health reached 0. Entering barren state.");
+            //Debug.Log($"[{name}] Environment health reached 0. Entering barren state.");
             StartBarren();
             return;
         }
@@ -159,7 +159,7 @@ public partial class EnvironmentResourceNode : MonoBehaviour
     {
         if (environmentControl == null)
         {
-            Debug.LogWarning($"[{name}] PerformImmediateClear called but EnvironmentControl is null.");
+            //Debug.LogWarning($"[{name}] PerformImmediateClear called but EnvironmentControl is null.");
             return;
         }
 
@@ -168,15 +168,15 @@ public partial class EnvironmentResourceNode : MonoBehaviour
 
         if (gridManager == null)
         {
-            Debug.LogWarning($"[{name}] PerformImmediateClear aborted: GridManager not found.");
+            //Debug.LogWarning($"[{name}] PerformImmediateClear aborted: GridManager not found.");
             return;
         }
 
         if (clearingTaskPrefab == null || clearingTaskPrefab.clearedTilePrefab == null)
         {
-            Debug.LogWarning(
-                $"[{name}] clearingTaskPrefab or its clearedTilePrefab is not assigned; " +
-                "cannot auto-clear tile.");
+            //Debug.LogWarning(
+                //$"[{name}] clearingTaskPrefab or its clearedTilePrefab is not assigned; " +
+                //"cannot auto-clear tile.");
             return;
         }
 
@@ -186,14 +186,14 @@ public partial class EnvironmentResourceNode : MonoBehaviour
         var tile = environmentControl.GetComponentInParent<TileControl>();
         if (tile == null)
         {
-            Debug.LogWarning($"[{name}] PerformImmediateClear could not find TileControl parent.");
+            //Debug.LogWarning($"[{name}] PerformImmediateClear could not find TileControl parent.");
             return;
         }
 
         var tileBox = tile.GetComponent<BoxCollider>();
         if (tileBox == null)
         {
-            Debug.LogWarning($"[{name}] PerformImmediateClear: TileControl has no BoxCollider.");
+            //Debug.LogWarning($"[{name}] PerformImmediateClear: TileControl has no BoxCollider.");
             return;
         }
 
@@ -204,8 +204,8 @@ public partial class EnvironmentResourceNode : MonoBehaviour
         Vector2Int maxGridPos = gridManager.GetGridPosition(bounds.max);
         float halfCell = gridManager.cellSize * 0.5f;
 
-        Debug.Log($"[{name}] PerformImmediateClear filling tile area " +
-                $"min={minGridPos} max={maxGridPos} bounds={bounds}");
+        //Debug.Log($"[{name}] PerformImmediateClear filling tile area " +
+                //$"min={minGridPos} max={maxGridPos} bounds={bounds}");
 
         // 1) Destroy any existing TileControl tiles in this area (including this tile)
         {
@@ -215,7 +215,7 @@ public partial class EnvironmentResourceNode : MonoBehaviour
                 var hitTile = hit.GetComponent<TileControl>();
                 if (hitTile == null) continue;
 
-                Debug.Log($"[{name}] Immediate clear: destroying tile '{hitTile.name}' in area.");
+                //Debug.Log($"[{name}] Immediate clear: destroying tile '{hitTile.name}' in area.");
                 Destroy(hitTile.gameObject);
             }
         }
@@ -240,9 +240,9 @@ public partial class EnvironmentResourceNode : MonoBehaviour
             }
         }
 
-        Debug.Log(
-            $"[{name}] PerformImmediateClear completed; tile area at {environmentControl.gridPosition} " +
-            "filled with cleared tiles.");
+        //Debug.Log(
+            //$"[{name}] PerformImmediateClear completed; tile area at {environmentControl.gridPosition} " +
+            //"filled with cleared tiles.");
 
         // The node lives on the old tile, which we've destroyed above,
         // so this component will go away with it. No extra Destroy(gameObject) needed.

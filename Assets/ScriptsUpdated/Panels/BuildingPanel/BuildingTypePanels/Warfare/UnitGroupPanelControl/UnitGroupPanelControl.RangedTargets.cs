@@ -20,7 +20,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         if (meleeTargetsPanelRoot == null || meleeTargetsContentRoot == null || meleeTargetItemPrefab == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Ranged targets UI not wired (reuses melee target UI).");
+            //Debug.LogWarning("[UnitGroupPanel] Ranged targets UI not wired (reuses melee target UI).");
             return;
         }
 
@@ -43,7 +43,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         if (UnitGroupActionManager.Instance == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] No UnitGroupActionManager in scene.");
+            //Debug.LogWarning("[UnitGroupPanel] No UnitGroupActionManager in scene.");
             return;
         }
 
@@ -137,7 +137,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         if (_rangedCandidates.Count == 0)
         {
-            Debug.Log("[UnitGroupPanel] No ranged targets found in range.");
+            //Debug.Log("[UnitGroupPanel] No ranged targets found in range.");
             return;
         }
 

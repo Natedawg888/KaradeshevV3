@@ -477,7 +477,7 @@ public class PlayersPopulationManager : MonoBehaviour
             return g;
         }
 
-        Debug.Log("Birth blocked: reached maxPopulation.");
+        //Debug.Log("Birth blocked: reached maxPopulation.");
         return null;
     }
 
@@ -1548,14 +1548,14 @@ public class PlayersPopulationManager : MonoBehaviour
                         ? "EndOfLife"
                         : "ZeroHealth";
 
-                Debug.LogWarning(
-                    $"[POP PRUNE] " +
-                    $"Reason={reason} | " +
-                    $"GroupID={g.GroupID} | " +
-                    $"AgeGroup={g.ageGroup} | Gender={g.gender} | " +
-                    $"Count={g.count} | " +
-                    $"AvgAgeTurns={g.averageAgeInTurns} | " +
-                    $"Health01={g.averageHealth:F3}");
+                //Debug.LogWarning(
+                    //$"[POP PRUNE] " +
+                    //$"Reason={reason} | " +
+                    //$"GroupID={g.GroupID} | " +
+                    //$"AgeGroup={g.ageGroup} | Gender={g.gender} | " +
+                    //$"Count={g.count} | " +
+                    //$"AvgAgeTurns={g.averageAgeInTurns} | " +
+                    //$"Health01={g.averageHealth:F3}");
 
                 DetachGroupFromReservations(g);
                 allPopulations.RemoveAt(i);
@@ -1797,7 +1797,7 @@ public class PlayersPopulationManager : MonoBehaviour
 
         if (replacement == null)
         {
-            Debug.Log($"[PlayersPopulationManager] Reservation {reservationId} lost worker {outgoing.Id} and could not be backfilled.");
+            //Debug.Log($"[PlayersPopulationManager] Reservation {reservationId} lost worker {outgoing.Id} and could not be backfilled.");
             return false;
         }
 
@@ -1808,7 +1808,7 @@ public class PlayersPopulationManager : MonoBehaviour
         if (reservationCurrentlyBusy)
             sim.SetIndividualBusy(replacement.Id, true);
 
-        Debug.Log($"[PlayersPopulationManager] Reservation {reservationId} replaced {outgoing.Id} with {replacement.Id}.");
+        //Debug.Log($"[PlayersPopulationManager] Reservation {reservationId} replaced {outgoing.Id} with {replacement.Id}.");
 
         MarkPopulationDirty();
         return true;
@@ -2423,6 +2423,6 @@ public class PlayersPopulationManager : MonoBehaviour
         if (debugPopulationRemovalStack)
             message += $"\nStack Trace:\n{Environment.StackTrace}";
 
-        Debug.LogWarning(message);
+        //Debug.LogWarning(message);
     }
 }

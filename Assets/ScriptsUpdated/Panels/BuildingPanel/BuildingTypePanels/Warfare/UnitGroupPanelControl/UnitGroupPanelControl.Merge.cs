@@ -90,7 +90,7 @@ public partial class UnitGroupPanelControl
             capacity = Mathf.Max(0, unit.maxGroupSize - _group.unitCount);
             if (capacity <= 0)
             {
-                Debug.Log("[UnitGroupPanel] Cannot merge; group already at or above max size.");
+                //Debug.Log("[UnitGroupPanel] Cannot merge; group already at or above max size.");
                 return;
             }
         }
@@ -193,7 +193,7 @@ public partial class UnitGroupPanelControl
 
         if (mergeChoicesContentRoot == null || mergeChoicePrefab == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Merge choices UI not configured.");
+            //Debug.LogWarning("[UnitGroupPanel] Merge choices UI not configured.");
             return;
         }
 
@@ -280,14 +280,14 @@ public partial class UnitGroupPanelControl
         var unit = _group.unitType;
         if (unit == null || sourceGroup.unitType != unit)
         {
-            Debug.LogWarning("[UnitGroupPanel] Cannot merge groups with different unit types.");
+            //Debug.LogWarning("[UnitGroupPanel] Cannot merge groups with different unit types.");
             CancelMerge();
             return;
         }
 
         if (sourceGroup.skillLevel != _group.skillLevel)
         {
-            Debug.LogWarning("[UnitGroupPanel] Cannot merge groups with different skill levels.");
+            //Debug.LogWarning("[UnitGroupPanel] Cannot merge groups with different skill levels.");
             CancelMerge();
             return;
         }
@@ -298,7 +298,7 @@ public partial class UnitGroupPanelControl
             capacity = Mathf.Max(0, unit.maxGroupSize - _group.unitCount);
             if (capacity <= 0)
             {
-                Debug.Log("[UnitGroupPanel] Merge aborted; no capacity left.");
+                //Debug.Log("[UnitGroupPanel] Merge aborted; no capacity left.");
                 CancelMerge();
                 return;
             }
@@ -307,7 +307,7 @@ public partial class UnitGroupPanelControl
         int availableFromSource = sourceGroup.unitCount;
         if (availableFromSource <= 0)
         {
-            Debug.Log("[UnitGroupPanel] Source group has no units to merge.");
+            //Debug.Log("[UnitGroupPanel] Source group has no units to merge.");
             CancelMerge();
             return;
         }
@@ -316,7 +316,7 @@ public partial class UnitGroupPanelControl
         int mergeUnits = Mathf.Min(desired, availableFromSource, capacity);
         if (mergeUnits <= 0)
         {
-            Debug.Log("[UnitGroupPanel] MergeUnits computed as zero; aborting.");
+            //Debug.Log("[UnitGroupPanel] MergeUnits computed as zero; aborting.");
             CancelMerge();
             return;
         }

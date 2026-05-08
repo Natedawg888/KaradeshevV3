@@ -179,7 +179,7 @@ public class StormSimulationSystem : MonoBehaviour
                 RequestAdvanceStorm();
 
                 if (debugLogging)
-                    Debug.Log("[StormSimulationSystem] Sources ready. Storm system initialized.");
+                    //Debug.Log("[StormSimulationSystem] Sources ready. Storm system initialized.");
 
                 _waitForSourcesReadyCoroutine = null;
                 yield break;
@@ -236,7 +236,7 @@ public class StormSimulationSystem : MonoBehaviour
             OnStormGridInitialized?.Invoke();
 
         if (debugLogging && sizeChanged)
-            Debug.Log($"[StormSimulationSystem] Initialized {_cols}x{_rows}");
+            //Debug.Log($"[StormSimulationSystem] Initialized {_cols}x{_rows}");
 
         return true;
     }
@@ -424,7 +424,7 @@ public class StormSimulationSystem : MonoBehaviour
                 OnStormStateChanged?.Invoke();
 
             if (debugLogging)
-                Debug.Log("[StormSimulationSystem] Advanced storms one step.");
+                //Debug.Log("[StormSimulationSystem] Advanced storms one step.");
         }
         finally
         {
@@ -475,7 +475,7 @@ public class StormSimulationSystem : MonoBehaviour
                 OnStormStateChanged?.Invoke();
 
             if (debugLogging)
-                Debug.Log("[StormSimulationSystem] Advanced storms one batched step.");
+                //Debug.Log("[StormSimulationSystem] Advanced storms one batched step.");
         }
         finally
         {
@@ -864,7 +864,7 @@ public class StormSimulationSystem : MonoBehaviour
         if (!TryInitializeGrid())
         {
             if (debugLogging)
-                Debug.LogWarning("[StormSimulationSystem] Could not load storm state because grid is not initialized yet.");
+                //Debug.LogWarning("[StormSimulationSystem] Could not load storm state because grid is not initialized yet.");
 
             return;
         }
@@ -951,9 +951,9 @@ public class StormSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[StormSimulationSystem] Loaded storm state. " +
-                $"Cells={restoredCells}, Active={_activeStormCellCount}");
+            //Debug.Log(
+                //$"[StormSimulationSystem] Loaded storm state. " +
+                //$"Cells={restoredCells}, Active={_activeStormCellCount}");
         }
     }
 
@@ -1003,6 +1003,6 @@ public class StormSimulationSystem : MonoBehaviour
         minStormIntensityForBands = settings.minStormIntensityForBands;
 
         if (debugLogging)
-            Debug.Log("[StormSimulationSystem] Applied storm preset settings.");
+            //Debug.Log("[StormSimulationSystem] Applied storm preset settings.");
     }
 }

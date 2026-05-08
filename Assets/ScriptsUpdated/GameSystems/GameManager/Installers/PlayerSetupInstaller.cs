@@ -77,7 +77,7 @@ public class PlayerSetupInstaller : MonoBehaviour
     {
         if (!uiScene.IsValid() || !uiScene.isLoaded)
         {
-            Debug.LogError("[PlayerSetupInstaller] UI scene is not valid or not loaded.");
+            //Debug.LogError("[PlayerSetupInstaller] UI scene is not valid or not loaded.");
             return;
         }
 
@@ -125,16 +125,16 @@ public class PlayerSetupInstaller : MonoBehaviour
             knownCraftingManager = FindComponentInScene<PlayerKnownCraftingManager>(LoadedScene);
 
         if (immigrantOfferManager == null)
-            Debug.LogWarning("[PlayerSetupInstaller] ImmigrantOfferManager not found in PlayerSetup scene.");
+            //Debug.LogWarning("[PlayerSetupInstaller] ImmigrantOfferManager not found in PlayerSetup scene.");
 
         if (turnSystem == null)
-            Debug.LogWarning("[PlayerSetupInstaller] TurnSystem not found in PlayerSetup scene.");
+            //Debug.LogWarning("[PlayerSetupInstaller] TurnSystem not found in PlayerSetup scene.");
 
         if (playersPopulationManager == null)
-            Debug.LogWarning("[PlayerSetupInstaller] PlayersPopulationManager not found in PlayerSetup scene.");
+            //Debug.LogWarning("[PlayerSetupInstaller] PlayersPopulationManager not found in PlayerSetup scene.");
 
         if (knownResourcesManager == null)
-            Debug.LogWarning("[PlayerSetupInstaller] PlayerKnownResourcesManager not found in PlayerSetup scene.");
+            //Debug.LogWarning("[PlayerSetupInstaller] PlayerKnownResourcesManager not found in PlayerSetup scene.");
 
         if (knownBuildingsManager == null)
             knownBuildingsManager = FindComponentInScene<PlayerKnownBuildingsManager>(LoadedScene);
@@ -167,13 +167,13 @@ public class PlayerSetupInstaller : MonoBehaviour
             playerRitualManager = FindComponentInScene<PlayerRitualManager>(LoadedScene);
 
         if (knownBuildingsManager == null)
-            Debug.LogWarning("[PlayerSetupInstaller] PlayerKnownBuildingsManager not found in PlayerSetup scene.");
+            //Debug.LogWarning("[PlayerSetupInstaller] PlayerKnownBuildingsManager not found in PlayerSetup scene.");
 
         if (playerLevel == null)
-            Debug.LogWarning("[PlayerSetupInstaller] PlayerLevel not found in PlayerSetup scene.");
+            //Debug.LogWarning("[PlayerSetupInstaller] PlayerLevel not found in PlayerSetup scene.");
 
         if (playerPopulationStatistic == null)
-            Debug.LogWarning("[PlayerSetupInstaller] PlayerPopulationStatistic not found in PlayerSetup scene.");
+            //Debug.LogWarning("[PlayerSetupInstaller] PlayerPopulationStatistic not found in PlayerSetup scene.");
         else if (playersPopulationManager != null)
             playerPopulationStatistic.populationManager = playersPopulationManager;
     }
@@ -204,7 +204,7 @@ public class PlayerSetupInstaller : MonoBehaviour
     private static void LogMissing(string label, Object value, string objectName)
     {
         if (value == null)
-            Debug.LogWarning($"[PlayerSetupInstaller] Could not resolve {label} from UI scene using object name '{objectName}'.");
+            //Debug.LogWarning($"[PlayerSetupInstaller] Could not resolve {label} from UI scene using object name '{objectName}'.");
     }
 
     private static T FindComponentInSceneByName<T>(Scene scene, string targetName) where T : Component

@@ -18,7 +18,7 @@ public class SeasonDisplay : MonoBehaviour
             seasonManager = FindObjectOfType<SeasonManager>();
             if (seasonManager == null)
             {
-                Debug.LogError("SeasonManager not found in scene. Please ensure one exists and is enabled.");
+                //Debug.LogError("SeasonManager not found in scene. Please ensure one exists and is enabled.");
                 enabled = false;
                 return;
             }

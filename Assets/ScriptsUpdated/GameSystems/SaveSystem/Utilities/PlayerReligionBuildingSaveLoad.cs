@@ -61,7 +61,7 @@ public static class PlayerReligionBuildingSaveLoad
 
             if (!bySaveableId.TryGetValue(saved.buildingSaveableID, out ReligiousBuildingControl building) || building == null)
             {
-                Debug.LogWarning($"[Religion Save] Could not resolve religious building '{saved.buildingSaveableID}' while loading.");
+                //Debug.LogWarning($"[Religion Save] Could not resolve religious building '{saved.buildingSaveableID}' while loading.");
                 continue;
             }
 

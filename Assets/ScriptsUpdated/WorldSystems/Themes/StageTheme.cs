@@ -332,7 +332,7 @@ public class StageTheme : ScriptableObject
         var path = UnityEditor.AssetDatabase.GetAssetPath(folder);
         if (string.IsNullOrEmpty(path) || !UnityEditor.AssetDatabase.IsValidFolder(path))
         {
-            Debug.LogWarning($"[StageTheme] Invalid folder: {path}");
+            //Debug.LogWarning($"[StageTheme] Invalid folder: {path}");
             return new List<Sprite>();
         }
 

@@ -91,7 +91,7 @@ public class BuildingUpgradePanelControl : MonoBehaviour
 
         if (_candidates.Count == 0)
         {
-            Debug.LogWarning("[UpgradePanel] No valid upgrade targets.");
+            //Debug.LogWarning("[UpgradePanel] No valid upgrade targets.");
             Close();
             return;
         }
@@ -277,7 +277,7 @@ public class BuildingUpgradePanelControl : MonoBehaviour
 
         if (IsUpgradeBlockedBySourceState(out string blockReason))
         {
-            Debug.LogWarning($"[UpgradePanel] {blockReason}");
+            //Debug.LogWarning($"[UpgradePanel] {blockReason}");
             return;
         }
 
@@ -288,7 +288,7 @@ public class BuildingUpgradePanelControl : MonoBehaviour
 
         if (!InventoryQuery.CanAfford(activeCosts))
         {
-            Debug.LogWarning($"[UpgradePanel] Cannot afford upgrade cost set '{target.GetActiveCostSetLabel()}'.");
+            //Debug.LogWarning($"[UpgradePanel] Cannot afford upgrade cost set '{target.GetActiveCostSetLabel()}'.");
             return;
         }
 
@@ -297,13 +297,13 @@ public class BuildingUpgradePanelControl : MonoBehaviour
 
         if (avail < needPop)
         {
-            Debug.LogWarning($"[UpgradePanel] Not enough population (need {needPop}).");
+            //Debug.LogWarning($"[UpgradePanel] Not enough population (need {needPop}).");
             return;
         }
 
         if (!SpendCosts(activeCosts))
         {
-            Debug.LogWarning("[UpgradePanel] Spend costs failed.");
+            //Debug.LogWarning("[UpgradePanel] Spend costs failed.");
             return;
         }
 
@@ -314,7 +314,7 @@ public class BuildingUpgradePanelControl : MonoBehaviour
     {
         if (target == null || target.buildingPrefab == null)
         {
-            Debug.LogError("[UpgradePanel] Target definition missing buildingPrefab.");
+            //Debug.LogError("[UpgradePanel] Target definition missing buildingPrefab.");
             yield break;
         }
 
@@ -353,7 +353,7 @@ public class BuildingUpgradePanelControl : MonoBehaviour
 
         if (!started)
         {
-            Debug.LogWarning("[UpgradePanel] StartConstruction failed; refund and destroy spawned construction.");
+            //Debug.LogWarning("[UpgradePanel] StartConstruction failed; refund and destroy spawned construction.");
             RefundCosts(spentCosts);
             Destroy(constructionGO);
             yield break;
@@ -376,7 +376,7 @@ public class BuildingUpgradePanelControl : MonoBehaviour
         var pim = PlayerInventoryManager.Instance;
         if (!pim)
         {
-            Debug.LogError("[UpgradePanel] No PlayerInventoryManager.");
+            //Debug.LogError("[UpgradePanel] No PlayerInventoryManager.");
             return false;
         }
 
@@ -397,7 +397,7 @@ public class BuildingUpgradePanelControl : MonoBehaviour
                 for (int r = 0; r < rollback.Count; r++)
                     pim.TryAdd(rollback[r].resource, rollback[r].amount);
 
-                Debug.LogWarning("[UpgradePanel] Spend mid-transaction failed, rolled back.");
+                //Debug.LogWarning("[UpgradePanel] Spend mid-transaction failed, rolled back.");
                 return false;
             }
 

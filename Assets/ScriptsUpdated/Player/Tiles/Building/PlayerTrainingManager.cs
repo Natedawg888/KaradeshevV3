@@ -169,7 +169,7 @@ public class PlayerTrainingManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("[PlayerTrainingManager] TrainingCompletion has missing data; skipping spawn.");
+                    //Debug.LogWarning("[PlayerTrainingManager] TrainingCompletion has missing data; skipping spawn.");
                 }
 
                 if (!spawned && !string.IsNullOrEmpty(tc.populationReservationId))
@@ -282,7 +282,7 @@ public class PlayerTrainingManager : MonoBehaviour
 
                 if (!bySaveableId.TryGetValue(saved.buildingSaveableID, out KineticWarfareControl kw) || kw == null)
                 {
-                    Debug.LogWarning($"[Training] Could not resolve building '{saved.buildingSaveableID}' for active training order '{saved.orderID}'.");
+                    //Debug.LogWarning($"[Training] Could not resolve building '{saved.buildingSaveableID}' for active training order '{saved.orderID}'.");
                     continue;
                 }
 
@@ -309,7 +309,7 @@ public class PlayerTrainingManager : MonoBehaviour
                 MilitiaUnit unit = ResolveUnitByID(saved.unitID);
                 if (unit == null)
                 {
-                    Debug.LogWarning($"[Training] Could not resolve unit '{saved.unitID}' for pending completion '{saved.orderId}'.");
+                    //Debug.LogWarning($"[Training] Could not resolve unit '{saved.unitID}' for pending completion '{saved.orderId}'.");
                     continue;
                 }
 

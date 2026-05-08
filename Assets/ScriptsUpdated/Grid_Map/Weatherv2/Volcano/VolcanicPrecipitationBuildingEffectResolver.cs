@@ -194,9 +194,9 @@ public class VolcanicPrecipitationBuildingEffectResolver : MonoBehaviour
         {
             if (debugLogging || resistance.debugLogging)
             {
-                Debug.Log(
-                    $"[VolcanicPrecipitationBuildingEffectResolver] {cell.kind} ignored immune building " +
-                    $"'{buildingObject.name}' at ({cell.x},{cell.y}).");
+                //Debug.Log(
+                    //$"[VolcanicPrecipitationBuildingEffectResolver] {cell.kind} ignored immune building " +
+                    //$"'{buildingObject.name}' at ({cell.x},{cell.y}).");
             }
 
             return;
@@ -221,9 +221,9 @@ public class VolcanicPrecipitationBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging || (resistance != null && resistance.debugLogging))
         {
-            Debug.Log(
-                $"[VolcanicPrecipitationBuildingEffectResolver] {cell.kind} affected '{buildingObject.name}' " +
-                $"cell=({cell.x},{cell.y}) severity={cell.severity01:0.00} finalDamage={finalDamage}");
+            //Debug.Log(
+                //$"[VolcanicPrecipitationBuildingEffectResolver] {cell.kind} affected '{buildingObject.name}' " +
+                //$"cell=({cell.x},{cell.y}) severity={cell.severity01:0.00} finalDamage={finalDamage}");
         }
     }
 

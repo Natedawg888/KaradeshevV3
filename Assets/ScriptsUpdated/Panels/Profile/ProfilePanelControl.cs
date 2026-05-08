@@ -100,7 +100,7 @@ public class ProfilePanelControl : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("closeProfileButton is not assigned!");
+            //Debug.LogWarning("closeProfileButton is not assigned!");
         }
 
         if (openProfilePictureMenuButton != null)
@@ -263,7 +263,7 @@ public class ProfilePanelControl : MonoBehaviour
             ProfilePicItem item = go.GetComponent<ProfilePicItem>();
             if (item == null)
             {
-                Debug.LogWarning("Avatar item prefab missing ProfilePicItem component.");
+                //Debug.LogWarning("Avatar item prefab missing ProfilePicItem component.");
                 continue;
             }
 
@@ -380,7 +380,7 @@ public class ProfilePanelControl : MonoBehaviour
         Sprite match = availableAvatars.Find(s => s != null && s.name == avatarName);
         if (match == null)
         {
-            Debug.LogWarning($"[PROFILE SAVE] Could not find avatar '{avatarName}' in availableAvatars.");
+            //Debug.LogWarning($"[PROFILE SAVE] Could not find avatar '{avatarName}' in availableAvatars.");
             return;
         }
 
@@ -426,7 +426,7 @@ public class ProfilePanelControl : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(titleSceneName))
         {
-            Debug.LogError("[ProfilePanelControl] Title scene name is empty.");
+            //Debug.LogError("[ProfilePanelControl] Title scene name is empty.");
             return;
         }
 

@@ -437,7 +437,7 @@ public class GatheringTutorial : MonoBehaviour
 
         if (candidates.Count == 0)
         {
-            Debug.LogWarning("[GatheringTutorial] Resource pool is empty.");
+            //Debug.LogWarning("[GatheringTutorial] Resource pool is empty.");
             return new List<ResourceDefinition>();
         }
 

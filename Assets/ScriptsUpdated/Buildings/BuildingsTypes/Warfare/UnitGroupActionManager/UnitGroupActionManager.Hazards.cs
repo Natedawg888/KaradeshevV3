@@ -67,9 +67,9 @@ public partial class UnitGroupActionManager
         float roll = Random.value;
         if (roll > hazardChance01)
         {
-            Debug.Log(
-                $"[UnitGroupActionManager] Group {group.groupId} scouted undiscovered '{envCtrl.environmentName}' safely " +
-                $"(roll={roll:0.00} vs hazard={hazardChance01:0.00}).");
+            //Debug.Log(
+                //$"[UnitGroupActionManager] Group {group.groupId} scouted undiscovered '{envCtrl.environmentName}' safely " +
+                //$"(roll={roll:0.00} vs hazard={hazardChance01:0.00}).");
             return false;
         }
 
@@ -111,10 +111,10 @@ public partial class UnitGroupActionManager
         int oldHealth = group.currentHealth;
         group.currentHealth = Mathf.Max(1, group.currentHealth - damage);
 
-        Debug.Log(
-            $"[UnitGroupActionManager] Group {group.groupId} took {damage} damage " +
-            $"while SCOUTING in undiscovered '{envCtrl.environmentName}' " +
-            $"(health {oldHealth} → {group.currentHealth}/{group.maxHealth}).");
+        //Debug.Log(
+            //$"[UnitGroupActionManager] Group {group.groupId} took {damage} damage " +
+            //$"while SCOUTING in undiscovered '{envCtrl.environmentName}' " +
+            //$"(health {oldHealth} → {group.currentHealth}/{group.maxHealth}).");
     }
 
     private void ApplyFatalCasualtiesToGroupWhileScouting(
@@ -146,15 +146,15 @@ public partial class UnitGroupActionManager
 
         group.unitCount -= casualties;
 
-        Debug.Log(
-            $"[UnitGroupActionManager] Group {group.groupId} lost {casualties} " +
-            $"people while SCOUTING undiscovered '{envCtrl.environmentName}' " +
-            $"(units left: {group.unitCount}).");
+        //Debug.Log(
+            //$"[UnitGroupActionManager] Group {group.groupId} lost {casualties} " +
+            //$"people while SCOUTING undiscovered '{envCtrl.environmentName}' " +
+            //$"(units left: {group.unitCount}).");
 
         if (group.unitCount <= 0)
         {
-            Debug.Log(
-                $"[UnitGroupActionManager] Group {group.groupId} was wiped out by hazards while SCOUTING in '{envCtrl.environmentName}'.");
+            //Debug.Log(
+                //$"[UnitGroupActionManager] Group {group.groupId} was wiped out by hazards while SCOUTING in '{envCtrl.environmentName}'.");
 
             if (!string.IsNullOrEmpty(group.populationReservationId) && popMgr != null && group.reservedPopulation > 0)
             {

@@ -119,7 +119,7 @@ public partial class UnitGroupPanelControl
         var unit = _group.unitType;
         if (unit == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Cannot split group with null unitType.");
+            //Debug.LogWarning("[UnitGroupPanel] Cannot split group with null unitType.");
             CancelSplit();
             return;
         }
@@ -139,7 +139,7 @@ public partial class UnitGroupPanelControl
 
         if (newGroup == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Failed to create split group.");
+            //Debug.LogWarning("[UnitGroupPanel] Failed to create split group.");
             CancelSplit();
             return;
         }

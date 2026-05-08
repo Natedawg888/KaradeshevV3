@@ -292,14 +292,14 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         }
         if (!typeOk)
         {
-            Debug.LogWarning("[UnitGroupPanel] BeginTraining called but building cannot train this unit type.");
+            //Debug.LogWarning("[UnitGroupPanel] BeginTraining called but building cannot train this unit type.");
             return;
         }
 
         int maxSkill = Mathf.Max(1, unit.maxSkillLevel);
         if (_group.skillLevel >= maxSkill)
         {
-            Debug.Log("[UnitGroupPanel] Group already at max skill; cannot train.");
+            //Debug.Log("[UnitGroupPanel] Group already at max skill; cannot train.");
             return;
         }
 
@@ -361,7 +361,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         if (root == null || prefab == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Cannot spawn training order preview; missing prefab or root on trainerContext.");
+            //Debug.LogWarning("[UnitGroupPanel] Cannot spawn training order preview; missing prefab or root on trainerContext.");
             return;
         }
 
@@ -579,14 +579,14 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         // Must have used all points
         if (TrainingPointsRemaining > 0)
         {
-            Debug.Log("[UnitGroupPanel] Cannot start training; not all stat points have been allocated.");
+            //Debug.Log("[UnitGroupPanel] Cannot start training; not all stat points have been allocated.");
             return;
         }
 
         // NEW: must have enough resources
         if (!CanAffordSkillTraining())
         {
-            Debug.Log("[UnitGroupPanel] Cannot start training; insufficient resources for skill training.");
+            //Debug.Log("[UnitGroupPanel] Cannot start training; insufficient resources for skill training.");
             if (trainingCostPanelRoot != null && !trainingCostPanelRoot.activeSelf)
             {
                 trainingCostPanelRoot.SetActive(true);
@@ -626,14 +626,14 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         if (!started)
         {
-            Debug.LogWarning($"[UnitGroupPanel] Could not start skill training: {failReason}");
+            //Debug.LogWarning($"[UnitGroupPanel] Could not start skill training: {failReason}");
             return;
         }
 
-        Debug.Log(
-            $"[UnitGroupPanel] Started training group {_group.groupId} to skill {newSkill} " +
-            $"over {trainingTurns} turns via {_trainerContext.name}."
-        );
+        //Debug.Log(
+            //$"[UnitGroupPanel] Started training group {_group.groupId} to skill {newSkill} " +
+            //$"over {trainingTurns} turns via {_trainerContext.name}."
+        //);
 
         // Group is now "inside" the building until completion.
         // Close all panels (group panel, building panel, etc.).

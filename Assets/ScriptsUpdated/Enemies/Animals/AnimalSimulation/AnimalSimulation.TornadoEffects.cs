@@ -66,9 +66,9 @@ public partial class AnimalSimulation
                 {
                     if (debugLogging)
                     {
-                        Debug.Log(
-                            $"[AnimalSimulation] Tornado killed animal group {groupId} at {originalTile}. " +
-                            $"Damage={finalDamage}");
+                        //Debug.Log(
+                            //$"[AnimalSimulation] Tornado killed animal group {groupId} at {originalTile}. " +
+                            //$"Damage={finalDamage}");
                     }
 
                     CleanupTargetsOnDeath(ref group);
@@ -105,8 +105,8 @@ public partial class AnimalSimulation
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[AnimalSimulation] Tornado pushed animal group {groupId} from {originalTile} to {pushedTile}.");
+                //Debug.Log(
+                    //$"[AnimalSimulation] Tornado pushed animal group {groupId} from {originalTile} to {pushedTile}.");
             }
         }
 

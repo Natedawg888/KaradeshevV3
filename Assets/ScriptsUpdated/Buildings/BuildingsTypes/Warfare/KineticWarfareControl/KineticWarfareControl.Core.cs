@@ -297,9 +297,9 @@ public partial class KineticWarfareControl : MonoBehaviour
 
         OnTrainingQueueChanged?.Invoke();
 
-        Debug.Log(
-            $"[KineticWarfare] Started training order {order.orderID}: " +
-            $"{order.TotalUnits} x {unit.unitName} (pop={populationRequired}, resId={reservationId}, expiry={expiryTurn})");
+        //Debug.Log(
+            //$"[KineticWarfare] Started training order {order.orderID}: " +
+            //$"{order.TotalUnits} x {unit.unitName} (pop={populationRequired}, resId={reservationId}, expiry={expiryTurn})");
 
         return true;
     }
@@ -410,7 +410,7 @@ public partial class KineticWarfareControl : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("[KineticWarfare] Training order completed with zero units.");
+                    //Debug.LogWarning("[KineticWarfare] Training order completed with zero units.");
                     // No group will be spawned; release the population now
                     ReleasePopulationForOrder(order);
                     RemoveWidget(order.orderID);
@@ -467,7 +467,7 @@ public partial class KineticWarfareControl : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("[KineticWarfare] TrainingCompletion missing data; skipping spawn.");
+                    //Debug.LogWarning("[KineticWarfare] TrainingCompletion missing data; skipping spawn.");
                 }
 
                 if (!spawned && !string.IsNullOrEmpty(tc.populationReservationId))
@@ -527,7 +527,7 @@ public partial class KineticWarfareControl : MonoBehaviour
         if (popMgr != null)
         {
             popMgr.ReleaseReservation(order.populationReservationId);
-            Debug.Log($"[KineticWarfare] Released pop reservation {order.populationReservationId} (order {order.orderID}).");
+            //Debug.Log($"[KineticWarfare] Released pop reservation {order.populationReservationId} (order {order.orderID}).");
         }
 
         order.populationReservationId = null;
@@ -590,7 +590,7 @@ public partial class KineticWarfareControl : MonoBehaviour
         }
 
         if (!string.IsNullOrEmpty(reason))
-            Debug.Log($"[KineticWarfare] All training orders aborted: {reason}");
+            //Debug.Log($"[KineticWarfare] All training orders aborted: {reason}");
     }
 
     public List<ActiveTrainingOrderSaveData> CaptureActiveOrders(string buildingSaveableID)
@@ -648,7 +648,7 @@ public partial class KineticWarfareControl : MonoBehaviour
         MilitiaUnit unit = unitResolver != null ? unitResolver(saved.unitID) : null;
         if (unit == null)
         {
-            Debug.LogWarning($"[KineticWarfare] Could not resolve unit '{saved.unitID}' while loading training order '{saved.orderID}'.");
+            //Debug.LogWarning($"[KineticWarfare] Could not resolve unit '{saved.unitID}' while loading training order '{saved.orderID}'.");
             return;
         }
 

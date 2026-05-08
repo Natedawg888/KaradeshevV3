@@ -15,7 +15,7 @@ public static class PlayerUnitSaveLoad
         if (TileUnitGroupControl.NonEmptyControls.Count == 0)
             return data;
 
-        Debug.Log($"[PlayerUnitSaveLoad] NonEmptyControls={TileUnitGroupControl.NonEmptyControls.Count}");
+        //Debug.Log($"[PlayerUnitSaveLoad] NonEmptyControls={TileUnitGroupControl.NonEmptyControls.Count}");
 
         foreach (TileUnitGroupControl control in TileUnitGroupControl.NonEmptyControls)
         {
@@ -147,7 +147,7 @@ public static class PlayerUnitSaveLoad
             MilitiaUnit resolvedUnitType = ResolveUnitTypeById(saved.unitTypeID);
             if (resolvedUnitType == null)
             {
-                Debug.LogWarning($"[PlayerUnitSaveLoad] Could not resolve unit type '{saved.unitTypeID}' while loading group '{saved.groupId}'.");
+                //Debug.LogWarning($"[PlayerUnitSaveLoad] Could not resolve unit type '{saved.unitTypeID}' while loading group '{saved.groupId}'.");
                 continue;
             }
 
@@ -155,7 +155,7 @@ public static class PlayerUnitSaveLoad
                 !controlLookup.TryGetValue(saved.tileSaveableID, out TileUnitGroupControl targetControl) ||
                 targetControl == null)
             {
-                Debug.LogWarning($"[PlayerUnitSaveLoad] Could not resolve tile control '{saved.tileSaveableID}' while loading unit group '{saved.groupId}'.");
+                //Debug.LogWarning($"[PlayerUnitSaveLoad] Could not resolve tile control '{saved.tileSaveableID}' while loading unit group '{saved.groupId}'.");
                 continue;
             }
 

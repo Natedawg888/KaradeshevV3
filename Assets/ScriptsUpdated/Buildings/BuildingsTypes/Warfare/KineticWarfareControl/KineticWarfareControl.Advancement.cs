@@ -120,7 +120,7 @@ public partial class KineticWarfareControl
 
             if (!removed)
             {
-                Debug.LogWarning($"[KineticWarfare] Failed to remove {amt}x {res.resourceID} for advancement.");
+                //Debug.LogWarning($"[KineticWarfare] Failed to remove {amt}x {res.resourceID} for advancement.");
                 failReason = "Unexpected inventory error when paying advancement cost.";
                 return false;
             }
@@ -238,10 +238,10 @@ public partial class KineticWarfareControl
 
         SpawnGroupTrainingWidget(order);
 
-        Debug.Log(
-            $"[KineticWarfare] Started advancement order {order.orderId} " +
-            $"for group {group.groupId} → {targetUnit.unitName} in {turns} turns."
-        );
+        //Debug.Log(
+            //$"[KineticWarfare] Started advancement order {order.orderId} " +
+            //$"for group {group.groupId} → {targetUnit.unitName} in {turns} turns."
+        //);
 
         return true;
     }

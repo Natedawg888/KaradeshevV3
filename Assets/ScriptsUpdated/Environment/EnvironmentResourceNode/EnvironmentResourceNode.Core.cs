@@ -104,7 +104,7 @@ public partial class EnvironmentResourceNode : MonoBehaviour
 
         if (environmentControl == null)
         {
-            Debug.LogWarning($"{nameof(EnvironmentResourceNode)} on '{name}' has no EnvironmentControl; aborting resource generation.");
+            //Debug.LogWarning($"{nameof(EnvironmentResourceNode)} on '{name}' has no EnvironmentControl; aborting resource generation.");
             return;
         }
 
@@ -244,7 +244,7 @@ public partial class EnvironmentResourceNode : MonoBehaviour
         var dict = ResourceDictionary.Instance;
         if (dict == null || dict.allResources == null)
         {
-            Debug.LogWarning($"[EnvironmentResourceNode] No ResourceDictionary.Instance; env={envType}, tile={tileType}");
+            //Debug.LogWarning($"[EnvironmentResourceNode] No ResourceDictionary.Instance; env={envType}, tile={tileType}");
             cached = new List<ResourceDefinition>();
         }
         else

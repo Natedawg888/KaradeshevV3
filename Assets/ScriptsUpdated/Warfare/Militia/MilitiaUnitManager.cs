@@ -44,13 +44,13 @@ public class MilitiaUnitManager : MonoBehaviour
 
             if (string.IsNullOrWhiteSpace(u.unitID))
             {
-                Debug.LogWarning($"[MilitiaUnitManager] Unit '{u.unitName}' has empty unitID.");
+                //Debug.LogWarning($"[MilitiaUnitManager] Unit '{u.unitName}' has empty unitID.");
                 continue;
             }
 
             if (_byId.ContainsKey(u.unitID))
             {
-                Debug.LogWarning($"[MilitiaUnitManager] Duplicate unitID '{u.unitID}'. Keeping the first.");
+                //Debug.LogWarning($"[MilitiaUnitManager] Duplicate unitID '{u.unitID}'. Keeping the first.");
                 continue;
             }
 

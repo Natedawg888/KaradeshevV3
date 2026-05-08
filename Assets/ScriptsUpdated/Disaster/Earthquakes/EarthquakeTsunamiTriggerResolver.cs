@@ -117,12 +117,12 @@ public class EarthquakeTsunamiTriggerResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[EarthquakeTsunamiTriggerResolver] Installed refs. " +
-                $"Earthquake={(earthquakeSimulationSystem != null ? earthquakeSimulationSystem.name : "NULL")}, " +
-                $"Tsunami={(tsunamiSimulationSystem != null ? tsunamiSimulationSystem.name : "NULL")}, " +
-                $"Map={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
-                $"Grid={(gridManager != null ? gridManager.name : "NULL")}");
+            //Debug.Log(
+                //$"[EarthquakeTsunamiTriggerResolver] Installed refs. " +
+                //$"Earthquake={(earthquakeSimulationSystem != null ? earthquakeSimulationSystem.name : "NULL")}, " +
+                //$"Tsunami={(tsunamiSimulationSystem != null ? tsunamiSimulationSystem.name : "NULL")}, " +
+                //$"Map={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
+                //$"Grid={(gridManager != null ? gridManager.name : "NULL")}");
         }
     }
 
@@ -161,7 +161,7 @@ public class EarthquakeTsunamiTriggerResolver : MonoBehaviour
         if (data.forced && !allowForcedEarthquakesToTriggerTsunamis)
         {
             if (debugLogging)
-                Debug.Log("[EarthquakeTsunamiTriggerResolver] Forced earthquake ignored for tsunami trigger.");
+                //Debug.Log("[EarthquakeTsunamiTriggerResolver] Forced earthquake ignored for tsunami trigger.");
 
             return;
         }
@@ -169,7 +169,7 @@ public class EarthquakeTsunamiTriggerResolver : MonoBehaviour
         if (tsunamiSimulationSystem == null || mapGenerator == null || gridManager == null)
         {
             if (debugLogging)
-                Debug.LogWarning("[EarthquakeTsunamiTriggerResolver] Missing references.");
+                //Debug.LogWarning("[EarthquakeTsunamiTriggerResolver] Missing references.");
 
             return;
         }
@@ -180,9 +180,9 @@ public class EarthquakeTsunamiTriggerResolver : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[EarthquakeTsunamiTriggerResolver] Earthquake too weak for tsunami. " +
-                    $"Magnitude={data.magnitude:0.0}");
+                //Debug.Log(
+                    //$"[EarthquakeTsunamiTriggerResolver] Earthquake too weak for tsunami. " +
+                    //$"Magnitude={data.magnitude:0.0}");
             }
 
             return;
@@ -192,9 +192,9 @@ public class EarthquakeTsunamiTriggerResolver : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[EarthquakeTsunamiTriggerResolver] Earthquake did not affect sea blocks. " +
-                    $"Magnitude={data.magnitude:0.0}, Epicentre={data.epicentreBlock}");
+                //Debug.Log(
+                    //$"[EarthquakeTsunamiTriggerResolver] Earthquake did not affect sea blocks. " +
+                    //$"Magnitude={data.magnitude:0.0}, Epicentre={data.epicentreBlock}");
             }
 
             return;
@@ -209,9 +209,9 @@ public class EarthquakeTsunamiTriggerResolver : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[EarthquakeTsunamiTriggerResolver] Earthquake tsunami roll failed. " +
-                    $"Magnitude={data.magnitude:0.0}, Chance={chance:0.00}, Roll={roll:0.00}");
+                //Debug.Log(
+                    //$"[EarthquakeTsunamiTriggerResolver] Earthquake tsunami roll failed. " +
+                    //$"Magnitude={data.magnitude:0.0}, Chance={chance:0.00}, Roll={roll:0.00}");
             }
 
             return;
@@ -220,7 +220,7 @@ public class EarthquakeTsunamiTriggerResolver : MonoBehaviour
         if (!TryPickPreferredOceanEdge(data, out TsunamiGridEdge edge))
         {
             if (debugLogging)
-                Debug.LogWarning("[EarthquakeTsunamiTriggerResolver] No valid ocean edge found for tsunami.");
+                //Debug.LogWarning("[EarthquakeTsunamiTriggerResolver] No valid ocean edge found for tsunami.");
 
             return;
         }
@@ -234,11 +234,11 @@ public class EarthquakeTsunamiTriggerResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[EarthquakeTsunamiTriggerResolver] Earthquake tsunami decision. " +
-                $"Triggered={triggered}, Magnitude={data.magnitude:0.0}, Magnitude01={magnitude01:0.00}, " +
-                $"Chance={chance:0.00}, Roll={(bypassRoll ? -1f : roll):0.00}, " +
-                $"Energy={energy:0.00}, Edge={edge}, ForcedEarthquake={data.forced}");
+            //Debug.Log(
+                //$"[EarthquakeTsunamiTriggerResolver] Earthquake tsunami decision. " +
+                //$"Triggered={triggered}, Magnitude={data.magnitude:0.0}, Magnitude01={magnitude01:0.00}, " +
+                //$"Chance={chance:0.00}, Roll={(bypassRoll ? -1f : roll):0.00}, " +
+                //$"Energy={energy:0.00}, Edge={edge}, ForcedEarthquake={data.forced}");
         }
     }
 

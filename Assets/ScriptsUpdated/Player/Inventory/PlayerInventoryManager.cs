@@ -152,7 +152,7 @@ public partial class PlayerInventoryManager : MonoBehaviour
 
             bool ok = TryAdd(e.def, e.amount); // uses your existing capacity + merge logic :contentReference[oaicite:3]{index=3}
             if (!ok)
-                Debug.LogWarning($"[INV] Starter add failed (capacity?) {e.amount}x {e.def.resourceName} ({e.def.resourceID})");
+                //Debug.LogWarning($"[INV] Starter add failed (capacity?) {e.amount}x {e.def.resourceName} ({e.def.resourceID})");
             else
                 addedCount++;
         }
@@ -640,7 +640,7 @@ public partial class PlayerInventoryManager : MonoBehaviour
 
         if (enableConsumeDebug)
         {
-            Debug.Log($"[INV][{mode}] Need={need:F2} pts  |  Available(before)={availableBefore:F2} pts  |  Stacks={list.Count}");
+            //Debug.Log($"[INV][{mode}] Need={need:F2} pts  |  Available(before)={availableBefore:F2} pts  |  Stacks={list.Count}");
         }
 
         float providedPoints = 0f;
@@ -702,7 +702,7 @@ public partial class PlayerInventoryManager : MonoBehaviour
             if (enableConsumeDebug)
             {
                 float afterRemaining = Mathf.Max(0f, need - providedPoints);
-                Debug.Log($"[INV][{mode}]  • Took {unitsToTake} × {ShortRes(def)} @ {perUnit:F2} => {subtotal:F2} pts  |  Remaining need ≈ {afterRemaining:F2}  |  Stack left={s.amount}");
+                //Debug.Log($"[INV][{mode}]  • Took {unitsToTake} × {ShortRes(def)} @ {perUnit:F2} => {subtotal:F2} pts  |  Remaining need ≈ {afterRemaining:F2}  |  Stack left={s.amount}");
             }
 
             if (s.amount <= 0)
@@ -730,7 +730,7 @@ public partial class PlayerInventoryManager : MonoBehaviour
         {
             float overfill = Mathf.Max(0f, providedPoints - need);
             float availableAfter = ComputeAvailablePoints(list, useNutrition);
-            Debug.Log($"[INV][{mode}] Provided={providedPoints:F2} / Need={need:F2}  (Overfill={overfill:F2})  |  StacksUsed={stacksUsed}  |  Available(after)={availableAfter:F2}");
+            //Debug.Log($"[INV][{mode}] Provided={providedPoints:F2} / Need={need:F2}  (Overfill={overfill:F2})  |  StacksUsed={stacksUsed}  |  Available(after)={availableAfter:F2}");
         }
 
         return providedPoints;
@@ -1030,11 +1030,11 @@ public partial class PlayerInventoryManager : MonoBehaviour
 
             if (debugConsumedResourceRecoveryEffects)
             {
-                Debug.Log(
-                    $"[INV][RECOVERY] {def.resourceName} restored health. " +
-                    $"Units={unitsConsumed}, " +
-                    $"PeopleHealed={healedPeople}, " +
-                    $"TotalHealthRestored={totalHealthRestored:F3}");
+                //Debug.Log(
+                    //$"[INV][RECOVERY] {def.resourceName} restored health. " +
+                    //$"Units={unitsConsumed}, " +
+                    //$"PeopleHealed={healedPeople}, " +
+                    //$"TotalHealthRestored={totalHealthRestored:F3}");
             }
         }
 
@@ -1065,11 +1065,11 @@ public partial class PlayerInventoryManager : MonoBehaviour
 
         if (debugConsumedResourceRecoveryEffects && affected > 0)
         {
-            Debug.Log(
-                $"[INV][RECOVERY] {def.resourceName} boosted disease recovery. " +
-                $"Units={unitsConsumed}, " +
-                $"RecoveryBudget={recoveryBoostBudget:F3}, " +
-                $"Affected={affected}");
+            //Debug.Log(
+                //$"[INV][RECOVERY] {def.resourceName} boosted disease recovery. " +
+                //$"Units={unitsConsumed}, " +
+                //$"RecoveryBudget={recoveryBoostBudget:F3}, " +
+                //$"Affected={affected}");
         }
 
         return affected;

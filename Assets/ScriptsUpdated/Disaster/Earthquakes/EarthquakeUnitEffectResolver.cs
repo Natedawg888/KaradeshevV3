@@ -143,12 +143,12 @@ public class EarthquakeUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeUnitEffectResolver: Installed refs. " +
-                $"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
-                $"MapGenerator={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
-                $"GridManager={(gridManager != null ? gridManager.name : "NULL")}"
-            );
+            //Debug.Log(
+                //$"EarthquakeUnitEffectResolver: Installed refs. " +
+                //$"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
+                //$"MapGenerator={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
+                //$"GridManager={(gridManager != null ? gridManager.name : "NULL")}"
+            //);
         }
     }
 
@@ -196,7 +196,7 @@ public class EarthquakeUnitEffectResolver : MonoBehaviour
         if (mapGenerator == null || gridManager == null)
         {
             if (debugLogging)
-                Debug.LogWarning("EarthquakeUnitEffectResolver: Missing MapGenerator or GridManager.");
+                //Debug.LogWarning("EarthquakeUnitEffectResolver: Missing MapGenerator or GridManager.");
 
             return;
         }
@@ -232,7 +232,7 @@ public class EarthquakeUnitEffectResolver : MonoBehaviour
         if (magnitude01 <= 0f)
         {
             if (debugLogging)
-                Debug.Log($"EarthquakeUnitEffectResolver: Magnitude {data.magnitude:0.0}, no unit effects.");
+                //Debug.Log($"EarthquakeUnitEffectResolver: Magnitude {data.magnitude:0.0}, no unit effects.");
 
             processedGroupsThisPass.Clear();
             ClearUnitControlLookup();
@@ -256,11 +256,11 @@ public class EarthquakeUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeUnitEffectResolver complete. " +
-                $"AffectedGroups={affectedGroups}, " +
-                $"FaultCells={faultCells.Count}, InfluenceCells={influenceCells.Count}, AffectedCells={affectedCells.Count}"
-            );
+            //Debug.Log(
+                //$"EarthquakeUnitEffectResolver complete. " +
+                //$"AffectedGroups={affectedGroups}, " +
+                //$"FaultCells={faultCells.Count}, InfluenceCells={influenceCells.Count}, AffectedCells={affectedCells.Count}"
+            //);
         }
 
         processedGroupsThisPass.Clear();
@@ -279,7 +279,7 @@ public class EarthquakeUnitEffectResolver : MonoBehaviour
         if (magnitude01 <= 0f)
         {
             if (debugLogging)
-                Debug.Log($"EarthquakeUnitEffectResolver: Magnitude {data.magnitude:0.0}, no unit effects.");
+                //Debug.Log($"EarthquakeUnitEffectResolver: Magnitude {data.magnitude:0.0}, no unit effects.");
 
             processedGroupsThisPass.Clear();
             ClearUnitControlLookup();
@@ -291,11 +291,11 @@ public class EarthquakeUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeUnitEffectResolver complete. " +
-                $"AffectedGroups={affectedGroups}, " +
-                $"FaultCells={faultCells.Count}, InfluenceCells={influenceCells.Count}, AffectedCells={affectedCells.Count}"
-            );
+            //Debug.Log(
+                //$"EarthquakeUnitEffectResolver complete. " +
+                //$"AffectedGroups={affectedGroups}, " +
+                //$"FaultCells={faultCells.Count}, InfluenceCells={influenceCells.Count}, AffectedCells={affectedCells.Count}"
+            //);
         }
 
         processedGroupsThisPass.Clear();
@@ -432,10 +432,10 @@ public class EarthquakeUnitEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[EarthquakeUnitEffectResolver] Earthquake destroyed unit group {group.groupId} " +
-                    $"at ({coord.x},{coord.y}). Zone={zoneName}, Severity={severity:0.00}, Damage={finalDamage}"
-                );
+                //Debug.Log(
+                    //$"[EarthquakeUnitEffectResolver] Earthquake destroyed unit group {group.groupId} " +
+                    //$"at ({coord.x},{coord.y}). Zone={zoneName}, Severity={severity:0.00}, Damage={finalDamage}"
+                //);
             }
 
             unitControl.RemoveGroupDueToFatalities(group);
@@ -449,11 +449,11 @@ public class EarthquakeUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[EarthquakeUnitEffectResolver] Earthquake damaged unit group {group.groupId} " +
-                $"at ({coord.x},{coord.y}). Zone={zoneName}, Severity={severity:0.00}, " +
-                $"Damage={finalDamage}, UnitsLost={unitsLost}, RemainingUnits={group.unitCount}"
-            );
+            //Debug.Log(
+                //$"[EarthquakeUnitEffectResolver] Earthquake damaged unit group {group.groupId} " +
+                //$"at ({coord.x},{coord.y}). Zone={zoneName}, Severity={severity:0.00}, " +
+                //$"Damage={finalDamage}, UnitsLost={unitsLost}, RemainingUnits={group.unitCount}"
+            //);
         }
     }
 

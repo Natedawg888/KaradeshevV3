@@ -140,7 +140,7 @@ public class ProductionRunningPanelControl : MonoBehaviour
 
         if (_production == null || !_production.HasActivePlan)
         {
-            Debug.LogWarning("[ProductionRunningPanel] OpenFor called but building has no active production plan.");
+            //Debug.LogWarning("[ProductionRunningPanel] OpenFor called but building has no active production plan.");
             return;
         }
 
@@ -299,7 +299,7 @@ public class ProductionRunningPanelControl : MonoBehaviour
         {
             if (costEntryPrefab == null)
             {
-                Debug.LogWarning("[ProductionRunningPanel] No costEntryPrefab assigned.");
+                //Debug.LogWarning("[ProductionRunningPanel] No costEntryPrefab assigned.");
                 return;
             }
 
@@ -320,7 +320,7 @@ public class ProductionRunningPanelControl : MonoBehaviour
         {
             if (rewardEntryPrefab == null)
             {
-                Debug.LogWarning("[ProductionRunningPanel] No rewardEntryPrefab assigned.");
+                //Debug.LogWarning("[ProductionRunningPanel] No rewardEntryPrefab assigned.");
                 return;
             }
 
@@ -505,7 +505,7 @@ public class ProductionRunningPanelControl : MonoBehaviour
         var plan = _production.ActivePlan;
         if (!plan.isExternalExtractor)
         {
-            Debug.LogWarning("[ProductionRunningPanel] Re-pick tiles clicked, but active plan is not an external extractor.");
+            //Debug.LogWarning("[ProductionRunningPanel] Re-pick tiles clicked, but active plan is not an external extractor.");
             return;
         }
 

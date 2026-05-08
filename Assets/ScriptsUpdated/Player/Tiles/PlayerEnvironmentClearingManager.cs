@@ -60,26 +60,26 @@ public class PlayerEnvironmentClearingManager : MonoBehaviour
     {
         if (env == null)
         {
-            Debug.LogWarning("[PlayerEnvironmentClearingManager] StartClearing called with null EnvironmentControl.");
+            //Debug.LogWarning("[PlayerEnvironmentClearingManager] StartClearing called with null EnvironmentControl.");
             return false;
         }
 
         if (!env.IsDiscovered)
         {
-            Debug.LogWarning("[PlayerEnvironmentClearingManager] Cannot clear undiscovered environment.");
+            //Debug.LogWarning("[PlayerEnvironmentClearingManager] Cannot clear undiscovered environment.");
             return false;
         }
 
         // Already clearing this environment?
         if (_activeByEnv.ContainsKey(env))
         {
-            Debug.Log("[PlayerEnvironmentClearingManager] Environment is already being cleared.");
+            //Debug.Log("[PlayerEnvironmentClearingManager] Environment is already being cleared.");
             return false;
         }
 
         if (clearingTaskPrefab == null)
         {
-            Debug.LogError("[PlayerEnvironmentClearingManager] clearingTaskPrefab is not assigned.");
+            //Debug.LogError("[PlayerEnvironmentClearingManager] clearingTaskPrefab is not assigned.");
             return false;
         }
 

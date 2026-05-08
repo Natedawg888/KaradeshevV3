@@ -94,7 +94,7 @@ public class CameraControl : MonoBehaviour
 
         if (_cloudLayer < 0)
         {
-            Debug.LogWarning($"[CameraControl] Layer '{cloudLayerName}' was not found.");
+            //Debug.LogWarning($"[CameraControl] Layer '{cloudLayerName}' was not found.");
         }
 
         ApplyCloudLayerVisibility();

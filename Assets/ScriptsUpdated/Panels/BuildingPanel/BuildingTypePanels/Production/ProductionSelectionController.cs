@@ -52,7 +52,7 @@ public static class ProductionSelectionController
 
         s_active = false;
 
-        Debug.Log("[ProductionSelection] Selection complete; exiting selection mode.");
+        //Debug.Log("[ProductionSelection] Selection complete; exiting selection mode.");
 
         OnSelectionModeChanged?.Invoke(false);
         OnSelectionProgress?.Invoke(picked, max);
@@ -75,13 +75,13 @@ public static class ProductionSelectionController
     {
         if (building == null || plan == null)
         {
-            Debug.LogWarning("[ProductionSelection] BeginSelection with null building/plan.");
+            //Debug.LogWarning("[ProductionSelection] BeginSelection with null building/plan.");
             return;
         }
 
         if (!plan.isExternalExtractor)
         {
-            Debug.LogWarning("[ProductionSelection] Plan is not an external extractor; no tile picking needed.");
+            //Debug.LogWarning("[ProductionSelection] Plan is not an external extractor; no tile picking needed.");
             return;
         }
 
@@ -119,8 +119,8 @@ public static class ProductionSelectionController
 
         s_active = true;
 
-        Debug.Log($"[ProductionSelection] Started selection for plan {plan.productionID}. " +
-                $"BFS tiles={s_inRangeTiles.Count}, Max picks={s_maxSelectableTiles}");
+        //Debug.Log($"[ProductionSelection] Started selection for plan {plan.productionID}. " +
+                //$"BFS tiles={s_inRangeTiles.Count}, Max picks={s_maxSelectableTiles}");
 
         OnSelectionModeChanged?.Invoke(true);
         OnSelectionProgress?.Invoke(SelectedCount, MaxTiles);
@@ -175,7 +175,7 @@ public static class ProductionSelectionController
         {
             if (s_selectedTiles.Count >= MaxTiles)
             {
-                Debug.Log("[ProductionSelection] Already at plan tile cap.");
+                //Debug.Log("[ProductionSelection] Already at plan tile cap.");
                 return false;
             }
 
@@ -187,7 +187,7 @@ public static class ProductionSelectionController
         // Auto-complete when we hit the cap
         if (MaxTiles > 0 && SelectedCount == MaxTiles)
         {
-            Debug.Log("[ProductionSelection] Reached max tiles; auto-completing selection.");
+            //Debug.Log("[ProductionSelection] Reached max tiles; auto-completing selection.");
             CompleteSelection();
         }
 

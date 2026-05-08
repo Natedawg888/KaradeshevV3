@@ -203,18 +203,18 @@ public class BuildingFireSecondaryEffects : MonoBehaviour
         {
             string buildingName = building != null ? building.name : name;
 
-            Debug.Log(
-                $"[BuildingFireSecondaryEffects] Fire damaged '{buildingName}'. " +
-                $"IncomingFireDamage={finalDamage} | " +
-                $"AppliedBuildingDamage={actualBuildingDamage} | " +
-                $"ShelterDeaths={killedInShelter} | " +
-                $"CancelledCraftOrders={cancelledCraftOrders} | " +
-                $"CrafterDeaths={killedCrafters} | " +
-                $"ProductionPaused={productionPaused} | " +
-                $"ProductionWorkerDeaths={killedProductionWorkers} | " +
-                $"TrainingPaused={trainingPaused} | " +
-                $"TrainingDeaths={killedTrainees} | " +
-                $"StorageDestroyed={storageResourcesDestroyed}");
+            //Debug.Log(
+                //$"[BuildingFireSecondaryEffects] Fire damaged '{buildingName}'. " +
+                //$"IncomingFireDamage={finalDamage} | " +
+                //$"AppliedBuildingDamage={actualBuildingDamage} | " +
+                //$"ShelterDeaths={killedInShelter} | " +
+                //$"CancelledCraftOrders={cancelledCraftOrders} | " +
+                //$"CrafterDeaths={killedCrafters} | " +
+                //$"ProductionPaused={productionPaused} | " +
+                //$"ProductionWorkerDeaths={killedProductionWorkers} | " +
+                //$"TrainingPaused={trainingPaused} | " +
+                //$"TrainingDeaths={killedTrainees} | " +
+                //$"StorageDestroyed={storageResourcesDestroyed}");
         }
     }
 

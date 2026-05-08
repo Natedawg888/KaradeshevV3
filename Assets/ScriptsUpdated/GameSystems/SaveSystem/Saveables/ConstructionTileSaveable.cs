@@ -71,7 +71,7 @@ public class ConstructionTileSaveable : Saveable
 
         if (resolvedDef == null && !string.IsNullOrWhiteSpace(data.runtimeData.buildingID))
         {
-            Debug.LogWarning($"[ConstructionTileSaveable] Could not resolve building '{data.runtimeData.buildingID}' while loading '{name}'.");
+            //Debug.LogWarning($"[ConstructionTileSaveable] Could not resolve building '{data.runtimeData.buildingID}' while loading '{name}'.");
         }
 
         bc.ApplyRuntimeSaveData(data.runtimeData, resolvedDef, resolvedFinalOverride);

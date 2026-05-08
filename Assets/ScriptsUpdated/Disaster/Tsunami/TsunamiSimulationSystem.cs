@@ -198,7 +198,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
         if (!IsMapReady())
         {
             if (debugLogging)
-                Debug.LogWarning("[TsunamiSimulationSystem] Map is not ready. Roll skipped.");
+                //Debug.LogWarning("[TsunamiSimulationSystem] Map is not ready. Roll skipped.");
 
             return;
         }
@@ -216,9 +216,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiSimulationSystem] Turn roll. " +
-                $"Turn={currentTurn} Chance={tsunamiChancePerTurn:0.000} Roll={roll:0.000}");
+            //Debug.Log(
+                //$"[TsunamiSimulationSystem] Turn roll. " +
+                //$"Turn={currentTurn} Chance={tsunamiChancePerTurn:0.000} Roll={roll:0.000}");
         }
 
         if (roll > tsunamiChancePerTurn)
@@ -248,7 +248,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
         if (!IsSeaCell(coord))
         {
             if (debugLogging)
-                Debug.LogWarning($"[TsunamiSimulationSystem] ForceTsunamiAtCell failed. Source is not sea: {coord}");
+                //Debug.LogWarning($"[TsunamiSimulationSystem] ForceTsunamiAtCell failed. Source is not sea: {coord}");
 
             return false;
         }
@@ -273,7 +273,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
         if (!IsMapReady())
         {
             if (debugLogging)
-                Debug.LogWarning("[TsunamiSimulationSystem] Cannot start tsunami. Map is not ready.");
+                //Debug.LogWarning("[TsunamiSimulationSystem] Cannot start tsunami. Map is not ready.");
 
             return false;
         }
@@ -380,7 +380,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
         if (!IsMapReady())
         {
             if (debugLogging)
-                Debug.LogWarning("[TsunamiSimulationSystem] Cannot trigger tsunami. Map is not ready.");
+                //Debug.LogWarning("[TsunamiSimulationSystem] Cannot trigger tsunami. Map is not ready.");
 
             return;
         }
@@ -393,7 +393,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
             if (!TryPickOceanGridEdge(forced, out spawnEdge))
             {
                 if (debugLogging)
-                    Debug.LogWarning("[TsunamiSimulationSystem] No valid ocean edge found. Tsunami skipped.");
+                    //Debug.LogWarning("[TsunamiSimulationSystem] No valid ocean edge found. Tsunami skipped.");
 
                 return;
             }
@@ -423,9 +423,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.LogWarning(
-                    $"[TsunamiSimulationSystem] Picked ocean edge={spawnEdge}, " +
-                    $"but no valid sea source cells were built. Tsunami skipped.");
+                //Debug.LogWarning(
+                    //$"[TsunamiSimulationSystem] Picked ocean edge={spawnEdge}, " +
+                    //$"but no valid sea source cells were built. Tsunami skipped.");
             }
 
             return;
@@ -435,9 +435,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiSimulationSystem] Triggered tsunami from ocean edge={spawnEdge}, " +
-                $"direction={directionKind}, sourceCells={sourceScratch.Count}");
+            //Debug.Log(
+                //$"[TsunamiSimulationSystem] Triggered tsunami from ocean edge={spawnEdge}, " +
+                //$"direction={directionKind}, sourceCells={sourceScratch.Count}");
         }
     }
 
@@ -464,9 +464,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiSimulationSystem] Forced edge={forcedSpawnEdge} had no ocean cells. " +
-                    $"Falling back to ocean edge={edge}.");
+                //Debug.Log(
+                    //$"[TsunamiSimulationSystem] Forced edge={forcedSpawnEdge} had no ocean cells. " +
+                    //$"Falling back to ocean edge={edge}.");
             }
 
             return true;
@@ -784,9 +784,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiSimulationSystem] Started tsunami id={id} " +
-                $"direction={directionKind} energy={energy:0.00} sourceCells={sourceCells.Count} forced={forced}");
+            //Debug.Log(
+                //$"[TsunamiSimulationSystem] Started tsunami id={id} " +
+                //$"direction={directionKind} energy={energy:0.00} sourceCells={sourceCells.Count} forced={forced}");
         }
 
         MarkTsunamiSaveDirty();
@@ -1023,9 +1023,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiSimulationSystem] Advanced id={wave.tsunamiId} " +
-                $"step={wave.stepCount} energy={wave.energy:0.00} activeCells={wave.currentCells.Count} landRatio={landRatio:0.00}");
+            //Debug.Log(
+                //$"[TsunamiSimulationSystem] Advanced id={wave.tsunamiId} " +
+                //$"step={wave.stepCount} energy={wave.energy:0.00} activeCells={wave.currentCells.Count} landRatio={landRatio:0.00}");
         }
 
         if (wave.energy <= 0f)
@@ -1082,9 +1082,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiSimulationSystem] Ended id={wave.tsunamiId} " +
-                $"reason={reason} finalStep={wave.stepCount} finalEnergy={wave.energy:0.00}");
+            //Debug.Log(
+                //$"[TsunamiSimulationSystem] Ended id={wave.tsunamiId} " +
+                //$"reason={reason} finalStep={wave.stepCount} finalEnergy={wave.energy:0.00}");
         }
     }
 
@@ -1290,9 +1290,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiSimulationSystem] Wave blocked by environment type. " +
-                    $"coord={coord} envType={data.environmentType}");
+                //Debug.Log(
+                    //$"[TsunamiSimulationSystem] Wave blocked by environment type. " +
+                    //$"coord={coord} envType={data.environmentType}");
             }
 
             return false;
@@ -1302,9 +1302,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiSimulationSystem] Wave blocked by tile type. " +
-                    $"coord={coord} tileType={data.tileType}");
+                //Debug.Log(
+                    //$"[TsunamiSimulationSystem] Wave blocked by tile type. " +
+                    //$"coord={coord} tileType={data.tileType}");
             }
 
             return false;
@@ -1440,7 +1440,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
         if (!IsMapReady())
         {
             if (debugLogging)
-                Debug.LogWarning("[TsunamiSimulationSystem] Cannot trigger earthquake tsunami. Map is not ready.");
+                //Debug.LogWarning("[TsunamiSimulationSystem] Cannot trigger earthquake tsunami. Map is not ready.");
 
             return false;
         }
@@ -1453,9 +1453,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
             {
                 if (debugLogging)
                 {
-                    Debug.LogWarning(
-                        $"[TsunamiSimulationSystem] Earthquake tsunami preferred edge={preferredEdge} " +
-                        $"has no sea cells and fallback is disabled.");
+                    //Debug.LogWarning(
+                        //$"[TsunamiSimulationSystem] Earthquake tsunami preferred edge={preferredEdge} " +
+                        //$"has no sea cells and fallback is disabled.");
                 }
 
                 return false;
@@ -1464,16 +1464,16 @@ public class TsunamiSimulationSystem : MonoBehaviour
             if (!TryPickOceanGridEdge(false, out spawnEdge))
             {
                 if (debugLogging)
-                    Debug.LogWarning("[TsunamiSimulationSystem] Earthquake tsunami failed. No valid ocean edge found.");
+                    //Debug.LogWarning("[TsunamiSimulationSystem] Earthquake tsunami failed. No valid ocean edge found.");
 
                 return false;
             }
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiSimulationSystem] Earthquake tsunami preferred edge={preferredEdge} had no sea cells. " +
-                    $"Using fallback edge={spawnEdge}.");
+                //Debug.Log(
+                    //$"[TsunamiSimulationSystem] Earthquake tsunami preferred edge={preferredEdge} had no sea cells. " +
+                    //$"Using fallback edge={spawnEdge}.");
             }
         }
 
@@ -1490,9 +1490,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.LogWarning(
-                    $"[TsunamiSimulationSystem] Earthquake tsunami failed. " +
-                    $"No valid sea source cells built for edge={spawnEdge}.");
+                //Debug.LogWarning(
+                    //$"[TsunamiSimulationSystem] Earthquake tsunami failed. " +
+                    //$"No valid sea source cells built for edge={spawnEdge}.");
             }
 
             return false;
@@ -1509,9 +1509,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiSimulationSystem] Earthquake triggered tsunami. " +
-                $"Edge={spawnEdge}, Direction={directionKind}, Energy={finalEnergy:0.00}, SourceCells={sourceScratch.Count}");
+            //Debug.Log(
+                //$"[TsunamiSimulationSystem] Earthquake triggered tsunami. " +
+                //$"Edge={spawnEdge}, Direction={directionKind}, Energy={finalEnergy:0.00}, SourceCells={sourceScratch.Count}");
         }
 
         return true;
@@ -1694,9 +1694,9 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiSimulationSystem] Loaded tsunami state. " +
-                $"ActiveWaves={restored}, NextId={nextTsunamiId}, LastRollTurn={lastRollTurn}");
+            //Debug.Log(
+                //$"[TsunamiSimulationSystem] Loaded tsunami state. " +
+                //$"ActiveWaves={restored}, NextId={nextTsunamiId}, LastRollTurn={lastRollTurn}");
         }
     }
 
@@ -1888,6 +1888,6 @@ public class TsunamiSimulationSystem : MonoBehaviour
         allowTsunamiIntoLakes = settings.allowTsunamiIntoLakes;
 
         if (debugLogging)
-            Debug.Log("[TsunamiSimulationSystem] Applied tsunami preset settings.");
+            //Debug.Log("[TsunamiSimulationSystem] Applied tsunami preset settings.");
     }
 }

@@ -65,7 +65,7 @@ public class SceneStartupLifecycleScanner : MonoBehaviour
         Scene scene = gameObject.scene;
         if (!scene.IsValid() || !scene.isLoaded)
         {
-            Debug.LogWarning($"[LifecycleScan] Scene still not ready during phase '{phase}'.", this);
+            //Debug.LogWarning($"[LifecycleScan] Scene still not ready during phase '{phase}'.", this);
             yield break;
         }
 
@@ -84,7 +84,7 @@ public class SceneStartupLifecycleScanner : MonoBehaviour
         Scene scene = gameObject.scene;
         if (!scene.IsValid() || !scene.isLoaded)
         {
-            Debug.LogWarning("[LifecycleScan] Scene is not valid or not loaded yet.", this);
+            //Debug.LogWarning("[LifecycleScan] Scene is not valid or not loaded yet.", this);
             return;
         }
 
@@ -167,7 +167,7 @@ public class SceneStartupLifecycleScanner : MonoBehaviour
                 $"Awake={entry.hasAwake} OnEnable={entry.hasOnEnable} Start={entry.hasStart}");
         }
 
-        Debug.Log(sb.ToString(), this);
+        //Debug.Log(sb.ToString(), this);
     }
 
     private static bool DeclaresParameterlessMethod(Type type, string methodName)

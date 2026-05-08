@@ -144,7 +144,7 @@ public class VolcanoLavaBridge : MonoBehaviour
         if (lavaOverlayManager == null)
         {
             if (debugLogging)
-                Debug.LogWarning("[VolcanoLavaBridge] No LavaOverlayManager found.");
+                //Debug.LogWarning("[VolcanoLavaBridge] No LavaOverlayManager found.");
 
             return;
         }
@@ -155,7 +155,7 @@ public class VolcanoLavaBridge : MonoBehaviour
         if (!volcano.TryGetPrimaryCell(out TileCoord primaryCell))
         {
             if (debugLogging)
-                Debug.LogWarning($"[VolcanoLavaBridge] Could not resolve primary cell for {volcano.name}");
+                //Debug.LogWarning($"[VolcanoLavaBridge] Could not resolve primary cell for {volcano.name}");
 
             return;
         }
@@ -184,10 +184,10 @@ public class VolcanoLavaBridge : MonoBehaviour
             for (int i = 0; i < footprintScratch.Count; i++)
                 cells += $"({footprintScratch[i].x},{footprintScratch[i].y}) ";
 
-            Debug.Log(
-                $"[VolcanoLavaBridge] Seeded lava for {volcano.name}. " +
-                $"primary=({primaryCell.x},{primaryCell.y}) " +
-                $"cells={footprintScratch.Count} {cells}");
+            //Debug.Log(
+                //$"[VolcanoLavaBridge] Seeded lava for {volcano.name}. " +
+                //$"primary=({primaryCell.x},{primaryCell.y}) " +
+                //$"cells={footprintScratch.Count} {cells}");
         }
     }
 
@@ -290,7 +290,7 @@ public class VolcanoLavaBridge : MonoBehaviour
         if (!volcano.TryGetPrimaryCell(out TileCoord primaryCell))
         {
             if (debugLogging)
-                Debug.LogWarning($"[VolcanoLavaBridge] Could not resolve primary cell for erupting volcano {volcano.name}");
+                //Debug.LogWarning($"[VolcanoLavaBridge] Could not resolve primary cell for erupting volcano {volcano.name}");
 
             return;
         }
@@ -312,10 +312,10 @@ public class VolcanoLavaBridge : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[VolcanoLavaBridge] {volcano.name} emitted lava this eruption turn. " +
-                $"Added={added} PerTurn={volcano.GetLavaCellsPerEruptionTurn()} " +
-                $"MaxDistance={volcano.GetMaxLavaDistanceFromSource()}");
+            //Debug.Log(
+                //$"[VolcanoLavaBridge] {volcano.name} emitted lava this eruption turn. " +
+                //$"Added={added} PerTurn={volcano.GetLavaCellsPerEruptionTurn()} " +
+                //$"MaxDistance={volcano.GetMaxLavaDistanceFromSource()}");
         }
     }
 

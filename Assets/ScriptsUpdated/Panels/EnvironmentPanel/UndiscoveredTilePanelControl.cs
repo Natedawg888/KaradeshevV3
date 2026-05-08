@@ -158,7 +158,7 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
         if (lowDiscoveryPopup)
             lowDiscoveryPopup.Show(title, body);
         else
-            Debug.LogWarning("[UndiscoveredTilePanel] lowDiscoveryPopup not set.");
+            //Debug.LogWarning("[UndiscoveredTilePanel] lowDiscoveryPopup not set.");
     }
 
     public void Hide()
@@ -222,13 +222,13 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
             if (detailsPanel != null)
                 detailsPanel.ShowFor(currentEnv);
             else
-                Debug.LogWarning("Not enough population and detailsPanel is null.");
+                //Debug.LogWarning("Not enough population and detailsPanel is null.");
             return;
         }
 
         if (PlayerDiscoveryManager.Instance == null)
         {
-            Debug.LogWarning("PlayerDiscoveryManager.Instance is null. Cannot start discovery.");
+            //Debug.LogWarning("PlayerDiscoveryManager.Instance is null. Cannot start discovery.");
             return;
         }
 
@@ -243,7 +243,7 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
             if (detailsPanel != null)
                 detailsPanel.ShowFor(currentEnv);
 
-            Debug.Log($"Failed to start discovery on {currentEnv.environmentName}. Requirements not met.");
+            //Debug.Log($"Failed to start discovery on {currentEnv.environmentName}. Requirements not met.");
         }
     }
 }

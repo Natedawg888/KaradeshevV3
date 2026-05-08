@@ -397,7 +397,7 @@ public class PlayerSurveyManager : MonoBehaviour
 
                 if (!envById.TryGetValue(envId, out EnvironmentControl env) || env == null)
                 {
-                    Debug.LogWarning($"[PlayerSurveyManager] Could not resolve surveyed environment '{envId}' while loading.");
+                    //Debug.LogWarning($"[PlayerSurveyManager] Could not resolve surveyed environment '{envId}' while loading.");
                     continue;
                 }
 
@@ -422,7 +422,7 @@ public class PlayerSurveyManager : MonoBehaviour
 
                 if (!envById.TryGetValue(saved.environmentID, out EnvironmentControl env) || env == null)
                 {
-                    Debug.LogWarning($"[PlayerSurveyManager] Could not resolve active survey environment '{saved.environmentID}' while loading.");
+                    //Debug.LogWarning($"[PlayerSurveyManager] Could not resolve active survey environment '{saved.environmentID}' while loading.");
                     continue;
                 }
 
@@ -544,9 +544,9 @@ public class PlayerSurveyManager : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[PlayerSurveyManager] Tornado killed {killedCount} surveying worker(s) on '{info.env?.name}'."
-                );
+                //Debug.Log(
+                    //$"[PlayerSurveyManager] Tornado killed {killedCount} surveying worker(s) on '{info.env?.name}'."
+                //);
             }
 
             return killedCount;
@@ -580,10 +580,10 @@ public class PlayerSurveyManager : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[PlayerSurveyManager] Survey on '{env.name}' cancelled by tornado. " +
-                $"PopulationLost={killed}"
-            );
+            //Debug.Log(
+                //$"[PlayerSurveyManager] Survey on '{env.name}' cancelled by tornado. " +
+                //$"PopulationLost={killed}"
+            //);
         }
     }
 }

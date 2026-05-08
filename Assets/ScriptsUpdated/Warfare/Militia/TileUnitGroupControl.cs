@@ -182,7 +182,7 @@ public class TileUnitGroupControl : MonoBehaviour
     {
         if (tileUI == null || tileUI.ContentRoot == null || groupMarkerPrefab == null)
         {
-            Debug.LogWarning("[TileUnitGroupControl] Missing TileUnitUI or groupMarkerPrefab; cannot display unit group marker.");
+            //Debug.LogWarning("[TileUnitGroupControl] Missing TileUnitUI or groupMarkerPrefab; cannot display unit group marker.");
             return;
         }
 
@@ -215,7 +215,7 @@ public class TileUnitGroupControl : MonoBehaviour
         if (popMgr != null)
         {
             popMgr.ReleaseReservation(group.populationReservationId);
-            Debug.Log($"[TileUnitGroupControl] Released pop reservation {group.populationReservationId} for group {group.groupId}.");
+            //Debug.Log($"[TileUnitGroupControl] Released pop reservation {group.populationReservationId} for group {group.groupId}.");
         }
 
         group.populationReservationId = null;
@@ -366,7 +366,7 @@ public class TileUnitGroupControl : MonoBehaviour
         int index = _groups.IndexOf(group);
         if (index < 0)
         {
-            Debug.LogWarning($"[TileUnitGroupControl] MoveGroupTo: group {group.groupId} not found on {name}.");
+            //Debug.LogWarning($"[TileUnitGroupControl] MoveGroupTo: group {group.groupId} not found on {name}.");
             return;
         }
 

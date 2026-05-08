@@ -100,7 +100,7 @@ public class KineticWarfarePanelControl : MonoBehaviour
     {
         if (building == null)
         {
-            Debug.LogError("[KineticWarfarePanel] OpenFor called with null building.");
+            //Debug.LogError("[KineticWarfarePanel] OpenFor called with null building.");
             return;
         }
 
@@ -111,7 +111,7 @@ public class KineticWarfarePanelControl : MonoBehaviour
 
         if (_currentControl == null)
         {
-            Debug.LogError("[KineticWarfarePanel] Building has no KineticWarfareControl.");
+            //Debug.LogError("[KineticWarfarePanel] Building has no KineticWarfareControl.");
             return;
         }
 
@@ -146,7 +146,7 @@ public class KineticWarfarePanelControl : MonoBehaviour
     {
         if (control == null)
         {
-            Debug.LogWarning("[KineticWarfarePanel] Show called with null control.");
+            //Debug.LogWarning("[KineticWarfarePanel] Show called with null control.");
             return;
         }
 
@@ -265,7 +265,7 @@ public class KineticWarfarePanelControl : MonoBehaviour
         var unitMgr = PlayerUnitManager.Instance;
         if (unitMgr == null)
         {
-            Debug.LogWarning("[KineticWarfarePanel] No PlayerUnitManager; cannot build management list.");
+            //Debug.LogWarning("[KineticWarfarePanel] No PlayerUnitManager; cannot build management list.");
             return;
         }
 
@@ -344,7 +344,7 @@ public class KineticWarfarePanelControl : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[KineticWarfarePanel] unitGroupPanel reference not set.");
+            //Debug.LogWarning("[KineticWarfarePanel] unitGroupPanel reference not set.");
         }
     }
 
@@ -355,7 +355,7 @@ public class KineticWarfarePanelControl : MonoBehaviour
 
         if (!_currentControl.TryRebandTemporarilyDisbandedGroup(group, owner, out string failReason))
         {
-            Debug.LogWarning($"[KineticWarfarePanel] Failed to reband group {group.groupId}: {failReason}");
+            //Debug.LogWarning($"[KineticWarfarePanel] Failed to reband group {group.groupId}: {failReason}");
             return;
         }
 
@@ -373,7 +373,7 @@ public class KineticWarfarePanelControl : MonoBehaviour
                 KineticWarfareControl.TempRegroupMode.RemovePregnantReservedIdsAndRegroup,
                 out string failReason))
         {
-            Debug.LogWarning($"[KineticWarfarePanel] Failed to reband group without pregnant population {group.groupId}: {failReason}");
+            //Debug.LogWarning($"[KineticWarfarePanel] Failed to reband group without pregnant population {group.groupId}: {failReason}");
             return;
         }
 
@@ -388,7 +388,7 @@ public class KineticWarfarePanelControl : MonoBehaviour
         var cam = GameObject.FindObjectOfType<CameraControl>();
         if (cam == null)
         {
-            Debug.LogWarning("[KineticWarfarePanel] No CameraControl found for focusing on unit group.");
+            //Debug.LogWarning("[KineticWarfarePanel] No CameraControl found for focusing on unit group.");
             return;
         }
 

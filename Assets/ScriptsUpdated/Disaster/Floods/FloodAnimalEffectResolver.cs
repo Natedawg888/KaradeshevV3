@@ -130,12 +130,12 @@ public class FloodAnimalEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[FloodAnimalEffectResolver] Installed refs. " +
-                $"Flood={(floodSimulationSystem != null ? floodSimulationSystem.name : "NULL")}, " +
-                $"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
-                $"AnimalSimulation={(animalSimulation != null ? "OK" : "NULL")}"
-            );
+            //Debug.Log(
+                //$"[FloodAnimalEffectResolver] Installed refs. " +
+                //$"Flood={(floodSimulationSystem != null ? floodSimulationSystem.name : "NULL")}, " +
+                //$"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
+                //$"AnimalSimulation={(animalSimulation != null ? "OK" : "NULL")}"
+            //);
         }
     }
 
@@ -197,7 +197,7 @@ public class FloodAnimalEffectResolver : MonoBehaviour
         if (animalSimulation == null || gridManager == null || floodSimulationSystem == null)
         {
             if (debugLogging)
-                Debug.LogWarning("[FloodAnimalEffectResolver] Missing references.");
+                //Debug.LogWarning("[FloodAnimalEffectResolver] Missing references.");
 
             return;
         }
@@ -210,7 +210,7 @@ public class FloodAnimalEffectResolver : MonoBehaviour
         if (activeFloodDangerCells.Count == 0)
         {
             if (debugLogging)
-                Debug.Log("[FloodAnimalEffectResolver] No active flood danger cells.");
+                //Debug.Log("[FloodAnimalEffectResolver] No active flood danger cells.");
 
             return;
         }
@@ -275,9 +275,9 @@ public class FloodAnimalEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[FloodAnimalEffectResolver] Complete. " +
-                $"AffectedGroups={affectedGroups}, ActiveFloodDangerCells={activeFloodDangerCells.Count}");
+            //Debug.Log(
+                //$"[FloodAnimalEffectResolver] Complete. " +
+                //$"AffectedGroups={affectedGroups}, ActiveFloodDangerCells={activeFloodDangerCells.Count}");
         }
 
         processedGroupsThisPass.Clear();
@@ -305,9 +305,9 @@ public class FloodAnimalEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[FloodAnimalEffectResolver] Complete. " +
-                $"AffectedGroups={affectedGroups}, ActiveFloodDangerCells={activeFloodDangerCells.Count}");
+            //Debug.Log(
+                //$"[FloodAnimalEffectResolver] Complete. " +
+                //$"AffectedGroups={affectedGroups}, ActiveFloodDangerCells={activeFloodDangerCells.Count}");
         }
 
         processedGroupsThisPass.Clear();
@@ -379,11 +379,11 @@ public class FloodAnimalEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[FloodAnimalEffectResolver] Flood animal group {groupId} at {coord}. " +
-                    $"Depth01={state.floodDepth01:0.00}, Severity={severity01:0.00}, " +
-                    $"FleeChance={fleeChance:0.00}, DamageIfFail={damageIfFleeFails}"
-                );
+                //Debug.Log(
+                    //$"[FloodAnimalEffectResolver] Flood animal group {groupId} at {coord}. " +
+                    //$"Depth01={state.floodDepth01:0.00}, Severity={severity01:0.00}, " +
+                    //$"FleeChance={fleeChance:0.00}, DamageIfFail={damageIfFleeFails}"
+                //);
             }
         }
 

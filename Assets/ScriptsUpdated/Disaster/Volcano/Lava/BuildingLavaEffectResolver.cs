@@ -176,7 +176,7 @@ public class BuildingLavaEffectResolver : MonoBehaviour
         if (resistance != null && resistance.lavaImmune)
         {
             if (debugLogging || resistance.debugLogging)
-                Debug.Log($"[BuildingLavaEffectResolver] Lava ignored immune building '{name}'.");
+                //Debug.Log($"[BuildingLavaEffectResolver] Lava ignored immune building '{name}'.");
             return;
         }
 
@@ -197,10 +197,10 @@ public class BuildingLavaEffectResolver : MonoBehaviour
 
         if (debugLogging || (resistance != null && resistance.debugLogging))
         {
-            Debug.Log(
-                $"[BuildingLavaEffectResolver] Lava affected '{name}' " +
-                $"activation={isActivation} baseDamage={baseDamage} " +
-                $"finalDamage={finalDamage} severity={severity01:0.00}");
+            //Debug.Log(
+                //$"[BuildingLavaEffectResolver] Lava affected '{name}' " +
+                //$"activation={isActivation} baseDamage={baseDamage} " +
+                //$"finalDamage={finalDamage} severity={severity01:0.00}");
         }
     }
 

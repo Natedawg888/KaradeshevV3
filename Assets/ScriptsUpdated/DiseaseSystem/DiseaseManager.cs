@@ -367,9 +367,9 @@ public class DiseaseManager : MonoBehaviour
             {
                 if (debugConsumedResourceDiseaseRisk)
                 {
-                    Debug.LogWarning(
-                        $"[DiseaseManager] Resource disease risk matched '{consumedResource.resourceID}', " +
-                        $"but no disease was assigned.");
+                    //Debug.LogWarning(
+                        //$"[DiseaseManager] Resource disease risk matched '{consumedResource.resourceID}', " +
+                        //$"but no disease was assigned.");
                 }
 
                 continue;
@@ -385,13 +385,13 @@ public class DiseaseManager : MonoBehaviour
             {
                 if (debugConsumedResourceDiseaseRisk)
                 {
-                    Debug.Log(
-                        $"[DiseaseManager] Consumed resource disease skipped. " +
-                        $"Resource={consumedResource.resourceID}, " +
-                        $"Points={pointsConsumed:F2}, " +
-                        $"PointsPerPerson={pointsPerPersonScale:F2}, " +
-                        $"ExposedPeopleFloat={exposedPeopleFloat:F3}, " +
-                        $"CalculatedPeople=0");
+                    //Debug.Log(
+                        //$"[DiseaseManager] Consumed resource disease skipped. " +
+                        //$"Resource={consumedResource.resourceID}, " +
+                        //$"Points={pointsConsumed:F2}, " +
+                        //$"PointsPerPerson={pointsPerPersonScale:F2}, " +
+                        //$"ExposedPeopleFloat={exposedPeopleFloat:F3}, " +
+                        //$"CalculatedPeople=0");
                 }
 
                 continue;
@@ -463,21 +463,21 @@ public class DiseaseManager : MonoBehaviour
                 float firstTargetFinalChance =
                     risk.infectionChancePerPerson * firstTargetExposure;
 
-                Debug.Log(
-                    $"[DiseaseManager] Consumed resource disease roll. " +
-                    $"Resource={label}, " +
-                    $"ResourceID={consumedResource.resourceID}, " +
-                    $"Disease={risk.disease.displayName}, " +
-                    $"Units={unitsConsumed}, " +
-                    $"Points={pointsConsumed:F2}, " +
-                    $"PointsPerPerson={pointsPerPersonScale:F2}, " +
-                    $"ExposedPeopleFloat={exposedPeopleFloat:F3}, " +
-                    $"PeopleWanted={peopleToCheck}, " +
-                    $"PeopleFound={targetsFound}, " +
-                    $"BaseChancePerPerson={risk.infectionChancePerPerson:F2}, " +
-                    $"FirstTargetExposure={firstTargetExposure:F3}, " +
-                    $"FirstTargetFinalChance={firstTargetFinalChance:F3}, " +
-                    $"Infections={infectionsFromThisRisk}");
+                //Debug.Log(
+                    //$"[DiseaseManager] Consumed resource disease roll. " +
+                    //$"Resource={label}, " +
+                    //$"ResourceID={consumedResource.resourceID}, " +
+                    //$"Disease={risk.disease.displayName}, " +
+                    //$"Units={unitsConsumed}, " +
+                    //$"Points={pointsConsumed:F2}, " +
+                    //$"PointsPerPerson={pointsPerPersonScale:F2}, " +
+                    //$"ExposedPeopleFloat={exposedPeopleFloat:F3}, " +
+                    //$"PeopleWanted={peopleToCheck}, " +
+                    //$"PeopleFound={targetsFound}, " +
+                    //$"BaseChancePerPerson={risk.infectionChancePerPerson:F2}, " +
+                    //$"FirstTargetExposure={firstTargetExposure:F3}, " +
+                    //$"FirstTargetFinalChance={firstTargetFinalChance:F3}, " +
+                    //$"Infections={infectionsFromThisRisk}");
             }
         }
 
@@ -685,14 +685,14 @@ public class DiseaseManager : MonoBehaviour
         {
             string diseaseName = disease != null ? disease.displayName : state?.diseaseId;
 
-            Debug.Log(
-                $"[DiseaseManager] Disease health damage applied. " +
-                $"Individual={person.Id}, " +
-                $"Disease={diseaseName}, " +
-                $"IndividualHealth {person.Health01 - individualHealthDelta01:F3}->{person.Health01:F3}, " +
-                $"Group={group.GroupID}, " +
-                $"GroupHealth {beforeGroupHealth:F3}->{group.averageHealth:F3}, " +
-                $"GroupDelta={groupDelta01:F4}");
+            //Debug.Log(
+                //$"[DiseaseManager] Disease health damage applied. " +
+                //$"Individual={person.Id}, " +
+                //$"Disease={diseaseName}, " +
+                //$"IndividualHealth {person.Health01 - individualHealthDelta01:F3}->{person.Health01:F3}, " +
+                //$"Group={group.GroupID}, " +
+                //$"GroupHealth {beforeGroupHealth:F3}->{group.averageHealth:F3}, " +
+                //$"GroupDelta={groupDelta01:F4}");
         }
     }
 
@@ -778,7 +778,7 @@ public class DiseaseManager : MonoBehaviour
         string pName = !string.IsNullOrWhiteSpace(person.Surname) ? person.Surname : "A citizen";
 
         if (debugDeath)
-            Debug.LogWarning($"[DiseaseManager] Individual died from disease. Individual={person.Id}, Disease={dName}");
+            //Debug.LogWarning($"[DiseaseManager] Individual died from disease. Individual={person.Id}, Disease={dName}");
 
         PostDiseaseDeathNotification(dName, pName);
     }
@@ -1000,7 +1000,7 @@ public class DiseaseManager : MonoBehaviour
     private void Log(string message)
     {
         if (enableDebugLogs)
-            Debug.Log(message);
+            //Debug.Log(message);
     }
 
     public bool HasActiveDiseaseInGroup(Guid groupId)
@@ -1094,13 +1094,13 @@ public class DiseaseManager : MonoBehaviour
 
         if (debugTaskFailureEffects && totalAdd01 > 0f)
         {
-            Debug.Log(
-                $"[DiseaseManager] Disease task failure modifier. " +
-                $"TaskType={taskType}, " +
-                $"Task={taskName}, " +
-                $"Workers={individualIds.Count}, " +
-                $"SickWorkers={sickWorkerCount}, " +
-                $"FailureAdd={totalAdd01 * 100f:F1}%");
+            //Debug.Log(
+                //$"[DiseaseManager] Disease task failure modifier. " +
+                //$"TaskType={taskType}, " +
+                //$"Task={taskName}, " +
+                //$"Workers={individualIds.Count}, " +
+                //$"SickWorkers={sickWorkerCount}, " +
+                //$"FailureAdd={totalAdd01 * 100f:F1}%");
         }
 
         return totalAdd01;
@@ -1192,13 +1192,13 @@ public class DiseaseManager : MonoBehaviour
 
         if (debugWorkEfficiencyEffects && sickWorkers > 0)
         {
-            Debug.Log(
-                $"[DiseaseManager] Disease work efficiency modifier. " +
-                $"TaskType={taskType}, " +
-                $"Task={taskName}, " +
-                $"Workers={countedWorkers}, " +
-                $"SickWorkers={sickWorkers}, " +
-                $"OutputMultiplier={finalMultiplier:F3}");
+            //Debug.Log(
+                //$"[DiseaseManager] Disease work efficiency modifier. " +
+                //$"TaskType={taskType}, " +
+                //$"Task={taskName}, " +
+                //$"Workers={countedWorkers}, " +
+                //$"SickWorkers={sickWorkers}, " +
+                //$"OutputMultiplier={finalMultiplier:F3}");
         }
 
         return finalMultiplier;
@@ -1406,19 +1406,19 @@ public class DiseaseManager : MonoBehaviour
                     ? risk.disease.displayName
                     : risk.debugLabel;
 
-                Debug.Log(
-                    $"[DiseaseManager] Environmental disease risk rolled. " +
-                    $"Task={taskType}, " +
-                    $"Risk={label}, " +
-                    $"Env={env.name}, " +
-                    $"EnvType={env.environmentType}, " +
-                    $"TileType={env.environmentTileType}, " +
-                    $"WorkersChecked={maxWorkers}, " +
-                    $"Chance={infectionChance01:F3}, " +
-                    $"Exposure={exposureStrength01:F3}, " +
-                    $"WeatherStrength={weatherStrength01:F3}, " +
-                    $"Infections={infectionsFromRisk}, " +
-                    $"Weather={weatherSummary}");
+                //Debug.Log(
+                    //$"[DiseaseManager] Environmental disease risk rolled. " +
+                    //$"Task={taskType}, " +
+                    //$"Risk={label}, " +
+                    //$"Env={env.name}, " +
+                    //$"EnvType={env.environmentType}, " +
+                    //$"TileType={env.environmentTileType}, " +
+                    //$"WorkersChecked={maxWorkers}, " +
+                    //$"Chance={infectionChance01:F3}, " +
+                    //$"Exposure={exposureStrength01:F3}, " +
+                    //$"WeatherStrength={weatherStrength01:F3}, " +
+                    //$"Infections={infectionsFromRisk}, " +
+                    //$"Weather={weatherSummary}");
             }
         }
 
@@ -1574,17 +1574,17 @@ public class DiseaseManager : MonoBehaviour
                     ? risk.disease.displayName
                     : risk.debugLabel;
 
-                Debug.Log(
-                    $"[DiseaseManager] Building weather disease risk rolled. " +
-                    $"Context={exposureType}, " +
-                    $"Risk={label}, " +
-                    $"Building={buildingComponent.name}, " +
-                    $"TargetsChecked={maxTargets}, " +
-                    $"Chance={infectionChance01:F3}, " +
-                    $"Exposure={exposureStrength01:F3}, " +
-                    $"WeatherStrength={weatherStrength01:F3}, " +
-                    $"Infections={infectionsFromRisk}, " +
-                    $"Weather={weatherSummary}");
+                //Debug.Log(
+                    //$"[DiseaseManager] Building weather disease risk rolled. " +
+                    //$"Context={exposureType}, " +
+                    //$"Risk={label}, " +
+                    //$"Building={buildingComponent.name}, " +
+                    //$"TargetsChecked={maxTargets}, " +
+                    //$"Chance={infectionChance01:F3}, " +
+                    //$"Exposure={exposureStrength01:F3}, " +
+                    //$"WeatherStrength={weatherStrength01:F3}, " +
+                    //$"Infections={infectionsFromRisk}, " +
+                    //$"Weather={weatherSummary}");
             }
         }
 
@@ -1760,13 +1760,13 @@ public class DiseaseManager : MonoBehaviour
 
                         if (debugVirusContextSpread)
                         {
-                            Debug.Log(
-                                $"[DiseaseManager] Virus spread in {contextType}. " +
-                                $"Context={contextName}, " +
-                                $"Disease={sourceState.GetDisplayName(disease)}, " +
-                                $"From={sourcePerson.Id}, " +
-                                $"To={victim.Id}, " +
-                                $"Chance={spreadChance01:F3}");
+                            //Debug.Log(
+                                //$"[DiseaseManager] Virus spread in {contextType}. " +
+                                //$"Context={contextName}, " +
+                                //$"Disease={sourceState.GetDisplayName(disease)}, " +
+                                //$"From={sourcePerson.Id}, " +
+                                //$"To={victim.Id}, " +
+                                //$"Chance={spreadChance01:F3}");
                         }
                     }
                 }
@@ -1886,12 +1886,12 @@ public class DiseaseManager : MonoBehaviour
 
         if (debugVirusMutation)
         {
-            Debug.Log(
-                $"[DiseaseManager] Virus mutated. " +
-                $"Individual={person.Id}, " +
-                $"Disease={state.GetDisplayName(disease)}, " +
-                $"Severity {oldSeverity:F2}->{state.severity01:F2}, " +
-                $"Contagion {oldContagion:F2}->{state.strainContagionMultiplier:F2}");
+            //Debug.Log(
+                //$"[DiseaseManager] Virus mutated. " +
+                //$"Individual={person.Id}, " +
+                //$"Disease={state.GetDisplayName(disease)}, " +
+                //$"Severity {oldSeverity:F2}->{state.severity01:F2}, " +
+                //$"Contagion {oldContagion:F2}->{state.strainContagionMultiplier:F2}");
         }
     }
 
@@ -2135,11 +2135,11 @@ public class DiseaseManager : MonoBehaviour
 
             if (enableDebugLogs)
             {
-                Debug.Log(
-                    $"[DiseaseManager] Resource restored health. " +
-                    $"Resource={sourceResource.resourceName}, " +
-                    $"PeopleHealed={healedCount}, " +
-                    $"TotalRestored={totalRestored:F3}");
+                //Debug.Log(
+                    //$"[DiseaseManager] Resource restored health. " +
+                    //$"Resource={sourceResource.resourceName}, " +
+                    //$"PeopleHealed={healedCount}, " +
+                    //$"TotalRestored={totalRestored:F3}");
             }
         }
 
@@ -2236,13 +2236,13 @@ public class DiseaseManager : MonoBehaviour
 
             if (debugRecovery)
             {
-                Debug.Log(
-                    $"[DiseaseManager] Resource boosted disease recovery. " +
-                    $"Resource={sourceResource.resourceName}, " +
-                    $"Disease={disease.displayName}, " +
-                    $"Target={state.targetId}, " +
-                    $"Turns {oldTurns}->{state.turnsRemaining}, " +
-                    $"Severity {oldSeverity:F2}->{state.severity01:F2}");
+                //Debug.Log(
+                    //$"[DiseaseManager] Resource boosted disease recovery. " +
+                    //$"Resource={sourceResource.resourceName}, " +
+                    //$"Disease={disease.displayName}, " +
+                    //$"Target={state.targetId}, " +
+                    //$"Turns {oldTurns}->{state.turnsRemaining}, " +
+                    //$"Severity {oldSeverity:F2}->{state.severity01:F2}");
             }
         }
 
@@ -2367,7 +2367,7 @@ public class DiseaseManager : MonoBehaviour
                 DiseaseDefinitionSO disease = GetDiseaseDefinition(saved.diseaseId);
                 if (disease == null)
                 {
-                    Debug.LogWarning($"[DiseaseManager] Skipped saved disease with missing definition: {saved.diseaseId}");
+                    //Debug.LogWarning($"[DiseaseManager] Skipped saved disease with missing definition: {saved.diseaseId}");
                     continue;
                 }
 
@@ -2444,10 +2444,10 @@ public class DiseaseManager : MonoBehaviour
 
         if (enableDebugLogs)
         {
-            Debug.Log(
-                $"[DiseaseManager] Loaded disease save data. " +
-                $"ActiveDiseases={activeIndividualDiseases.Count}, " +
-                $"ImmunityTargets={_immunityTurnsByTargetKey.Count}");
+            //Debug.Log(
+                //$"[DiseaseManager] Loaded disease save data. " +
+                //$"ActiveDiseases={activeIndividualDiseases.Count}, " +
+                //$"ImmunityTargets={_immunityTurnsByTargetKey.Count}");
         }
     }
 

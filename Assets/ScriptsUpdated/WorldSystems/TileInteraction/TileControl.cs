@@ -224,14 +224,14 @@ public class TileControl : MonoBehaviour
 
             if (printed < 6)
             {
-                Debug.Log(
-                    $"[{name}] {context} | type={_tileContentType} emissionOnFlag={emissionOn} " +
-                    $"Renderer='{mr.name}' PB_EmissionColor={pbCol} {matInfo}"
-                );
+                //Debug.Log(
+                    //$"[{name}] {context} | type={_tileContentType} emissionOnFlag={emissionOn} " +
+                    //$"Renderer='{mr.name}' PB_EmissionColor={pbCol} {matInfo}"
+                //);
                 printed++;
             }
         }
 
-        Debug.Log($"[{name}] {context} | renderers={rendererCount} emissionOnFlag={emissionOn}");
+        //Debug.Log($"[{name}] {context} | renderers={rendererCount} emissionOnFlag={emissionOn}");
     }
 }

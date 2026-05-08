@@ -83,7 +83,7 @@ public class PlayerFamilySimulationManager : MonoBehaviour
 
         if (PlayerPop == null || General == null)
         {
-            Debug.LogError("[FamilySim] Missing required managers in scene (PlayersPopulationManager / GeneralPopulationManager).");
+            //Debug.LogError("[FamilySim] Missing required managers in scene (PlayersPopulationManager / GeneralPopulationManager).");
             enabled = false;
             return;
         }
@@ -736,19 +736,19 @@ public class PlayerFamilySimulationManager : MonoBehaviour
                 {
                     anyTaskAvailabilityChanged = true;
 
-                    Debug.Log(
-                        $"[POP AGE TASK CHANGE] " +
-                        $"Person={p.Id} | {oldGroup}->{newGroup} | " +
-                        $"Alive={p.IsAlive} | Busy={p.IsBusy}");
+                    //Debug.Log(
+                        //$"[POP AGE TASK CHANGE] " +
+                        //$"Person={p.Id} | {oldGroup}->{newGroup} | " +
+                        //$"Alive={p.IsAlive} | Busy={p.IsBusy}");
 
                     if (pop != null && wasTaskCapable && !isTaskCapable)
                     {
                         bool replaced;
                         pop.TryDetachIndividualFromExistingReservations(p.Id, out replaced);
 
-                        Debug.Log(
-                            $"[POP AGE TASK CHANGE] Removed aged-out worker from reservations. " +
-                            $"Person={p.Id} | Replaced={replaced}");
+                        //Debug.Log(
+                            //$"[POP AGE TASK CHANGE] Removed aged-out worker from reservations. " +
+                            //$"Person={p.Id} | Replaced={replaced}");
                     }
                 }
             }
@@ -1373,12 +1373,12 @@ public class PlayerFamilySimulationManager : MonoBehaviour
         if (before == after)
             return;
 
-        Debug.LogWarning(
-            $"[POP FAMILY PASS] " +
-            $"Stage={stage} | " +
-            $"Turn={(TurnSystem.Instance != null ? TurnSystem.GetCurrentTurn() : -1)} | " +
-            $"TotalPopulation {before}->{after} | " +
-            $"Delta={after - before}");
+        //Debug.LogWarning(
+            //$"[POP FAMILY PASS] " +
+            //$"Stage={stage} | " +
+            //$"Turn={(TurnSystem.Instance != null ? TurnSystem.GetCurrentTurn() : -1)} | " +
+            //$"TotalPopulation {before}->{after} | " +
+            //$"Delta={after - before}");
     }
     public bool TryKillIndividualsById(IEnumerable<string> individualIds, out int killedCount)
     {

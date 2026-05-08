@@ -421,9 +421,9 @@ public class BuildingCatalogItem : MonoBehaviour
 
         if (PlayerBuildingManager.Instance != null && PlayerBuildingManager.Instance.HasReachedFamilyLimit(def))
         {
-            Debug.Log(
-                $"Cannot build {def.buildingName}: family limit reached " +
-                $"({PlayerBuildingManager.Instance.GetCountForBuildingFamily(def)}/{def.maxCountPerFamily}) for family '{def.FamilyKey}'.");
+            //Debug.Log(
+                //$"Cannot build {def.buildingName}: family limit reached " +
+                //$"({PlayerBuildingManager.Instance.GetCountForBuildingFamily(def)}/{def.maxCountPerFamily}) for family '{def.FamilyKey}'.");
             return false;
         }
 
@@ -431,7 +431,7 @@ public class BuildingCatalogItem : MonoBehaviour
 
         if (!InventoryQuery.CanAfford(activeCosts))
         {
-            Debug.Log($"Cannot build {def.buildingName}: not enough resources for {def.GetActiveCostSetLabel()}.");
+            //Debug.Log($"Cannot build {def.buildingName}: not enough resources for {def.GetActiveCostSetLabel()}.");
             if (costPanelRoot && !costPanelRoot.activeSelf)
             {
                 costPanelRoot.SetActive(true);
@@ -447,7 +447,7 @@ public class BuildingCatalogItem : MonoBehaviour
 
         if (availPop < needPop)
         {
-            Debug.Log($"Cannot build {def.buildingName}: not enough population (need {needPop}, have {availPop}).");
+            //Debug.Log($"Cannot build {def.buildingName}: not enough population (need {needPop}, have {availPop}).");
             if (infoPanelRoot && !infoPanelRoot.activeSelf)
             {
                 infoPanelRoot.SetActive(true);

@@ -37,12 +37,12 @@ public class PlayerBuildingTechApplier : MonoBehaviour
         if (!_byTech.TryGetValue(techID, out var list) || list == null || list.Count == 0) return;
 
         var rulebook = PlayerBuildingRulebook.Instance;
-        if (rulebook == null) { Debug.LogWarning("[PlayerBuildingTechApplier] Missing PlayerBuildingRulebook."); return; }
-
+        //if (rulebook == null) { Debug.LogWarning("[PlayerBuildingTechApplier] Missing PlayerBuildingRulebook."); return; }
+//
         // Aggregate per-tech; push to rulebook
-        for (int i = 0; i < list.Count; i++)
-        {
-            var so = list[i];
+        //for (int i = 0; i < list.Count; i++)
+        //{
+            //var so = list[i];
             var targets = (so.targetBuildingIDs != null && so.targetBuildingIDs.Count > 0)
                 ? (IReadOnlyList<string>)so.targetBuildingIDs
                 : new List<string>(0); // empty => wildcard
@@ -67,11 +67,11 @@ public class PlayerBuildingTechApplier : MonoBehaviour
         if (!_byTech.TryGetValue(techID, out var list) || list == null || list.Count == 0) return;
 
         var rulebook = PlayerBuildingRulebook.Instance;
-        if (rulebook == null) { Debug.LogWarning("[PlayerBuildingTechApplier] Missing PlayerBuildingRulebook."); return; }
-
-        for (int i = 0; i < list.Count; i++)
-        {
-            var so = list[i];
+        //if (rulebook == null) { Debug.LogWarning("[PlayerBuildingTechApplier] Missing PlayerBuildingRulebook."); return; }
+//
+        //for (int i = 0; i < list.Count; i++)
+        //{
+            //var so = list[i];
             var targets = (so.targetBuildingIDs != null && so.targetBuildingIDs.Count > 0)
                 ? (IReadOnlyList<string>)so.targetBuildingIDs
                 : new List<string>(0);

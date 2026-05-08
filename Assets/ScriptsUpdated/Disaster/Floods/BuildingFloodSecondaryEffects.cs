@@ -182,22 +182,22 @@ public class BuildingFloodSecondaryEffects : MonoBehaviour
         {
             string buildingName = building != null ? building.name : name;
 
-            Debug.Log(
-                $"[BuildingFloodSecondaryEffects] Flood damaged '{buildingName}'. " +
-                $"Turn={hitData.turnIndex} | " +
-                $"AvgDepth={hitData.averageDepth01:0.00} | " +
-                $"MaxDepth={hitData.maxDepth01:0.00} | " +
-                $"HitCells={hitData.hitCellCount}/{hitData.buildingCellCount} | " +
-                $"IncomingFloodDamage={finalDamage} | " +
-                $"AppliedBuildingDamage={actualBuildingDamage} | " +
-                $"ShelterDeaths={killedInShelter} | " +
-                $"CancelledCraftOrders={cancelledCraftOrders} | " +
-                $"CrafterDeaths={killedCrafters} | " +
-                $"ProductionPaused={productionPaused} | " +
-                $"ProductionWorkerDeaths={killedProductionWorkers} | " +
-                $"TrainingPaused={trainingPaused} | " +
-                $"TrainingDeaths={killedTrainees} | " +
-                $"StorageDestroyed={storageResourcesDestroyed}");
+            //Debug.Log(
+                //$"[BuildingFloodSecondaryEffects] Flood damaged '{buildingName}'. " +
+                //$"Turn={hitData.turnIndex} | " +
+                //$"AvgDepth={hitData.averageDepth01:0.00} | " +
+                //$"MaxDepth={hitData.maxDepth01:0.00} | " +
+                //$"HitCells={hitData.hitCellCount}/{hitData.buildingCellCount} | " +
+                //$"IncomingFloodDamage={finalDamage} | " +
+                //$"AppliedBuildingDamage={actualBuildingDamage} | " +
+                //$"ShelterDeaths={killedInShelter} | " +
+                //$"CancelledCraftOrders={cancelledCraftOrders} | " +
+                //$"CrafterDeaths={killedCrafters} | " +
+                //$"ProductionPaused={productionPaused} | " +
+                //$"ProductionWorkerDeaths={killedProductionWorkers} | " +
+                //$"TrainingPaused={trainingPaused} | " +
+                //$"TrainingDeaths={killedTrainees} | " +
+                //$"StorageDestroyed={storageResourcesDestroyed}");
         }
     }
 
@@ -208,8 +208,8 @@ public class BuildingFloodSecondaryEffects : MonoBehaviour
 
         string buildingName = building != null ? building.name : name;
 
-        Debug.Log(
-            $"[BuildingFloodSecondaryEffects] '{buildingName}' received flood hit. " +
-            $"Turn={hitData.turnIndex}, AvgDepth={hitData.averageDepth01:0.00}, MaxDepth={hitData.maxDepth01:0.00}");
+        //Debug.Log(
+            //$"[BuildingFloodSecondaryEffects] '{buildingName}' received flood hit. " +
+            //$"Turn={hitData.turnIndex}, AvgDepth={hitData.averageDepth01:0.00}, MaxDepth={hitData.maxDepth01:0.00}");
     }
 }

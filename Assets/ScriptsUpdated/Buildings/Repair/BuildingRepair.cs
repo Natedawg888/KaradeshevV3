@@ -116,7 +116,7 @@ public class BuildingRepair : MonoBehaviour
 
         if (!allowRepairWhenDestroyed && _status != null && _status.CurrentState == BuildingState.Destroyed)
         {
-            Debug.LogWarning("[BuildingRepair] Cannot repair: building is Destroyed.");
+            //Debug.LogWarning("[BuildingRepair] Cannot repair: building is Destroyed.");
             return false;
         }
 
@@ -133,7 +133,7 @@ public class BuildingRepair : MonoBehaviour
 
         if (!TryReservePopulation(pop, out _reservationId))
         {
-            Debug.LogWarning("[BuildingRepair] Not enough population available for repair.");
+            //Debug.LogWarning("[BuildingRepair] Not enough population available for repair.");
             return false;
         }
 
@@ -312,7 +312,7 @@ public class BuildingRepair : MonoBehaviour
             return ok && !string.IsNullOrEmpty(reservationId);
         }
 
-        Debug.LogWarning("[BuildingRepair] No compatible reservation API found.");
+        //Debug.LogWarning("[BuildingRepair] No compatible reservation API found.");
         return false;
     }
 
@@ -355,7 +355,7 @@ public class BuildingRepair : MonoBehaviour
         if (mRelease != null)
             mRelease.Invoke(pop, new object[] { _reservationId });
         else
-            Debug.LogWarning("[BuildingRepair] Could not find a reservation release method.");
+            //Debug.LogWarning("[BuildingRepair] Could not find a reservation release method.");
 
         _reservationId = null;
         _reservedPopulationCount = 0;
@@ -383,7 +383,7 @@ public class BuildingRepair : MonoBehaviour
         var inv = PlayerInventoryManager.Instance;
         if (inv == null)
         {
-            Debug.LogWarning("[BuildingRepair] No PlayerInventoryManager; cannot spend.");
+            //Debug.LogWarning("[BuildingRepair] No PlayerInventoryManager; cannot spend.");
             return false;
         }
 
@@ -394,7 +394,7 @@ public class BuildingRepair : MonoBehaviour
             // TryRemove handles both group + normal resources
             if (!inv.TryRemove(c.resource, c.amount))
             {
-                Debug.LogWarning($"[BuildingRepair] Spend failed for {c.resource?.name} x{c.amount} (Owned={inv.GetAmount(c.resource)}).");
+                //Debug.LogWarning($"[BuildingRepair] Spend failed for {c.resource?.name} x{c.amount} (Owned={inv.GetAmount(c.resource)}).");
                 return false;
             }
         }

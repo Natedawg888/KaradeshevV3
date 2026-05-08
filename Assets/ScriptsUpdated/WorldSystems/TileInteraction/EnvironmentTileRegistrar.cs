@@ -22,7 +22,7 @@ public class EnvironmentTileRegistrar : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[EnvTileRegistrar] No GridManager found; cannot compute tile coord.");
+            //Debug.LogWarning("[EnvTileRegistrar] No GridManager found; cannot compute tile coord.");
         }
     }
 

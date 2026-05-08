@@ -314,10 +314,10 @@ public class PregnancyService : IPregnancyService
 
         if (!allReservationsReplaced)
         {
-            Debug.Log(
-                $"[PregnancyService] Mother {mother.Id} was claimed for gestation. " +
-                $"One or more previous reservations could not be backfilled and may fail validation."
-            );
+            //Debug.Log(
+                //$"[PregnancyService] Mother {mother.Id} was claimed for gestation. " +
+                //$"One or more previous reservations could not be backfilled and may fail validation."
+            //);
         }
 
         _gestationReservationByMother[mother.Id] = reservationId;

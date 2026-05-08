@@ -72,7 +72,7 @@ public class PersistentLoadingUI : MonoBehaviour
         if (loadingFillImage != null)
             _loadingLoopCoroutine = StartCoroutine(AnimateLoadingLoop());
         else
-            Debug.LogWarning("[PersistentLoadingUI] loadingFillImage is not assigned.", this);
+            //Debug.LogWarning("[PersistentLoadingUI] loadingFillImage is not assigned.", this);
     }
 
     public void StopLoop(bool fillComplete)

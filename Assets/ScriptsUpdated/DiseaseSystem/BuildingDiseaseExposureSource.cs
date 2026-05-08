@@ -328,16 +328,16 @@ public class BuildingDiseaseExposureSource : MonoBehaviour
                     ? risk.disease.displayName
                     : risk.debugLabel;
 
-                Debug.Log(
-                    $"[BuildingDiseaseExposureSource] Rolled building disease. " +
-                    $"Building={name}, " +
-                    $"Risk={label}, " +
-                    $"Mode={mode}, " +
-                    $"Timing={timing}, " +
-                    $"TargetsChecked={maxTargets}, " +
-                    $"Chance={finalChance:F3}, " +
-                    $"Exposure={finalExposure:F3}, " +
-                    $"Infections={infectionsFromRisk}");
+                //Debug.Log(
+                    //$"[BuildingDiseaseExposureSource] Rolled building disease. " +
+                    //$"Building={name}, " +
+                    //$"Risk={label}, " +
+                    //$"Mode={mode}, " +
+                    //$"Timing={timing}, " +
+                    //$"TargetsChecked={maxTargets}, " +
+                    //$"Chance={finalChance:F3}, " +
+                    //$"Exposure={finalExposure:F3}, " +
+                    //$"Infections={infectionsFromRisk}");
             }
         }
 

@@ -31,13 +31,13 @@ public partial class AnimalSimulationController : MonoBehaviour
     {
         if (markerPrefab == null)
         {
-            Debug.LogWarning("[AnimalSimulationController] markerPrefab is null.");
+            //Debug.LogWarning("[AnimalSimulationController] markerPrefab is null.");
             return;
         }
 
         if (!TryGetTileUI(group.tile, out var tileUI))
         {
-            Debug.LogWarning($"[AnimalSimulationController] No TileAnimalUI for {group.tile} while creating marker for animal group {group.id}.");
+            //Debug.LogWarning($"[AnimalSimulationController] No TileAnimalUI for {group.tile} while creating marker for animal group {group.id}.");
             return;
         }
 
@@ -45,7 +45,7 @@ public partial class AnimalSimulationController : MonoBehaviour
 
         if (tileUI.ContentRoot == null)
         {
-            Debug.LogWarning($"[AnimalSimulationController] TileAnimalUI ContentRoot was null for {group.tile} while creating marker for animal group {group.id}.");
+            //Debug.LogWarning($"[AnimalSimulationController] TileAnimalUI ContentRoot was null for {group.tile} while creating marker for animal group {group.id}.");
             return;
         }
 

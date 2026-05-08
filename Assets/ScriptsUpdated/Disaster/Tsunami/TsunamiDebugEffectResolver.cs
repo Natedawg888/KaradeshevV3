@@ -45,9 +45,9 @@ public class TsunamiDebugEffectResolver : MonoBehaviour
         if (!logStartedEnded || data == null)
             return;
 
-        Debug.Log(
-            $"[TsunamiDebugEffectResolver] Tsunami started. " +
-            $"id={data.tsunamiId} direction={data.directionKind} energy={data.startEnergy:0.00} sourceCells={data.sourceCells.Count}");
+        //Debug.Log(
+            //$"[TsunamiDebugEffectResolver] Tsunami started. " +
+            //$"id={data.tsunamiId} direction={data.directionKind} energy={data.startEnergy:0.00} sourceCells={data.sourceCells.Count}");
     }
 
     private void HandleTsunamiAdvanced(TsunamiAdvancedEventData data)
@@ -55,9 +55,9 @@ public class TsunamiDebugEffectResolver : MonoBehaviour
         if (!logAdvancedCells || data == null)
             return;
 
-        Debug.Log(
-            $"[TsunamiDebugEffectResolver] Tsunami advanced. " +
-            $"id={data.tsunamiId} step={data.stepCount} energy={data.energyRemaining:0.00} activeCells={data.activeCells.Count}");
+        //Debug.Log(
+            //$"[TsunamiDebugEffectResolver] Tsunami advanced. " +
+            //$"id={data.tsunamiId} step={data.stepCount} energy={data.energyRemaining:0.00} activeCells={data.activeCells.Count}");
 
         // Later:
         // - Damage buildings on data.activeCells
@@ -71,8 +71,8 @@ public class TsunamiDebugEffectResolver : MonoBehaviour
         if (!logStartedEnded || data == null)
             return;
 
-        Debug.Log(
-            $"[TsunamiDebugEffectResolver] Tsunami ended. " +
-            $"id={data.tsunamiId} reason={data.reason} finalStep={data.finalStepCount} finalEnergy={data.finalEnergy:0.00}");
+        //Debug.Log(
+            //$"[TsunamiDebugEffectResolver] Tsunami ended. " +
+            //$"id={data.tsunamiId} reason={data.reason} finalStep={data.finalStepCount} finalEnergy={data.finalEnergy:0.00}");
     }
 }

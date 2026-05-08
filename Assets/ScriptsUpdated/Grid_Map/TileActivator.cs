@@ -247,7 +247,7 @@ public class TileActivator : MonoBehaviour
 
         if (caveCapable.Count == 0)
         {
-            Debug.LogWarning("[TileActivator] No tiles have a Cave option—cannot guarantee a Cave on first map.");
+            //Debug.LogWarning("[TileActivator] No tiles have a Cave option—cannot guarantee a Cave on first map.");
             return;
         }
 
@@ -260,12 +260,12 @@ public class TileActivator : MonoBehaviour
                 return;
         }
 
-        Debug.LogWarning("[TileActivator] Could not place a Cave that satisfies filters. Falling back to unfiltered force.");
+        //Debug.LogWarning("[TileActivator] Could not place a Cave that satisfies filters. Falling back to unfiltered force.");
 
         TileScript fallback = caveCapable[UnityEngine.Random.Range(0, caveCapable.Count)];
         bool ok = fallback.ForceSpawnSpecificTileType(EnvironmentTileType.Cave);
 
         if (!ok)
-            Debug.LogWarning("[TileActivator] Fallback cave force failed.");
+            //Debug.LogWarning("[TileActivator] Fallback cave force failed.");
     }
 }

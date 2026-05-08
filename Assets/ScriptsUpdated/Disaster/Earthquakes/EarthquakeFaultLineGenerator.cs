@@ -115,14 +115,14 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
         BeginGenerateFaultLinesFromPreset();
 
         if (debugLogging)
-            Debug.Log("EarthquakeFaultLineGenerator: Started automatic wait-for-map fault generation.");
+            //Debug.Log("EarthquakeFaultLineGenerator: Started automatic wait-for-map fault generation.");
     }
 
     private void Update()
     {
         if (regenerateWithGKey && Input.GetKeyDown(KeyCode.G))
         {
-            Debug.Log("EarthquakeFaultLineGenerator: Manual regenerate with G key.");
+            //Debug.Log("EarthquakeFaultLineGenerator: Manual regenerate with G key.");
             BeginGenerateFaultLinesFromPreset();
         }
     }
@@ -160,7 +160,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
             subscribedMapGenerator.OnMapGenerationCompleted += HandleMapGenerationCompleted;
 
             if (debugLogging)
-                Debug.Log($"EarthquakeFaultLineGenerator: Subscribed to {subscribedMapGenerator.name} map generation events.");
+                //Debug.Log($"EarthquakeFaultLineGenerator: Subscribed to {subscribedMapGenerator.name} map generation events.");
         }
     }
 
@@ -182,7 +182,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
             ClearFaultLines();
 
         if (debugLogging)
-            Debug.Log("EarthquakeFaultLineGenerator: Map generation started, clearing old fault lines.");
+            //Debug.Log("EarthquakeFaultLineGenerator: Map generation started, clearing old fault lines.");
     }
 
     private void HandleMapGenerationCompleted()
@@ -197,7 +197,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
             return;
 
         if (debugLogging)
-            Debug.Log("EarthquakeFaultLineGenerator: Map generation completed, generating fault lines.");
+            //Debug.Log("EarthquakeFaultLineGenerator: Map generation completed, generating fault lines.");
 
         BeginGenerateFaultLinesFromPreset();
     }
@@ -220,11 +220,11 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
 
             if (maxWaitFrames > 0 && waitedFrames >= maxWaitFrames)
             {
-                Debug.LogWarning(
-                    $"EarthquakeFaultLineGenerator: Timed out after {waitedFrames} frames. " +
-                    $"MapGenerator={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
-                    $"GridManager={(gridManager != null ? gridManager.name : "NULL")}"
-                );
+                //Debug.LogWarning(
+                    //$"EarthquakeFaultLineGenerator: Timed out after {waitedFrames} frames. " +
+                    //$"MapGenerator={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
+                    //$"GridManager={(gridManager != null ? gridManager.name : "NULL")}"
+                //);
 
                 generateRoutine = null;
                 yield break;
@@ -235,11 +235,11 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeFaultLineGenerator: Map ready after {waitedFrames} frame(s). " +
-                $"BlockColumns={mapGenerator.BlockColumns}, BlockRows={mapGenerator.BlockRows}, " +
-                $"HasBlockTerrainData={mapGenerator.HasBlockTerrainData}"
-            );
+            //Debug.Log(
+                //$"EarthquakeFaultLineGenerator: Map ready after {waitedFrames} frame(s). " +
+                //$"BlockColumns={mapGenerator.BlockColumns}, BlockRows={mapGenerator.BlockRows}, " +
+                //$"HasBlockTerrainData={mapGenerator.HasBlockTerrainData}"
+            //);
         }
 
         GenerateFaultLinesFromPreset();
@@ -291,20 +291,20 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
 
         if (mapGenerator == null || gridManager == null)
         {
-            Debug.LogWarning("EarthquakeFaultLineGenerator: Missing MapGenerator or GridManager.");
+            //Debug.LogWarning("EarthquakeFaultLineGenerator: Missing MapGenerator or GridManager.");
             return;
         }
 
         if (!mapGenerator.HasBlockTerrainData)
         {
-            Debug.LogWarning("EarthquakeFaultLineGenerator: MapGenerator has no block terrain data yet.");
+            //Debug.LogWarning("EarthquakeFaultLineGenerator: MapGenerator has no block terrain data yet.");
             return;
         }
 
         if (!canHaveFaultLines)
         {
             if (debugLogging)
-                Debug.Log("EarthquakeFaultLineGenerator: Fault lines disabled for this map.");
+                //Debug.Log("EarthquakeFaultLineGenerator: Fault lines disabled for this map.");
 
             return;
         }
@@ -312,7 +312,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
         if (!forceFaultLineForDebug && Random.value > faultLineMapChance)
         {
             if (debugLogging)
-                Debug.Log($"EarthquakeFaultLineGenerator: This map rolled no fault lines. Chance={faultLineMapChance:0.00}");
+                //Debug.Log($"EarthquakeFaultLineGenerator: This map rolled no fault lines. Chance={faultLineMapChance:0.00}");
 
             return;
         }
@@ -321,7 +321,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
 
         if (validBlockScratch.Count == 0)
         {
-            Debug.LogWarning("EarthquakeFaultLineGenerator: No valid block indexes found after map was ready.");
+            //Debug.LogWarning("EarthquakeFaultLineGenerator: No valid block indexes found after map was ready.");
             return;
         }
 
@@ -343,10 +343,10 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeFaultLineGenerator: Generated {count} fault line(s). " +
-                $"FaultBlocks={faultBlocks.Count}, InfluenceBlocks={faultInfluenceBlocks.Count}"
-            );
+            //Debug.Log(
+                //$"EarthquakeFaultLineGenerator: Generated {count} fault line(s). " +
+                //$"FaultBlocks={faultBlocks.Count}, InfluenceBlocks={faultInfluenceBlocks.Count}"
+            //);
         }
 
         MarkEarthquakeFaultSaveDirty();
@@ -380,7 +380,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
         if (section == null)
         {
             if (debugLogging)
-                Debug.Log("EarthquakeFaultLineGenerator: No preset section found. Using inspector settings.");
+                //Debug.Log("EarthquakeFaultLineGenerator: No preset section found. Using inspector settings.");
 
             return;
         }
@@ -394,11 +394,11 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeFaultLineGenerator: Applied preset settings. " +
-                $"canHaveFaultLines={canHaveFaultLines}, chance={faultLineMapChance}, " +
-                $"min={minFaultLines}, max={maxFaultLines}"
-            );
+            //Debug.Log(
+                //$"EarthquakeFaultLineGenerator: Applied preset settings. " +
+                //$"canHaveFaultLines={canHaveFaultLines}, chance={faultLineMapChance}, " +
+                //$"min={minFaultLines}, max={maxFaultLines}"
+            //);
         }
     }
 
@@ -706,9 +706,9 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeFaultLineGenerator: Loaded fault state. " +
-                $"FaultBlocks={faultBlocks.Count}, InfluenceBlocks={faultInfluenceBlocks.Count}");
+            //Debug.Log(
+                //$"EarthquakeFaultLineGenerator: Loaded fault state. " +
+                //$"FaultBlocks={faultBlocks.Count}, InfluenceBlocks={faultInfluenceBlocks.Count}");
         }
     }
 

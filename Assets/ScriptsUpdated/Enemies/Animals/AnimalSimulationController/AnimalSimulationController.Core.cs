@@ -235,20 +235,20 @@ public partial class AnimalSimulationController : MonoBehaviour
 
     private void HandleSeasonChanged(SeasonDefinition newSeason)
     {
-        Debug.Log("Season change top up attempt");
+        //Debug.Log("Season change top up attempt");
 
         // Do not run seasonal top-up before the initial world spawn has completed.
         if (!_hasCompletedInitialAnimalSpawn)
             return;
 
-        Debug.Log("Season change top up Initial Animal Spawn complete");
+        //Debug.Log("Season change top up Initial Animal Spawn complete");
 
         if (_simulation != null &&
             _seasonalTopUpRoutine == null &&
             _simulation.GetTotalGroupCount() < maxTotalGroups)
         {
             _seasonalTopUpRoutine = StartCoroutine(SeasonalTopUpMissingSpeciesFromPreset());
-            Debug.Log("Starting Top up");
+            //Debug.Log("Starting Top up");
         }
     }
 

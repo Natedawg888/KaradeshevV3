@@ -102,13 +102,13 @@ public class PlayerConstructionManager : MonoBehaviour
     {
         if (constructionGO == null)
         {
-            Debug.LogError("[ConstructionManager] StartConstruction: constructionGO was null.");
+            //Debug.LogError("[ConstructionManager] StartConstruction: constructionGO was null.");
             return false;
         }
 
         if (def == null)
         {
-            Debug.LogError("[ConstructionManager] StartConstruction: Building def is null.");
+            //Debug.LogError("[ConstructionManager] StartConstruction: Building def is null.");
             return false;
         }
 
@@ -117,14 +117,14 @@ public class PlayerConstructionManager : MonoBehaviour
 
         if (populationManager == null)
         {
-            Debug.LogError("[ConstructionManager] populationManager is not assigned.");
+            //Debug.LogError("[ConstructionManager] populationManager is not assigned.");
             return false;
         }
 
         BuildingConstruction bc = constructionGO.GetComponent<BuildingConstruction>();
         if (bc == null)
         {
-            Debug.LogError($"[ConstructionManager] The construction prefab '{constructionGO.name}' is missing BuildingConstruction.");
+            //Debug.LogError($"[ConstructionManager] The construction prefab '{constructionGO.name}' is missing BuildingConstruction.");
             return false;
         }
 
@@ -140,17 +140,17 @@ public class PlayerConstructionManager : MonoBehaviour
                     nameof(BuildingConstruction),
                     out reservationId))
             {
-                Debug.LogWarning($"[ConstructionManager] Could not reserve population for construction (need {requiredPopulation}).");
+                //Debug.LogWarning($"[ConstructionManager] Could not reserve population for construction (need {requiredPopulation}).");
                 return false;
             }
             else
             {
-                Debug.Log($"[ConstructionManager] Reserved population locally (id:{reservationId}).");
+                //Debug.Log($"[ConstructionManager] Reserved population locally (id:{reservationId}).");
             }
         }
         else
         {
-            Debug.Log($"[ConstructionManager] Using reservation from placement (id:{reservationId}).");
+            //Debug.Log($"[ConstructionManager] Using reservation from placement (id:{reservationId}).");
 
             populationManager.UpdateReservationMetadata(
                 reservationId,
@@ -161,13 +161,13 @@ public class PlayerConstructionManager : MonoBehaviour
 
         bc.Initialize(def, turnsRequired, requiredPopulation, reservationId);
 
-        Debug.Log($"[ConstructionManager] BeginConstruction on '{constructionGO.name}' " +
-                  $"(turns:{turnsRequired}, pop:{requiredPopulation}, building:'{def.buildingName}').");
+        //Debug.Log($"[ConstructionManager] BeginConstruction on '{constructionGO.name}' " +
+                  //$"(turns:{turnsRequired}, pop:{requiredPopulation}, building:'{def.buildingName}').");
 
         bc.BeginConstruction();
 
         if (bc.TurnsToComplete <= 0)
-            Debug.LogWarning("[ConstructionManager] Warning: turnsToComplete <= 0 (check Building.buildTurnsRequired).");
+            //Debug.LogWarning("[ConstructionManager] Warning: turnsToComplete <= 0 (check Building.buildTurnsRequired).");
 
         TagConstructionReservation(reservationId, constructionGO);
 

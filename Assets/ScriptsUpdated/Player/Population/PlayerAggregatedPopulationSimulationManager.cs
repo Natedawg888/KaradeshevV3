@@ -21,11 +21,11 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
 
         general = GeneralPopulationManager.Instance;
         if (general == null)
-            Debug.LogError("GeneralPopulationManager missing in scene.");
+            //Debug.LogError("GeneralPopulationManager missing in scene.");
 
         playerPop = PlayersPopulationManager.Instance;
         if (playerPop == null)
-            Debug.LogError("PlayersPopulationManager missing in scene.");
+            //Debug.LogError("PlayersPopulationManager missing in scene.");
     }
 
     private void OnEnable()
@@ -310,18 +310,18 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
         if (afterCount >= beforeCount)
             return;
 
-        Debug.LogWarning(
-            $"[POP LOSS - TURN] " +
-            $"Reason={reason} | " +
-            $"Turn={turn} | " +
-            $"Lost={beforeCount - afterCount} | " +
-            $"GroupID={group.GroupID} | " +
-            $"AgeGroup={group.ageGroup} | Gender={group.gender} | " +
-            $"Count {beforeCount}->{afterCount} | " +
-            $"Health01 {beforeHealth:F3}->{afterHealth:F3} | " +
-            $"Hunger01={hunger:F3} | " +
-            $"Thirst01={thirst:F3} | " +
-            $"AvgAgeTurns={ageTurns}");
+        //Debug.LogWarning(
+            //$"[POP LOSS - TURN] " +
+            //$"Reason={reason} | " +
+            //$"Turn={turn} | " +
+            //$"Lost={beforeCount - afterCount} | " +
+            //$"GroupID={group.GroupID} | " +
+            //$"AgeGroup={group.ageGroup} | Gender={group.gender} | " +
+            //$"Count {beforeCount}->{afterCount} | " +
+            //$"Health01 {beforeHealth:F3}->{afterHealth:F3} | " +
+            //$"Hunger01={hunger:F3} | " +
+            //$"Thirst01={thirst:F3} | " +
+            //$"AvgAgeTurns={ageTurns}");
     }
 
     private void LogAgeTransition(int turn, PopulationGroup group, AgeGroup beforeAgeGroup)
@@ -332,12 +332,12 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
         if (beforeAgeGroup == group.ageGroup)
             return;
 
-        Debug.Log(
-            $"[POP AGE CHANGE] " +
-            $"Turn={turn} | " +
-            $"GroupID={group.GroupID} | " +
-            $"Gender={group.gender} | " +
-            $"AgeGroup {beforeAgeGroup}->{group.ageGroup} | " +
-            $"AvgAgeTurns={group.averageAgeInTurns}");
+        //Debug.Log(
+            //$"[POP AGE CHANGE] " +
+            //$"Turn={turn} | " +
+            //$"GroupID={group.GroupID} | " +
+            //$"Gender={group.gender} | " +
+            //$"AgeGroup {beforeAgeGroup}->{group.ageGroup} | " +
+            //$"AvgAgeTurns={group.averageAgeInTurns}");
     }
 }

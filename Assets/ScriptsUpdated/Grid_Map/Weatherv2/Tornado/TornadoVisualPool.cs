@@ -49,7 +49,7 @@ public class TornadoVisualPool : MonoBehaviour
         }
 
         if (debugLogging && createNow > 0)
-            Debug.Log($"[TornadoVisualPool] Prewarmed {createNow} for prefab '{prefab.name}'.");
+            //Debug.Log($"[TornadoVisualPool] Prewarmed {createNow} for prefab '{prefab.name}'.");
     }
 
     public GameObject Get(
@@ -97,7 +97,7 @@ public class TornadoVisualPool : MonoBehaviour
         if (resolvedPrefab == null)
         {
             if (debugLogging)
-                Debug.LogWarning($"[TornadoVisualPool] Could not resolve prefab for returned instance '{instance.name}'. Destroying.");
+                //Debug.LogWarning($"[TornadoVisualPool] Could not resolve prefab for returned instance '{instance.name}'. Destroying.");
             Destroy(instance);
             return;
         }

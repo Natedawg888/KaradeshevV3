@@ -213,7 +213,7 @@ public class UnitGroupMarker : MonoBehaviour
     {
         if (_group == null)
         {
-            Debug.LogWarning("[UnitGroupMarker] Tried to open group panel, but _group is null.");
+            //Debug.LogWarning("[UnitGroupMarker] Tried to open group panel, but _group is null.");
             return;
         }
 
@@ -221,7 +221,7 @@ public class UnitGroupMarker : MonoBehaviour
         var owner = GetComponentInParent<TileUnitGroupControl>();
         if (owner == null)
         {
-            Debug.LogWarning("[UnitGroupMarker] No TileUnitGroupControl found in parents.");
+            //Debug.LogWarning("[UnitGroupMarker] No TileUnitGroupControl found in parents.");
             return;
         }
 
@@ -229,7 +229,7 @@ public class UnitGroupMarker : MonoBehaviour
         var panel = FindObjectOfType<UnitGroupPanelControl>();
         if (panel == null)
         {
-            Debug.LogWarning("[UnitGroupMarker] No UnitGroupPanelControl found in scene.");
+            //Debug.LogWarning("[UnitGroupMarker] No UnitGroupPanelControl found in scene.");
             return;
         }
 

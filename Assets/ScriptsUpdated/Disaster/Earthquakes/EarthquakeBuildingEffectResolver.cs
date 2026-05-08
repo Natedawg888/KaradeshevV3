@@ -134,13 +134,13 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeBuildingEffectResolver: Installed refs. " +
-                $"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
-                $"MapGenerator={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
-                $"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
-                $"WorldBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}"
-            );
+            //Debug.Log(
+                //$"EarthquakeBuildingEffectResolver: Installed refs. " +
+                //$"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
+                //$"MapGenerator={(mapGenerator != null ? mapGenerator.name : "NULL")}, " +
+                //$"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
+                //$"WorldBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}"
+            //);
         }
     }
 
@@ -153,10 +153,10 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeBuildingEffectResolver: SetWorldBuildingManager -> " +
-                $"{(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}"
-            );
+            //Debug.Log(
+                //$"EarthquakeBuildingEffectResolver: SetWorldBuildingManager -> " +
+                //$"{(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}"
+            //);
         }
     }
 
@@ -200,7 +200,7 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
         if (mapGenerator == null || gridManager == null || worldBuildingManager == null)
         {
             if (debugLogging)
-                Debug.LogWarning("EarthquakeBuildingEffectResolver: Missing references.");
+                //Debug.LogWarning("EarthquakeBuildingEffectResolver: Missing references.");
 
             resolverRoutine = null;
             yield break;
@@ -227,7 +227,7 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
         if (magnitude01 <= 0f)
         {
             if (debugLogging)
-                Debug.Log($"EarthquakeBuildingEffectResolver: Magnitude {data.magnitude:0.0}, no building damage.");
+                //Debug.Log($"EarthquakeBuildingEffectResolver: Magnitude {data.magnitude:0.0}, no building damage.");
 
             resolverRoutine = null;
             yield break;
@@ -320,12 +320,12 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"Earthquake building '{building.name}' zone={zoneName}, " +
-                    $"cells={buildingCellsScratch.Count}, zoneMult={zoneMultiplier:0.00}, " +
-                    $"distMult={distanceMultiplier:0.00}, damage={finalDamage}, " +
-                    $"magnitude={data.magnitude:0.0}"
-                );
+                //Debug.Log(
+                    //$"Earthquake building '{building.name}' zone={zoneName}, " +
+                    //$"cells={buildingCellsScratch.Count}, zoneMult={zoneMultiplier:0.00}, " +
+                    //$"distMult={distanceMultiplier:0.00}, damage={finalDamage}, " +
+                    //$"magnitude={data.magnitude:0.0}"
+                //);
             }
 
             processed++;
@@ -339,13 +339,13 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"EarthquakeBuildingEffectResolver complete. " +
-                $"Damaged={damagedCount}, " +
-                $"SkippedOutsideAffectedCells={skippedOutsideAffectedCells}, " +
-                $"SkippedOutsideFaultInfluence={skippedOutsideFaultInfluence}, " +
-                $"FaultCells={faultCells.Count}, InfluenceCells={influenceCells.Count}, AffectedCells={affectedCells.Count}"
-            );
+            //Debug.Log(
+                //$"EarthquakeBuildingEffectResolver complete. " +
+                //$"Damaged={damagedCount}, " +
+                //$"SkippedOutsideAffectedCells={skippedOutsideAffectedCells}, " +
+                //$"SkippedOutsideFaultInfluence={skippedOutsideFaultInfluence}, " +
+                //$"FaultCells={faultCells.Count}, InfluenceCells={influenceCells.Count}, AffectedCells={affectedCells.Count}"
+            //);
         }
 
         resolverRoutine = null;
@@ -426,12 +426,12 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
 
         if (debugIgnitionLogging)
         {
-            Debug.Log(
-                $"Earthquake ignition check '{building.name}'. " +
-                $"Zone={zoneName}, Magnitude={magnitude:0.0}, " +
-                $"Strength={earthquakeStrength01:0.00}, IgnitionMagnitude={ignitionMagnitude01:0.00}, " +
-                $"Chance={finalChance:0.00}, BurnTurns={finalBurnTurns}, Ignited={ignited}"
-            );
+            //Debug.Log(
+                //$"Earthquake ignition check '{building.name}'. " +
+                //$"Zone={zoneName}, Magnitude={magnitude:0.0}, " +
+                //$"Strength={earthquakeStrength01:0.00}, IgnitionMagnitude={ignitionMagnitude01:0.00}, " +
+                //$"Chance={finalChance:0.00}, BurnTurns={finalBurnTurns}, Ignited={ignited}"
+            //);
         }
     }
 
@@ -486,10 +486,10 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"EarthquakeBuildingEffectResolver: Applied direct BuildingControl damage " +
-                    $"{finalDamage} to '{buildingControl.name}' because no BuildingEarthquakeSecondaryEffects was found."
-                );
+                //Debug.Log(
+                    //$"EarthquakeBuildingEffectResolver: Applied direct BuildingControl damage " +
+                    //$"{finalDamage} to '{buildingControl.name}' because no BuildingEarthquakeSecondaryEffects was found."
+                //);
             }
 
             return;
@@ -504,10 +504,10 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.LogWarning(
-                $"EarthquakeBuildingEffectResolver: Could not find BuildingEarthquakeSecondaryEffects " +
-                $"or BuildingControl on '{building.name}'. SendMessage fallback used."
-            );
+            //Debug.LogWarning(
+                //$"EarthquakeBuildingEffectResolver: Could not find BuildingEarthquakeSecondaryEffects " +
+                //$"or BuildingControl on '{building.name}'. SendMessage fallback used."
+            //);
         }
     }
 

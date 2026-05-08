@@ -50,7 +50,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
     {
         if (trackingResultsPanelRoot == null || trackingResultItemPrefab == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Tracking results UI not wired in inspector.");
+            //Debug.LogWarning("[UnitGroupPanel] Tracking results UI not wired in inspector.");
             return;
         }
 

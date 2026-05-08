@@ -53,8 +53,8 @@ public class BuildingConstruction : MonoBehaviour
         // one-shot pin for the first visual update
         _forceMiddleOnce = startInMiddle;   // NEW
 
-        Debug.Log($"[BuildingConstruction] Starting on '{gameObject.name}' " +
-                  $"for '{def?.buildingName ?? "NULL"}' | turns:{turnsToComplete} | stages:{(constructionStages != null ? constructionStages.Count : 0)}");
+        //Debug.Log($"[BuildingConstruction] Starting on '{gameObject.name}' " +
+                  //$"for '{def?.buildingName ?? "NULL"}' | turns:{turnsToComplete} | stages:{(constructionStages != null ? constructionStages.Count : 0)}");
 
         if (constructionCanvas) constructionCanvas.SetActive(true);
         if (constructTimerUI)
@@ -88,7 +88,7 @@ public class BuildingConstruction : MonoBehaviour
         GameObject finalPrefab = finalBuildingOverride ? finalBuildingOverride : def?.finalBuildingPrefab;
         if (!finalPrefab)
         {
-            Debug.LogError("[BuildingConstruction] No final building prefab provided.");
+            //Debug.LogError("[BuildingConstruction] No final building prefab provided.");
             return null;
         }
 
@@ -112,7 +112,7 @@ public class BuildingConstruction : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[BuildingConstruction] Final building missing BuildingControl or def was null; ID/Name not set.");
+            //Debug.LogWarning("[BuildingConstruction] Final building missing BuildingControl or def was null; ID/Name not set.");
         }
 
         return finalGO;

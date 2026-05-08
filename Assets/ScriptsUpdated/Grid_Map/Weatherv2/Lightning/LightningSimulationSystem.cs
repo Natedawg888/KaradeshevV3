@@ -343,7 +343,7 @@ public class LightningSimulationSystem : MonoBehaviour
             if (TryInitializeGrid())
             {
                 if (debugLogging)
-                    Debug.Log("[LightningSimulationSystem] Sources ready. Lightning system initialized.");
+                    //Debug.Log("[LightningSimulationSystem] Sources ready. Lightning system initialized.");
 
                 _waitForSourcesReadyCoroutine = null;
                 yield break;
@@ -404,7 +404,7 @@ public class LightningSimulationSystem : MonoBehaviour
             OnLightningGridInitialized?.Invoke();
 
         if (debugLogging && sizeChanged)
-            Debug.Log($"[LightningSimulationSystem] Initialized {_cols}x{_rows}");
+            //Debug.Log($"[LightningSimulationSystem] Initialized {_cols}x{_rows}");
 
         return true;
     }
@@ -483,7 +483,7 @@ public class LightningSimulationSystem : MonoBehaviour
                 OnLightningStateChanged?.Invoke();
 
             if (debugLogging)
-                Debug.Log("[LightningSimulationSystem] Advanced lightning one sparse step.");
+                //Debug.Log("[LightningSimulationSystem] Advanced lightning one sparse step.");
         }
         finally
         {
@@ -543,7 +543,7 @@ public class LightningSimulationSystem : MonoBehaviour
                 OnLightningStateChanged?.Invoke();
 
             if (debugLogging)
-                Debug.Log("[LightningSimulationSystem] Advanced lightning one sparse batched step.");
+                //Debug.Log("[LightningSimulationSystem] Advanced lightning one sparse batched step.");
         }
         finally
         {
@@ -897,9 +897,9 @@ public class LightningSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[LightningSimulationSystem] Queued burst {info.burstId} at ({info.originCellX},{info.originCellY}) " +
-                $"strikes={info.strikeCount} interval={info.strikeIntervalSeconds:0.00}");
+            //Debug.Log(
+                //$"[LightningSimulationSystem] Queued burst {info.burstId} at ({info.originCellX},{info.originCellY}) " +
+                //$"strikes={info.strikeCount} interval={info.strikeIntervalSeconds:0.00}");
         }
     }
 
@@ -1643,7 +1643,7 @@ public class LightningSimulationSystem : MonoBehaviour
         if (!TryInitializeGrid())
         {
             if (debugLogging)
-                Debug.LogWarning("[LightningSimulationSystem] Could not load lightning state because grid is not initialized yet.");
+                //Debug.LogWarning("[LightningSimulationSystem] Could not load lightning state because grid is not initialized yet.");
 
             return;
         }
@@ -1760,9 +1760,9 @@ public class LightningSimulationSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[LightningSimulationSystem] Loaded lightning state. " +
-                $"ChargedCells={_chargedCells.Count}, QueuedBursts={_queuedBursts.Count}");
+            //Debug.Log(
+                //$"[LightningSimulationSystem] Loaded lightning state. " +
+                //$"ChargedCells={_chargedCells.Count}, QueuedBursts={_queuedBursts.Count}");
         }
     }
 }

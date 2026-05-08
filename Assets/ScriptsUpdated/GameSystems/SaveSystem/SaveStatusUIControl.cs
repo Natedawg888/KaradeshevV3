@@ -87,7 +87,7 @@ public class SaveStatusUIControl : MonoBehaviour
 
     private void HandleSaveFailed(string error)
     {
-        Debug.LogWarning("[SaveStatusUIControl] Save failed, hiding save UI.\n" + error);
+        //Debug.LogWarning("[SaveStatusUIControl] Save failed, hiding save UI.\n" + error);
         HideImmediate();
     }
 

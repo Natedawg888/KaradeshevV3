@@ -194,7 +194,7 @@ public class VolcanoTileState : MonoBehaviour
         RefreshVisuals();
 
         if (debugLogging)
-            Debug.Log($"[VolcanoTileState] Initialized {name} as {activityState} energy={energy01:0.00}");
+            //Debug.Log($"[VolcanoTileState] Initialized {name} as {activityState} energy={energy01:0.00}");
     }
 
     public void AdvanceOneTurn(VolcanoManager manager)
@@ -437,7 +437,7 @@ public class VolcanoTileState : MonoBehaviour
         }
 
         if (debugLogging)
-            Debug.Log($"[VolcanoTileState] {name} became Dormant.");
+            //Debug.Log($"[VolcanoTileState] {name} became Dormant.");
     }
 
     private void BeginEruption(VolcanoManager manager)
@@ -455,7 +455,7 @@ public class VolcanoTileState : MonoBehaviour
             manager.NotifyEruptionStarted(this);
 
         if (debugLogging)
-            Debug.Log($"[VolcanoTileState] {name} began Erupting for {eruptionTurnsRemaining} turns.");
+            //Debug.Log($"[VolcanoTileState] {name} began Erupting for {eruptionTurnsRemaining} turns.");
     }
 
     private void EndEruption(VolcanoManager manager)
@@ -485,7 +485,7 @@ public class VolcanoTileState : MonoBehaviour
         }
 
         if (debugLogging)
-            Debug.Log($"[VolcanoTileState] {name} ended eruption and returned Dormant.");
+            //Debug.Log($"[VolcanoTileState] {name} ended eruption and returned Dormant.");
     }
 
     private void RevertToMountain(VolcanoManager manager)
@@ -509,7 +509,7 @@ public class VolcanoTileState : MonoBehaviour
             manager.NotifyVolcanoRevertedToMountain(this);
 
         if (debugLogging)
-            Debug.Log($"[VolcanoTileState] {name} reverted to Mountain.");
+            //Debug.Log($"[VolcanoTileState] {name} reverted to Mountain.");
     }
 
     private void UpdateLowEnergyCounter()
@@ -727,10 +727,10 @@ public class VolcanoTileState : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[VolcanoTileState] Loaded state for {name}. " +
-                $"State={activityState}, Energy={energy01:0.00}, " +
-                $"EruptionTurnsRemaining={eruptionTurnsRemaining}");
+            //Debug.Log(
+                //$"[VolcanoTileState] Loaded state for {name}. " +
+                //$"State={activityState}, Energy={energy01:0.00}, " +
+                //$"EruptionTurnsRemaining={eruptionTurnsRemaining}");
         }
     }
 

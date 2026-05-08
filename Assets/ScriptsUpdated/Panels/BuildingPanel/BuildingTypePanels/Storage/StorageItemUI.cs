@@ -33,7 +33,7 @@ public class StorageItemUI : MonoBehaviour
 
         if (_def == null || _storage == null)
         {
-            Debug.LogWarning("[StorageItemUI] Missing def or storage.");
+            //Debug.LogWarning("[StorageItemUI] Missing def or storage.");
             return;
         }
 
@@ -179,7 +179,7 @@ public class StorageItemUI : MonoBehaviour
         if (!stored)
         {
             PlayerInventoryManager.Instance.TryAdd(_def, _storeAmount);
-            Debug.LogWarning("Storage refused deposit; rolled back to player inventory.");
+            //Debug.LogWarning("Storage refused deposit; rolled back to player inventory.");
             return;
         }
 

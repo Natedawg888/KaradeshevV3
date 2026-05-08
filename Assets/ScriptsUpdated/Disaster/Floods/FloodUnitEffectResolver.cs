@@ -119,11 +119,11 @@ public class FloodUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[FloodUnitEffectResolver] Installed refs. " +
-                $"Flood={(floodSimulationSystem != null ? floodSimulationSystem.name : "NULL")}, " +
-                $"GridManager={(gridManager != null ? gridManager.name : "NULL")}"
-            );
+            //Debug.Log(
+                //$"[FloodUnitEffectResolver] Installed refs. " +
+                //$"Flood={(floodSimulationSystem != null ? floodSimulationSystem.name : "NULL")}, " +
+                //$"GridManager={(gridManager != null ? gridManager.name : "NULL")}"
+            //);
         }
     }
 
@@ -177,7 +177,7 @@ public class FloodUnitEffectResolver : MonoBehaviour
         if (floodSimulationSystem == null || gridManager == null)
         {
             if (debugLogging)
-                Debug.LogWarning("[FloodUnitEffectResolver] Missing references.");
+                //Debug.LogWarning("[FloodUnitEffectResolver] Missing references.");
 
             return;
         }
@@ -198,7 +198,7 @@ public class FloodUnitEffectResolver : MonoBehaviour
         if (activeFloodDamageCells.Count == 0)
         {
             if (debugLogging)
-                Debug.Log("[FloodUnitEffectResolver] No active flood damage cells.");
+                //Debug.Log("[FloodUnitEffectResolver] No active flood damage cells.");
 
             ClearUnitControlLookup();
             return;
@@ -269,9 +269,9 @@ public class FloodUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[FloodUnitEffectResolver] Complete. " +
-                $"AffectedGroups={affectedGroups}, ActiveFloodDamageCells={activeFloodDamageCells.Count}");
+            //Debug.Log(
+                //$"[FloodUnitEffectResolver] Complete. " +
+                //$"AffectedGroups={affectedGroups}, ActiveFloodDamageCells={activeFloodDamageCells.Count}");
         }
 
         processedGroupsThisPass.Clear();
@@ -306,9 +306,9 @@ public class FloodUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[FloodUnitEffectResolver] Complete. " +
-                $"AffectedGroups={affectedGroups}, ActiveFloodDamageCells={activeFloodDamageCells.Count}");
+            //Debug.Log(
+                //$"[FloodUnitEffectResolver] Complete. " +
+                //$"AffectedGroups={affectedGroups}, ActiveFloodDamageCells={activeFloodDamageCells.Count}");
         }
 
         processedGroupsThisPass.Clear();
@@ -445,11 +445,11 @@ public class FloodUnitEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[FloodUnitEffectResolver] Flood destroyed unit group {group.groupId} " +
-                    $"at ({coord.x},{coord.y}). " +
-                    $"Depth01={floodState.floodDepth01:0.00}, Severity={severity01:0.00}, Damage={finalDamage}"
-                );
+                //Debug.Log(
+                    //$"[FloodUnitEffectResolver] Flood destroyed unit group {group.groupId} " +
+                    //$"at ({coord.x},{coord.y}). " +
+                    //$"Depth01={floodState.floodDepth01:0.00}, Severity={severity01:0.00}, Damage={finalDamage}"
+                //);
             }
 
             unitControl.RemoveGroupDueToFatalities(group);
@@ -463,12 +463,12 @@ public class FloodUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[FloodUnitEffectResolver] Flood damaged unit group {group.groupId} " +
-                $"at ({coord.x},{coord.y}). " +
-                $"Depth01={floodState.floodDepth01:0.00}, Severity={severity01:0.00}, " +
-                $"Damage={finalDamage}, UnitsLost={unitsLost}, RemainingUnits={group.unitCount}"
-            );
+            //Debug.Log(
+                //$"[FloodUnitEffectResolver] Flood damaged unit group {group.groupId} " +
+                //$"at ({coord.x},{coord.y}). " +
+                //$"Depth01={floodState.floodDepth01:0.00}, Severity={severity01:0.00}, " +
+                //$"Damage={finalDamage}, UnitsLost={unitsLost}, RemainingUnits={group.unitCount}"
+            //);
         }
     }
 

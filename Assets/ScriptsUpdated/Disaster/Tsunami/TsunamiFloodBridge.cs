@@ -103,7 +103,7 @@ public class TsunamiFloodBridge : MonoBehaviour
         if (!TryReadActiveTsunamiCells(tsunamiSimulationSystem, tsunamiCellScratch))
         {
             if (debugLogging)
-                Debug.LogWarning("[TsunamiFloodBridge] Could not find active tsunami cells on TsunamiSimulationSystem.");
+                //Debug.LogWarning("[TsunamiFloodBridge] Could not find active tsunami cells on TsunamiSimulationSystem.");
 
             return;
         }
@@ -116,7 +116,7 @@ public class TsunamiFloodBridge : MonoBehaviour
         }
 
         if (debugLogging)
-            Debug.Log($"[TsunamiFloodBridge] Applied tsunami flood input to {tsunamiCellScratch.Count} cells.");
+            //Debug.Log($"[TsunamiFloodBridge] Applied tsunami flood input to {tsunamiCellScratch.Count} cells.");
     }
 
     private bool TryReadActiveTsunamiCells(object tsunami, List<TileCoord> result)

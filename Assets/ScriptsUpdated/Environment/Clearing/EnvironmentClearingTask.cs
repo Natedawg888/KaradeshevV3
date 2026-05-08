@@ -119,7 +119,7 @@ public class EnvironmentClearingTask : MonoBehaviour
 
         if (!ReservePopulationForClearing())
         {
-            Debug.LogWarning("[EnvironmentClearingTask] Not enough available population to start clearing; cancelling task.");
+            //Debug.LogWarning("[EnvironmentClearingTask] Not enough available population to start clearing; cancelling task.");
             SetTilesInteractable(true);
             Destroy(gameObject);
             return;
@@ -136,7 +136,7 @@ public class EnvironmentClearingTask : MonoBehaviour
         _affectedTiles.Clear();
         if (gridManager == null || baseTilePrefab == null || _box == null)
         {
-            Debug.LogWarning("[EnvironmentClearingTask] SpawnBaseTilesAndCollectCells aborted: missing refs.");
+            //Debug.LogWarning("[EnvironmentClearingTask] SpawnBaseTilesAndCollectCells aborted: missing refs.");
             return;
         }
 
@@ -147,8 +147,8 @@ public class EnvironmentClearingTask : MonoBehaviour
 
         float halfCell = gridManager.cellSize * 0.5f;
 
-        Debug.Log($"[EnvironmentClearingTask] SpawnBaseTilesAndCollectCells " +
-                $"min={minGridPos} max={maxGridPos} bounds={bounds}");
+        //Debug.Log($"[EnvironmentClearingTask] SpawnBaseTilesAndCollectCells " +
+                //$"min={minGridPos} max={maxGridPos} bounds={bounds}");
 
         for (int x = minGridPos.x; x <= maxGridPos.x; x++)
         {
@@ -180,26 +180,26 @@ public class EnvironmentClearingTask : MonoBehaviour
                 var tileScript = baseTile.GetComponentInChildren<TileScript>(true);
                 if (tileScript != null)
                 {
-                    Debug.Log(
-                        $"[EnvironmentClearingTask] Tiny base '{baseTile.name}' got TileScript. " +
-                        $"Calling ForceSpawnSpecific({envTypeToUse}, {tileTypeToUse}). " +
-                        $"Options count={ (tileScript.options != null ? tileScript.options.Length : 0) }");
+                    //Debug.Log(
+                        //$"[EnvironmentClearingTask] Tiny base '{baseTile.name}' got TileScript. " +
+                        //$"Calling ForceSpawnSpecific({envTypeToUse}, {tileTypeToUse}). " +
+                        //$"Options count={ (tileScript.options != null ? tileScript.options.Length : 0) }");
 
                     bool ok = tileScript.ForceSpawnSpecific(envTypeToUse, tileTypeToUse);
                     if (!ok)
                     {
-                        Debug.LogWarning(
-                            $"[EnvironmentClearingTask] ForceSpawnSpecific({envTypeToUse}, {tileTypeToUse}) " +
-                            $"FAILED on tiny base tile at grid {gridPos}. Falling back to SpawnEnvironmentTile().");
+                        //Debug.LogWarning(
+                            //$"[EnvironmentClearingTask] ForceSpawnSpecific({envTypeToUse}, {tileTypeToUse}) " +
+                            //$"FAILED on tiny base tile at grid {gridPos}. Falling back to SpawnEnvironmentTile().");
 
                         tileScript.SpawnEnvironmentTile();
                     }
                 }
                 else
                 {
-                    Debug.LogError(
-                        $"[EnvironmentClearingTask] baseTilePrefab '{baseTilePrefab.name}' has no TileScript " +
-                        $"(even in children); cannot spawn environment on tiny base tile at grid {gridPos}.");
+                    //Debug.LogError(
+                        //$"[EnvironmentClearingTask] baseTilePrefab '{baseTilePrefab.name}' has no TileScript " +
+                        //$"(even in children); cannot spawn environment on tiny base tile at grid {gridPos}.");
                 }
 
                 // 🔥 The TileControl lives on the spawned environment prefab.
@@ -229,9 +229,9 @@ public class EnvironmentClearingTask : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning(
-                        $"[EnvironmentClearingTask] Could not find TileControl on spawned environment " +
-                        $"under '{baseTile.name}' at grid {gridPos}.");
+                    //Debug.LogWarning(
+                        //$"[EnvironmentClearingTask] Could not find TileControl on spawned environment " +
+                        //$"under '{baseTile.name}' at grid {gridPos}.");
                 }
             }
         }
@@ -247,11 +247,11 @@ public class EnvironmentClearingTask : MonoBehaviour
             if (_affectedTiles.Contains(tile))
                 continue;
 
-            Debug.Log($"[EnvironmentClearingTask] Destroying original big tile '{tile.name}' in cleared area.");
+            //Debug.Log($"[EnvironmentClearingTask] Destroying original big tile '{tile.name}' in cleared area.");
             Destroy(tile.gameObject);
         }
 
-        Debug.Log($"[EnvironmentClearingTask] Spawned base tiles and collected {_affectedTiles.Count} cells to clear in area '{name}'.");
+        //Debug.Log($"[EnvironmentClearingTask] Spawned base tiles and collected {_affectedTiles.Count} cells to clear in area '{name}'.");
     }
 
     // --------------------------------------------------------------------
@@ -351,16 +351,16 @@ public class EnvironmentClearingTask : MonoBehaviour
         var tile = environmentControl.GetComponentInParent<TileControl>();
         if (tile == null)
         {
-            Debug.LogWarning("[EnvironmentClearingTask] No TileControl parent found for environment; " +
-                            "cannot sync BoxCollider size.");
+            //Debug.LogWarning("[EnvironmentClearingTask] No TileControl parent found for environment; " +
+                            //"cannot sync BoxCollider size.");
             return;
         }
 
         var srcBox = tile.GetComponent<BoxCollider>();
         if (srcBox == null)
         {
-            Debug.LogWarning("[EnvironmentClearingTask] TileControl has no BoxCollider; " +
-                            "cannot sync BoxCollider size.");
+            //Debug.LogWarning("[EnvironmentClearingTask] TileControl has no BoxCollider; " +
+                            //"cannot sync BoxCollider size.");
             return;
         }
 
@@ -377,7 +377,7 @@ public class EnvironmentClearingTask : MonoBehaviour
 
         _box.isTrigger = true;
 
-        Debug.Log($"[EnvironmentClearingTask] Synced BoxCollider to tile (shrunk). New size={_box.size}, center={_box.center}");
+        //Debug.Log($"[EnvironmentClearingTask] Synced BoxCollider to tile (shrunk). New size={_box.size}, center={_box.center}");
     }
 
     private void CollectAffectedTiles()
@@ -399,7 +399,7 @@ public class EnvironmentClearingTask : MonoBehaviour
             }
         }
 
-        Debug.Log($"[EnvironmentClearingTask] Found {_affectedTiles.Count} tiles to clear in area '{name}'.");
+        //Debug.Log($"[EnvironmentClearingTask] Found {_affectedTiles.Count} tiles to clear in area '{name}'.");
     }
 
     /// <summary>
@@ -422,7 +422,7 @@ public class EnvironmentClearingTask : MonoBehaviour
         var sim = PlayerFamilySimulationManager.Instance;
         if (sim == null)
         {
-            Debug.LogWarning("[EnvironmentClearingTask] PlayerFamilySimulationManager not found; skipping population reservation.");
+            //Debug.LogWarning("[EnvironmentClearingTask] PlayerFamilySimulationManager not found; skipping population reservation.");
             return true; // allow task to proceed, but no reservation
         }
 

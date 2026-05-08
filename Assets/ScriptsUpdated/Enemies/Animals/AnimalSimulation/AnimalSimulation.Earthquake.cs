@@ -62,10 +62,10 @@ public partial class AnimalSimulation
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[AnimalSimulation] Earthquake forced animal group {groupId} to flee " +
-                    $"from {originalTile} to {fleeTile}."
-                );
+                //Debug.Log(
+                    //$"[AnimalSimulation] Earthquake forced animal group {groupId} to flee " +
+                    //$"from {originalTile} to {fleeTile}."
+                //);
             }
 
             return true;
@@ -75,10 +75,10 @@ public partial class AnimalSimulation
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[AnimalSimulation] Earthquake killed animal group {groupId} at {originalTile}. " +
-                    $"Flee failed."
-                );
+                //Debug.Log(
+                    //$"[AnimalSimulation] Earthquake killed animal group {groupId} at {originalTile}. " +
+                    //$"Flee failed."
+                //);
             }
 
             CleanupTargetsOnDeath(ref group);
@@ -104,10 +104,10 @@ public partial class AnimalSimulation
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[AnimalSimulation] Earthquake damage killed animal group {groupId} at {originalTile}. " +
-                    $"Damage={finalDamage}"
-                );
+                //Debug.Log(
+                    //$"[AnimalSimulation] Earthquake damage killed animal group {groupId} at {originalTile}. " +
+                    //$"Damage={finalDamage}"
+                //);
             }
 
             CleanupTargetsOnDeath(ref group);
@@ -124,10 +124,10 @@ public partial class AnimalSimulation
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[AnimalSimulation] Earthquake damaged animal group {groupId} at {originalTile}. " +
-                $"Damage={finalDamage} RemainingSize={group.size}"
-            );
+            //Debug.Log(
+                //$"[AnimalSimulation] Earthquake damaged animal group {groupId} at {originalTile}. " +
+                //$"Damage={finalDamage} RemainingSize={group.size}"
+            //);
         }
 
         return true;

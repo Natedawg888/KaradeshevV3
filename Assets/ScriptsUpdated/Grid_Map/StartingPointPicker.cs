@@ -161,19 +161,19 @@ public class StartingPointPicker : MonoBehaviour
 
         if (cameraControl == null)
         {
-            Debug.LogError("[StartingPointPicker] No CameraControl assigned.");
+            //Debug.LogError("[StartingPointPicker] No CameraControl assigned.");
             return;
         }
 
         if (panel == null || prevButton == null || nextButton == null || confirmButton == null)
         {
-            Debug.LogError("[StartingPointPicker] Panel/buttons are not fully assigned.");
+            //Debug.LogError("[StartingPointPicker] Panel/buttons are not fully assigned.");
             return;
         }
 
         if (BuildingManager.Instance == null)
         {
-            Debug.LogError("[StartingPointPicker] BuildingManager instance missing.");
+            //Debug.LogError("[StartingPointPicker] BuildingManager instance missing.");
             return;
         }
 
@@ -187,7 +187,7 @@ public class StartingPointPicker : MonoBehaviour
 
         if (starterBuildings.Count == 0)
         {
-            Debug.LogWarning("[StartingPointPicker] No starter candidate buildings found in stage 0.");
+            //Debug.LogWarning("[StartingPointPicker] No starter candidate buildings found in stage 0.");
             return;
         }
 
@@ -217,7 +217,7 @@ public class StartingPointPicker : MonoBehaviour
 
         if (starterCandidates.Count == 0)
         {
-            Debug.LogWarning("[StartingPointPicker] No valid starter candidates matched any tiles.");
+            //Debug.LogWarning("[StartingPointPicker] No valid starter candidates matched any tiles.");
             return;
         }
 
@@ -320,14 +320,14 @@ public class StartingPointPicker : MonoBehaviour
 
         if (ts == null || starterDef == null)
         {
-            Debug.LogError("[StartingPointPicker] Candidate tile or building missing.");
+            //Debug.LogError("[StartingPointPicker] Candidate tile or building missing.");
             return;
         }
 
         GameObject envGO = ts.GetSpawnedInstance();
         if (envGO == null)
         {
-            Debug.LogError("[StartingPointPicker] Spawned tile object missing.");
+            //Debug.LogError("[StartingPointPicker] Spawned tile object missing.");
             return;
         }
 
@@ -343,7 +343,7 @@ public class StartingPointPicker : MonoBehaviour
 
         if (prefab == null)
         {
-            Debug.LogError($"[StartingPointPicker] Starter prefab missing for '{starterDef.buildingName}'.");
+            //Debug.LogError($"[StartingPointPicker] Starter prefab missing for '{starterDef.buildingName}'.");
             return;
         }
 
@@ -437,12 +437,12 @@ public class StartingPointPicker : MonoBehaviour
 
         if (SaveSystem.Instance == null)
         {
-            Debug.LogWarning("[StartingPointPicker] SaveSystem instance missing; could not autosave starter choice.");
+            //Debug.LogWarning("[StartingPointPicker] SaveSystem instance missing; could not autosave starter choice.");
             yield break;
         }
 
         SaveSystem.RequestSave();
-        Debug.Log("[StartingPointPicker] Autosaved after starter point confirmed.");
+        //Debug.Log("[StartingPointPicker] Autosaved after starter point confirmed.");
     }
 
     private void WireBuildingPreview(GameObject go, Building def)

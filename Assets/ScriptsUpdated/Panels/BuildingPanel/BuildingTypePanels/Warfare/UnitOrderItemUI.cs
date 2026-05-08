@@ -90,7 +90,7 @@ public class UnitOrderItemUI : MonoBehaviour
 
         if (_unit == null)
         {
-            Debug.LogWarning("[UnitOrderItemUI] Setup called with null unit.");
+            //Debug.LogWarning("[UnitOrderItemUI] Setup called with null unit.");
             return;
         }
 
@@ -494,7 +494,7 @@ public class UnitOrderItemUI : MonoBehaviour
         // Safety check — should already be enforced by UpdateConfirmButtonState.
         if (!HasEnoughPopulation() || !CanAffordTrainingCosts() || !_ownerControl.HasFreeTrainingSlot())
         {
-            Debug.Log("[UnitOrderItemUI] ConfirmOrder blocked: requirements not met.");
+            //Debug.Log("[UnitOrderItemUI] ConfirmOrder blocked: requirements not met.");
 
             // If fail is due to pop, auto-open info panel like crafting does.
             if (!HasEnoughPopulation() && infoPanelRoot && !infoPanelRoot.activeSelf)
@@ -517,7 +517,7 @@ public class UnitOrderItemUI : MonoBehaviour
 
         if (!_ownerControl.TryStartTraining(_unit, _multiplier, out string failReason))
         {
-            Debug.LogWarning($"[UnitOrderItemUI] Failed to start training: {failReason}");
+            //Debug.LogWarning($"[UnitOrderItemUI] Failed to start training: {failReason}");
             UpdateConfirmButtonState();
             RefreshCostButtonColor();
             return;

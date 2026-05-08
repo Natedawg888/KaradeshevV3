@@ -183,7 +183,7 @@ public class PlayerUnitManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[PlayerUnitManager] No UnitGroupMovementManager in scene; cannot tick group movement.");
+            //Debug.LogWarning("[PlayerUnitManager] No UnitGroupMovementManager in scene; cannot tick group movement.");
         }
 
         var actionMgr = UnitGroupActionManager.Instance;
@@ -193,7 +193,7 @@ public class PlayerUnitManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[PlayerUnitManager] No UnitGroupActionManager in scene; cannot tick group actions.");
+            //Debug.LogWarning("[PlayerUnitManager] No UnitGroupActionManager in scene; cannot tick group actions.");
         }
     }
 
@@ -227,7 +227,7 @@ public class PlayerUnitManager : MonoBehaviour
         var inventory = PlayerInventoryManager.Instance;
         if (inventory == null)
         {
-            Debug.LogWarning("[PlayerUnitManager] No PlayerInventoryManager found; cannot pay unit upkeep.");
+            //Debug.LogWarning("[PlayerUnitManager] No PlayerInventoryManager found; cannot pay unit upkeep.");
             return;
         }
 
@@ -272,7 +272,7 @@ public class PlayerUnitManager : MonoBehaviour
 
                 if (defField == null || amountField == null)
                 {
-                    Debug.LogWarning("[PlayerUnitManager] Could not reflect ResourceCost fields; skipping upkeep entry.");
+                    //Debug.LogWarning("[PlayerUnitManager] Could not reflect ResourceCost fields; skipping upkeep entry.");
                     continue;
                 }
 
@@ -323,7 +323,7 @@ public class PlayerUnitManager : MonoBehaviour
             int before = inventory.GetAmount(def);
             if (before <= 0)
             {
-                Debug.LogWarning($"[PlayerUnitManager] Upkeep: no '{def.name}' available (needed {want}).");
+                //Debug.LogWarning($"[PlayerUnitManager] Upkeep: no '{def.name}' available (needed {want}).");
                 continue;
             }
 
@@ -333,9 +333,9 @@ public class PlayerUnitManager : MonoBehaviour
 
             if (paid < want)
             {
-                Debug.LogWarning(
-                    $"[PlayerUnitManager] Partial upkeep payment for '{def.name}': paid {paid}/{want}. " +
-                    "You can add morale/attrition penalties here later.");
+                //Debug.LogWarning(
+                    //$"[PlayerUnitManager] Partial upkeep payment for '{def.name}': paid {paid}/{want}. " +
+                    //"You can add morale/attrition penalties here later.");
             }
         }
 
@@ -397,9 +397,9 @@ public class PlayerUnitManager : MonoBehaviour
             var t = _upkeepDeathBuffer[i];
             if (t == null || t.data == null || t.owner == null) continue;
 
-            Debug.Log(
-                $"[PlayerUnitManager] Group {t.data.groupId} ({t.data.unitType?.unitName}) " +
-                $"disbanded due to missed upkeep (misses={t.data.missedUpkeepTurns}, max={t.data.unitType?.maxMissedUpkeepTurns}).");
+            //Debug.Log(
+                //$"[PlayerUnitManager] Group {t.data.groupId} ({t.data.unitType?.unitName}) " +
+                //$"disbanded due to missed upkeep (misses={t.data.missedUpkeepTurns}, max={t.data.unitType?.maxMissedUpkeepTurns}).");
 
             // This will release population and unregister from PlayerUnitManager.
             t.owner.RemoveGroup(t.data.groupId);
@@ -439,9 +439,9 @@ public class PlayerUnitManager : MonoBehaviour
             var t = _expiredBuffer[i];
             if (t == null || t.data == null || t.owner == null) continue;
 
-            Debug.Log(
-                $"[PlayerUnitManager] Group {t.data.groupId} ({t.data.unitType?.unitName}) " +
-                $"expired on turn {currentTurn} (expiry={t.data.expiryTurn}).");
+            //Debug.Log(
+                //$"[PlayerUnitManager] Group {t.data.groupId} ({t.data.unitType?.unitName}) " +
+                //$"expired on turn {currentTurn} (expiry={t.data.expiryTurn}).");
 
             // This will also release population and unregister from PlayerUnitManager.
             t.owner.RemoveGroup(t.data.groupId);

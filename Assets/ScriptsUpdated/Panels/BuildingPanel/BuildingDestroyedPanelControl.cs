@@ -179,7 +179,7 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
     {
         if (!restoreInfoPanel)
         {
-            Debug.LogError("[DestroyedPanel] restoreInfoPanel reference is missing.");
+            //Debug.LogError("[DestroyedPanel] restoreInfoPanel reference is missing.");
             return;
         }
 
@@ -204,26 +204,26 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
     {
         if (currentBuilding == null)
         {
-            Debug.LogError("[DestroyedPanel] currentBuilding is null in OnClickRestore.");
+            //Debug.LogError("[DestroyedPanel] currentBuilding is null in OnClickRestore.");
             return;
         }
 
         var def = BuildingManager.Instance?.GetBuildingByID(currentBuilding.buildingID);
         if (def == null)
         {
-            Debug.LogError($"[DestroyedPanel] Could not resolve Building definition for '{currentBuilding.buildingID}'.");
+            //Debug.LogError($"[DestroyedPanel] Could not resolve Building definition for '{currentBuilding.buildingID}'.");
             return;
         }
         if (def.buildingPrefab == null)
         {
-            Debug.LogError($"[DestroyedPanel] Definition '{def.buildingID}' has no construction prefab (buildingPrefab).");
+            //Debug.LogError($"[DestroyedPanel] Definition '{def.buildingID}' has no construction prefab (buildingPrefab).");
             return;
         }
 
         // 1) Pay resources
         if (!SpendRestoreCosts())
         {
-            Debug.LogWarning("[DestroyedPanel] SpendRestoreCosts() returned false; aborting restore.");
+            //Debug.LogWarning("[DestroyedPanel] SpendRestoreCosts() returned false; aborting restore.");
             if (restoreButton) restoreButton.interactable = false;
             return;
         }
@@ -239,7 +239,7 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
                             (currentBuilding ? currentBuilding.transform.parent : null);
 
         if (tileParent == null)
-            Debug.LogWarning("[DestroyedPanel] No tile parent; will place in world space.");
+            //Debug.LogWarning("[DestroyedPanel] No tile parent; will place in world space.");
 
         // --- A) Spawn a DUMMY to get the snapped pose (PARENTED to the tile) ---
         GameObject dummy = Instantiate(def.buildingPrefab);
@@ -249,7 +249,7 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
             dummy.transform.localPosition = Vector3.zero;
             dummy.transform.localRotation = Quaternion.identity;
         }
-        Debug.Log("[DestroyedPanel] Dummy construction spawned to sample pose.");
+        //Debug.Log("[DestroyedPanel] Dummy construction spawned to sample pose.");
 
         // Allow layout/snapping scripts to run
         yield return null;
@@ -258,7 +258,7 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
         Vector3 snapPos = dummy.transform.position;
         Quaternion snapRot = dummy.transform.rotation;
         Destroy(dummy);
-        Debug.Log($"[DestroyedPanel] Dummy deleted. Captured pose pos={snapPos} rot={snapRot.eulerAngles}");
+        //Debug.Log($"[DestroyedPanel] Dummy deleted. Captured pose pos={snapPos} rot={snapRot.eulerAngles}");
 
         // --- B) Spawn the REAL construction UNPARENTED (world root) ---
         GameObject newConstructionGO = Instantiate(def.buildingPrefab);
@@ -284,7 +284,7 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
             );
             if (!ok)
             {
-                Debug.LogWarning("[DestroyedPanel] StartConstruction failed; destroying spawned construction.");
+                //Debug.LogWarning("[DestroyedPanel] StartConstruction failed; destroying spawned construction.");
                 Destroy(newConstructionGO);
                 yield break;
             }
@@ -296,7 +296,7 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
             var ruinedGO = currentBuilding.gameObject;
             currentBuilding = null;
             Destroy(ruinedGO);
-            Debug.Log("[DestroyedPanel] Ruined building destroyed.");
+            //Debug.Log("[DestroyedPanel] Ruined building destroyed.");
         }
 
         Hide();
@@ -306,7 +306,7 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
     {
         if (!currentBuilding)
         {
-            Debug.LogError("[DestroyedPanel] No currentBuilding.");
+            //Debug.LogError("[DestroyedPanel] No currentBuilding.");
             return;
         }
 
@@ -321,14 +321,14 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
         var def = BuildingManager.Instance?.GetBuildingByID(currentBuilding.buildingID);
         if (def == null)
         {
-            Debug.LogError($"[DestroyedPanel] No Building def for '{currentBuilding.buildingID}'.");
+            //Debug.LogError($"[DestroyedPanel] No Building def for '{currentBuilding.buildingID}'.");
             return;
         }
 
         // Let the manager handle pop, costs, ticking, rewards, clearing:
         bool ok = PlayerClearingManager.Instance?.StartManualClear(currentBuilding, def) ?? false;
         if (ok) Hide();
-        else Debug.LogWarning("[DestroyedPanel] Manual clear did not start.");
+        //else Debug.LogWarning("[DestroyedPanel] Manual clear did not start.");
     }
 
     private void ComputeRestoreParams()
@@ -403,7 +403,7 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
         var pim = PlayerInventoryManager.Instance;
         if (pim == null)
         {
-            Debug.LogError("[DestroyedPanel] PlayerInventoryManager.Instance is null.");
+            //Debug.LogError("[DestroyedPanel] PlayerInventoryManager.Instance is null.");
             return false;
         }
 
@@ -422,7 +422,7 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
                 for (int r = 0; r < rollback.Count; r++)
                     pim.TryAdd(rollback[r].resource, rollback[r].amount);
 
-                Debug.LogWarning("[DestroyedPanel] Spend failed on non-group; rolled back.");
+                //Debug.LogWarning("[DestroyedPanel] Spend failed on non-group; rolled back.");
                 return false;
             }
             rollback.Add(line);
@@ -439,7 +439,7 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
                 for (int r = 0; r < rollback.Count; r++)
                     pim.TryAdd(rollback[r].resource, rollback[r].amount);
 
-                Debug.LogWarning("[DestroyedPanel] Group spend failed unexpectedly after afford-check.");
+                //Debug.LogWarning("[DestroyedPanel] Group spend failed unexpectedly after afford-check.");
                 return false;
             }
         }
@@ -451,27 +451,27 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
     {
         if (!currentBuilding)
         {
-            Debug.LogError("[DestroyedPanel] No currentBuilding for ClearInfo.");
+            //Debug.LogError("[DestroyedPanel] No currentBuilding for ClearInfo.");
             return;
         }
 
         var def = BuildingManager.Instance?.GetBuildingByID(currentBuilding.buildingID);
         if (def == null)
         {
-            Debug.LogError("[DestroyedPanel] Building def not found for ClearInfo.");
+            //Debug.LogError("[DestroyedPanel] Building def not found for ClearInfo.");
             return;
         }
 
         var status = currentBuilding.GetComponent<BuildingStatus>();
         if (!status)
         {
-            Debug.LogError("[DestroyedPanel] BuildingStatus missing for ClearInfo.");
+            //Debug.LogError("[DestroyedPanel] BuildingStatus missing for ClearInfo.");
             return;
         }
 
         if (!clearInfoPanel)
         {
-            Debug.LogError("[DestroyedPanel] clearInfoPanel reference missing.");
+            //Debug.LogError("[DestroyedPanel] clearInfoPanel reference missing.");
             return;
         }
 

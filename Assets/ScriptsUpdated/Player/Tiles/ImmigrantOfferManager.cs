@@ -110,7 +110,7 @@ public class ImmigrantOfferManager : MonoBehaviour
 
         if (panel == null)
         {
-            Debug.LogWarning("[ImmigrantOfferManager] No panel assigned.");
+            //Debug.LogWarning("[ImmigrantOfferManager] No panel assigned.");
             return;
         }
 
@@ -142,7 +142,7 @@ public class ImmigrantOfferManager : MonoBehaviour
         var famSim = PlayerFamilySimulationManager.Instance;
         if (famSim == null)
         {
-            Debug.LogWarning("[ImmigrantOfferManager] No PlayerFamilySimulationManager.");
+            //Debug.LogWarning("[ImmigrantOfferManager] No PlayerFamilySimulationManager.");
             return;
         }
 
@@ -153,22 +153,22 @@ public class ImmigrantOfferManager : MonoBehaviour
         {
             if (!famSim.TryAddImmigrantFamily(offer.adults, offer.children, offer.cfg, out addedTotal, out familyId))
             {
-                Debug.Log("[ImmigrantOfferManager] Accept failed (capacity / sim constraints).");
+                //Debug.Log("[ImmigrantOfferManager] Accept failed (capacity / sim constraints).");
                 return;
             }
 
             EnvironmentTaskRewardManager.Instance?.TryHouseFamilyPublic(familyId, famSim);
-            Debug.Log($"[Immigrants] Accepted family {familyId} (+{addedTotal}).");
+            //Debug.Log($"[Immigrants] Accepted family {familyId} (+{addedTotal}).");
         }
         else
         {
             if (!famSim.TryAddImmigrantIndividuals(offer.individuals, offer.cfg, out addedTotal))
             {
-                Debug.Log("[ImmigrantOfferManager] Accept failed (capacity / sim constraints).");
+                //Debug.Log("[ImmigrantOfferManager] Accept failed (capacity / sim constraints).");
                 return;
             }
 
-            Debug.Log($"[Immigrants] Accepted individuals (+{addedTotal}).");
+            //Debug.Log($"[Immigrants] Accepted individuals (+{addedTotal}).");
         }
 
         PlayersPopulationManager.Instance?.ForceSyncUI();

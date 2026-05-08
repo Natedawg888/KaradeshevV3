@@ -264,7 +264,7 @@ public class TornadoSimulationSystem : MonoBehaviour
                 RequestAdvanceTornadoes();
 
                 if (debugLogging)
-                    Debug.Log("[TornadoSimulationSystem] Sources ready. Tornado system initialized.");
+                    //Debug.Log("[TornadoSimulationSystem] Sources ready. Tornado system initialized.");
 
                 _waitForSourcesReadyCoroutine = null;
                 yield break;
@@ -323,7 +323,7 @@ public class TornadoSimulationSystem : MonoBehaviour
             OnTornadoGridInitialized?.Invoke();
 
         if (debugLogging && sizeChanged)
-            Debug.Log($"[TornadoSimulationSystem] Initialized {_cols}x{_rows}");
+            //Debug.Log($"[TornadoSimulationSystem] Initialized {_cols}x{_rows}");
 
         return true;
     }
@@ -371,7 +371,7 @@ public class TornadoSimulationSystem : MonoBehaviour
                 OnTornadoCellsChanged?.Invoke();
 
             if (debugLogging)
-                Debug.Log("[TornadoSimulationSystem] Advanced tornadoes one step.");
+                //Debug.Log("[TornadoSimulationSystem] Advanced tornadoes one step.");
         }
         finally
         {
@@ -434,7 +434,7 @@ public class TornadoSimulationSystem : MonoBehaviour
                 OnTornadoCellsChanged?.Invoke();
 
             if (debugLogging)
-                Debug.Log("[TornadoSimulationSystem] Advanced tornadoes one batched step.");
+                //Debug.Log("[TornadoSimulationSystem] Advanced tornadoes one batched step.");
         }
         finally
         {
@@ -496,9 +496,9 @@ public class TornadoSimulationSystem : MonoBehaviour
 
                 if (!placed && debugLogging)
                 {
-                    Debug.Log(
-                        $"[TornadoSimulationSystem] Tornado {tornadoId} could not be placed after carry " +
-                        $"from ({x},{y}).");
+                    //Debug.Log(
+                        //$"[TornadoSimulationSystem] Tornado {tornadoId} could not be placed after carry " +
+                        //$"from ({x},{y}).");
                 }
             }
         }
@@ -614,12 +614,12 @@ public class TornadoSimulationSystem : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TornadoSimulationSystem] Tornado spawned candidate accepted at ({candidate.x},{candidate.y}) " +
-                    $"| Lifetime={lifetime} | Storm={candidate.stormIntensity01:F2} " +
-                    $"| Humidity={candidate.humidity01:F2} " +
-                    $"| TempDiff={candidate.localTemperatureDifference:F2} " +
-                    $"| Cloud={candidate.cloudDensity}");
+                //Debug.Log(
+                    //$"[TornadoSimulationSystem] Tornado spawned candidate accepted at ({candidate.x},{candidate.y}) " +
+                    //$"| Lifetime={lifetime} | Storm={candidate.stormIntensity01:F2} " +
+                    //$"| Humidity={candidate.humidity01:F2} " +
+                    //$"| TempDiff={candidate.localTemperatureDifference:F2} " +
+                    //$"| Cloud={candidate.cloudDensity}");
             }
         }
     }
@@ -640,10 +640,10 @@ public class TornadoSimulationSystem : MonoBehaviour
 
         string buildingName = record.instance != null ? record.instance.name : "null-instance";
 
-        Debug.Log(
-            $"[TornadoSimulationSystem] Tornado {reason} on building-owned cell {cell} | " +
-            $"TornadoId={tornadoId} | Lifetime={lifetimeRemaining} | " +
-            $"BuildingInstanceId={record.instanceId} | BuildingObject={buildingName}");
+        //Debug.Log(
+            //$"[TornadoSimulationSystem] Tornado {reason} on building-owned cell {cell} | " +
+            //$"TornadoId={tornadoId} | Lifetime={lifetimeRemaining} | " +
+            //$"BuildingInstanceId={record.instanceId} | BuildingObject={buildingName}");
     }
 
     private bool ApplyTornadoStateRows(int startY, int endY)
@@ -689,10 +689,10 @@ public class TornadoSimulationSystem : MonoBehaviour
                         string buildingName =
                             record.instance != null ? record.instance.name : "null-instance";
 
-                        Debug.Log(
-                            $"[TornadoSimulationSystem] Tornado cell ACTIVATED on building-owned cell ({x},{y}) | " +
-                            $"TornadoId={newId} | Lifetime={newLifetime} | " +
-                            $"BuildingInstanceId={record.instanceId} | BuildingObject={buildingName}");
+                        //Debug.Log(
+                            //$"[TornadoSimulationSystem] Tornado cell ACTIVATED on building-owned cell ({x},{y}) | " +
+                            //$"TornadoId={newId} | Lifetime={newLifetime} | " +
+                            //$"BuildingInstanceId={record.instanceId} | BuildingObject={buildingName}");
                     }
                 }
 
@@ -711,9 +711,9 @@ public class TornadoSimulationSystem : MonoBehaviour
 
         bool hit = weatherGridManager.TryGetBuildingAtCell(cell.x, cell.y, out WorldBuildingManager.Record record);
 
-        Debug.Log(
-            $"[TornadoSimulationSystem] Query building cache at tornado cell {cell} | " +
-            $"Hit={hit} | Record={(record != null ? record.instanceId : "null")}");
+        //Debug.Log(
+            //$"[TornadoSimulationSystem] Query building cache at tornado cell {cell} | " +
+            //$"Hit={hit} | Record={(record != null ? record.instanceId : "null")}");
 
         if (record != null)
         {
@@ -727,8 +727,8 @@ public class TornadoSimulationSystem : MonoBehaviour
                     coords += covered[i].ToString();
                 }
 
-                Debug.Log(
-                    $"[TornadoSimulationSystem] Building cache cells for {record.instanceId}: [{coords}]");
+                //Debug.Log(
+                    //$"[TornadoSimulationSystem] Building cache cells for {record.instanceId}: [{coords}]");
             }
         }
     }
@@ -890,9 +890,9 @@ public class TornadoSimulationSystem : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TornadoSimulationSystem] Blocked tornado cell ({x},{y}) " +
-                    $"because environmentType={data.environmentType}");
+                //Debug.Log(
+                    //$"[TornadoSimulationSystem] Blocked tornado cell ({x},{y}) " +
+                    //$"because environmentType={data.environmentType}");
             }
 
             return false;
@@ -902,9 +902,9 @@ public class TornadoSimulationSystem : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TornadoSimulationSystem] Blocked tornado cell ({x},{y}) " +
-                    $"because tileType={data.tileType}");
+                //Debug.Log(
+                    //$"[TornadoSimulationSystem] Blocked tornado cell ({x},{y}) " +
+                    //$"because tileType={data.tileType}");
             }
 
             return false;
@@ -1437,7 +1437,7 @@ public class TornadoSimulationSystem : MonoBehaviour
         if (!TryInitializeGrid())
         {
             if (debugLogging)
-                Debug.LogWarning("[TornadoSimulationSystem] Could not load tornado state because grid is not initialized yet.");
+                //Debug.LogWarning("[TornadoSimulationSystem] Could not load tornado state because grid is not initialized yet.");
 
             return;
         }
@@ -1502,7 +1502,7 @@ public class TornadoSimulationSystem : MonoBehaviour
         OnTornadoCellsChanged?.Invoke();
 
         if (debugLogging)
-            Debug.Log($"[TornadoSimulationSystem] Loaded {_activeTornadoCells.Count} tornado cells.");
+            //Debug.Log($"[TornadoSimulationSystem] Loaded {_activeTornadoCells.Count} tornado cells.");
     }
 
     public void ApplyPresetSettings(TornadoPresetSettings settings)
@@ -1525,6 +1525,6 @@ public class TornadoSimulationSystem : MonoBehaviour
         maxSpawnCandidatesPerStep = settings.maxSpawnCandidatesPerStep;
 
         if (debugLogging)
-            Debug.Log("[TornadoSimulationSystem] Applied tornado preset settings.");
+            //Debug.Log("[TornadoSimulationSystem] Applied tornado preset settings.");
     }
 }

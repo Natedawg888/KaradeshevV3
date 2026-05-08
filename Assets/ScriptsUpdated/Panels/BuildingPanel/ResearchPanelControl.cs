@@ -48,7 +48,7 @@ public class ResearchPanelControl : MonoBehaviour
         else
         {
             source = new List<Technology>();
-            Debug.LogWarning("[ResearchPanel] No BuildingTechnology on station; showing empty.");
+            //Debug.LogWarning("[ResearchPanel] No BuildingTechnology on station; showing empty.");
         }
 
         PopulateList(station, source);
@@ -76,7 +76,7 @@ public class ResearchPanelControl : MonoBehaviour
 
         if (!contentRoot || !techItemPrefab)
         {
-            Debug.LogError("[ResearchPanel] Missing contentRoot or techItemPrefab.");
+            //Debug.LogError("[ResearchPanel] Missing contentRoot or techItemPrefab.");
             return;
         }
 

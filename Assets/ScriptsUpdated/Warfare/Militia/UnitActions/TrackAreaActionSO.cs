@@ -242,13 +242,13 @@ public class TrackAreaActionSO : UnitActionDefinitionSO
 
             if (verboseLogging)
             {
-                Debug.Log(
-                    $"[TrackAreaAction] Completed for group {group.groupId}. " +
-                    $"Animals={group.lastTrackingAnimalResults.Count}, " +
-                    $"Units={group.lastTrackingUnitResults.Count}, " +
-                    $"MarkerTurns={group.lastTrackingMarkerTurns}, " +
-                    $"TilesProcessed={tilesToProcess}/{tilesInRange.Count}, " +
-                    $"TilesPerFrame={tilesPerFrame}.");
+                //Debug.Log(
+                    //$"[TrackAreaAction] Completed for group {group.groupId}. " +
+                    //$"Animals={group.lastTrackingAnimalResults.Count}, " +
+                    //$"Units={group.lastTrackingUnitResults.Count}, " +
+                    //$"MarkerTurns={group.lastTrackingMarkerTurns}, " +
+                    //$"TilesProcessed={tilesToProcess}/{tilesInRange.Count}, " +
+                    //$"TilesPerFrame={tilesPerFrame}.");
             }
         }
         finally

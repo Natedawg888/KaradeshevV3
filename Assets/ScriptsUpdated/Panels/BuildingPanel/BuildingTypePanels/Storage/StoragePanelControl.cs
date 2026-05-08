@@ -92,7 +92,7 @@ public class StoragePanelControl : MonoBehaviour
         _storage = _building ? _building.GetComponent<StorageBuildingControl>() : null;
         if (_storage == null)
         {
-            Debug.LogWarning("[StoragePanel] No StorageBuildingControl found on building.");
+            //Debug.LogWarning("[StoragePanel] No StorageBuildingControl found on building.");
             return;
         }
 

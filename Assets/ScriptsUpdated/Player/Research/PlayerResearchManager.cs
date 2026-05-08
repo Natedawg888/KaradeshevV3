@@ -431,7 +431,7 @@ public class PlayerResearchManager : MonoBehaviour
         var pim = PlayerInventoryManager.Instance;
         if (!pim)
         {
-            Debug.LogError("[PlayerResearchManager] No PlayerInventoryManager.");
+            //Debug.LogError("[PlayerResearchManager] No PlayerInventoryManager.");
             return false;
         }
 
@@ -450,7 +450,7 @@ public class PlayerResearchManager : MonoBehaviour
                 for (int r = 0; r < rollback.Count; r++)
                     pim.TryAdd(rollback[r].resource, rollback[r].amount);
 
-                Debug.LogWarning("[PlayerResearchManager] Spend failed; rolled back.");
+                //Debug.LogWarning("[PlayerResearchManager] Spend failed; rolled back.");
                 return false;
             }
             if (!c.resource.isGroup) rollback.Add(c);
@@ -551,9 +551,9 @@ public class PlayerResearchManager : MonoBehaviour
 
         PlayersPopulationManager.Instance?.ForceSyncUI();
 
-        Debug.Log($"[Research] FAILED: '{ar.tech?.techName ?? ar?.tech?.techID}' " +
-                $"(reason={(failThisTick >= 1f ? "StationDestroyed" : "TickFail")}, " +
-                $"p={failThisTick:P0}, progress={progress01:P0})");
+        //Debug.Log($"[Research] FAILED: '{ar.tech?.techName ?? ar?.tech?.techID}' " +
+                //$"(reason={(failThisTick >= 1f ? "StationDestroyed" : "TickFail")}, " +
+                //$"p={failThisTick:P0}, progress={progress01:P0})");
 
         PostResearchNotification(NotificationType.ResearchFailed, ar.tech);
     }
@@ -691,7 +691,7 @@ public class PlayerResearchManager : MonoBehaviour
     {
         if (!Application.isPlaying)
         {
-            Debug.LogWarning("[PlayerResearchManager] Enter Play Mode before applying debug researched techs.");
+            //Debug.LogWarning("[PlayerResearchManager] Enter Play Mode before applying debug researched techs.");
             return;
         }
 
@@ -700,7 +700,7 @@ public class PlayerResearchManager : MonoBehaviour
 
         if (technologyManager == null)
         {
-            Debug.LogWarning("[PlayerResearchManager] No TechnologyManager found.");
+            //Debug.LogWarning("[PlayerResearchManager] No TechnologyManager found.");
             return;
         }
 
@@ -716,7 +716,7 @@ public class PlayerResearchManager : MonoBehaviour
             var tech = ResolveTechnologyByID(techID);
             if (tech == null)
             {
-                Debug.LogWarning($"[PlayerResearchManager] Debug tech ID not found: {techID}");
+                //Debug.LogWarning($"[PlayerResearchManager] Debug tech ID not found: {techID}");
                 continue;
             }
 
@@ -766,7 +766,7 @@ public class PlayerResearchManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"[PlayerResearchManager] Debug unlocked tech: {tech.techName ?? tech.techID}");
+        //Debug.Log($"[PlayerResearchManager] Debug unlocked tech: {tech.techName ?? tech.techID}");
         return true;
     }
 
@@ -1012,7 +1012,7 @@ public class PlayerResearchManager : MonoBehaviour
                 Technology tech = ResolveTechnologyByID(saved.techID);
                 if (tech == null)
                 {
-                    Debug.LogWarning($"[PlayerResearchManager] Could not resolve active research tech '{saved.techID}' on load.");
+                    //Debug.LogWarning($"[PlayerResearchManager] Could not resolve active research tech '{saved.techID}' on load.");
                     continue;
                 }
 

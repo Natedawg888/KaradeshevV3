@@ -63,9 +63,9 @@ public partial class AnimalSimulation
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[AnimalSimulation] Fire forced animal group {groupId} to flee " +
-                    $"from {originalTile} to {fleeTile}.");
+                //Debug.Log(
+                    //$"[AnimalSimulation] Fire forced animal group {groupId} to flee " +
+                    //$"from {originalTile} to {fleeTile}.");
             }
 
             return true;
@@ -75,9 +75,9 @@ public partial class AnimalSimulation
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[AnimalSimulation] Fire killed animal group {groupId} at {originalTile}. " +
-                    $"Flee failed.");
+                //Debug.Log(
+                    //$"[AnimalSimulation] Fire killed animal group {groupId} at {originalTile}. " +
+                    //$"Flee failed.");
             }
 
             CleanupTargetsOnDeath(ref group);
@@ -102,9 +102,9 @@ public partial class AnimalSimulation
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[AnimalSimulation] Fire damage killed animal group {groupId} at {originalTile}. " +
-                    $"Damage={finalDamage}");
+                //Debug.Log(
+                    //$"[AnimalSimulation] Fire damage killed animal group {groupId} at {originalTile}. " +
+                    //$"Damage={finalDamage}");
             }
 
             CleanupTargetsOnDeath(ref group);
@@ -121,9 +121,9 @@ public partial class AnimalSimulation
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[AnimalSimulation] Fire damaged animal group {groupId} at {originalTile}. " +
-                $"Damage={finalDamage} RemainingSize={group.size}");
+            //Debug.Log(
+                //$"[AnimalSimulation] Fire damaged animal group {groupId} at {originalTile}. " +
+                //$"Damage={finalDamage} RemainingSize={group.size}");
         }
 
         return true;

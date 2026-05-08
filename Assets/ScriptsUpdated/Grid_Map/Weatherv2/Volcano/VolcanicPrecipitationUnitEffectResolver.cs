@@ -347,9 +347,9 @@ public class VolcanicPrecipitationUnitEffectResolver : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[VolcanicPrecipitationUnitEffectResolver] {cell.kind} destroyed unit group {group.groupId} " +
-                    $"at ({cell.x},{cell.y}). damage={finalDamage} severity={severity01:0.00}");
+                //Debug.Log(
+                    //$"[VolcanicPrecipitationUnitEffectResolver] {cell.kind} destroyed unit group {group.groupId} " +
+                    //$"at ({cell.x},{cell.y}). damage={finalDamage} severity={severity01:0.00}");
             }
 
             unitControl.RemoveGroupDueToFatalities(group);
@@ -364,9 +364,9 @@ public class VolcanicPrecipitationUnitEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[VolcanicPrecipitationUnitEffectResolver] {cell.kind} damaged unit group {group.groupId} " +
-                $"at ({cell.x},{cell.y}). damage={finalDamage} unitsLost={unitsLost} severity={severity01:0.00}");
+            //Debug.Log(
+                //$"[VolcanicPrecipitationUnitEffectResolver] {cell.kind} damaged unit group {group.groupId} " +
+                //$"at ({cell.x},{cell.y}). damage={finalDamage} unitsLost={unitsLost} severity={severity01:0.00}");
         }
     }
 

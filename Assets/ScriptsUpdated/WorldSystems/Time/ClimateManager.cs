@@ -204,7 +204,7 @@ public class ClimateManager : MonoBehaviour
 
         if (gridManager == null)
         {
-            Debug.LogWarning("[ClimateManager] No GridManager assigned; cannot build climate map.");
+            //Debug.LogWarning("[ClimateManager] No GridManager assigned; cannot build climate map.");
             return;
         }
 
@@ -234,7 +234,7 @@ public class ClimateManager : MonoBehaviour
         RebuildClimateForSeason(startSeason);
 
         if (debugLogging)
-            Debug.Log("[ClimateManager] Climate initialized after tiles activated.");
+            //Debug.Log("[ClimateManager] Climate initialized after tiles activated.");
     }
 
     private void BuildTileLookup()
@@ -265,7 +265,7 @@ public class ClimateManager : MonoBehaviour
         }
 
         if (debugLogging)
-            Debug.Log($"[ClimateManager] Built climate cell lookup. Primary cells={_climateCells.Count}");
+            //Debug.Log($"[ClimateManager] Built climate cell lookup. Primary cells={_climateCells.Count}");
     }
 
     private void HandleSeasonChanged(SeasonDefinition newSeason)
@@ -299,20 +299,20 @@ public class ClimateManager : MonoBehaviour
         var presetMgr = EnvironmentPresetManager.Instance;
         if (presetMgr == null)
         {
-            Debug.LogWarning("[ClimateManager] No EnvironmentPresetManager; cannot compute climate correctly.");
+            //Debug.LogWarning("[ClimateManager] No EnvironmentPresetManager; cannot compute climate correctly.");
             yield break;
         }
 
         var currentPreset = presetMgr.GetCurrentPreset();
         if (currentPreset == null)
         {
-            Debug.LogWarning("[ClimateManager] No current EnvironmentPreset set; cannot compute climate correctly.");
+            //Debug.LogWarning("[ClimateManager] No current EnvironmentPreset set; cannot compute climate correctly.");
             yield break;
         }
 
         if (_climateCells.Count == 0)
         {
-            Debug.LogWarning("[ClimateManager] No climate cells to process.");
+            //Debug.LogWarning("[ClimateManager] No climate cells to process.");
             yield break;
         }
 
@@ -452,7 +452,7 @@ public class ClimateManager : MonoBehaviour
                 }
                 else if (debugLogging)
                 {
-                    Debug.Log($"[ClimateManager] Skip switch at ({x},{y}) - no {targetEnv} variant for tileType {tileType}.");
+                    //Debug.Log($"[ClimateManager] Skip switch at ({x},{y}) - no {targetEnv} variant for tileType {tileType}.");
                 }
             }
 
@@ -478,7 +478,7 @@ public class ClimateManager : MonoBehaviour
         if (debugLogging)
         {
             string seasonName = season != null ? season.displayName : "None";
-            Debug.Log($"[ClimateManager] Season {seasonName}: recomputed climate, scheduled {_pendingJobs.Count} biome changes.");
+            //Debug.Log($"[ClimateManager] Season {seasonName}: recomputed climate, scheduled {_pendingJobs.Count} biome changes.");
         }
 
         _rebuildCoroutine = null;
@@ -673,7 +673,7 @@ public class ClimateManager : MonoBehaviour
         }
 
         if (debugLogging && _pendingJobs.Count > 0)
-            Debug.Log($"[ClimateManager] Finished applying {_pendingJobs.Count} climate jobs.");
+            //Debug.Log($"[ClimateManager] Finished applying {_pendingJobs.Count} climate jobs.");
 
         _pendingJobs.Clear();
         _pendingJobIndex = 0;
@@ -1193,7 +1193,7 @@ public class ClimateManager : MonoBehaviour
 
         if (gridManager == null)
         {
-            Debug.LogWarning("[ClimateManager] Cannot load climate state without GridManager.");
+            //Debug.LogWarning("[ClimateManager] Cannot load climate state without GridManager.");
             return;
         }
 
@@ -1214,7 +1214,7 @@ public class ClimateManager : MonoBehaviour
 
         if (cols <= 0 || rows <= 0)
         {
-            Debug.LogWarning("[ClimateManager] Saved climate had invalid dimensions.");
+            //Debug.LogWarning("[ClimateManager] Saved climate had invalid dimensions.");
             return;
         }
 
@@ -1526,7 +1526,7 @@ public class ClimateManager : MonoBehaviour
         }
 
         if (waterEvaporationDebugLogging && changedCells > 0)
-            Debug.Log($"[ClimateManager] Water evaporation increased humidity on {changedCells} cells.");
+            //Debug.Log($"[ClimateManager] Water evaporation increased humidity on {changedCells} cells.");
 
         return changedCells > 0;
     }

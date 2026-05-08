@@ -34,7 +34,7 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
         _tilesByCoord.Clear();
 
         if (debugTileRegistration)
-            Debug.Log("[MonoEnvironmentDataSource] Awake");
+            //Debug.Log("[MonoEnvironmentDataSource] Awake");
     }
 
     public void RebuildFromLiveTiles()
@@ -62,7 +62,7 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
         }
 
         if (debugTileRegistration)
-            Debug.Log($"[MonoEnvironmentDataSource] RebuildFromLiveTiles complete. Registered={registered}");
+            //Debug.Log($"[MonoEnvironmentDataSource] RebuildFromLiveTiles complete. Registered={registered}");
     }
 
     public void RegisterOrUpdate(TileCoord coord, EnvironmentControl env)
@@ -86,9 +86,9 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
 
         if (debugTileRegistration)
         {
-            Debug.Log(
-                $"[ENV REGISTER] env={env.name} primary={coord} footprintCount={footprint.Count} " +
-                $"envType={env.environmentType} tileType={env.environmentTileType}");
+            //Debug.Log(
+                //$"[ENV REGISTER] env={env.name} primary={coord} footprintCount={footprint.Count} " +
+                //$"envType={env.environmentType} tileType={env.environmentTileType}");
         }
     }
 
@@ -132,7 +132,7 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
         if (grid == null || env == null)
         {
             if (debugTileRegistration)
-                Debug.LogWarning($"[ENV FOOTPRINT FALLBACK] env={(env != null ? env.name : "null")} used primary only because grid/env was missing. primary={primaryCoord}");
+                //Debug.LogWarning($"[ENV FOOTPRINT FALLBACK] env={(env != null ? env.name : "null")} used primary only because grid/env was missing. primary={primaryCoord}");
 
             results.Add(primaryCoord);
             return results;
@@ -143,7 +143,7 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
         if (!TryGetWorldBounds(root, out Bounds bounds))
         {
             if (debugTileRegistration)
-                Debug.LogWarning($"[ENV FOOTPRINT FALLBACK] env={env.name} used primary only because no collider/renderer bounds were found. primary={primaryCoord}");
+                //Debug.LogWarning($"[ENV FOOTPRINT FALLBACK] env={env.name} used primary only because no collider/renderer bounds were found. primary={primaryCoord}");
 
             results.Add(primaryCoord);
             return results;
@@ -156,10 +156,10 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
 
         if (debugTileRegistration)
         {
-            Debug.Log(
-                $"[ENV FOOTPRINT RESULT] env={env.name} primary={primaryCoord} " +
-                $"boundsSize={bounds.size} min={min} max={max} " +
-                $"cellWidth={(max.x - min.x + 1)} cellHeight={(max.y - min.y + 1)}");
+            //Debug.Log(
+                //$"[ENV FOOTPRINT RESULT] env={env.name} primary={primaryCoord} " +
+                //$"boundsSize={bounds.size} min={min} max={max} " +
+                //$"cellWidth={(max.x - min.x + 1)} cellHeight={(max.y - min.y + 1)}");
         }
 
         for (int x = min.x; x <= max.x; x++)
@@ -689,7 +689,7 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
             }
         }
 
-        Debug.Log(sb.ToString());
+        //Debug.Log(sb.ToString());
     }
 
     private void AppendCoordDebug(StringBuilder sb, TileCoord coord, string label)
@@ -757,10 +757,10 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
             }
         }
 
-        Debug.Log(
-            $"[ENV REGISTRY VALIDATE] registeredCoords={_tilesByCoord.Count} " +
-            $"primaryEnvs={_primaryCoordByEnv.Count} footprintEnvs={_footprintCoordsByEnv.Count} " +
-            $"nullEnvCoords={nullEnvCoords} missingPrimaryForCoord={missingPrimaryForCoord} " +
-            $"missingFootprintForPrimary={missingFootprintForPrimary} coordsNotInOwnFootprint={coordsNotInOwnFootprint}");
+        //Debug.Log(
+            //$"[ENV REGISTRY VALIDATE] registeredCoords={_tilesByCoord.Count} " +
+            //$"primaryEnvs={_primaryCoordByEnv.Count} footprintEnvs={_footprintCoordsByEnv.Count} " +
+            //$"nullEnvCoords={nullEnvCoords} missingPrimaryForCoord={missingPrimaryForCoord} " +
+            //$"missingFootprintForPrimary={missingFootprintForPrimary} coordsNotInOwnFootprint={coordsNotInOwnFootprint}");
     }
 }

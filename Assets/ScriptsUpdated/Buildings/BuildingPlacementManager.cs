@@ -48,7 +48,7 @@ public class BuildingPlacementManager : MonoBehaviour
 
         if (def == null || env == null)
         {
-            Debug.LogWarning("[Placement] BeginPlacement missing def/env.");
+            //Debug.LogWarning("[Placement] BeginPlacement missing def/env.");
             return;
         }
 
@@ -74,7 +74,7 @@ public class BuildingPlacementManager : MonoBehaviour
         if (!PlayersPopulationManager.Instance.TryPickRandomNonBusyTaskIndividuals(
                 needPop, out var picked, out reservationId))
         {
-            Debug.Log("[Placement] Failed to reserve/build workers (none available or all busy).");
+            //Debug.Log("[Placement] Failed to reserve/build workers (none available or all busy).");
             return;
         }
 
@@ -82,7 +82,7 @@ public class BuildingPlacementManager : MonoBehaviour
         {
             PlayersPopulationManager.Instance.ReleaseBusyIndividuals(reservationId, picked);
             reservationId = null;
-            Debug.Log("[Placement] Did not get the exact required worker count.");
+            //Debug.Log("[Placement] Did not get the exact required worker count.");
             return;
         }
 
@@ -93,7 +93,7 @@ public class BuildingPlacementManager : MonoBehaviour
 
         if (prefab == null)
         {
-            Debug.LogError("[Placement] No building prefab assigned.");
+            //Debug.LogError("[Placement] No building prefab assigned.");
             ReleaseReservation();
             return;
         }
@@ -122,7 +122,7 @@ public class BuildingPlacementManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[Placement] BuildingPlacementPanelControl reference is missing.");
+            //Debug.LogError("[Placement] BuildingPlacementPanelControl reference is missing.");
         }
     }
 
@@ -147,25 +147,25 @@ public class BuildingPlacementManager : MonoBehaviour
     {
         if (!IsPlacing)
         {
-            Debug.LogWarning("[Placement] Finalize called but not placing.");
+            //Debug.LogWarning("[Placement] Finalize called but not placing.");
             return;
         }
 
         if (!ValidatePlacement(previewInstance, def, env))
         {
-            Debug.Log("[Placement] Invalid placement.");
+            //Debug.Log("[Placement] Invalid placement.");
             return;
         }
 
         if (!ResourceDeduction.Deduct(selectedCostSnapshot))
         {
-            Debug.LogWarning("[Placement] Resource deduction failed at finalize.");
+            //Debug.LogWarning("[Placement] Resource deduction failed at finalize.");
             return;
         }
 
         if (def.buildingPrefab == null)
         {
-            Debug.LogError("[Placement] No construction prefab (buildingPrefab) set on Building.");
+            //Debug.LogError("[Placement] No construction prefab (buildingPrefab) set on Building.");
             CancelPlacement();
             return;
         }
@@ -177,7 +177,7 @@ public class BuildingPlacementManager : MonoBehaviour
         previewInstance = null;
 
         var constructionGO = Instantiate(def.buildingPrefab, pos, rot);
-        Debug.Log($"[Placement] Spawned constructionGO '{constructionGO.name}' at {pos}.");
+        //Debug.Log($"[Placement] Spawned constructionGO '{constructionGO.name}' at {pos}.");
 
         bool ok = PlayerConstructionManager.Instance
             && PlayerConstructionManager.Instance.StartConstruction(
@@ -190,7 +190,7 @@ public class BuildingPlacementManager : MonoBehaviour
 
         if (!ok)
         {
-            Debug.LogWarning("[Placement] StartConstruction returned false. Destroying constructionGO and restoring environment.");
+            //Debug.LogWarning("[Placement] StartConstruction returned false. Destroying constructionGO and restoring environment.");
             if (constructionGO != null)
                 Destroy(constructionGO);
 
@@ -203,7 +203,7 @@ public class BuildingPlacementManager : MonoBehaviour
 
             EjectAnimalsFromPlacementTile();
 
-            Debug.Log("[Placement] Construction started successfully – destroying environment tile.");
+            //Debug.Log("[Placement] Construction started successfully – destroying environment tile.");
             DestroyEnvironmentUnderConstruction();
         }
 
@@ -340,20 +340,20 @@ public class BuildingPlacementManager : MonoBehaviour
 
         if (gridManager == null)
         {
-            Debug.LogWarning("[Placement] GridManager reference is missing, cannot eject animals.");
+            //Debug.LogWarning("[Placement] GridManager reference is missing, cannot eject animals.");
             return;
         }
 
         if (AnimalSimulationAccess.Current == null)
         {
-            Debug.LogWarning("[Placement] AnimalSimulationAccess.Current is null, cannot eject animals.");
+            //Debug.LogWarning("[Placement] AnimalSimulationAccess.Current is null, cannot eject animals.");
             return;
         }
 
         var tile = env.GetComponent<TileControl>();
         if (tile == null)
         {
-            Debug.LogWarning("[Placement] No TileControl found on environment tile, cannot eject animals.");
+            //Debug.LogWarning("[Placement] No TileControl found on environment tile, cannot eject animals.");
             return;
         }
 
@@ -363,7 +363,7 @@ public class BuildingPlacementManager : MonoBehaviour
         int moved = AnimalSimulationAccess.Current.EjectGroupsFromDestroyedTile(coord);
 
         if (moved > 0)
-            Debug.Log($"[Placement] Ejected {moved} animal group(s) from tile ({coord.x}, {coord.y}).");
+            //Debug.Log($"[Placement] Ejected {moved} animal group(s) from tile ({coord.x}, {coord.y}).");
     }
 
     public void InstallRuntimeRefs(

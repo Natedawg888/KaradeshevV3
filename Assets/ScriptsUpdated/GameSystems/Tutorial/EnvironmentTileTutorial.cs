@@ -105,7 +105,7 @@ public class EnvironmentTileTutorial : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[EnvironmentTileTutorial] Starter target has no BoxCollider to expand from.");
+            //Debug.LogWarning("[EnvironmentTileTutorial] Starter target has no BoxCollider to expand from.");
         }
     }
 

@@ -45,7 +45,7 @@ public sealed class WorldObjectsSaveSection : SaveSectionBase
         }
 
         BuildingSaveable[] liveBuildings = Object.FindObjectsOfType<BuildingSaveable>(true);
-        Debug.Log($"[WorldObjectsSaveSection] Found {liveBuildings.Length} BuildingSaveables for save capture.");
+        //Debug.Log($"[WorldObjectsSaveSection] Found {liveBuildings.Length} BuildingSaveables for save capture.");
 
         for (int i = 0; i < liveBuildings.Length; i++)
         {
@@ -67,11 +67,11 @@ public sealed class WorldObjectsSaveSection : SaveSectionBase
             }
         }
 
-        Debug.Log($"[WorldObjectsSaveSection] Captured {snapshot.buildings.Count} buildings.");
+        //Debug.Log($"[WorldObjectsSaveSection] Captured {snapshot.buildings.Count} buildings.");
 
         // CONSTRUCTIONS
         ConstructionTileSaveable[] liveConstructions = Object.FindObjectsOfType<ConstructionTileSaveable>(true);
-        Debug.Log($"[WorldObjectsSaveSection] Found {liveConstructions.Length} ConstructionTileSaveables for save capture.");
+        //Debug.Log($"[WorldObjectsSaveSection] Found {liveConstructions.Length} ConstructionTileSaveables for save capture.");
 
         for (int i = 0; i < liveConstructions.Length; i++)
         {

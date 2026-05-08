@@ -110,7 +110,7 @@ public partial class PlayerInventoryManager
             ResourceDefinition def = FindResourceById(savedStack.resourceID);
             if (def == null)
             {
-                Debug.LogWarning($"[INV SAVE] Could not resolve resource ID '{savedStack.resourceID}' while loading inventory.");
+                //Debug.LogWarning($"[INV SAVE] Could not resolve resource ID '{savedStack.resourceID}' while loading inventory.");
                 continue;
             }
 

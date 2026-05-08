@@ -227,9 +227,9 @@ public class ScoutTileActionSO : UnitActionDefinitionSO
             ? group.lastScoutResults.Count
             : 0;
 
-        Debug.Log(
-            $"[ScoutTileAction] Group {group?.groupId} finished scouting tile {targetTile.name}. " +
-            $"Found {resultCount} entities (units + animals).");
+        //Debug.Log(
+            //$"[ScoutTileAction] Group {group?.groupId} finished scouting tile {targetTile.name}. " +
+            //$"Found {resultCount} entities (units + animals).");
     }
 
     public int GetMaxRangeInTiles()

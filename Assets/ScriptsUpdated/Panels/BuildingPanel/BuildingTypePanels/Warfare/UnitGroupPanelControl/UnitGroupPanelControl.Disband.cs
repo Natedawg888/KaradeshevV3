@@ -47,7 +47,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         bool canDisband = (buildingTile != null && groupTile != null && buildingTile == groupTile);
         if (!canDisband)
         {
-            Debug.LogWarning("[UnitGroupPanel] Cannot disband: group is not on this building's tile.");
+            //Debug.LogWarning("[UnitGroupPanel] Cannot disband: group is not on this building's tile.");
             if (disbandPanelRoot != null)
                 disbandPanelRoot.SetActive(false);
 
@@ -118,11 +118,11 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         if (!_trainerContext.TryTemporarilyDisbandGroup(_owner, _group, out string failReason))
         {
-            Debug.LogWarning($"[UnitGroupPanel] Failed to temporarily disband group {_group.groupId}: {failReason}");
+            //Debug.LogWarning($"[UnitGroupPanel] Failed to temporarily disband group {_group.groupId}: {failReason}");
             return;
         }
 
-        Debug.Log($"[UnitGroupPanel] Temporarily disbanded group {_group.groupId} via {_trainerContext.name}.");
+        //Debug.Log($"[UnitGroupPanel] Temporarily disbanded group {_group.groupId} via {_trainerContext.name}.");
 
         Hide();
     }
@@ -135,7 +135,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         string groupId = _group.groupId;
         _owner.RemoveGroup(groupId);
 
-        Debug.Log($"[UnitGroupPanel] Fully disbanded group {groupId}.");
+        //Debug.Log($"[UnitGroupPanel] Fully disbanded group {groupId}.");
 
         Hide();
     }

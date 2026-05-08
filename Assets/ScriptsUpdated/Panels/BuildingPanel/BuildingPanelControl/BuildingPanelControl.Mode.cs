@@ -233,13 +233,13 @@ public partial class BuildingPanelControl : MonoBehaviour
     {
         if (!currentBuilding)
         {
-            Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Kinetic Warfare.");
+            //Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Kinetic Warfare.");
             return;
         }
 
         if (!kineticWarfarePanel)
         {
-            Debug.LogError("[BuildingPanel] KineticWarfarePanel reference is missing (assign a SCENE instance).");
+            //Debug.LogError("[BuildingPanel] KineticWarfarePanel reference is missing (assign a SCENE instance).");
             return;
         }
 
@@ -249,7 +249,7 @@ public partial class BuildingPanelControl : MonoBehaviour
 
         if (kw == null)
         {
-            Debug.LogWarning("[BuildingPanel] No KineticWarfareControl on this building.");
+            //Debug.LogWarning("[BuildingPanel] No KineticWarfareControl on this building.");
             return;
         }
 
@@ -261,13 +261,13 @@ public partial class BuildingPanelControl : MonoBehaviour
     {
         if (!currentBuilding)
         {
-            Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Religious.");
+            //Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Religious.");
             return;
         }
 
         if (!religiousPanel)
         {
-            Debug.LogError("[BuildingPanel] ReligiousPanel reference is missing (assign a SCENE instance).");
+            //Debug.LogError("[BuildingPanel] ReligiousPanel reference is missing (assign a SCENE instance).");
             return;
         }
 
@@ -277,7 +277,7 @@ public partial class BuildingPanelControl : MonoBehaviour
 
         if (religious == null)
         {
-            Debug.LogWarning("[BuildingPanel] No ReligiousBuildingControl on this building.");
+            //Debug.LogWarning("[BuildingPanel] No ReligiousBuildingControl on this building.");
             return;
         }
 

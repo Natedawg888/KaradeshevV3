@@ -99,7 +99,7 @@ public class UnitSphereTileScanner : MonoBehaviour
 
         if (hitCount >= _buffer.Length)
         {
-            Debug.LogWarning($"[UnitSphereTileScanner] Collider buffer FULL ({_buffer.Length}). Increase colliderBufferSize.");
+            //Debug.LogWarning($"[UnitSphereTileScanner] Collider buffer FULL ({_buffer.Length}). Increase colliderBufferSize.");
         }
 
         for (int i = 0; i < hitCount; i++)

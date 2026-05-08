@@ -136,7 +136,7 @@ public class VolcanoAtmosphereBridge : MonoBehaviour
         if (!volcano.TryGetPrimaryCell(out TileCoord primaryCell))
         {
             if (debugLogging)
-                Debug.LogWarning($"[VolcanoAtmosphereBridge] Could not resolve primary cell for {volcano.name}");
+                //Debug.LogWarning($"[VolcanoAtmosphereBridge] Could not resolve primary cell for {volcano.name}");
 
             return;
         }
@@ -168,10 +168,10 @@ public class VolcanoAtmosphereBridge : MonoBehaviour
             for (int i = 0; i < ownedCellsCopy.Count; i++)
                 cells += $"({ownedCellsCopy[i].x},{ownedCellsCopy[i].y}) ";
 
-            Debug.Log(
-                $"[VolcanoAtmosphereBridge] Queued soot stamp volcano={volcano.name} " +
-                $"amount={amount:0.00} radius={volcano.GetSootStampRadius()} " +
-                $"ownedCells={ownedCellsCopy.Count} cells={cells}");
+            //Debug.Log(
+                //$"[VolcanoAtmosphereBridge] Queued soot stamp volcano={volcano.name} " +
+                //$"amount={amount:0.00} radius={volcano.GetSootStampRadius()} " +
+                //$"ownedCells={ownedCellsCopy.Count} cells={cells}");
         }
     }
 
@@ -330,12 +330,12 @@ public class VolcanoAtmosphereBridge : MonoBehaviour
         {
             string volcanoName = emission.volcano != null ? emission.volcano.name : "null";
 
-            Debug.Log(
-                $"[VolcanoAtmosphereBridge] Submitted soot stamp volcano={volcanoName} " +
-                $"amount={emission.amount:0.00} radius={emission.radius} " +
-                $"maxAddPerCell={emission.maxAddPerCell:0.00} " +
-                $"falloff={emission.falloffPerCell:0.00} " +
-                $"originCells={emission.originCells.Count}");
+            //Debug.Log(
+                //$"[VolcanoAtmosphereBridge] Submitted soot stamp volcano={volcanoName} " +
+                //$"amount={emission.amount:0.00} radius={emission.radius} " +
+                //$"maxAddPerCell={emission.maxAddPerCell:0.00} " +
+                //$"falloff={emission.falloffPerCell:0.00} " +
+                //$"originCells={emission.originCells.Count}");
         }
     }
 }

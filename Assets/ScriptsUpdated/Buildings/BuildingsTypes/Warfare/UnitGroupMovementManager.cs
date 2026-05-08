@@ -84,21 +84,21 @@ public class UnitGroupMovementManager : MonoBehaviour
     {
         if (group == null || owner == null)
         {
-            Debug.LogWarning("[UnitGroupMovementManager] BeginMovementForGroup: missing group or owner.");
+            //Debug.LogWarning("[UnitGroupMovementManager] BeginMovementForGroup: missing group or owner.");
             return;
         }
 
         var unit = group.unitType;
         if (unit == null)
         {
-            Debug.LogWarning("[UnitGroupMovementManager] BeginMovementForGroup: group has no unitType.");
+            //Debug.LogWarning("[UnitGroupMovementManager] BeginMovementForGroup: group has no unitType.");
             return;
         }
 
         var originTile = ResolveTileForOwner(owner);
         if (originTile == null)
         {
-            Debug.LogWarning("[UnitGroupMovementManager] BeginMovementForGroup: could not resolve TileControl for owner.");
+            //Debug.LogWarning("[UnitGroupMovementManager] BeginMovementForGroup: could not resolve TileControl for owner.");
             return;
         }
 
@@ -107,7 +107,7 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         if (maxSteps <= 0)
         {
-            Debug.Log($"[UnitGroupMovementManager] Group {group.groupId} has no movement.");
+            //Debug.Log($"[UnitGroupMovementManager] Group {group.groupId} has no movement.");
             return;
         }
 
@@ -134,7 +134,7 @@ public class UnitGroupMovementManager : MonoBehaviour
             isPatrol = false
         };
 
-        Debug.Log($"[UnitGroupMovementManager] Starting movement planning for group {group.groupId} with {maxSteps} steps.");
+        //Debug.Log($"[UnitGroupMovementManager] Starting movement planning for group {group.groupId} with {maxSteps} steps.");
 
         ShowStepOptions();
     }
@@ -143,27 +143,27 @@ public class UnitGroupMovementManager : MonoBehaviour
     {
         if (group == null || owner == null)
         {
-            Debug.LogWarning("[UnitGroupMovementManager] BeginPatrolForGroup: missing group or owner.");
+            //Debug.LogWarning("[UnitGroupMovementManager] BeginPatrolForGroup: missing group or owner.");
             return;
         }
 
         var unit = group.unitType;
         if (unit == null)
         {
-            Debug.LogWarning("[UnitGroupMovementManager] BeginPatrolForGroup: group has no unitType.");
+            //Debug.LogWarning("[UnitGroupMovementManager] BeginPatrolForGroup: group has no unitType.");
             return;
         }
 
         var originTile = ResolveTileForOwner(owner);
         if (originTile == null)
         {
-            Debug.LogWarning("[UnitGroupMovementManager] BeginPatrolForGroup: could not resolve TileControl for owner.");
+            //Debug.LogWarning("[UnitGroupMovementManager] BeginPatrolForGroup: could not resolve TileControl for owner.");
             return;
         }
 
         if (!IsTileAllowedForPatrol(originTile))
         {
-            Debug.Log("[UnitGroupMovementManager] Cannot start patrol: origin tile must be a discovered environment or a building.");
+            //Debug.Log("[UnitGroupMovementManager] Cannot start patrol: origin tile must be a discovered environment or a building.");
             return;
         }
 
@@ -172,7 +172,7 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         if (maxSteps <= 0)
         {
-            Debug.Log($"[UnitGroupMovementManager] Group {group.groupId} has no movement; cannot start patrol.");
+            //Debug.Log($"[UnitGroupMovementManager] Group {group.groupId} has no movement; cannot start patrol.");
             return;
         }
 
@@ -199,7 +199,7 @@ public class UnitGroupMovementManager : MonoBehaviour
             isPatrol = true
         };
 
-        Debug.Log($"[UnitGroupMovementManager] Starting PATROL planning for group {group.groupId} with {maxSteps} steps.");
+        //Debug.Log($"[UnitGroupMovementManager] Starting PATROL planning for group {group.groupId} with {maxSteps} steps.");
 
         ShowStepOptions();
     }
@@ -222,7 +222,7 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         if (_activeContext.stepsRemaining <= 0)
         {
-            Debug.Log($"[UnitGroupMovementManager] Group {_activeContext.group.groupId} has no steps remaining.");
+            //Debug.Log($"[UnitGroupMovementManager] Group {_activeContext.group.groupId} has no steps remaining.");
             if (endMovementButton != null)
                 endMovementButton.gameObject.SetActive(_activeContext.plannedTiles.Count > 0);
             return;
@@ -231,7 +231,7 @@ public class UnitGroupMovementManager : MonoBehaviour
         var currentTile = _activeContext.currentTile;
         if (currentTile == null)
         {
-            Debug.LogWarning("[UnitGroupMovementManager] ShowStepOptions: currentTile is null.");
+            //Debug.LogWarning("[UnitGroupMovementManager] ShowStepOptions: currentTile is null.");
             if (endMovementButton != null)
                 endMovementButton.gameObject.SetActive(false);
             _activeContext = null;
@@ -296,15 +296,15 @@ public class UnitGroupMovementManager : MonoBehaviour
         if (endMovementButton != null)
             endMovementButton.gameObject.SetActive(canConfirm);
 
-        Debug.Log(
-            $"[UnitGroupMovementManager] Showing {options} step options for group {_activeContext.group.groupId} " +
-            $"(steps remaining: {_activeContext.stepsRemaining}, planned tiles: {_activeContext.plannedTiles.Count}).");
+        //Debug.Log(
+            //$"[UnitGroupMovementManager] Showing {options} step options for group {_activeContext.group.groupId} " +
+            //$"(steps remaining: {_activeContext.stepsRemaining}, planned tiles: {_activeContext.plannedTiles.Count}).");
 
         if (options == 0)
         {
-            Debug.LogWarning(
-                $"[UnitGroupMovementManager] No neighbour tiles found for {currentTile.name}. " +
-                "Check tile BoxColliders / layers / TileMovementUI.");
+            //Debug.LogWarning(
+                //$"[UnitGroupMovementManager] No neighbour tiles found for {currentTile.name}. " +
+                //"Check tile BoxColliders / layers / TileMovementUI.");
         }
     }
 
@@ -314,13 +314,13 @@ public class UnitGroupMovementManager : MonoBehaviour
             _activeContext.group == null ||
             _activeContext.owner == null)
         {
-            Debug.LogWarning("[UnitGroupMovementManager] OnStepMoveClicked with no active context.");
+            //Debug.LogWarning("[UnitGroupMovementManager] OnStepMoveClicked with no active context.");
             return;
         }
 
         if (targetTile == null)
         {
-            Debug.LogWarning("[UnitGroupMovementManager] OnStepMoveClicked: invalid target (null tile).");
+            //Debug.LogWarning("[UnitGroupMovementManager] OnStepMoveClicked: invalid target (null tile).");
             return;
         }
 
@@ -332,9 +332,9 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         string mode = _activeContext.isPatrol ? "PATROL" : "MOVE";
 
-        Debug.Log(
-            $"[UnitGroupMovementManager] Planned {mode} step #{_activeContext.plannedTiles.Count} for group {_activeContext.group.groupId} " +
-            $"to {targetTile.name} (step cost: {stepTurnCost:0.0} turns, steps remaining: {_activeContext.stepsRemaining}).");
+        //Debug.Log(
+            //$"[UnitGroupMovementManager] Planned {mode} step #{_activeContext.plannedTiles.Count} for group {_activeContext.group.groupId} " +
+            //$"to {targetTile.name} (step cost: {stepTurnCost:0.0} turns, steps remaining: {_activeContext.stepsRemaining}).");
 
         ClearAllMoveHereButtons();
 
@@ -359,7 +359,7 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         if (_activeContext.plannedTiles.Count == 0)
         {
-            Debug.Log($"[UnitGroupMovementManager] ConfirmMovement: no tiles selected for group {group.groupId}. Cancelling.");
+            //Debug.Log($"[UnitGroupMovementManager] ConfirmMovement: no tiles selected for group {group.groupId}. Cancelling.");
             NotifyGroupMovementUpdated(group);
             ClearAllMoveHereButtons();
             if (endMovementButton != null)
@@ -394,9 +394,9 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         int displayTotal = Mathf.CeilToInt(totalTurnCost);
 
-        Debug.Log(
-            $"[UnitGroupMovementManager] Confirmed movement for group {group.groupId}: " +
-            $"{ctx.plannedTiles.Count} steps, approx {displayTotal} turns total.");
+        //Debug.Log(
+            //$"[UnitGroupMovementManager] Confirmed movement for group {group.groupId}: " +
+            //$"{ctx.plannedTiles.Count} steps, approx {displayTotal} turns total.");
 
         if (group.plannedPathGridPositions == null)
             group.plannedPathGridPositions = new List<Vector2Int>();
@@ -428,9 +428,9 @@ public class UnitGroupMovementManager : MonoBehaviour
             ? Mathf.Max(0.1f, group.plannedStepTurnCosts[0])
             : 0f;
 
-        Debug.Log(
-            $"[UnitGroupMovementManager] Stored route on group {group.groupId}: " +
-            $"{group.plannedPathGridPositions.Count} steps, first step cost = {group.remainingTurnCostOnCurrentStep:0.0} turns.");
+        //Debug.Log(
+            //$"[UnitGroupMovementManager] Stored route on group {group.groupId}: " +
+            //$"{group.plannedPathGridPositions.Count} steps, first step cost = {group.remainingTurnCostOnCurrentStep:0.0} turns.");
 
         NotifyGroupMovementUpdated(group);
     }
@@ -442,7 +442,7 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         if (origin == null)
         {
-            Debug.LogWarning("[UnitGroupMovementManager] BuildPatrolRouteFromContext: origin tile missing; falling back to normal movement.");
+            //Debug.LogWarning("[UnitGroupMovementManager] BuildPatrolRouteFromContext: origin tile missing; falling back to normal movement.");
             BuildStandardRouteFromContext(ctx);
             return;
         }
@@ -457,9 +457,9 @@ public class UnitGroupMovementManager : MonoBehaviour
 
             if (!IsTileAllowedForPatrol(tile))
             {
-                Debug.LogWarning(
-                    $"[UnitGroupMovementManager] Patrol path for group {group.groupId} contains invalid tile '{tile.name}'. " +
-                    "Falling back to one-way movement.");
+                //Debug.LogWarning(
+                    //$"[UnitGroupMovementManager] Patrol path for group {group.groupId} contains invalid tile '{tile.name}'. " +
+                    //"Falling back to one-way movement.");
                 BuildStandardRouteFromContext(ctx);
                 return;
             }
@@ -470,7 +470,7 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         if (forwardGrid.Count == 0)
         {
-            Debug.LogWarning("[UnitGroupMovementManager] BuildPatrolRouteFromContext: no tiles in patrol path.");
+            //Debug.LogWarning("[UnitGroupMovementManager] BuildPatrolRouteFromContext: no tiles in patrol path.");
             BuildStandardRouteFromContext(ctx);
             return;
         }
@@ -530,9 +530,9 @@ public class UnitGroupMovementManager : MonoBehaviour
             totalTurnCost += loopCosts[i];
         int approxTurns = Mathf.CeilToInt(totalTurnCost);
 
-        Debug.Log(
-            $"[UnitGroupMovementManager] Confirmed PATROL route for group {group.groupId}: " +
-            $"{loopGrid.Count} steps in ping-pong loop (≈{approxTurns} turns per full cycle).");
+        //Debug.Log(
+            //$"[UnitGroupMovementManager] Confirmed PATROL route for group {group.groupId}: " +
+            //$"{loopGrid.Count} steps in ping-pong loop (≈{approxTurns} turns per full cycle).");
 
         NotifyGroupMovementUpdated(group);
     }
@@ -599,8 +599,8 @@ public class UnitGroupMovementManager : MonoBehaviour
         if (group.plannedStepTurnCosts == null ||
             group.plannedStepTurnCosts.Count != group.plannedPathGridPositions.Count)
         {
-            Debug.LogWarning(
-                $"[UnitGroupMovementManager] Route/cost mismatch on group {group.groupId}. Clearing route.");
+            //Debug.LogWarning(
+                //$"[UnitGroupMovementManager] Route/cost mismatch on group {group.groupId}. Clearing route.");
             ClearRouteOnGroup(group);
             return;
         }
@@ -615,9 +615,9 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         if (group.remainingTurnCostOnCurrentStep > 0f)
         {
-            Debug.Log(
-                $"[UnitGroupMovementManager] Group {group.groupId} has " +
-                $"{group.remainingTurnCostOnCurrentStep:0.0} turns left on step index {group.currentPathIndex}.");
+            //Debug.Log(
+                //$"[UnitGroupMovementManager] Group {group.groupId} has " +
+                //$"{group.remainingTurnCostOnCurrentStep:0.0} turns left on step index {group.currentPathIndex}.");
 
             NotifyGroupMovementUpdated(group);
             return;
@@ -626,8 +626,8 @@ public class UnitGroupMovementManager : MonoBehaviour
         var currentTile = ResolveTileForOwner(owner);
         if (currentTile == null)
         {
-            Debug.LogWarning(
-                $"[UnitGroupMovementManager] Could not resolve current tile for owner {owner.name}. Clearing route for group {group.groupId}.");
+            //Debug.LogWarning(
+                //$"[UnitGroupMovementManager] Could not resolve current tile for owner {owner.name}. Clearing route for group {group.groupId}.");
             ClearRouteOnGroup(group);
             return;
         }
@@ -648,9 +648,9 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         if (nextTile == null)
         {
-            Debug.LogWarning(
-                $"[UnitGroupMovementManager] Could not find neighbour tile at {nextGrid} " +
-                $"from {currentTile.name} for group {group.groupId}. Clearing route.");
+            //Debug.LogWarning(
+                //$"[UnitGroupMovementManager] Could not find neighbour tile at {nextGrid} " +
+                //$"from {currentTile.name} for group {group.groupId}. Clearing route.");
             ClearRouteOnGroup(group);
             return;
         }
@@ -668,16 +668,16 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         if (nextOwner == null)
         {
-            Debug.LogWarning(
-                $"[UnitGroupMovementManager] Tile {nextTile.name} has no TileUnitGroupControl. Clearing route.");
+            //Debug.LogWarning(
+                //$"[UnitGroupMovementManager] Tile {nextTile.name} has no TileUnitGroupControl. Clearing route.");
             ClearRouteOnGroup(group);
             return;
         }
 
         owner.MoveGroupTo(group, nextOwner);
-        Debug.Log(
-            $"[UnitGroupMovementManager] Group {group.groupId} moved one step to {nextTile.name} " +
-            $"(step {group.currentPathIndex + 1}/{group.plannedPathGridPositions.Count}).");
+        //Debug.Log(
+            //$"[UnitGroupMovementManager] Group {group.groupId} moved one step to {nextTile.name} " +
+            //$"(step {group.currentPathIndex + 1}/{group.plannedPathGridPositions.Count}).");
 
         bool groupDestroyedByHazard = TryApplyUndiscoveredTileHazard(group, nextOwner, nextTile);
         if (groupDestroyedByHazard)
@@ -709,8 +709,8 @@ public class UnitGroupMovementManager : MonoBehaviour
                 group.remainingTurnCostOnCurrentStep =
                     Mathf.Max(0.1f, group.patrolLoopStepTurnCosts[0]);
 
-                Debug.Log(
-                    $"[UnitGroupMovementManager] Group {group.groupId} completed a patrol loop; restarting from beginning.");
+                //Debug.Log(
+                    //$"[UnitGroupMovementManager] Group {group.groupId} completed a patrol loop; restarting from beginning.");
 
                 NotifyGroupMovementUpdated(group);
             }
@@ -812,9 +812,9 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         if (box == null)
         {
-            Debug.LogWarning(
-                $"[UnitGroupMovementManager] GetNeighbors: Tile {originTile.name} has no BoxCollider. " +
-                "Neighbour detection will be empty.");
+            //Debug.LogWarning(
+                //$"[UnitGroupMovementManager] GetNeighbors: Tile {originTile.name} has no BoxCollider. " +
+                //"Neighbour detection will be empty.");
             yield break;
         }
 
@@ -958,9 +958,9 @@ public class UnitGroupMovementManager : MonoBehaviour
         float roll = Random.value;
         if (roll > hazardChance01)
         {
-            Debug.Log(
-                $"[UnitGroupMovementManager] Group {group.groupId} crossed undiscovered '{envCtrl.environmentName}' safely " +
-                $"(roll={roll:0.00} vs hazard={hazardChance01:0.00}).");
+            //Debug.Log(
+                //$"[UnitGroupMovementManager] Group {group.groupId} crossed undiscovered '{envCtrl.environmentName}' safely " +
+                //$"(roll={roll:0.00} vs hazard={hazardChance01:0.00}).");
             return false;
         }
 
@@ -1002,10 +1002,10 @@ public class UnitGroupMovementManager : MonoBehaviour
         int oldHealth = group.currentHealth;
         group.currentHealth = Mathf.Max(1, group.currentHealth - damage);
 
-        Debug.Log(
-            $"[UnitGroupMovementManager] Group {group.groupId} took {damage} damage " +
-            $"crossing undiscovered '{envCtrl.environmentName}' " +
-            $"(health {oldHealth} → {group.currentHealth}/{group.maxHealth}).");
+        //Debug.Log(
+            //$"[UnitGroupMovementManager] Group {group.groupId} took {damage} damage " +
+            //$"crossing undiscovered '{envCtrl.environmentName}' " +
+            //$"(health {oldHealth} → {group.currentHealth}/{group.maxHealth}).");
     }
 
     private void ApplyFatalCasualtiesToGroup(
@@ -1037,15 +1037,15 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         group.unitCount -= casualties;
 
-        Debug.Log(
-            $"[UnitGroupMovementManager] Group {group.groupId} lost {casualties} " +
-            $"people crossing undiscovered '{envCtrl.environmentName}' " +
-            $"(units left: {group.unitCount}).");
+        //Debug.Log(
+            //$"[UnitGroupMovementManager] Group {group.groupId} lost {casualties} " +
+            //$"people crossing undiscovered '{envCtrl.environmentName}' " +
+            //$"(units left: {group.unitCount}).");
 
         if (group.unitCount <= 0)
         {
-            Debug.Log(
-                $"[UnitGroupMovementManager] Group {group.groupId} was wiped out by hazards in '{envCtrl.environmentName}'.");
+            //Debug.Log(
+                //$"[UnitGroupMovementManager] Group {group.groupId} was wiped out by hazards in '{envCtrl.environmentName}'.");
 
             if (!string.IsNullOrEmpty(group.populationReservationId) && popMgr != null && group.reservedPopulation > 0)
             {

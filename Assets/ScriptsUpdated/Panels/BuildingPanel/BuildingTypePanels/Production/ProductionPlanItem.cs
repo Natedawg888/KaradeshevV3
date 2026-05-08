@@ -146,7 +146,7 @@ public class ProductionPlanItem : MonoBehaviour
 
             if (!HasEnoughPopulation() || !CanAffordPlanResources())
             {
-                Debug.Log("[ProductionPlanItem] Start blocked: not enough pop or resources.");
+                //Debug.Log("[ProductionPlanItem] Start blocked: not enough pop or resources.");
                 return;
             }
 

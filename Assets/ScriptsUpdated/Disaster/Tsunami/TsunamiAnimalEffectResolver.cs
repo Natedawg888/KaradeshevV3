@@ -118,11 +118,11 @@ public class TsunamiAnimalEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiAnimalEffectResolver] Installed refs. " +
-                $"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
-                $"GridManager={(gridManager != null ? gridManager.name : "NULL")} "
-            );
+            //Debug.Log(
+                //$"[TsunamiAnimalEffectResolver] Installed refs. " +
+                //$"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
+                //$"GridManager={(gridManager != null ? gridManager.name : "NULL")} "
+            //);
         }
     }
 
@@ -178,7 +178,7 @@ public class TsunamiAnimalEffectResolver : MonoBehaviour
         if (animalSimulation == null || gridManager == null)
         {
             if (debugLogging)
-                Debug.LogWarning("[TsunamiAnimalEffectResolver] Missing references.");
+                //Debug.LogWarning("[TsunamiAnimalEffectResolver] Missing references.");
 
             return;
         }
@@ -211,9 +211,9 @@ public class TsunamiAnimalEffectResolver : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiAnimalEffectResolver] Energy too low for animal effects. " +
-                    $"TsunamiId={data.tsunamiId}, Energy01={data.energy01:0.00}");
+                //Debug.Log(
+                    //$"[TsunamiAnimalEffectResolver] Energy too low for animal effects. " +
+                    //$"TsunamiId={data.tsunamiId}, Energy01={data.energy01:0.00}");
             }
 
             processRoutine = null;
@@ -236,10 +236,10 @@ public class TsunamiAnimalEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiAnimalEffectResolver] Complete. " +
-                $"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
-                $"AffectedGroups={affectedGroups}, ActiveCells={activeTsunamiCells.Count}");
+            //Debug.Log(
+                //$"[TsunamiAnimalEffectResolver] Complete. " +
+                //$"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
+                //$"AffectedGroups={affectedGroups}, ActiveCells={activeTsunamiCells.Count}");
         }
 
         processedGroupsThisPass.Clear();
@@ -257,9 +257,9 @@ public class TsunamiAnimalEffectResolver : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiAnimalEffectResolver] Energy too low for animal effects. " +
-                    $"TsunamiId={data.tsunamiId}, Energy01={data.energy01:0.00}");
+                //Debug.Log(
+                    //$"[TsunamiAnimalEffectResolver] Energy too low for animal effects. " +
+                    //$"TsunamiId={data.tsunamiId}, Energy01={data.energy01:0.00}");
             }
 
             return;
@@ -270,10 +270,10 @@ public class TsunamiAnimalEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiAnimalEffectResolver] Complete. " +
-                $"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
-                $"AffectedGroups={affectedGroups}, ActiveCells={activeTsunamiCells.Count}");
+            //Debug.Log(
+                //$"[TsunamiAnimalEffectResolver] Complete. " +
+                //$"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
+                //$"AffectedGroups={affectedGroups}, ActiveCells={activeTsunamiCells.Count}");
         }
 
         processedGroupsThisPass.Clear();
@@ -335,12 +335,12 @@ public class TsunamiAnimalEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiAnimalEffectResolver] Tsunami animal group {groupId} at {coord}. " +
-                    $"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
-                    $"Energy01={data.energy01:0.00}, Severity={severity01:0.00}, " +
-                    $"FleeChance={fleeChance:0.00}, DamageIfFail={damageIfFleeFails}"
-                );
+                //Debug.Log(
+                    //$"[TsunamiAnimalEffectResolver] Tsunami animal group {groupId} at {coord}. " +
+                    //$"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
+                    //$"Energy01={data.energy01:0.00}, Severity={severity01:0.00}, " +
+                    //$"FleeChance={fleeChance:0.00}, DamageIfFail={damageIfFleeFails}"
+                //);
             }
         }
 

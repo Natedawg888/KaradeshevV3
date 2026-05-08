@@ -182,22 +182,22 @@ public class BuildingTsunamiSecondaryEffects : MonoBehaviour
         {
             string buildingName = building != null ? building.name : name;
 
-            Debug.Log(
-                $"[BuildingTsunamiSecondaryEffects] Tsunami damaged '{buildingName}'. " +
-                $"TsunamiId={hitData.tsunamiId} | " +
-                $"Step={hitData.stepCount} | " +
-                $"Energy01={hitData.energy01:0.00} | " +
-                $"HitCells={hitData.hitCellCount}/{hitData.buildingCellCount} | " +
-                $"IncomingTsunamiDamage={finalDamage} | " +
-                $"AppliedBuildingDamage={actualBuildingDamage} | " +
-                $"ShelterDeaths={killedInShelter} | " +
-                $"CancelledCraftOrders={cancelledCraftOrders} | " +
-                $"CrafterDeaths={killedCrafters} | " +
-                $"ProductionPaused={productionPaused} | " +
-                $"ProductionWorkerDeaths={killedProductionWorkers} | " +
-                $"TrainingPaused={trainingPaused} | " +
-                $"TrainingDeaths={killedTrainees} | " +
-                $"StorageDestroyed={storageResourcesDestroyed}");
+            //Debug.Log(
+                //$"[BuildingTsunamiSecondaryEffects] Tsunami damaged '{buildingName}'. " +
+                //$"TsunamiId={hitData.tsunamiId} | " +
+                //$"Step={hitData.stepCount} | " +
+                //$"Energy01={hitData.energy01:0.00} | " +
+                //$"HitCells={hitData.hitCellCount}/{hitData.buildingCellCount} | " +
+                //$"IncomingTsunamiDamage={finalDamage} | " +
+                //$"AppliedBuildingDamage={actualBuildingDamage} | " +
+                //$"ShelterDeaths={killedInShelter} | " +
+                //$"CancelledCraftOrders={cancelledCraftOrders} | " +
+                //$"CrafterDeaths={killedCrafters} | " +
+                //$"ProductionPaused={productionPaused} | " +
+                //$"ProductionWorkerDeaths={killedProductionWorkers} | " +
+                //$"TrainingPaused={trainingPaused} | " +
+                //$"TrainingDeaths={killedTrainees} | " +
+                //$"StorageDestroyed={storageResourcesDestroyed}");
         }
     }
 
@@ -208,8 +208,8 @@ public class BuildingTsunamiSecondaryEffects : MonoBehaviour
 
         string buildingName = building != null ? building.name : name;
 
-        Debug.Log(
-            $"[BuildingTsunamiSecondaryEffects] '{buildingName}' received tsunami hit. " +
-            $"TsunamiId={hitData.tsunamiId}, Step={hitData.stepCount}, Energy01={hitData.energy01:0.00}");
+        //Debug.Log(
+            //$"[BuildingTsunamiSecondaryEffects] '{buildingName}' received tsunami hit. " +
+            //$"TsunamiId={hitData.tsunamiId}, Step={hitData.stepCount}, Energy01={hitData.energy01:0.00}");
     }
 }

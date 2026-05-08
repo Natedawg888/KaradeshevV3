@@ -82,7 +82,7 @@ public class ReligiousRitualPanelControl : MonoBehaviour
     {
         if (building == null)
         {
-            Debug.LogError("[ReligiousRitualPanel] OpenFor called with null building.");
+            //Debug.LogError("[ReligiousRitualPanel] OpenFor called with null building.");
             return;
         }
 
@@ -93,7 +93,7 @@ public class ReligiousRitualPanelControl : MonoBehaviour
 
         if (_control == null)
         {
-            Debug.LogError("[ReligiousRitualPanel] Building has no ReligiousBuildingControl.");
+            //Debug.LogError("[ReligiousRitualPanel] Building has no ReligiousBuildingControl.");
             return;
         }
 

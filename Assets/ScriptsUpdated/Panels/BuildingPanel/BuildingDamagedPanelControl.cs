@@ -217,12 +217,12 @@ public class BuildingDamagedPanelControl : MonoBehaviour
     {
         if (!currentBuilding)
         {
-            Debug.LogWarning("[BuildingDamagedPanel] No currentBuilding when opening Repair.");
+            //Debug.LogWarning("[BuildingDamagedPanel] No currentBuilding when opening Repair.");
             return;
         }
         if (!repairPanel)
         {
-            Debug.LogError("[BuildingDamagedPanel] RepairPanel reference is missing (assign a SCENE instance, not a prefab).");
+            //Debug.LogError("[BuildingDamagedPanel] RepairPanel reference is missing (assign a SCENE instance, not a prefab).");
             return;
         }
 

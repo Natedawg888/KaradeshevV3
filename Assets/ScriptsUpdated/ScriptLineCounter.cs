@@ -17,15 +17,15 @@ public class ScriptLineCounter : MonoBehaviour
 
         int totalLines = 0;
 
-        Debug.Log($"[ScriptLineCounter] Found {scriptFiles.Length} scripts in project.");
+        //Debug.Log($"[ScriptLineCounter] Found {scriptFiles.Length} scripts in project.");
 
         foreach (string script in scriptFiles)
         {
             int lineCount = File.ReadLines(script).Count();
             totalLines += lineCount;
-            Debug.Log($"[ScriptLineCounter] {Path.GetFileName(script)}: {lineCount} lines");
+            //Debug.Log($"[ScriptLineCounter] {Path.GetFileName(script)}: {lineCount} lines");
         }
 
-        Debug.Log($"[ScriptLineCounter] 🔹 Total Lines of Code in Project: {totalLines}");
+        //Debug.Log($"[ScriptLineCounter] 🔹 Total Lines of Code in Project: {totalLines}");
     }
 }

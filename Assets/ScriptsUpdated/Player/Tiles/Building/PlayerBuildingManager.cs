@@ -35,7 +35,7 @@ public class PlayerBuildingManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("Multiple PlayerBuildingManager instances; destroying duplicate.");
+            //Debug.LogWarning("Multiple PlayerBuildingManager instances; destroying duplicate.");
             Destroy(gameObject);
             return;
         }

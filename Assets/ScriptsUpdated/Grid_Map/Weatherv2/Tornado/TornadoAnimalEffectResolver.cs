@@ -269,7 +269,7 @@ public class TornadoAnimalEffectResolver : MonoBehaviour
                 _knownEmptyActiveTornadoTileKeys.Add(tileKey);
 
                 if (debugLogging)
-                    Debug.Log($"[TornadoAnimalEffectResolver] Cached empty tornado animal tile at {tile}.");
+                    //Debug.Log($"[TornadoAnimalEffectResolver] Cached empty tornado animal tile at {tile}.");
 
                 continue;
             }
@@ -308,7 +308,7 @@ public class TornadoAnimalEffectResolver : MonoBehaviour
                 _knownEmptyActiveTornadoTileKeys.Add(tileKey);
 
                 if (debugLogging)
-                    Debug.Log($"[TornadoAnimalEffectResolver] Tile became empty after tornado processing at {tile}.");
+                    //Debug.Log($"[TornadoAnimalEffectResolver] Tile became empty after tornado processing at {tile}.");
             }
             else
             {

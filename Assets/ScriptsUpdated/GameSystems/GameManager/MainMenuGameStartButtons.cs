@@ -100,7 +100,7 @@ public class MainMenuGameStartButtons : MonoBehaviour
 
         if (string.IsNullOrEmpty(gameplayScenePath))
         {
-            Debug.LogError("MainMenuGameStartButtons: No gameplay scene assigned.");
+            //Debug.LogError("MainMenuGameStartButtons: No gameplay scene assigned.");
             if (persistentLoadingUI != null)
                 persistentLoadingUI.HideImmediate();
 
@@ -118,7 +118,7 @@ public class MainMenuGameStartButtons : MonoBehaviour
         AsyncOperation op = SceneManager.LoadSceneAsync(gameplayScenePath);
         if (op == null)
         {
-            Debug.LogError($"Failed to load scene: {gameplayScenePath}");
+            //Debug.LogError($"Failed to load scene: {gameplayScenePath}");
 
             if (persistentLoadingUI != null)
                 persistentLoadingUI.HideImmediate();
@@ -173,7 +173,7 @@ public class MainMenuGameStartButtons : MonoBehaviour
         if (!logSceneLoadTimings)
             return;
 
-        Debug.Log($"[SceneLoadTiming] {label}: {seconds:0.000}s");
+        //Debug.Log($"[SceneLoadTiming] {label}: {seconds:0.000}s");
     }
 
 #if UNITY_EDITOR

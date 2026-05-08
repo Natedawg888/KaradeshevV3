@@ -37,13 +37,13 @@ public partial class PlayerInventoryManager
 
         if (debugConsumedResourceDiseaseRisk && infections > 0)
         {
-            Debug.Log(
-                $"[INV][Disease] Consumed resource caused disease. " +
-                $"Resource={def.resourceName} ({def.resourceID}), " +
-                $"Units={unitsConsumed}, " +
-                $"Points={pointsConsumed:F2}, " +
-                $"Mode={(useNutrition ? "Nutrition" : "Hydration")}, " +
-                $"Infections={infections}");
+            //Debug.Log(
+                //$"[INV][Disease] Consumed resource caused disease. " +
+                //$"Resource={def.resourceName} ({def.resourceID}), " +
+                //$"Units={unitsConsumed}, " +
+                //$"Points={pointsConsumed:F2}, " +
+                //$"Mode={(useNutrition ? "Nutrition" : "Hydration")}, " +
+                //$"Infections={infections}");
         }
     }
 }

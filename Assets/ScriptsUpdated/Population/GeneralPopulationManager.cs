@@ -59,7 +59,7 @@ public class GeneralPopulationManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("Multiple GeneralPopulationManager instances detected; destroying duplicate.");
+            //Debug.LogWarning("Multiple GeneralPopulationManager instances detected; destroying duplicate.");
             Destroy(gameObject);
             return;
         }

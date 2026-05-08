@@ -87,7 +87,7 @@ public class SummoningSpiritOfferPanelControl : MonoBehaviour
 
         if (!PlayerRitualManager.Instance.TryAcceptSummoningChoice(spirit, out string reason))
         {
-            Debug.LogWarning($"[SummoningSpiritOfferPanel] Failed to accept spirit choice: {reason}");
+            //Debug.LogWarning($"[SummoningSpiritOfferPanel] Failed to accept spirit choice: {reason}");
         }
     }
 }

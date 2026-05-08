@@ -39,12 +39,12 @@ public class BuildingManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Multiple BuildingManager instances detected!");
+            //Debug.LogError("Multiple BuildingManager instances detected!");
             Destroy(gameObject);
         }
 
         if (buildingsByStage == null || buildingsByStage.Count == 0)
-            Debug.LogError("BuildingManager: No buildings initialized! Check initialization sequence.");
+            //Debug.LogError("BuildingManager: No buildings initialized! Check initialization sequence.");
     }
 
     private void InitializeBuildingStages()
@@ -113,7 +113,7 @@ public class BuildingManager : MonoBehaviour
     {
         if (!buildingsByStage.TryGetValue(stage, out var list))
         {
-            Debug.LogWarning($"Invalid stage: {stage}. Building not added.");
+            //Debug.LogWarning($"Invalid stage: {stage}. Building not added.");
             return;
         }
         list.Add(building);

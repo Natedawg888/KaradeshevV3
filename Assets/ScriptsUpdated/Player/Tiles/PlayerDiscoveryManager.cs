@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -70,7 +70,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
         if (Instance == null) Instance = this;
         else if (Instance != this)
         {
-            Debug.LogWarning("Multiple PlayerDiscoveryManager instances detected; destroying duplicate.");
+            //Debug.LogWarning("Multiple PlayerDiscoveryManager instances detected; destroying duplicate.");
             Destroy(gameObject);
             return;
         }
@@ -196,7 +196,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("PlayerDiscoveryManager: Could not find TileControl for env " + env.name);
+            //Debug.LogWarning("PlayerDiscoveryManager: Could not find TileControl for env " + env.name);
         }
     }
 
@@ -208,7 +208,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
 
         if (populationManager == null)
         {
-            Debug.LogWarning("PlayerDiscoveryManager: populationManager not assigned.");
+            //Debug.LogWarning("PlayerDiscoveryManager: populationManager not assigned.");
             return false;
         }
 
@@ -565,7 +565,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
 
                 if (!envById.TryGetValue(saved.environmentID, out EnvironmentControl env) || env == null)
                 {
-                    Debug.LogWarning($"[PlayerDiscoveryManager] Could not resolve environment '{saved.environmentID}' while loading active discovery.");
+                    //Debug.LogWarning($"[PlayerDiscoveryManager] Could not resolve environment '{saved.environmentID}' while loading active discovery.");
                     continue;
                 }
 

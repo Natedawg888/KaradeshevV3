@@ -35,9 +35,9 @@ public partial class AnimalSimulationController : MonoBehaviour
         string defName = def != null ? def.name : "NULL";
         string phaseName = string.IsNullOrWhiteSpace(phase) ? "Unknown" : phase;
 
-        Debug.Log(
-            $"[AnimalSpawn:{phaseName}] '{defName}' x{size} @ {coord} | " +
-            $"env={envType}/{tileType} | phaseCount={spawnedSoFar}/{capForPhase} | liveCap={overallLiveCap}");
+        //Debug.Log(
+            //$"[AnimalSpawn:{phaseName}] '{defName}' x{size} @ {coord} | " +
+            //$"env={envType}/{tileType} | phaseCount={spawnedSoFar}/{capForPhase} | liveCap={overallLiveCap}");
     }
 
     private void DebugLogSupportedSpeciesPool(List<AnimalDefinition> supportedSpecies)
@@ -47,7 +47,7 @@ public partial class AnimalSimulationController : MonoBehaviour
 
         if (supportedSpecies == null || supportedSpecies.Count == 0)
         {
-            Debug.Log("[AnimalSpawn:SupportedPool] No supported species selected.");
+            //Debug.Log("[AnimalSpawn:SupportedPool] No supported species selected.");
             return;
         }
 
@@ -66,9 +66,9 @@ public partial class AnimalSimulationController : MonoBehaviour
             parts.Add($"{speciesName} [{def.diet}/{def.sizeCategory}]");
         }
 
-        Debug.Log(
-            $"[AnimalSpawn:SupportedPool] Selected {supportedSpecies.Count}/{Mathf.Max(1, maxSupportedSpeciesOnMap)}: " +
-            string.Join(", ", parts));
+        //Debug.Log(
+            //$"[AnimalSpawn:SupportedPool] Selected {supportedSpecies.Count}/{Mathf.Max(1, maxSupportedSpeciesOnMap)}: " +
+            //string.Join(", ", parts));
     }
 #endif
 
@@ -301,12 +301,12 @@ public partial class AnimalSimulationController : MonoBehaviour
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     if (debugAnimalSpawnSummary)
     {
-        Debug.Log(
-            $"[AnimalSpawn:Initial] Finished. " +
-            $"SupportedSpecies={supportedSpecies.Count}/{allSpecies.Count}, " +
-            $"InitialSpawned={groupsSpawned}/{initialSpawnCap}, " +
-            $"CandidateTiles={uniqueTiles.Count}, " +
-            $"LiveGroupsNow={_simulation.GetTotalGroupCount()}/{maxTotalGroups}");
+        //Debug.Log(
+            //$"[AnimalSpawn:Initial] Finished. " +
+            //$"SupportedSpecies={supportedSpecies.Count}/{allSpecies.Count}, " +
+            //$"InitialSpawned={groupsSpawned}/{initialSpawnCap}, " +
+            //$"CandidateTiles={uniqueTiles.Count}, " +
+            //$"LiveGroupsNow={_simulation.GetTotalGroupCount()}/{maxTotalGroups}");
     }
 #endif
         _hasCompletedInitialAnimalSpawn = true;
@@ -683,12 +683,12 @@ public partial class AnimalSimulationController : MonoBehaviour
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (debugAnimalSpawnSummary)
         {
-            Debug.Log(
-                $"[AnimalSpawn:SeasonTopUp] Start. " +
-                $"LiveSpecies={liveSpeciesCount}, " +
-                $"TargetVariety={targetVariety}, " +
-                $"VarietyGap={varietyGap}, " +
-                $"LiveGroups={_simulation.GetTotalGroupCount()}/{maxTotalGroups}");
+            //Debug.Log(
+                //$"[AnimalSpawn:SeasonTopUp] Start. " +
+                //$"LiveSpecies={liveSpeciesCount}, " +
+                //$"TargetVariety={targetVariety}, " +
+                //$"VarietyGap={varietyGap}, " +
+                //$"LiveGroups={_simulation.GetTotalGroupCount()}/{maxTotalGroups}");
         }
 #endif
 
@@ -720,8 +720,8 @@ public partial class AnimalSimulationController : MonoBehaviour
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (debugAnimalSpawnSummary)
         {
-            Debug.Log(
-                $"[AnimalSpawn:SeasonTopUp] Candidate missing species after filtering alive/invalid = {candidateSpecies.Count}");
+            //Debug.Log(
+                //$"[AnimalSpawn:SeasonTopUp] Candidate missing species after filtering alive/invalid = {candidateSpecies.Count}");
         }
 #endif
 
@@ -777,8 +777,8 @@ public partial class AnimalSimulationController : MonoBehaviour
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     if (debugAnimalSpawning)
     {
-        Debug.Log(
-            $"[AnimalSpawn:SeasonTopUp-Target] '{species.name}' seasonalTarget={seasonalTargetGroups} maxAllowed={maxGroupsForSpecies}");
+        //Debug.Log(
+            //$"[AnimalSpawn:SeasonTopUp-Target] '{species.name}' seasonalTarget={seasonalTargetGroups} maxAllowed={maxGroupsForSpecies}");
     }
 #endif
         }
@@ -914,13 +914,13 @@ public partial class AnimalSimulationController : MonoBehaviour
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (debugAnimalSpawnSummary)
         {
-            Debug.Log(
-                $"[AnimalSpawn:SeasonTopUp] Finished. " +
-                $"SelectedMissingSpecies={selectedMissingSpecies.Count}, " +
-                $"SpawnedMissingSpecies={spawnedSpecies}, " +
-                $"SpawnedGroups={spawnedGroups}, " +
-                $"LiveSpeciesNow={liveSpeciesCount + spawnedSpecies}/{targetVariety}, " +
-                $"LiveGroupsNow={_simulation.GetTotalGroupCount()}/{maxTotalGroups}");
+            //Debug.Log(
+                //$"[AnimalSpawn:SeasonTopUp] Finished. " +
+                //$"SelectedMissingSpecies={selectedMissingSpecies.Count}, " +
+                //$"SpawnedMissingSpecies={spawnedSpecies}, " +
+                //$"SpawnedGroups={spawnedGroups}, " +
+                //$"LiveSpeciesNow={liveSpeciesCount + spawnedSpecies}/{targetVariety}, " +
+                //$"LiveGroupsNow={_simulation.GetTotalGroupCount()}/{maxTotalGroups}");
         }
 #endif
 
@@ -1054,9 +1054,9 @@ public partial class AnimalSimulationController : MonoBehaviour
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (debugAnimalSpawning)
             {
-                Debug.Log(
-                    $"[AnimalSpawn:SeasonTopUp-Guaranteed] '{species.name}' x{size} @ {chosenTile.Key} | " +
-                    $"env={chosenTile.Value.environmentType}/{chosenTile.Value.environmentTileType}");
+                //Debug.Log(
+                    //$"[AnimalSpawn:SeasonTopUp-Guaranteed] '{species.name}' x{size} @ {chosenTile.Key} | " +
+                    //$"env={chosenTile.Value.environmentType}/{chosenTile.Value.environmentTileType}");
             }
 #endif
                 return true;

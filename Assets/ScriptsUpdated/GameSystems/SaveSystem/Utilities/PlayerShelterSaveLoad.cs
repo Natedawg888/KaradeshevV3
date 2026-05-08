@@ -39,7 +39,7 @@ public static class PlayerShelterSaveLoad
 
             if (!bySaveableId.TryGetValue(saved.buildingSaveableID, out ShelterControl shelter) || shelter == null)
             {
-                Debug.LogWarning($"[Shelter Save] Could not resolve shelter '{saved.buildingSaveableID}' while loading.");
+                //Debug.LogWarning($"[Shelter Save] Could not resolve shelter '{saved.buildingSaveableID}' while loading.");
                 continue;
             }
 

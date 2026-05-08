@@ -92,10 +92,10 @@ public partial class KineticWarfareControl
 
         SpawnGroupTrainingWidget(order);
 
-        Debug.Log(
-            $"[KineticWarfare] Started skill training order {order.orderId} " +
-            $"for group {group.groupId} → skill {newSkillLevel} in {trainingTurns} turns."
-        );
+        //Debug.Log(
+            //$"[KineticWarfare] Started skill training order {order.orderId} " +
+            //$"for group {group.groupId} → skill {newSkillLevel} in {trainingTurns} turns."
+        //);
 
         return true;
     }
@@ -169,10 +169,10 @@ public partial class KineticWarfareControl
 
             if (!removed)
             {
-                Debug.LogWarning(
-                    $"[KineticWarfare] Failed to remove {amt} x {res.resourceID} " +
-                    $"even though affordability check passed."
-                );
+                //Debug.LogWarning(
+                    //$"[KineticWarfare] Failed to remove {amt} x {res.resourceID} " +
+                    //$"even though affordability check passed."
+                //);
 
                 failReason = "Unexpected inventory error when paying training cost.";
                 return false;
@@ -251,7 +251,7 @@ public partial class KineticWarfareControl
             if (!string.IsNullOrEmpty(order.populationReservationId))
                 PlayersPopulationManager.Instance?.ReleaseReservation(order.populationReservationId);
 
-            Debug.LogWarning("[KineticWarfare] Training owner missing on group-training completion; released population.");
+            //Debug.LogWarning("[KineticWarfare] Training owner missing on group-training completion; released population.");
             return;
         }
 
@@ -261,7 +261,7 @@ public partial class KineticWarfareControl
             if (!string.IsNullOrEmpty(order.populationReservationId))
                 PlayersPopulationManager.Instance?.ReleaseReservation(order.populationReservationId);
 
-            Debug.LogWarning("[KineticWarfare] Group data missing on skill-training completion; released population.");
+            //Debug.LogWarning("[KineticWarfare] Group data missing on skill-training completion; released population.");
             return;
         }
 
@@ -310,11 +310,11 @@ public partial class KineticWarfareControl
 
         PostSkillTrainingNotification(order, group);
 
-        Debug.Log(
-            $"[KineticWarfare] Completed {(order.isAdvancementOrder ? "advancement" : "skill training")} " +
-            $"order {order.orderId} for group {group.groupId}. " +
-            $"New unit = {group.unitType.unitName}, skill = {group.skillLevel}."
-        );
+        //Debug.Log(
+            //$"[KineticWarfare] Completed {(order.isAdvancementOrder ? "advancement" : "skill training")} " +
+            //$"order {order.orderId} for group {group.groupId}. " +
+            //$"New unit = {group.unitType.unitName}, skill = {group.skillLevel}."
+        //);
     }
 
     private static void PostSkillTrainingNotification(GroupSkillTrainingOrder order, TileUnitGroupData group)

@@ -289,7 +289,7 @@ public class TsunamiOverlayManager : MonoBehaviour
         pendingVisualRefreshSet.Clear();
 
         if (debugLogging)
-            Debug.Log("[TsunamiOverlayManager] Cleared all overlays.");
+            //Debug.Log("[TsunamiOverlayManager] Cleared all overlays.");
     }
 
     private void IncrementActiveCell(TileCoord coord)
@@ -382,7 +382,7 @@ public class TsunamiOverlayManager : MonoBehaviour
             RemoveVisual(coord);
 
             if (debugLogging)
-                Debug.LogWarning("[TsunamiOverlayManager] Missing wavePrefab.");
+                //Debug.LogWarning("[TsunamiOverlayManager] Missing wavePrefab.");
 
             return;
         }
@@ -535,6 +535,6 @@ public class TsunamiOverlayManager : MonoBehaviour
         }
 
         if (debugLogging)
-            Debug.Log($"[TsunamiOverlayManager] Rebuilt tsunami overlays from simulation. Waves={snapshots.Count}");
+            //Debug.Log($"[TsunamiOverlayManager] Rebuilt tsunami overlays from simulation. Waves={snapshots.Count}");
     }
 }

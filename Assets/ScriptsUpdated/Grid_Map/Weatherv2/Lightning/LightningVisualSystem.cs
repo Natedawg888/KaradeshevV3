@@ -229,13 +229,13 @@ public class LightningVisualSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                string.Format(
-                    "[LightningVisualSystem] Spawned lightning visual locked to cloud at {0},{1} for strike {2}/{3}",
-                    payload.resolvedCellX,
-                    payload.resolvedCellY,
-                    payload.strikeIndexInBurst + 1,
-                    payload.totalStrikesInBurst));
+            //Debug.Log(
+                //string.Format(
+                    //"[LightningVisualSystem] Spawned lightning visual locked to cloud at {0},{1} for strike {2}/{3}",
+                    //payload.resolvedCellX,
+                    //payload.resolvedCellY,
+                    //payload.strikeIndexInBurst + 1,
+                    //payload.totalStrikesInBurst));
         }
 
         return true;

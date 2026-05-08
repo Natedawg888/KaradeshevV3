@@ -106,14 +106,14 @@ public class MapTilePlacer : MonoBehaviour
             !oceanTilePrefab || !beachTilePrefab ||
             !lakeTilePrefab || !lakeEdgePrefab)
         {
-            Debug.LogWarning("MapTilePlacer: assign all references first!");
+            //Debug.LogWarning("MapTilePlacer: assign all references first!");
             _placementRoutine = null;
             yield break;
         }
 
         if (shouldPlaceRivers && !riverTilePrefab)
         {
-            Debug.LogWarning("MapTilePlacer: riverTilePrefab missing but preset wants rivers.");
+            //Debug.LogWarning("MapTilePlacer: riverTilePrefab missing but preset wants rivers.");
             _placementRoutine = null;
             yield break;
         }

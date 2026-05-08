@@ -1286,9 +1286,9 @@ public class PlayerReligionManager : MonoBehaviour
 
                 runtime.favor = spirit.ClampFavor(runtime.favor - taboo.GetPenalty());
 
-                Debug.Log(
-                    $"[Religion] Retreat taboo broken: spirit='{spirit.displayName}', taboo='{taboo.displayName}', " +
-                    $"penalty={taboo.GetPenalty()}, newFavor={runtime.favor}");
+                //Debug.Log(
+                    //$"[Religion] Retreat taboo broken: spirit='{spirit.displayName}', taboo='{taboo.displayName}', " +
+                    //$"penalty={taboo.GetPenalty()}, newFavor={runtime.favor}");
             }
         }
     }

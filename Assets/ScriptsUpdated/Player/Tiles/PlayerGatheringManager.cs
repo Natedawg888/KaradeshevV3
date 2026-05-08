@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -166,50 +166,50 @@ public class PlayerGatheringManager : MonoBehaviour
     {
         if (env == null)
         {
-            Debug.Log("[GatherMgr] Blocked: env is null");
+            //Debug.Log("[GatherMgr] Blocked: env is null");
             return false;
         }
 
         if (!env.canExplore)
         {
-            Debug.Log($"[GatherMgr] Blocked on {env.name}: canExplore == false");
+            //Debug.Log($"[GatherMgr] Blocked on {env.name}: canExplore == false");
             return false;
         }
 
         if (!env.IsDiscovered)
         {
-            Debug.Log($"[GatherMgr] Blocked on {env.name}: IsDiscovered == false");
+            //Debug.Log($"[GatherMgr] Blocked on {env.name}: IsDiscovered == false");
             return false;
         }
 
         if (env.isGathering)
         {
-            Debug.Log($"[GatherMgr] Blocked on {env.name}: already gathering");
+            //Debug.Log($"[GatherMgr] Blocked on {env.name}: already gathering");
             return false;
         }
 
         if (inProgress.ContainsKey(env))
         {
-            Debug.Log($"[GatherMgr] Blocked on {env.name}: already inProgress dictionary");
+            //Debug.Log($"[GatherMgr] Blocked on {env.name}: already inProgress dictionary");
             return false;
         }
 
         if (populationManager == null)
         {
-            Debug.Log("[GatherMgr] Blocked: populationManager is null");
+            //Debug.Log("[GatherMgr] Blocked: populationManager is null");
             return false;
         }
 
         var node = env.GetComponent<EnvironmentResourceNode>();
         if (node == null)
         {
-            Debug.Log($"[GatherMgr] Blocked on {env.name}: no EnvironmentResourceNode");
+            //Debug.Log($"[GatherMgr] Blocked on {env.name}: no EnvironmentResourceNode");
             return false;
         }
 
         if (node.SpawnedResources == null || node.SpawnedResources.Count == 0)
         {
-            Debug.Log($"[GatherMgr] Blocked on {env.name}: no spawned resources");
+            //Debug.Log($"[GatherMgr] Blocked on {env.name}: no spawned resources");
             return false;
         }
 
@@ -220,7 +220,7 @@ public class PlayerGatheringManager : MonoBehaviour
 
         if (!hasKnownResource)
         {
-            Debug.Log($"[GatherMgr] Blocked on {env.name}: no KNOWN resources with amount > 0");
+            //Debug.Log($"[GatherMgr] Blocked on {env.name}: no KNOWN resources with amount > 0");
             return false;
         }
 
@@ -233,16 +233,16 @@ public class PlayerGatheringManager : MonoBehaviour
         requiredPop = Mathf.Max(1, requiredPop);
 
         int available = populationManager.GetAvailableTaskPopulation();
-        Debug.Log($"[GatherMgr] {env.name}: trying to reserve {requiredPop}, availableTextShows={available}");
+        //Debug.Log($"[GatherMgr] {env.name}: trying to reserve {requiredPop}, availableTextShows={available}");
 
         if (!populationManager.TryPickRandomNonBusyTaskIndividuals(
                 requiredPop, out var picked, out var reservationId))
         {
-            Debug.Log($"[GatherMgr] Blocked on {env.name}: TryPickRandomNonBusyTaskIndividuals failed for required={requiredPop}");
+            //Debug.Log($"[GatherMgr] Blocked on {env.name}: TryPickRandomNonBusyTaskIndividuals failed for required={requiredPop}");
             return false;
         }
 
-        Debug.Log($"[GatherMgr] {env.name}: reserved {picked.Count} workers, reservation={reservationId}");
+        //Debug.Log($"[GatherMgr] {env.name}: reserved {picked.Count} workers, reservation={reservationId}");
 
         PlayersPopulationManager.Instance?.ForceSyncUI();
 
@@ -701,7 +701,7 @@ public class PlayerGatheringManager : MonoBehaviour
 
             if (!envById.TryGetValue(saved.environmentID, out EnvironmentControl env) || env == null)
             {
-                Debug.LogWarning($"[PlayerGatheringManager] Could not resolve active gathering environment '{saved.environmentID}' while loading.");
+                //Debug.LogWarning($"[PlayerGatheringManager] Could not resolve active gathering environment '{saved.environmentID}' while loading.");
                 continue;
             }
 

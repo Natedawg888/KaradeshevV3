@@ -401,7 +401,7 @@ public class LavaOverlayManager : MonoBehaviour
         RefreshAllTouchedCells(cells);
 
         if (debugLogging)
-            Debug.Log($"[LavaOverlayManager] Seeded lava cells={cells.Count}");
+            //Debug.Log($"[LavaOverlayManager] Seeded lava cells={cells.Count}");
     }
 
     public void SeedLavaCell(TileCoord coord)
@@ -441,7 +441,7 @@ public class LavaOverlayManager : MonoBehaviour
         MarkLavaSaveDirty();
 
         if (debugLogging)
-            Debug.Log("[LavaOverlayManager] Cleared all lava.");
+            //Debug.Log("[LavaOverlayManager] Cleared all lava.");
     }
 
     public void ExpandLavaOneTurn()
@@ -504,7 +504,7 @@ public class LavaOverlayManager : MonoBehaviour
             QueueFullVisualRefreshAroundLava();
 
             if (debugLogging)
-                Debug.Log($"[LavaOverlayManager] Expanded lava. NewCells={newCellsThisTurn}");
+                //Debug.Log($"[LavaOverlayManager] Expanded lava. NewCells={newCellsThisTurn}");
         }
     }
 
@@ -602,9 +602,9 @@ public class LavaOverlayManager : MonoBehaviour
 
         if (blocked && debugLogging)
         {
-            Debug.Log(
-                $"[LavaOverlayManager] Blocked lava at ({coord.x},{coord.y}) " +
-                $"because the cell is flooded. Depth={floodState.floodDepth01:0.00}");
+            //Debug.Log(
+                //$"[LavaOverlayManager] Blocked lava at ({coord.x},{coord.y}) " +
+                //$"because the cell is flooded. Depth={floodState.floodDepth01:0.00}");
         }
 
         return blocked;
@@ -733,9 +733,9 @@ public class LavaOverlayManager : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[LavaOverlayManager] Volcano lava emission. " +
-                $"Added={added}/{maxNewCells} Reheated={reheated}");
+            //Debug.Log(
+                //$"[LavaOverlayManager] Volcano lava emission. " +
+                //$"Added={added}/{maxNewCells} Reheated={reheated}");
         }
 
         return added;
@@ -1422,9 +1422,9 @@ public class LavaOverlayManager : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[LavaOverlayManager] Blocked lava at ({coord.x},{coord.y}) " +
-                    $"because environmentType={data.environmentType}");
+                //Debug.Log(
+                    //$"[LavaOverlayManager] Blocked lava at ({coord.x},{coord.y}) " +
+                    //$"because environmentType={data.environmentType}");
             }
 
             return false;
@@ -1434,9 +1434,9 @@ public class LavaOverlayManager : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[LavaOverlayManager] Blocked lava at ({coord.x},{coord.y}) " +
-                    $"because tileType={data.tileType}");
+                //Debug.Log(
+                    //$"[LavaOverlayManager] Blocked lava at ({coord.x},{coord.y}) " +
+                    //$"because tileType={data.tileType}");
             }
 
             return false;
@@ -1586,9 +1586,9 @@ public class LavaOverlayManager : MonoBehaviour
 
         if (debugLogging && ignitedAny)
         {
-            Debug.Log(
-                $"[LavaOverlayManager] Lava ignited fire at cell ({coord.x},{coord.y}) " +
-                $"heat={lavaHeat01:0.00} chance={finalChance:0.00} registeredByWeatherFireSystem={useWeatherFireSystemForLavaIgnition}");
+            //Debug.Log(
+                //$"[LavaOverlayManager] Lava ignited fire at cell ({coord.x},{coord.y}) " +
+                //$"heat={lavaHeat01:0.00} chance={finalChance:0.00} registeredByWeatherFireSystem={useWeatherFireSystemForLavaIgnition}");
         }
     }
 
@@ -1806,7 +1806,7 @@ public class LavaOverlayManager : MonoBehaviour
         OnLavaCellsChanged?.Invoke();
 
         if (debugLogging)
-            Debug.Log($"[LavaOverlayManager] Loaded lava overlay. Cells={restored}");
+            //Debug.Log($"[LavaOverlayManager] Loaded lava overlay. Cells={restored}");
     }
 
     private void StopLavaLoadSensitiveRoutines()

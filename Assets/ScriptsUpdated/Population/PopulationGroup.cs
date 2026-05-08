@@ -136,7 +136,7 @@ public class PopulationGroup : IEquatable<PopulationGroup>, ISerializationCallba
             if (debugAnyPopulationLossStack)
                 msg += $"\nStack:\n{Environment.StackTrace}";
 
-            Debug.LogWarning(msg);
+            //Debug.LogWarning(msg);
         }
     }
 

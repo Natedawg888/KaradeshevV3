@@ -194,8 +194,8 @@ public class MeleeAttackActionSO : UnitActionDefinitionSO, IPerTurnUnitAction
 
                 int killed = Mathf.Clamp(oldSize - newSize, 0, oldSize);
 
-                Debug.Log(
-                    $"[MeleeLootCheck] attacker={attacker.groupId}, oldHealth={oldHealth}, newHealth={animal.currentHealth}, oldSize={oldSize}, newSize={newSize}, killed={killed}");
+                //Debug.Log(
+                    //$"[MeleeLootCheck] attacker={attacker.groupId}, oldHealth={oldHealth}, newHealth={animal.currentHealth}, oldSize={oldSize}, newSize={newSize}, killed={killed}");
 
                 if (killed > 0 && animal.species != null && animal.species.lootPerKill != null)
                 {
@@ -806,16 +806,16 @@ public class MeleeAttackActionSO : UnitActionDefinitionSO, IPerTurnUnitAction
 
             if (knownMgr != null && !knownMgr.IsKnown(d.resource))
             {
-                Debug.Log($"[MeleeLoot] Skipped unknown resource '{d.resource.name}' for attacker {attacker.groupId}.");
+                //Debug.Log($"[MeleeLoot] Skipped unknown resource '{d.resource.name}' for attacker {attacker.groupId}.");
                 continue;
             }
 
             int amount = d.amountPerKill * kills;
             attacker.AddPendingLoot(d.resource, amount);
 
-            Debug.Log(
-                $"[MeleeLoot] Attacker={attacker.groupId} gained {amount}x {d.resource.name} " +
-                $"for {kills} kills. Pending now={attacker.GetPendingLootAmount(d.resource)}");
+            //Debug.Log(
+                //$"[MeleeLoot] Attacker={attacker.groupId} gained {amount}x {d.resource.name} " +
+                //$"for {kills} kills. Pending now={attacker.GetPendingLootAmount(d.resource)}");
         }
     }
 

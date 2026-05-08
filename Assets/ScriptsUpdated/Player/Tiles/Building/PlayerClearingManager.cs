@@ -99,27 +99,27 @@ public class PlayerClearingManager : MonoBehaviour
     {
         if (!target || def == null)
         {
-            Debug.LogError("[ClearingManager] StartManualClear: invalid args.");
+            //Debug.LogError("[ClearingManager] StartManualClear: invalid args.");
             return false;
         }
 
         BuildingStatus status = target.GetComponent<BuildingStatus>();
         if (!status || status.CurrentState != BuildingState.Destroyed)
         {
-            Debug.LogWarning("[ClearingManager] Target not in Destroyed state.");
+            //Debug.LogWarning("[ClearingManager] Target not in Destroyed state.");
             return false;
         }
 
         ManualClearJob job = target.GetComponent<ManualClearJob>();
         if (!job)
         {
-            Debug.LogError("[ClearingManager] ManualClearJob missing on target.");
+            //Debug.LogError("[ClearingManager] ManualClearJob missing on target.");
             return false;
         }
 
         if (job.IsActive)
         {
-            Debug.LogWarning("[ClearingManager] ManualClearJob already running on this building.");
+            //Debug.LogWarning("[ClearingManager] ManualClearJob already running on this building.");
             return false;
         }
 
@@ -129,7 +129,7 @@ public class PlayerClearingManager : MonoBehaviour
         // Spend costs
         if (!SpendCosts(def.manualClearCosts))
         {
-            Debug.LogWarning("[ClearingManager] Cannot afford manual clear costs.");
+            //Debug.LogWarning("[ClearingManager] Cannot afford manual clear costs.");
             return false;
         }
 
@@ -141,7 +141,7 @@ public class PlayerClearingManager : MonoBehaviour
         {
             if (populationManager == null)
             {
-                Debug.LogError("[ClearingManager] populationManager not assigned.");
+                //Debug.LogError("[ClearingManager] populationManager not assigned.");
                 RefundCosts(def.manualClearCosts);
                 return false;
             }
@@ -153,7 +153,7 @@ public class PlayerClearingManager : MonoBehaviour
                     nameof(ManualClearJob),
                     out reservationId))
             {
-                Debug.LogWarning($"[ClearingManager] Could not reserve population (need {needPop}).");
+                //Debug.LogWarning($"[ClearingManager] Could not reserve population (need {needPop}).");
                 RefundCosts(def.manualClearCosts);
                 return false;
             }
@@ -243,7 +243,7 @@ public class PlayerClearingManager : MonoBehaviour
 
         if (Inv == null)
         {
-            Debug.LogError("[ClearingManager] inventoryManager reference is null.");
+            //Debug.LogError("[ClearingManager] inventoryManager reference is null.");
             return false;
         }
 
@@ -266,7 +266,7 @@ public class PlayerClearingManager : MonoBehaviour
                 for (int r = 0; r < rollback.Count; r++)
                     Inv.TryAdd(rollback[r].resource, rollback[r].amount);
 
-                Debug.LogWarning("[ClearingManager] SpendCosts failed; rolled back.");
+                //Debug.LogWarning("[ClearingManager] SpendCosts failed; rolled back.");
                 return false;
             }
 
@@ -391,7 +391,7 @@ public class PlayerClearingManager : MonoBehaviour
 
             if (!jobsBySaveableId.TryGetValue(saved.buildingSaveableID, out ManualClearJob job) || job == null)
             {
-                Debug.LogWarning($"[ClearingManager] Could not resolve ManualClearJob for building saveable '{saved.buildingSaveableID}' while loading.");
+                //Debug.LogWarning($"[ClearingManager] Could not resolve ManualClearJob for building saveable '{saved.buildingSaveableID}' while loading.");
                 continue;
             }
 

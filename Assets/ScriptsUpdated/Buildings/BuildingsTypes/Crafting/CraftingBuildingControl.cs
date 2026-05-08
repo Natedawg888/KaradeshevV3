@@ -445,7 +445,7 @@ public class CraftingBuildingControl : MonoBehaviour
         NotifyOrdersChanged();
 
         if (!string.IsNullOrEmpty(reason))
-            Debug.Log($"[Crafting] All orders aborted: {reason}");
+            //Debug.Log($"[Crafting] All orders aborted: {reason}");
     }
 
     public List<ActiveCraftOrderSaveData> CaptureActiveOrders(string buildingSaveableID)
@@ -513,7 +513,7 @@ public class CraftingBuildingControl : MonoBehaviour
         CraftingRecipe recipe = recipeResolver != null ? recipeResolver(saved.craftingID) : null;
         if (recipe == null)
         {
-            Debug.LogWarning($"[CraftingBuildingControl] Could not resolve recipe '{saved.craftingID}' while loading.");
+            //Debug.LogWarning($"[CraftingBuildingControl] Could not resolve recipe '{saved.craftingID}' while loading.");
             return;
         }
 
@@ -701,12 +701,12 @@ public class CraftingBuildingControl : MonoBehaviour
 
         if (debugLogging && (result.cancelledOrders > 0 || result.workersKilled > 0))
         {
-            Debug.Log(
-                $"[CraftingBuildingControl] Tornado interrupted crafting at '{name}' | " +
-                $"CancelledOrders={result.cancelledOrders} | " +
-                $"WorkersRolled={result.workersRolled} | " +
-                $"WorkersKilled={result.workersKilled}"
-            );
+            //Debug.Log(
+                //$"[CraftingBuildingControl] Tornado interrupted crafting at '{name}' | " +
+                //$"CancelledOrders={result.cancelledOrders} | " +
+                //$"WorkersRolled={result.workersRolled} | " +
+                //$"WorkersKilled={result.workersKilled}"
+            //);
         }
 
         return result;
@@ -786,12 +786,12 @@ public class CraftingBuildingControl : MonoBehaviour
 
         if (debugLogging && (result.cancelledOrders > 0 || result.workersKilled > 0))
         {
-            Debug.Log(
-                $"[CraftingBuildingControl] Fire interrupted crafting at '{name}' | " +
-                $"CancelledOrders={result.cancelledOrders} | " +
-                $"WorkersRolled={result.workersRolled} | " +
-                $"WorkersKilled={result.workersKilled}"
-            );
+            //Debug.Log(
+                //$"[CraftingBuildingControl] Fire interrupted crafting at '{name}' | " +
+                //$"CancelledOrders={result.cancelledOrders} | " +
+                //$"WorkersRolled={result.workersRolled} | " +
+                //$"WorkersKilled={result.workersKilled}"
+            //);
         }
 
         return result;
@@ -878,11 +878,11 @@ public class CraftingBuildingControl : MonoBehaviour
 
                 if (debugLogging)
                 {
-                    Debug.Log(
-                        $"[CraftingBuildingControl] Crafter wear | Building='{name}' | " +
-                        $"Person={person.Id} | Age={person.AggregatedAgeGroup} | " +
-                        $"Resistance01={ageResistance01:F2} | " +
-                        $"Health {oldHealth:F3}->{newHealth:F3}");
+                    //Debug.Log(
+                        //$"[CraftingBuildingControl] Crafter wear | Building='{name}' | " +
+                        //$"Person={person.Id} | Age={person.AggregatedAgeGroup} | " +
+                        //$"Resistance01={ageResistance01:F2} | " +
+                        //$"Health {oldHealth:F3}->{newHealth:F3}");
                 }
             }
         }
@@ -895,10 +895,10 @@ public class CraftingBuildingControl : MonoBehaviour
 
         if (debugLogging && affectedWorkers > 0)
         {
-            Debug.Log(
-                $"[CraftingBuildingControl] Crafting wear at '{name}' | " +
-                $"AffectedWorkers={affectedWorkers} | " +
-                $"TotalHealthLoss={totalHealthLoss:F3}");
+            //Debug.Log(
+                //$"[CraftingBuildingControl] Crafting wear at '{name}' | " +
+                //$"AffectedWorkers={affectedWorkers} | " +
+                //$"TotalHealthLoss={totalHealthLoss:F3}");
         }
 
         return affectedWorkers;
@@ -939,12 +939,12 @@ public class CraftingBuildingControl : MonoBehaviour
 
         if (debugDiseaseCraftingOutput && diseaseMultiplier < 0.999f)
         {
-            Debug.Log(
-                $"[CraftingBuildingControl] Disease lowered crafting output. " +
-                $"Building={name}, " +
-                $"HealthMultiplier={healthMultiplier:F3}, " +
-                $"DiseaseMultiplier={diseaseMultiplier:F3}, " +
-                $"FinalMultiplier={finalMultiplier:F3}");
+            //Debug.Log(
+                //$"[CraftingBuildingControl] Disease lowered crafting output. " +
+                //$"Building={name}, " +
+                //$"HealthMultiplier={healthMultiplier:F3}, " +
+                //$"DiseaseMultiplier={diseaseMultiplier:F3}, " +
+                //$"FinalMultiplier={finalMultiplier:F3}");
         }
 
         return Mathf.Clamp(finalMultiplier, craftingMinimumOutputMultiplier, 1f);
@@ -1072,9 +1072,9 @@ public class CraftingBuildingControl : MonoBehaviour
         {
             if (infections > 0)
             {
-                Debug.Log(
-                    $"[CraftingBuildingControl] Weather disease exposure at '{name}'. " +
-                    $"Workers={_tmpCraftingWeatherDiseaseIds.Count}, Infections={infections}");
+                //Debug.Log(
+                    //$"[CraftingBuildingControl] Weather disease exposure at '{name}'. " +
+                    //$"Workers={_tmpCraftingWeatherDiseaseIds.Count}, Infections={infections}");
             }
         }
 

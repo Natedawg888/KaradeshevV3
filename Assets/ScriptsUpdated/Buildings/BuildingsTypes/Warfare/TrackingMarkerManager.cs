@@ -61,7 +61,7 @@ public class TrackingMarkerManager : MonoBehaviour
         var ui = GetMarkerUI(tile);
         if (ui == null)
         {
-            Debug.LogWarning($"[TrackingMarkerManager] Tile '{tile.name}' has no TileTrackingMarkerUI.");
+            //Debug.LogWarning($"[TrackingMarkerManager] Tile '{tile.name}' has no TileTrackingMarkerUI.");
             return;
         }
 

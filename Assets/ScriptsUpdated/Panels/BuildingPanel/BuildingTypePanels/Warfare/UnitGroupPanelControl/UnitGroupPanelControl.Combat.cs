@@ -11,14 +11,14 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         var originTile = ResolveOwnerTileForCombat();
         if (originTile == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] OpenMeleeTargetsPanel: could not resolve owner/origin tile.");
+            //Debug.LogWarning("[UnitGroupPanel] OpenMeleeTargetsPanel: could not resolve owner/origin tile.");
             return;
         }
 
         var targetTile = ResolvePreferredMeleeTargetTile(meleeAction, originTile);
         if (targetTile == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] OpenMeleeTargetsPanel: could not resolve a valid melee target tile.");
+            //Debug.LogWarning("[UnitGroupPanel] OpenMeleeTargetsPanel: could not resolve a valid melee target tile.");
             return;
         }
 
@@ -36,13 +36,13 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         var originTile = ResolveOwnerTileForCombat();
         if (originTile == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] OpenSurroundTargetsPanel: could not resolve owner/origin tile.");
+            //Debug.LogWarning("[UnitGroupPanel] OpenSurroundTargetsPanel: could not resolve owner/origin tile.");
             return;
         }
 
         if (!surroundAction.IsValidTarget(_group, originTile, originTile))
         {
-            Debug.LogWarning("[UnitGroupPanel] OpenSurroundTargetsPanel: origin tile is not valid for surround.");
+            //Debug.LogWarning("[UnitGroupPanel] OpenSurroundTargetsPanel: origin tile is not valid for surround.");
             return;
         }
 
@@ -59,7 +59,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
     {
         if (meleeTargetsPanelRoot == null || meleeTargetsContentRoot == null || meleeTargetItemPrefab == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Combat targets UI not wired in inspector.");
+            //Debug.LogWarning("[UnitGroupPanel] Combat targets UI not wired in inspector.");
             return;
         }
 
@@ -322,7 +322,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         var originTile = ResolveOwnerTileForCombat();
         if (originTile == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] BeginMeleeAttack: could not resolve owner/origin tile.");
+            //Debug.LogWarning("[UnitGroupPanel] BeginMeleeAttack: could not resolve owner/origin tile.");
             return;
         }
 
@@ -331,7 +331,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         if (!meleeAction.IsValidTarget(_group, originTile, targetTile))
         {
-            Debug.Log("[UnitGroupPanel] BeginMeleeAttack: target tile is not valid.");
+            //Debug.Log("[UnitGroupPanel] BeginMeleeAttack: target tile is not valid.");
             return;
         }
 
@@ -375,7 +375,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         var originTile = ResolveOwnerTileForCombat();
         if (originTile == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] BeginSurroundAction: could not resolve owner/origin tile.");
+            //Debug.LogWarning("[UnitGroupPanel] BeginSurroundAction: could not resolve owner/origin tile.");
             return;
         }
 
@@ -384,7 +384,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         if (!surroundAction.IsValidTarget(_group, originTile, targetTile))
         {
-            Debug.Log("[UnitGroupPanel] BeginSurroundAction: target tile is not valid.");
+            //Debug.Log("[UnitGroupPanel] BeginSurroundAction: target tile is not valid.");
             return;
         }
 

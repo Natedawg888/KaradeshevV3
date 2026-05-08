@@ -91,7 +91,7 @@ public class NotificationManager : MonoBehaviour
     {
         _notifications.Add(notification);
 
-        Debug.Log($"[NotificationManager] Added: [{notification.type}] {notification.title} — {notification.message}");
+        //Debug.Log($"[NotificationManager] Added: [{notification.type}] {notification.title} — {notification.message}");
 
         SaveSystem.MarkSectionDirty(SaveSectionKeys.Notifications);
         OnNotificationAdded?.Invoke(notification);
@@ -113,7 +113,7 @@ public class NotificationManager : MonoBehaviour
 
         if (anyChanged)
         {
-            Debug.Log("[NotificationManager] All notifications marked as read.");
+            //Debug.Log("[NotificationManager] All notifications marked as read.");
             OnNotificationsChanged?.Invoke();
         }
     }

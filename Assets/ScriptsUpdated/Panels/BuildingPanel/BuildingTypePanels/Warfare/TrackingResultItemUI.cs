@@ -48,7 +48,7 @@ public class TrackingResultItemUI : MonoBehaviour
 
             if (tile == null)
             {
-                Debug.LogWarning("[TrackingResultItemUI] Could not find source tile to show marker.");
+                //Debug.LogWarning("[TrackingResultItemUI] Could not find source tile to show marker.");
                 return;
             }
 
@@ -91,7 +91,7 @@ public class TrackingResultItemUI : MonoBehaviour
             var mgr = TrackingMarkerManager.Instance;
             if (mgr == null)
             {
-                Debug.LogWarning("[TrackingResultItemUI] No TrackingMarkerManager in scene.");
+                //Debug.LogWarning("[TrackingResultItemUI] No TrackingMarkerManager in scene.");
                 return;
             }
 

@@ -81,7 +81,7 @@ public class ProductionBuildingPanelControl : MonoBehaviour
 
         if (_production == null)
         {
-            Debug.LogError("[ProductionPanel] Building has no ProductionBuildingControl.");
+            //Debug.LogError("[ProductionPanel] Building has no ProductionBuildingControl.");
             return;
         }
 
@@ -146,7 +146,7 @@ public class ProductionBuildingPanelControl : MonoBehaviour
             ProductionPlan plan = productionPlanManager.GetByID(knownId);
             if (plan == null)
             {
-                Debug.LogWarning($"[ProductionPanel] Known production id '{knownId}' NOT found in ProductionPlanManager.");
+                //Debug.LogWarning($"[ProductionPanel] Known production id '{knownId}' NOT found in ProductionPlanManager.");
                 continue;
             }
 
@@ -156,7 +156,7 @@ public class ProductionBuildingPanelControl : MonoBehaviour
 
             if (!_production.IsPlanAllowed(plan.productionID))
             {
-                Debug.Log($"[ProductionPanel] Plan '{plan.productionID}' exists but NOT allowed for building '{_building?.buildingID}'.");
+                //Debug.Log($"[ProductionPanel] Plan '{plan.productionID}' exists but NOT allowed for building '{_building?.buildingID}'.");
                 continue;
             }
 

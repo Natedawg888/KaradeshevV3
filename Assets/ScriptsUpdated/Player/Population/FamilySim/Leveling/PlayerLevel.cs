@@ -154,13 +154,13 @@ public class PlayerLevel : MonoBehaviour
 
         if (levelManager == null)
         {
-            Debug.LogError("PlayerLevel: LevelManager reference is missing while loading.");
+            //Debug.LogError("PlayerLevel: LevelManager reference is missing while loading.");
             return;
         }
 
         if (turnSystem == null)
         {
-            Debug.LogError("PlayerLevel: TurnSystem reference is missing while loading.");
+            //Debug.LogError("PlayerLevel: TurnSystem reference is missing while loading.");
             return;
         }
 

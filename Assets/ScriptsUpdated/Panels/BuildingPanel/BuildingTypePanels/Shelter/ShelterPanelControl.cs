@@ -84,7 +84,7 @@ public class ShelterPanelControl : MonoBehaviour
 
         if (_shelter == null)
         {
-            Debug.LogError("[ShelterPanel] Building has no ShelterControl.");
+            //Debug.LogError("[ShelterPanel] Building has no ShelterControl.");
             return;
         }
 

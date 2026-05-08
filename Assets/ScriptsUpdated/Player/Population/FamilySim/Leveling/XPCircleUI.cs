@@ -62,7 +62,7 @@ public class XPCircleUI : MonoBehaviour
             : FindObjectOfType<PlayerLevel>();
 
         if (player == null)
-            Debug.LogWarning("[XPCircleUI] No PlayerLevel found in scene.");
+            //Debug.LogWarning("[XPCircleUI] No PlayerLevel found in scene.");
     }
 
     private void Subscribe()

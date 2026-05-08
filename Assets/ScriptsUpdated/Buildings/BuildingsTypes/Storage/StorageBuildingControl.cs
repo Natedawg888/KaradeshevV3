@@ -733,9 +733,9 @@ public class StorageBuildingControl : MonoBehaviour
             if (debugLogging)
             {
                 string resourceName = def != null ? def.name : item.resourceID;
-                Debug.Log(
-                    $"[StorageBuildingControl] Fire destroyed {amountToDestroy}x {resourceName} " +
-                    $"from '{name}'. Remaining stack={Mathf.Max(0, item.amount)}");
+                //Debug.Log(
+                    //$"[StorageBuildingControl] Fire destroyed {amountToDestroy}x {resourceName} " +
+                    //$"from '{name}'. Remaining stack={Mathf.Max(0, item.amount)}");
             }
 
             if (item.amount <= 0)
@@ -751,9 +751,9 @@ public class StorageBuildingControl : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[StorageBuildingControl] Fire destroyed {destroyedTotal} total resources " +
-                $"from '{name}'. Before={totalBefore}, After={GetTotalStoredAmount()}");
+            //Debug.Log(
+                //$"[StorageBuildingControl] Fire destroyed {destroyedTotal} total resources " +
+                //$"from '{name}'. Before={totalBefore}, After={GetTotalStoredAmount()}");
         }
 
         return destroyedTotal;

@@ -38,19 +38,19 @@ public class ResourceDictionary : MonoBehaviour
         {
             if (def == null)
             {
-                Debug.LogWarning("ResourceDictionary: null entry in allResources, skipping.");
+                //Debug.LogWarning("ResourceDictionary: null entry in allResources, skipping.");
                 continue;
             }
 
             if (string.IsNullOrWhiteSpace(def.resourceID))
             {
-                Debug.LogWarning($"ResourceDefinition '{def.name}' has empty resourceID; skipping registration.");
+                //Debug.LogWarning($"ResourceDefinition '{def.name}' has empty resourceID; skipping registration.");
                 continue;
             }
 
             if (byID.ContainsKey(def.resourceID))
             {
-                Debug.LogWarning($"Duplicate ResourceDefinition ID '{def.resourceID}' in '{def.name}'; skipping.");
+                //Debug.LogWarning($"Duplicate ResourceDefinition ID '{def.resourceID}' in '{def.name}'; skipping.");
                 continue;
             }
 

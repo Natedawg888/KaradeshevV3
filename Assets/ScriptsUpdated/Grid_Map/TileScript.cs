@@ -206,7 +206,7 @@ public class TileScript : MonoBehaviour
         if (candidates.Count == 0)
         {
             if (logSpawnDebug)
-                Debug.LogWarning("[TileScript] No candidates found under strict adjacency rules. Relaxing as last resort.");
+                //Debug.LogWarning("[TileScript] No candidates found under strict adjacency rules. Relaxing as last resort.");
             BuildCandidates_AllOptions(climateMgr, candidates, relaxAdjacencyRulesAsLastResort: true);
         }
 
@@ -375,7 +375,7 @@ public class TileScript : MonoBehaviour
             string presetName = presetMgr != null && presetMgr.GetCurrentPreset() != null
                 ? presetMgr.GetCurrentPreset().presetName
                 : "NULL";
-            Debug.Log($"[TileScript] Preset={presetName} hasClimate={hasClimate} chosenType={chosenCand.opt.tileType} chosenEnv={chosenCand.variant.environmentType} candidates={candidates.Count}");
+            //Debug.Log($"[TileScript] Preset={presetName} hasClimate={hasClimate} chosenType={chosenCand.opt.tileType} chosenEnv={chosenCand.variant.environmentType} candidates={candidates.Count}");
         }
 
         // 8) Spawn
@@ -990,7 +990,7 @@ public class TileScript : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[TileScript] Spawned environment has no EnvironmentStatus; cannot apply discovery state.");
+            //Debug.LogWarning("[TileScript] Spawned environment has no EnvironmentStatus; cannot apply discovery state.");
         }
     }
 

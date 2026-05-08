@@ -427,7 +427,7 @@ public class DiscoveredTilePanelControl : MonoBehaviour
         if (lowDiscoveryPopup)
             lowDiscoveryPopup.Show(title, body);
         else
-            Debug.LogWarning("[DiscoveredTilePanel] lowDiscoveryPopup not set.");
+            //Debug.LogWarning("[DiscoveredTilePanel] lowDiscoveryPopup not set.");
     }
 
     public void Hide()
@@ -553,13 +553,13 @@ public class DiscoveredTilePanelControl : MonoBehaviour
     {
         if (currentEnv == null)
         {
-            Debug.Log("[Gather] Blocked: currentEnv is null");
+            //Debug.Log("[Gather] Blocked: currentEnv is null");
             return;
         }
 
         if (currentEnv.isGathering)
         {
-            Debug.Log("[Gather] Blocked: already gathering (currentEnv.isGathering == true)");
+            //Debug.Log("[Gather] Blocked: already gathering (currentEnv.isGathering == true)");
             return;
         }
 
@@ -572,7 +572,7 @@ public class DiscoveredTilePanelControl : MonoBehaviour
         if (CivilizationDiscoverySystem.Instance != null &&
             CivilizationDiscoverySystem.Instance.ShouldBlockForRisk(failureChance01))
         {
-            Debug.Log($"[Gather] Blocked: risk system blocked it (failChance={(failureChance01 * 100f):0.#}%) -> showing blocked popup");
+            //Debug.Log($"[Gather] Blocked: risk system blocked it (failChance={(failureChance01 * 100f):0.#}%) -> showing blocked popup");
             ShowGatherBlockedPopup();
             return;
         }
@@ -592,7 +592,7 @@ public class DiscoveredTilePanelControl : MonoBehaviour
         int available = PlayersPopulationManager.Instance?.GetAvailableTaskPopulation() ?? 0;
         if (available < required)
         {
-            Debug.Log($"[Gather] Blocked: not enough population (available={available}, required={required}) -> showing details panel");
+            //Debug.Log($"[Gather] Blocked: not enough population (available={available}, required={required}) -> showing details panel");
             gatheringDetailsPanel?.ShowFor(currentEnv, showNoResources: false);
             return;
         }
@@ -604,7 +604,7 @@ public class DiscoveredTilePanelControl : MonoBehaviour
 
         if (started)
         {
-            Debug.Log("[Gather] Started: StartGathering returned true");
+            //Debug.Log("[Gather] Started: StartGathering returned true");
 
             if (gatherButton != null) gatherButton.interactable = false;
 
@@ -624,13 +624,13 @@ public class DiscoveredTilePanelControl : MonoBehaviour
         }
         else
         {
-            Debug.Log("[Gather] Blocked: StartGathering returned false -> showing details panel");
+            //Debug.Log("[Gather] Blocked: StartGathering returned false -> showing details panel");
             gatheringDetailsPanel?.ShowFor(currentEnv, showNoResources: true);
         }
 
         if (currentEnv.isGathering)
         {
-            Debug.Log("[Gather] UI: disabling build button because gathering is active");
+            //Debug.Log("[Gather] UI: disabling build button because gathering is active");
             buildButton.interactable = false;
         }
     }

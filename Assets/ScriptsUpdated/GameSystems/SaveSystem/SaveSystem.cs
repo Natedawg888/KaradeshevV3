@@ -110,12 +110,12 @@ public class SaveSystem : MonoBehaviour
 
             if (!string.IsNullOrEmpty(error))
             {
-                Debug.LogError("[SaveSystem] Background save failed:\n" + error);
+                //Debug.LogError("[SaveSystem] Background save failed:\n" + error);
                 OnSaveFailed?.Invoke(error);
             }
             else
             {
-                Debug.Log("[SaveSystem] Background save completed successfully.");
+                //Debug.Log("[SaveSystem] Background save completed successfully.");
                 OnSaveCompleted?.Invoke();
             }
         }
@@ -234,7 +234,7 @@ public class SaveSystem : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError("[SaveSystem] Failed to delete save files:\n" + ex);
+            //Debug.LogError("[SaveSystem] Failed to delete save files:\n" + ex);
         }
     }
 
@@ -302,7 +302,7 @@ public class SaveSystem : MonoBehaviour
 
         if (_hasCachedSnapshot && !HasAnyDirtySections())
         {
-            Debug.Log("[SaveSystem] No dirty sections. Reusing cached snapshot.");
+            //Debug.Log("[SaveSystem] No dirty sections. Reusing cached snapshot.");
             SaveSnapshot cachedSnapshot = CreateWorkingSnapshotFromCache();
             cachedSnapshot.meta = BuildMetaForSnapshot(cachedSnapshot);
             StartBackgroundWrite(cachedSnapshot, slot);
@@ -324,25 +324,25 @@ public class SaveSystem : MonoBehaviour
         {
             if (_hasCachedSnapshot && !section.IsDirty)
             {
-                Debug.Log($"[SaveSystem] Reusing cached section '{section.Key}'.");
+                //Debug.Log($"[SaveSystem] Reusing cached section '{section.Key}'.");
                 continue;
             }
 
             float start = Time.realtimeSinceStartup;
             yield return section.CaptureInto(snapshot, context, saveObjectsPerFrame);
-            Debug.Log($"[SaveSystem] Captured section '{section.Key}' in {Time.realtimeSinceStartup - start:0.000}s");
+            //Debug.Log($"[SaveSystem] Captured section '{section.Key}' in {Time.realtimeSinceStartup - start:0.000}s");
         }
 
         int liveBuildingCount = FindObjectsOfType<BuildingSaveable>(true).Length;
         int liveConstructionCount = FindObjectsOfType<ConstructionTileSaveable>(true).Length;
 
-        Debug.Log($"[SaveSystem] Snapshot counts: tiles={snapshot.tiles.Count}, buildings={snapshot.buildings.Count}, constructions={snapshot.constructions.Count}");
-        Debug.Log($"[SaveSystem] Live counts: buildings={liveBuildingCount}, constructions={liveConstructionCount}");
+        //Debug.Log($"[SaveSystem] Snapshot counts: tiles={snapshot.tiles.Count}, buildings={snapshot.buildings.Count}, constructions={snapshot.constructions.Count}");
+        //Debug.Log($"[SaveSystem] Live counts: buildings={liveBuildingCount}, constructions={liveConstructionCount}");
 
         if (liveBuildingCount > 0 && snapshot.buildings.Count == 0)
         {
             string error = "[SaveSystem] Refusing to save: live buildings exist, but snapshot.buildings is empty.";
-            Debug.LogError(error);
+            //Debug.LogError(error);
             OnSaveFailed?.Invoke(error);
 
             _isSaving = false;
@@ -353,7 +353,7 @@ public class SaveSystem : MonoBehaviour
         if (liveConstructionCount > 0 && snapshot.constructions.Count == 0)
         {
             string error = "[SaveSystem] Refusing to save: live construction tiles exist, but snapshot.constructions is empty.";
-            Debug.LogError(error);
+            //Debug.LogError(error);
             OnSaveFailed?.Invoke(error);
 
             _isSaving = false;
@@ -402,7 +402,7 @@ public class SaveSystem : MonoBehaviour
             }
         });
 
-        Debug.Log($"[SaveSystem] Save write started for slot: {slot}");
+        //Debug.Log($"[SaveSystem] Save write started for slot: {slot}");
     }
 
     private void WriteSnapshotToDisk(SaveSnapshot snapshot, string rootPath)
@@ -570,7 +570,7 @@ public class SaveSystem : MonoBehaviour
         {
             rootPath = _closeSaveFilePath;
             meta = ReadJsonFile<EnvironmentSaveMeta>(rootPath);
-            Debug.Log("[SaveSystem] Loading close save.");
+            //Debug.Log("[SaveSystem] Loading close save.");
             return true;
         }
 
@@ -578,7 +578,7 @@ public class SaveSystem : MonoBehaviour
         {
             rootPath = _turnAutoSaveFilePath;
             meta = ReadJsonFile<EnvironmentSaveMeta>(rootPath);
-            Debug.LogWarning("[SaveSystem] Close save invalid or incomplete. Falling back to turn autosave.");
+            //Debug.LogWarning("[SaveSystem] Close save invalid or incomplete. Falling back to turn autosave.");
             return true;
         }
 
@@ -596,7 +596,7 @@ public class SaveSystem : MonoBehaviour
         string backupPath = path + ".bak";
         if (File.Exists(backupPath))
         {
-            Debug.LogWarning($"[SaveSystem] Main save failed, trying backup: {backupPath}");
+            //Debug.LogWarning($"[SaveSystem] Main save failed, trying backup: {backupPath}");
             loaded = TryReadJsonFile<T>(backupPath);
 
             if (loaded != null)
@@ -636,12 +636,12 @@ public class SaveSystem : MonoBehaviour
         }
         catch (CryptographicException ex)
         {
-            Debug.LogError($"[SaveSystem] Save file '{path}' failed validation or was tampered with:\n{ex}");
+            //Debug.LogError($"[SaveSystem] Save file '{path}' failed validation or was tampered with:\n{ex}");
             return null;
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[SaveSystem] Failed to read save file '{path}':\n{ex}");
+            //Debug.LogError($"[SaveSystem] Failed to read save file '{path}':\n{ex}");
             return null;
         }
     }
@@ -658,10 +658,10 @@ public class SaveSystem : MonoBehaviour
         }
 
         if (savedTilePlacer == null)
-            Debug.LogWarning("[SaveSystem] SavedTilePlacer was not assigned before load.");
+            //Debug.LogWarning("[SaveSystem] SavedTilePlacer was not assigned before load.");
 
         if (tileActivator == null)
-            Debug.LogWarning("[SaveSystem] TileActivator was not assigned before load.");
+            //Debug.LogWarning("[SaveSystem] TileActivator was not assigned before load.");
     }
 
     private void BuildPrefabLookups()
@@ -715,7 +715,7 @@ public class SaveSystem : MonoBehaviour
                 resourceLookup.Add(def.name, def);
         }
 
-        Debug.Log($"[SaveSystem] Prefab lookup built. Tiles={tilePrefabLookup.Count}, WorldObjects={buildingPrefabLookup.Count}");
+        //Debug.Log($"[SaveSystem] Prefab lookup built. Tiles={tilePrefabLookup.Count}, WorldObjects={buildingPrefabLookup.Count}");
     }
 
     private static string CleanPrefabName(string rawName)
@@ -741,14 +741,14 @@ public class SaveSystem : MonoBehaviour
 
         if (meta == null || !meta.isChunkedSave)
         {
-            Debug.LogWarning("[SaveSystem] Meta is null or not chunked. No tile chunks loaded.");
+            //Debug.LogWarning("[SaveSystem] Meta is null or not chunked. No tile chunks loaded.");
             yield break;
         }
 
         string rootDir = Path.GetDirectoryName(rootPath);
         string rootStem = Path.GetFileNameWithoutExtension(rootPath);
 
-        Debug.Log($"[SaveSystem] LoadTileChunks: meta.tileChunkCount={meta.tileChunkCount}");
+        //Debug.Log($"[SaveSystem] LoadTileChunks: meta.tileChunkCount={meta.tileChunkCount}");
 
         int chunkCount = Mathf.Max(0, meta.tileChunkCount);
 
@@ -758,7 +758,7 @@ public class SaveSystem : MonoBehaviour
             string[] discovered = Directory.GetFiles(rootDir, $"{rootStem}.world_tiles_*.json");
             Array.Sort(discovered, StringComparer.OrdinalIgnoreCase);
 
-            Debug.Log($"[SaveSystem] Meta had 0 tile chunks. Found {discovered.Length} tile chunk files on disk.");
+            //Debug.Log($"[SaveSystem] Meta had 0 tile chunks. Found {discovered.Length} tile chunk files on disk.");
 
             for (int i = 0; i < discovered.Length; i++)
             {
@@ -768,11 +768,11 @@ public class SaveSystem : MonoBehaviour
                 if (chunk != null && chunk.tiles != null)
                 {
                     outTiles.AddRange(chunk.tiles);
-                    Debug.Log($"[SaveSystem] Loaded recovery tile chunk '{Path.GetFileName(path)}' with {chunk.tiles.Count} tiles.");
+                    //Debug.Log($"[SaveSystem] Loaded recovery tile chunk '{Path.GetFileName(path)}' with {chunk.tiles.Count} tiles.");
                 }
                 else
                 {
-                    Debug.LogWarning($"[SaveSystem] Recovery tile chunk '{Path.GetFileName(path)}' was empty or invalid.");
+                    //Debug.LogWarning($"[SaveSystem] Recovery tile chunk '{Path.GetFileName(path)}' was empty or invalid.");
                 }
 
                 yield return null;
@@ -786,18 +786,18 @@ public class SaveSystem : MonoBehaviour
             string path = GetSavePartPath(rootPath, $"world_tiles_{i}");
             bool exists = File.Exists(path) || File.Exists(path + ".bak");
 
-            Debug.Log($"[SaveSystem] Loading tile chunk {i + 1}/{chunkCount}: {path} exists={exists}");
+            //Debug.Log($"[SaveSystem] Loading tile chunk {i + 1}/{chunkCount}: {path} exists={exists}");
 
             TileChunkSaveData chunk = ReadJsonFile<TileChunkSaveData>(path);
 
             if (chunk != null && chunk.tiles != null)
             {
                 outTiles.AddRange(chunk.tiles);
-                Debug.Log($"[SaveSystem] Loaded chunk {i} with {chunk.tiles.Count} tiles.");
+                //Debug.Log($"[SaveSystem] Loaded chunk {i} with {chunk.tiles.Count} tiles.");
             }
             else
             {
-                Debug.LogWarning($"[SaveSystem] Tile chunk file missing or empty: {path}");
+                //Debug.LogWarning($"[SaveSystem] Tile chunk file missing or empty: {path}");
             }
 
             yield return null;
@@ -844,7 +844,7 @@ public class SaveSystem : MonoBehaviour
             if (buildingData == null || buildingData.saveData == null || buildingData.saveData.transformData == null)
                 continue;
 
-            Debug.Log($"[SaveSystem] Loading building prefab '{buildingData.prefabName}'");
+            //Debug.Log($"[SaveSystem] Loading building prefab '{buildingData.prefabName}'");
 
             BuildingSaveable targetBuilding = FindMatchingExistingBuilding(buildingData, existingBuildings, usedBuildings);
 
@@ -854,7 +854,7 @@ public class SaveSystem : MonoBehaviour
 
                 if (!buildingPrefabLookup.TryGetValue(prefabKey, out GameObject buildingPrefab))
                 {
-                    Debug.LogWarning("[SaveSystem] Building prefab not found for: " + buildingData.prefabName);
+                    //Debug.LogWarning("[SaveSystem] Building prefab not found for: " + buildingData.prefabName);
                     continue;
                 }
 
@@ -872,14 +872,14 @@ public class SaveSystem : MonoBehaviour
 
             if (targetBuilding == null)
             {
-                Debug.LogWarning($"[SaveSystem] Instantiated building prefab '{buildingData.prefabName}' but no BuildingSaveable was found.");
+                //Debug.LogWarning($"[SaveSystem] Instantiated building prefab '{buildingData.prefabName}' but no BuildingSaveable was found.");
                 continue;
             }
 
             usedBuildings.Add(targetBuilding);
             targetBuilding.LoadState(buildingData.saveData);
 
-            Debug.Log($"[SaveSystem] Restored building '{targetBuilding.name}' id='{buildingData.saveData.uniqueID}'");
+            //Debug.Log($"[SaveSystem] Restored building '{targetBuilding.name}' id='{buildingData.saveData.uniqueID}'");
         }
     }
 
@@ -944,7 +944,7 @@ public class SaveSystem : MonoBehaviour
 
             if (!buildingPrefabLookup.TryGetValue(prefabKey, out GameObject constructionPrefab))
             {
-                Debug.LogWarning("Construction prefab not found for: " + saved.constructionTilePrefabName);
+                //Debug.LogWarning("Construction prefab not found for: " + saved.constructionTilePrefabName);
                 continue;
             }
 
@@ -961,7 +961,7 @@ public class SaveSystem : MonoBehaviour
             if (saveable != null)
                 saveable.LoadFromSaveData(saved);
             else
-                Debug.LogWarning($"Loaded construction prefab '{constructionPrefab.name}' has no ConstructionTileSaveable.");
+                //Debug.LogWarning($"Loaded construction prefab '{constructionPrefab.name}' has no ConstructionTileSaveable.");
         }
     }
 
@@ -1034,16 +1034,16 @@ public class SaveSystem : MonoBehaviour
 
         if (!spawned)
         {
-            Debug.LogWarning(
-                $"Failed to restore environment on tile '{tile.name}'. " +
-                $"Wanted prefab '{envData.spawnedPrefabName}', envType '{envData.environmentType}', tileType '{envData.environmentTileType}'.");
+            //Debug.LogWarning(
+                //$"Failed to restore environment on tile '{tile.name}'. " +
+                //$"Wanted prefab '{envData.spawnedPrefabName}', envType '{envData.environmentType}', tileType '{envData.environmentTileType}'.");
             return;
         }
 
         EnvironmentControl envControl = tile.GetComponentInChildren<EnvironmentControl>(true);
         if (envControl == null)
         {
-            Debug.LogWarning($"Spawned environment on tile '{tile.name}' but no EnvironmentControl was found.");
+            //Debug.LogWarning($"Spawned environment on tile '{tile.name}' but no EnvironmentControl was found.");
             return;
         }
 
@@ -1075,7 +1075,7 @@ public class SaveSystem : MonoBehaviour
 
         if (!TryGetBestLoadRoot(out loadRootPath, out meta))
         {
-            Debug.LogWarning("[SaveSystem] No valid close save or turn autosave found.");
+            //Debug.LogWarning("[SaveSystem] No valid close save or turn autosave found.");
             _isLoading = false;
             yield break;
         }
@@ -1090,7 +1090,7 @@ public class SaveSystem : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[SaveSystem] SavedTilePlacer is missing, falling back to matching existing tiles.");
+            //Debug.LogWarning("[SaveSystem] SavedTilePlacer is missing, falling back to matching existing tiles.");
             yield return LoadTiles(loadedTiles);
         }
 
@@ -1105,7 +1105,7 @@ public class SaveSystem : MonoBehaviour
         ReportLoadProgress(3);
         yield return null;
 
-        Debug.Log($"[SaveSystem] meta.hasBuildings={meta.hasBuildings}");
+        //Debug.Log($"[SaveSystem] meta.hasBuildings={meta.hasBuildings}");
 
         BuildingSectionSaveData buildingSection = null;
         ConstructionSectionSaveData constructionSection = null;
@@ -1262,7 +1262,7 @@ public class SaveSystem : MonoBehaviour
             if (VolcanoManager.Instance != null)
                 VolcanoManager.Instance.LoadState(data.volcanoManagerData);
             else
-                Debug.LogWarning("[SaveSystem] Volcano manager save data exists, but no VolcanoManager was found.");
+                //Debug.LogWarning("[SaveSystem] Volcano manager save data exists, but no VolcanoManager was found.");
         }
 
         // Load lava first because flood checks lava blocking.
@@ -1277,7 +1277,7 @@ public class SaveSystem : MonoBehaviour
             if (floodSystem != null)
                 floodSystem.LoadState(data.floodSimulationData);
             else
-                Debug.LogWarning("[SaveSystem] Flood save data exists, but no FloodSimulationSystem was found.");
+                //Debug.LogWarning("[SaveSystem] Flood save data exists, but no FloodSimulationSystem was found.");
         }
 
         // Load fault lines before earthquake sim because the sim uses the fault generator for epicentres.
@@ -1289,7 +1289,7 @@ public class SaveSystem : MonoBehaviour
             if (faultLineGenerator != null)
                 faultLineGenerator.LoadState(data.earthquakeFaultLineData);
             else
-                Debug.LogWarning("[SaveSystem] Earthquake fault line save data exists, but no EarthquakeFaultLineGenerator was found.");
+                //Debug.LogWarning("[SaveSystem] Earthquake fault line save data exists, but no EarthquakeFaultLineGenerator was found.");
         }
 
         if (data.earthquakeSimulationData != null)
@@ -1300,7 +1300,7 @@ public class SaveSystem : MonoBehaviour
             if (earthquakeSystem != null)
                 earthquakeSystem.LoadState(data.earthquakeSimulationData);
             else
-                Debug.LogWarning("[SaveSystem] Earthquake simulation save data exists, but no EarthquakeSimulationSystem was found.");
+                //Debug.LogWarning("[SaveSystem] Earthquake simulation save data exists, but no EarthquakeSimulationSystem was found.");
         }
 
         if (data.fireSimulationData != null)
@@ -1308,7 +1308,7 @@ public class SaveSystem : MonoBehaviour
             if (WeatherFireSystem.Instance != null)
                 WeatherFireSystem.Instance.LoadState(data.fireSimulationData);
             else
-                Debug.LogWarning("[SaveSystem] Fire save data exists, but no WeatherFireSystem was found.");
+                //Debug.LogWarning("[SaveSystem] Fire save data exists, but no WeatherFireSystem was found.");
         }
 
         if (data.tsunamiSimulationData != null)
@@ -1316,7 +1316,7 @@ public class SaveSystem : MonoBehaviour
             if (TsunamiSimulationSystem.Instance != null)
                 TsunamiSimulationSystem.Instance.LoadState(data.tsunamiSimulationData);
             else
-                Debug.LogWarning("[SaveSystem] Tsunami save data exists, but no TsunamiSimulationSystem was found.");
+                //Debug.LogWarning("[SaveSystem] Tsunami save data exists, but no TsunamiSimulationSystem was found.");
         }
     }
 
@@ -1511,9 +1511,9 @@ public class SaveSystem : MonoBehaviour
 
         if (volcano == null)
         {
-            Debug.LogWarning(
-                $"[SaveSystem] Volcano data existed for tile '{tile.name}', " +
-                $"but no VolcanoTileState was found on restored environment '{spawnedInstance.name}'.");
+            //Debug.LogWarning(
+                //$"[SaveSystem] Volcano data existed for tile '{tile.name}', " +
+                //$"but no VolcanoTileState was found on restored environment '{spawnedInstance.name}'.");
             return;
         }
 

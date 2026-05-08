@@ -318,7 +318,7 @@ public class PlayerCraftingManager : MonoBehaviour
 
                 if (!bySaveableId.TryGetValue(saved.buildingSaveableID, out CraftingBuildingControl cbc) || cbc == null)
                 {
-                    Debug.LogWarning($"[Crafting] Could not resolve building '{saved.buildingSaveableID}' for active craft order '{saved.orderId}'.");
+                    //Debug.LogWarning($"[Crafting] Could not resolve building '{saved.buildingSaveableID}' for active craft order '{saved.orderId}'.");
                     continue;
                 }
 

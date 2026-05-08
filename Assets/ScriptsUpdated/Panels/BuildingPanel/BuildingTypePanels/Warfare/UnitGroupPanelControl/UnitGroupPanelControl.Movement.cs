@@ -40,7 +40,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
     {
         if (_group == null || _owner == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Cannot open movement panel: missing group/owner.");
+            //Debug.LogWarning("[UnitGroupPanel] Cannot open movement panel: missing group/owner.");
             return;
         }
 
@@ -61,13 +61,13 @@ public partial class UnitGroupPanelControl : MonoBehaviour
     {
         if (_group == null || _owner == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Cannot start movement: missing group/owner.");
+            //Debug.LogWarning("[UnitGroupPanel] Cannot start movement: missing group/owner.");
             return;
         }
 
         if (UnitGroupMovementManager.Instance == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Cannot start movement: no UnitGroupMovementManager in scene.");
+            //Debug.LogWarning("[UnitGroupPanel] Cannot start movement: no UnitGroupMovementManager in scene.");
             return;
         }
 
@@ -89,20 +89,20 @@ public partial class UnitGroupPanelControl : MonoBehaviour
     {
         if (_group == null || _owner == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Cannot start patrol: missing group/owner.");
+            //Debug.LogWarning("[UnitGroupPanel] Cannot start patrol: missing group/owner.");
             return;
         }
 
         // If we're standing on an undiscovered environment tile, do not allow patrol.
         if (IsOnUndiscoveredEnvironmentTile())
         {
-            Debug.Log("[UnitGroupPanel] Cannot start patrol: group is on an undiscovered environment tile.");
+            //Debug.Log("[UnitGroupPanel] Cannot start patrol: group is on an undiscovered environment tile.");
             return;
         }
 
         if (UnitGroupMovementManager.Instance == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Cannot start patrol: no UnitGroupMovementManager in scene.");
+            //Debug.LogWarning("[UnitGroupPanel] Cannot start patrol: no UnitGroupMovementManager in scene.");
             return;
         }
 

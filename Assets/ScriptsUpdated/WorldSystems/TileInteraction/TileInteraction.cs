@@ -130,7 +130,7 @@ public class TileInteraction : MonoBehaviour
 
         _cameraControl = FindObjectOfType<CameraControl>();
         if (_cameraControl == null)
-            Debug.LogWarning($"{nameof(TileInteraction)}: {nameof(CameraControl)} not found in scene.");
+            //Debug.LogWarning($"{nameof(TileInteraction)}: {nameof(CameraControl)} not found in scene.");
     }
 
     private void OnValidate()
@@ -481,7 +481,7 @@ public class TileInteraction : MonoBehaviour
         var envCtrl = tile.EnvironmentControl;
         if (envCtrl == null)
         {
-            Debug.LogWarning($"{nameof(TileInteraction)}: selected tile claims Environment but is missing {nameof(EnvironmentControl)}.");
+            //Debug.LogWarning($"{nameof(TileInteraction)}: selected tile claims Environment but is missing {nameof(EnvironmentControl)}.");
             HideAllPanels();
             return;
         }
@@ -527,7 +527,7 @@ public class TileInteraction : MonoBehaviour
     {
         if (collectedGoodsPanel == null)
         {
-            Debug.LogWarning($"{nameof(TileInteraction)}: {nameof(collectedGoodsPanel)} is not assigned in the inspector.");
+            //Debug.LogWarning($"{nameof(TileInteraction)}: {nameof(collectedGoodsPanel)} is not assigned in the inspector.");
             return;
         }
 

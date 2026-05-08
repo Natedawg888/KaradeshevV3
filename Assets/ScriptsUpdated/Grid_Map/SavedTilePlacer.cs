@@ -53,17 +53,17 @@ public class SavedTilePlacer : MonoBehaviour
 
     public IEnumerator PlaceSavedTilesCoroutine(List<TileSaveData> savedTiles)
     {
-        Debug.Log($"[SavedTilePlacer] START PlaceSavedTilesCoroutine. savedTiles={(savedTiles != null ? savedTiles.Count : 0)}");
+        //Debug.Log($"[SavedTilePlacer] START PlaceSavedTilesCoroutine. savedTiles={(savedTiles != null ? savedTiles.Count : 0)}");
 
         if (gridManager == null)
         {
-            Debug.LogError("[SavedTilePlacer] GridManager reference is missing.");
+            //Debug.LogError("[SavedTilePlacer] GridManager reference is missing.");
             yield break;
         }
 
         if (tilePrefabSource == null)
         {
-            Debug.LogError("[SavedTilePlacer] MapTilePlacer reference is missing.");
+            //Debug.LogError("[SavedTilePlacer] MapTilePlacer reference is missing.");
             yield break;
         }
 
@@ -75,19 +75,19 @@ public class SavedTilePlacer : MonoBehaviour
         BeginSharedLoadProgress();
         yield return null;
 
-        Debug.Log("[SavedTilePlacer] Clearing existing tiles...");
+        //Debug.Log("[SavedTilePlacer] Clearing existing tiles...");
         yield return StartCoroutine(ClearExistingTilesCoroutine());
 
-        Debug.Log("[SavedTilePlacer] Resetting grid occupancy...");
+        //Debug.Log("[SavedTilePlacer] Resetting grid occupancy...");
         TryResetGridOccupancy();
 
-        Debug.Log("[SavedTilePlacer] Rebuilding prefab lookup...");
+        //Debug.Log("[SavedTilePlacer] Rebuilding prefab lookup...");
         RebuildPrefabLookup();
-        Debug.Log($"[SavedTilePlacer] Prefab lookup count = {_prefabLookup.Count}");
+        //Debug.Log($"[SavedTilePlacer] Prefab lookup count = {_prefabLookup.Count}");
 
         if (savedTiles == null || savedTiles.Count == 0)
         {
-            Debug.LogWarning("[SavedTilePlacer] No saved tiles were provided.");
+            //Debug.LogWarning("[SavedTilePlacer] No saved tiles were provided.");
             EndSharedLoadProgress(false);
             MapTilePlacer.SetWorldReady(true);
             yield break;
@@ -110,7 +110,7 @@ public class SavedTilePlacer : MonoBehaviour
 
             if (string.IsNullOrWhiteSpace(tilePrefabName))
             {
-                Debug.LogWarning($"[SavedTilePlacer] Saved tile at index {i} has no tile prefab name.");
+                //Debug.LogWarning($"[SavedTilePlacer] Saved tile at index {i} has no tile prefab name.");
                 failedPrefabCount++;
                 continue;
             }
@@ -118,7 +118,7 @@ public class SavedTilePlacer : MonoBehaviour
             GameObject tilePrefab = ResolveTilePrefab(tilePrefabName);
             if (tilePrefab == null)
             {
-                Debug.LogWarning($"[SavedTilePlacer] Tile prefab not found for '{tilePrefabName}'.");
+                //Debug.LogWarning($"[SavedTilePlacer] Tile prefab not found for '{tilePrefabName}'.");
                 failedPrefabCount++;
                 continue;
             }
@@ -152,13 +152,13 @@ public class SavedTilePlacer : MonoBehaviour
                 else
                 {
                     failedRestoreCount++;
-                    Debug.LogWarning($"[SavedTilePlacer] Could not restore spawned environment for tile '{tileGO.name}'.");
+                    //Debug.LogWarning($"[SavedTilePlacer] Could not restore spawned environment for tile '{tileGO.name}'.");
                 }
             }
             else
             {
                 failedRestoreCount++;
-                Debug.LogWarning($"[SavedTilePlacer] Loaded tile prefab '{tilePrefab.name}' has no TileScript.");
+                //Debug.LogWarning($"[SavedTilePlacer] Loaded tile prefab '{tilePrefab.name}' has no TileScript.");
             }
 
             batch++;
@@ -169,9 +169,9 @@ public class SavedTilePlacer : MonoBehaviour
             }
         }
 
-        Debug.Log(
-            $"[SavedTilePlacer] DONE. restoredCount={restoredCount}, " +
-            $"failedPrefabCount={failedPrefabCount}, failedRestoreCount={failedRestoreCount}");
+        //Debug.Log(
+            //$"[SavedTilePlacer] DONE. restoredCount={restoredCount}, " +
+            //$"failedPrefabCount={failedPrefabCount}, failedRestoreCount={failedRestoreCount}");
 
         EndSharedLoadProgress(false);
         MapTilePlacer.SetWorldReady(true);
@@ -354,7 +354,7 @@ public class SavedTilePlacer : MonoBehaviour
         if (envControl == null)
         {
             if (logWarnings)
-                Debug.LogWarning($"[SavedTilePlacer] Spawned environment on tile '{tileScript.name}' but no EnvironmentControl was found.");
+                //Debug.LogWarning($"[SavedTilePlacer] Spawned environment on tile '{tileScript.name}' but no EnvironmentControl was found.");
             return false;
         }
 

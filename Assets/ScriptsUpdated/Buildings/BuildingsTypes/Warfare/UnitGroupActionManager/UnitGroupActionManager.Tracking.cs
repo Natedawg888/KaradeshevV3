@@ -7,21 +7,21 @@ public partial class UnitGroupActionManager
     {
         if (group == null || owner == null || actionDef == null)
         {
-            Debug.LogWarning("[UnitGroupActionManager] BeginTrackingForGroup: missing group/owner/actionDef.");
+            //Debug.LogWarning("[UnitGroupActionManager] BeginTrackingForGroup: missing group/owner/actionDef.");
             return;
         }
 
         var unit = group.unitType;
         if (unit == null || !actionDef.CanUnitUseAction(unit))
         {
-            Debug.LogWarning("[UnitGroupActionManager] BeginTrackingForGroup: unit cannot use this action.");
+            //Debug.LogWarning("[UnitGroupActionManager] BeginTrackingForGroup: unit cannot use this action.");
             return;
         }
 
         var originTile = owner.GetComponentInParent<TileControl>();
         if (originTile == null)
         {
-            Debug.LogWarning("[UnitGroupActionManager] BeginTrackingForGroup: owner has no TileControl parent.");
+            //Debug.LogWarning("[UnitGroupActionManager] BeginTrackingForGroup: owner has no TileControl parent.");
             return;
         }
 
@@ -33,7 +33,7 @@ public partial class UnitGroupActionManager
         group.activeActionTargetTile = originTile;
         group.remainingActionTurns = turns;
 
-        Debug.Log($"[UnitGroupActionManager] Group {group.groupId} started TRACK for {turns} turns.");
+        //Debug.Log($"[UnitGroupActionManager] Group {group.groupId} started TRACK for {turns} turns.");
 
         owner.RefreshMarker(group);
     }

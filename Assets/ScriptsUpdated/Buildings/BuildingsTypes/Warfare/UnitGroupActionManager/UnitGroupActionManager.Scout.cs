@@ -18,21 +18,21 @@ public partial class UnitGroupActionManager
     {
         if (group == null || owner == null || actionDef == null)
         {
-            Debug.LogWarning("[UnitGroupActionManager] BeginScoutForGroup: missing group/owner/actionDef.");
+            //Debug.LogWarning("[UnitGroupActionManager] BeginScoutForGroup: missing group/owner/actionDef.");
             return;
         }
 
         var unit = group.unitType;
         if (unit == null || !actionDef.CanUnitUseAction(unit))
         {
-            Debug.LogWarning("[UnitGroupActionManager] BeginScoutForGroup: unit cannot use this action.");
+            //Debug.LogWarning("[UnitGroupActionManager] BeginScoutForGroup: unit cannot use this action.");
             return;
         }
 
         var originTile = owner.GetComponentInParent<TileControl>();
         if (originTile == null)
         {
-            Debug.LogWarning("[UnitGroupActionManager] BeginScoutForGroup: owner has no TileControl parent.");
+            //Debug.LogWarning("[UnitGroupActionManager] BeginScoutForGroup: owner has no TileControl parent.");
             return;
         }
 
@@ -131,7 +131,7 @@ public partial class UnitGroupActionManager
             _activeScoutContext.owner == null ||
             _activeScoutContext.actionDef == null)
         {
-            Debug.LogWarning("[UnitGroupActionManager] OnScoutTileClicked with no active context.");
+            //Debug.LogWarning("[UnitGroupActionManager] OnScoutTileClicked with no active context.");
             ClearAllScoutButtons();
             return;
         }
@@ -143,7 +143,7 @@ public partial class UnitGroupActionManager
 
         if (targetTile == null)
         {
-            Debug.LogWarning("[UnitGroupActionManager] OnScoutTileClicked: targetTile is null.");
+            //Debug.LogWarning("[UnitGroupActionManager] OnScoutTileClicked: targetTile is null.");
             ClearAllScoutButtons();
             _activeScoutContext = null;
             return;
@@ -152,7 +152,7 @@ public partial class UnitGroupActionManager
         int turns = action.GetTurnCost(group, origin, targetTile);
         if (turns <= 0)
         {
-            Debug.LogWarning("[UnitGroupActionManager] OnScoutTileClicked: computed turn cost <= 0.");
+            //Debug.LogWarning("[UnitGroupActionManager] OnScoutTileClicked: computed turn cost <= 0.");
             ClearAllScoutButtons();
             _activeScoutContext = null;
             return;
@@ -163,7 +163,7 @@ public partial class UnitGroupActionManager
         group.activeActionTargetTile = targetTile;
         group.remainingActionTurns = turns;
 
-        Debug.Log($"[UnitGroupActionManager] Group {group.groupId} started SCOUT on {targetTile.name} for {turns} turns.");
+        //Debug.Log($"[UnitGroupActionManager] Group {group.groupId} started SCOUT on {targetTile.name} for {turns} turns.");
 
         ClearAllScoutButtons();
         _activeScoutContext = null;

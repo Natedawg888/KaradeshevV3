@@ -9,16 +9,16 @@ public class SceneStartupProbe : MonoBehaviour
         if (_sceneStartReference < 0f)
             _sceneStartReference = Time.realtimeSinceStartup;
 
-        Debug.Log($"[SceneProbe] Awake on {name}: {Time.realtimeSinceStartup:0.000}s");
+        //Debug.Log($"[SceneProbe] Awake on {name}: {Time.realtimeSinceStartup:0.000}s");
     }
 
     private void OnEnable()
     {
-        Debug.Log($"[SceneProbe] OnEnable on {name}: {Time.realtimeSinceStartup:0.000}s");
+        //Debug.Log($"[SceneProbe] OnEnable on {name}: {Time.realtimeSinceStartup:0.000}s");
     }
 
     private void Start()
     {
-        Debug.Log($"[SceneProbe] Start on {name}: {Time.realtimeSinceStartup:0.000}s");
+        //Debug.Log($"[SceneProbe] Start on {name}: {Time.realtimeSinceStartup:0.000}s");
     }
 }

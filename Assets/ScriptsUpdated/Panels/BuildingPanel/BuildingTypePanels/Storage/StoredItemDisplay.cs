@@ -71,7 +71,7 @@ public class StoredItemDisplay : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Could not take resources (likely no player inventory space).");
+            //Debug.LogWarning("Could not take resources (likely no player inventory space).");
         }
     }
 }

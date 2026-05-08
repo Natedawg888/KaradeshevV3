@@ -289,7 +289,7 @@ public class UnitGroupAdvanceChoiceItem : MonoBehaviour
 
         if (!_trainer.TryStartGroupAdvancement(_owner, _group, _targetUnit, out string failReason))
         {
-            Debug.LogWarning($"[AdvanceChoice] Failed to start advancement: {failReason}");
+            //Debug.LogWarning($"[AdvanceChoice] Failed to start advancement: {failReason}");
 
             // If fail due to resources, pop cost panel open with costs view
             if (!string.IsNullOrEmpty(failReason) && failReason.Contains("Not enough"))

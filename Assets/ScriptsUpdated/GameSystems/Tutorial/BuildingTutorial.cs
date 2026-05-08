@@ -177,7 +177,7 @@ public class BuildingTutorial : MonoBehaviour
 
         if (_starterBuilding == null)
         {
-            Debug.LogWarning("[BuildingTutorial] Could not resolve starter building.");
+            //Debug.LogWarning("[BuildingTutorial] Could not resolve starter building.");
             if (resumeTurnTimerWhenFinished)
                 TurnSystem.Instance?.ResumeTurnTimer();
             return;
@@ -373,7 +373,7 @@ public class BuildingTutorial : MonoBehaviour
 
         if (_activeCatalogItem == null)
         {
-            Debug.LogWarning("[BuildingTutorial] No building catalog item available for tutorial.");
+            //Debug.LogWarning("[BuildingTutorial] No building catalog item available for tutorial.");
             return true;
         }
 
@@ -437,7 +437,7 @@ public class BuildingTutorial : MonoBehaviour
         bool started = item.TryStartRealBuild();
         if (!started)
         {
-            Debug.LogWarning("[BuildingTutorial] Real build placement did not start.");
+            //Debug.LogWarning("[BuildingTutorial] Real build placement did not start.");
             return true;
         }
 
@@ -460,7 +460,7 @@ public class BuildingTutorial : MonoBehaviour
         BuildingConstruction construction = FindConstructionFor(def, env);
         if (construction == null)
         {
-            Debug.LogWarning("[BuildingTutorial] Could not find spawned BuildingConstruction after finalized placement.");
+            //Debug.LogWarning("[BuildingTutorial] Could not find spawned BuildingConstruction after finalized placement.");
             CompleteTutorial();
             yield break;
         }

@@ -205,7 +205,7 @@ public class ShelterControl : MonoBehaviour
 
         if (playerPop == null || familySim == null)
         {
-            Debug.LogError("[Shelter] Missing required managers.");
+            //Debug.LogError("[Shelter] Missing required managers.");
             enabled = false;
             return;
         }
@@ -812,20 +812,20 @@ public class ShelterControl : MonoBehaviour
     private void TryCreatePairsAndStartGestations(int requestedCount)
     {
         if (_status != null && _status.CurrentState == BuildingState.Destroyed) return;
-        if (pauseBirthing) { Debug.Log("[Shelter] birthing paused"); return; }
-        if (!_canCreateOrders) { Debug.Log("[Shelter] blocked: damaged"); return; }
-
-        if (requireHousedForPairing && housedFamilyIds.Count == 0)
-        {
-            Debug.Log("[Shelter] blocked: no housed families");
+        //if (pauseBirthing) { Debug.Log("[Shelter] birthing paused"); return; }
+        //if (!_canCreateOrders) { Debug.Log("[Shelter] blocked: damaged"); return; }
+//
+        //if (requireHousedForPairing && housedFamilyIds.Count == 0)
+        //{
+            //Debug.Log("[Shelter] blocked: no housed families");
             return;
         }
         if (requestedCount <= 0) return;
         if (familySim == null || playerPop == null) return;
 
         int roomForOrders = Mathf.Max(0, maxConcurrentOrders - activeOrders.Count);
-        if (roomForOrders <= 0) { Debug.Log("[Shelter] blocked: at order capacity"); return; }
-        int toStart = Mathf.Min(requestedCount, roomForOrders);
+        //if (roomForOrders <= 0) { Debug.Log("[Shelter] blocked: at order capacity"); return; }
+        //int toStart = Mathf.Min(requestedCount, roomForOrders);
 
         var cfg = familySim.GetConfig();
         float minH = cfg != null ? cfg.minHealthForBirth        : 0.6f;
@@ -895,7 +895,7 @@ public class ShelterControl : MonoBehaviour
 
         if (started == 0)
         {
-            Debug.Log("[Shelter] no pregnancies could be started this cycle (cooldowns/needs/reservations).");
+            //Debug.Log("[Shelter] no pregnancies could be started this cycle (cooldowns/needs/reservations).");
         }
 
         SyncDebugOrders();
@@ -910,7 +910,7 @@ public class ShelterControl : MonoBehaviour
 
         int born = familySim.ResolveBirthAndReturnChildrenCount(mother, father);
         if (born > 1)
-            Debug.Log($"[Shelter] Multiples born: {born} babies.");
+            //Debug.Log($"[Shelter] Multiples born: {born} babies.");
 
         SyncHousedIndividualsFromFamilies();
         EnforceIndividualCapByTrimming();
@@ -1013,7 +1013,7 @@ public class ShelterControl : MonoBehaviour
             RemoveOrderById(ids[i], abortIfPending:true);
 
         if (!string.IsNullOrEmpty(reason))
-            Debug.Log($"[Shelter] All orders failed: {reason}");
+            //Debug.Log($"[Shelter] All orders failed: {reason}");
     }
 
     // ---------- Helpers ----------
@@ -1149,7 +1149,7 @@ public class ShelterControl : MonoBehaviour
 
         if (!CanAcceptFamily(s_pendingFamilyId, familySim))
         {
-            Debug.Log("[Shelter] Target no longer available.");
+            //Debug.Log("[Shelter] Target no longer available.");
             CancelMoveMode(false);
             return;
         }
@@ -1163,12 +1163,12 @@ public class ShelterControl : MonoBehaviour
             RefreshHousingTracking();
             s_sourceShelter.RefreshHousingTracking();
 
-            Debug.Log($"[Shelter] Moved family {s_pendingFamilyId} to {name}");
+            //Debug.Log($"[Shelter] Moved family {s_pendingFamilyId} to {name}");
             CancelMoveMode(true);
         }
         else
         {
-            Debug.Log("[Shelter] Move failed at assignment step.");
+            //Debug.Log("[Shelter] Move failed at assignment step.");
             CancelMoveMode(false);
         }
     }
@@ -1311,7 +1311,7 @@ public class ShelterControl : MonoBehaviour
         source.RemoveIndividualFromThisShelter(individualId);
         target.AddIndividualToThisShelter(individualId);
 
-        Debug.Log($"[Shelter] Moved individual {individualId} from {source.name} to {target.name}");
+        //Debug.Log($"[Shelter] Moved individual {individualId} from {source.name} to {target.name}");
         return true;
     }
 
@@ -1409,7 +1409,7 @@ public class ShelterControl : MonoBehaviour
         if (canHostUnhousedFatherHere)
         {
             AddIndividualToThisShelter(father.Id);
-            Debug.Log($"[Shelter] Pulled unhoused partner {father.Id} into {name} for pairing.");
+            //Debug.Log($"[Shelter] Pulled unhoused partner {father.Id} into {name} for pairing.");
             targetShelter = this;
             return true;
         }
@@ -1475,7 +1475,7 @@ public class ShelterControl : MonoBehaviour
         SyncDebugOrders();
         target.SyncDebugOrders();
 
-        Debug.Log($"[Shelter] Moved {toMove.Count} birth order(s) for family {familyId} from {name} to {target.name}");
+        //Debug.Log($"[Shelter] Moved {toMove.Count} birth order(s) for family {familyId} from {name} to {target.name}");
     }
 
     private void TryMoveOverflowIndividualsToOtherShelters()
@@ -1536,7 +1536,7 @@ public class ShelterControl : MonoBehaviour
 
         if (overflow > 0)
         {
-            Debug.LogWarning($"[Shelter] {name} is still over individual capacity by {overflow}. No valid shelters found for overflow residents.");
+            //Debug.LogWarning($"[Shelter] {name} is still over individual capacity by {overflow}. No valid shelters found for overflow residents.");
         }
     }
 
@@ -1863,11 +1863,11 @@ public class ShelterControl : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[Shelter] Tornado casualties at '{name}' | " +
-                $"Rolled={killIds.Count} | Killed={killedCount} | " +
-                $"ResidentsAfter={CurrentIndividualCount}"
-            );
+            //Debug.Log(
+                //$"[Shelter] Tornado casualties at '{name}' | " +
+                //$"Rolled={killIds.Count} | Killed={killedCount} | " +
+                //$"ResidentsAfter={CurrentIndividualCount}"
+            //);
         }
 
         return killedCount;
@@ -1961,11 +1961,11 @@ public class ShelterControl : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[Shelter] Fire casualties at '{name}' | " +
-                $"Rolled={killIds.Count} | Killed={killedCount} | " +
-                $"ResidentsAfter={CurrentIndividualCount}"
-            );
+            //Debug.Log(
+                //$"[Shelter] Fire casualties at '{name}' | " +
+                //$"Rolled={killIds.Count} | Killed={killedCount} | " +
+                //$"ResidentsAfter={CurrentIndividualCount}"
+            //);
         }
 
         return killedCount;
@@ -2026,7 +2026,7 @@ public class ShelterControl : MonoBehaviour
         if (resistance != null && resistance.IsImmune(acidRain))
         {
             if (debugLogging)
-                Debug.Log($"[Shelter] {name} is immune to {(acidRain ? "acid rain" : "ash")} exposure.");
+                //Debug.Log($"[Shelter] {name} is immune to {(acidRain ? "acid rain" : "ash")} exposure.");
             return 0;
         }
 
@@ -2110,11 +2110,11 @@ public class ShelterControl : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[Shelter] Volcanic {(acidRain ? "acid rain" : "ash")} exposure at '{name}' | " +
-                $"Affected={affectedCount} | " +
-                $"TotalHealthLoss={totalHealthLoss:F3} | " +
-                $"Residents={CurrentIndividualCount}");
+            //Debug.Log(
+                //$"[Shelter] Volcanic {(acidRain ? "acid rain" : "ash")} exposure at '{name}' | " +
+                //$"Affected={affectedCount} | " +
+                //$"TotalHealthLoss={totalHealthLoss:F3} | " +
+                //$"Residents={CurrentIndividualCount}");
         }
 
         return affectedCount;
@@ -2201,9 +2201,9 @@ public class ShelterControl : MonoBehaviour
         {
             if (infections > 0)
             {
-                Debug.Log(
-                    $"[Shelter] Weather disease exposure at '{name}'. " +
-                    $"UnbusyHousedTargets={_tmpShelterWeatherDiseaseIds.Count}, Infections={infections}");
+                //Debug.Log(
+                    //$"[Shelter] Weather disease exposure at '{name}'. " +
+                    //$"UnbusyHousedTargets={_tmpShelterWeatherDiseaseIds.Count}, Infections={infections}");
             }
         }
 
@@ -2270,9 +2270,9 @@ public class ShelterControl : MonoBehaviour
 
         if (debugShelterVirusSpread && spreadCount > 0)
         {
-            Debug.Log(
-                $"[Shelter] Virus spread in shelter '{name}'. " +
-                $"Contacts={_tmpShelterVirusSpreadIds.Count}, NewInfections={spreadCount}");
+            //Debug.Log(
+                //$"[Shelter] Virus spread in shelter '{name}'. " +
+                //$"Contacts={_tmpShelterVirusSpreadIds.Count}, NewInfections={spreadCount}");
         }
 
         return spreadCount;
@@ -2297,11 +2297,11 @@ public class ShelterControl : MonoBehaviour
         {
             if (debugShelterBuildingDiseaseGate)
             {
-                Debug.Log(
-                    $"[Shelter] Building disease skipped at '{name}'. " +
-                    $"Housed={housedCount}/{maxHoused}, " +
-                    $"Ratio={occupancyRatio:F2}, " +
-                    $"RequiredOver={buildingDiseaseMinOccupancyRatio:F2}");
+                //Debug.Log(
+                    //$"[Shelter] Building disease skipped at '{name}'. " +
+                    //$"Housed={housedCount}/{maxHoused}, " +
+                    //$"Ratio={occupancyRatio:F2}, " +
+                    //$"RequiredOver={buildingDiseaseMinOccupancyRatio:F2}");
             }
 
             return 0;
@@ -2325,11 +2325,11 @@ public class ShelterControl : MonoBehaviour
 
         if (debugShelterBuildingDiseaseGate && infections > 0)
         {
-            Debug.Log(
-                $"[Shelter] Building crowding disease ran at '{name}'. " +
-                $"Housed={housedCount}/{maxHoused}, " +
-                $"Ratio={occupancyRatio:F2}, " +
-                $"Infections={infections}");
+            //Debug.Log(
+                //$"[Shelter] Building crowding disease ran at '{name}'. " +
+                //$"Housed={housedCount}/{maxHoused}, " +
+                //$"Ratio={occupancyRatio:F2}, " +
+                //$"Infections={infections}");
         }
 
         return infections;

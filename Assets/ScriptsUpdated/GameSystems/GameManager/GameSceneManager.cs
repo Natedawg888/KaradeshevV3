@@ -46,7 +46,7 @@ public class GameSceneManager : MonoBehaviour
         if (saveSystem == null)
             saveSystem = SaveSystem.Instance;
 
-        Debug.Log($"[GameSceneManager] Awake: {Time.realtimeSinceStartup:0.000}s");
+        //Debug.Log($"[GameSceneManager] Awake: {Time.realtimeSinceStartup:0.000}s");
     }
 
     private IEnumerator Start()
@@ -72,7 +72,7 @@ public class GameSceneManager : MonoBehaviour
 
     private IEnumerator RunStartupRoutine()
     {
-        Debug.Log($"[GameSceneManager] Start entered: {Time.realtimeSinceStartup:0.000}s");
+        //Debug.Log($"[GameSceneManager] Start entered: {Time.realtimeSinceStartup:0.000}s");
 
         if (saveSystem == null)
             saveSystem = SaveSystem.Instance;
@@ -116,7 +116,7 @@ public class GameSceneManager : MonoBehaviour
         else
         {
             if (startMode == GameStartMode.LoadGame && !SaveSystem.HasSave())
-                Debug.LogWarning("[GameSceneManager] Load requested but no save exists. Falling back to New Game.");
+                //Debug.LogWarning("[GameSceneManager] Load requested but no save exists. Falling back to New Game.");
 
             float newGameStart = Time.realtimeSinceStartup;
             yield return RunNewGameGeneration();
@@ -159,7 +159,7 @@ public class GameSceneManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[GameSceneManager] MapGenerator reference is missing.");
+            //Debug.LogWarning("[GameSceneManager] MapGenerator reference is missing.");
         }
 
         yield return null;
@@ -180,7 +180,7 @@ public class GameSceneManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[GameSceneManager] MapTilePlacer reference is missing.");
+            //Debug.LogWarning("[GameSceneManager] MapTilePlacer reference is missing.");
         }
 
         yield return null;
@@ -209,7 +209,7 @@ public class GameSceneManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[GameSceneManager] TileActivator reference is missing.");
+            //Debug.LogWarning("[GameSceneManager] TileActivator reference is missing.");
         }
 
         StopLoopingLoadTimer(true);
@@ -373,14 +373,14 @@ public class GameSceneManager : MonoBehaviour
         if (!logStartupTimings)
             return;
 
-        Debug.Log($"[Timing][{group}] {label}: {seconds:0.000}s");
+        //Debug.Log($"[Timing][{group}] {label}: {seconds:0.000}s");
     }
 
     public void ConfigureWorldSetup(WorldSetupInstaller worldSetup)
     {
         if (worldSetup == null)
         {
-            Debug.LogError("[GameSceneManager] ConfigureWorldSetup received null installer.");
+            //Debug.LogError("[GameSceneManager] ConfigureWorldSetup received null installer.");
             return;
         }
 
@@ -393,7 +393,7 @@ public class GameSceneManager : MonoBehaviour
     {
         if (uiSetup == null)
         {
-            Debug.LogError("[GameSceneManager] ConfigureUISetup received null installer.");
+            //Debug.LogError("[GameSceneManager] ConfigureUISetup received null installer.");
             return;
         }
 

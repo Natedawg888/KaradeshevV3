@@ -193,13 +193,13 @@ public class TurnSystem : MonoBehaviour
     public static void SubscribeToStartOfTurn(Action handler)
     {
         OnStartOfTurn += handler;
-        Debug.Log($"[TurnSystem] SubscribeToStartOfTurn -> {handler.Method.Name}");
+        //Debug.Log($"[TurnSystem] SubscribeToStartOfTurn -> {handler.Method.Name}");
     }
 
     public static void UnsubscribeFromStartOfTurn(Action handler)
     {
         OnStartOfTurn -= handler;
-        Debug.Log($"[TurnSystem] UnsubscribeFromStartOfTurn -> {handler.Method.Name}");
+        //Debug.Log($"[TurnSystem] UnsubscribeFromStartOfTurn -> {handler.Method.Name}");
     }
 
     public void EndOfTurn()

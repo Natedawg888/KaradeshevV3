@@ -172,7 +172,7 @@ public partial class AnimalSimulation
         AnimalDefinition species = ResolveSpecies(saved.speciesAssetName);
         if (species == null)
         {
-            Debug.LogWarning($"[AnimalSimulation] Could not resolve species '{saved.speciesAssetName}' while loading animal state.");
+            //Debug.LogWarning($"[AnimalSimulation] Could not resolve species '{saved.speciesAssetName}' while loading animal state.");
             return null;
         }
 

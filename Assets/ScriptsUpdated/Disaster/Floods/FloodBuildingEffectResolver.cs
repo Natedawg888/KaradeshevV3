@@ -118,11 +118,11 @@ public class FloodBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[FloodBuildingEffectResolver] Installed refs. " +
-                $"Flood={(floodSimulationSystem != null ? floodSimulationSystem.name : "NULL")}, " +
-                $"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
-                $"WorldBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
+            //Debug.Log(
+                //$"[FloodBuildingEffectResolver] Installed refs. " +
+                //$"Flood={(floodSimulationSystem != null ? floodSimulationSystem.name : "NULL")}, " +
+                //$"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
+                //$"WorldBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
         }
     }
 
@@ -135,9 +135,9 @@ public class FloodBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[FloodBuildingEffectResolver] SetWorldBuildingManager -> " +
-                $"{(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
+            //Debug.Log(
+                //$"[FloodBuildingEffectResolver] SetWorldBuildingManager -> " +
+                //$"{(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
         }
     }
 
@@ -196,7 +196,7 @@ public class FloodBuildingEffectResolver : MonoBehaviour
         if (floodSimulationSystem == null || gridManager == null || worldBuildingManager == null)
         {
             if (debugLogging)
-                Debug.LogWarning("[FloodBuildingEffectResolver] Missing references.");
+                //Debug.LogWarning("[FloodBuildingEffectResolver] Missing references.");
 
             resolverRoutine = null;
             yield break;
@@ -338,11 +338,11 @@ public class FloodBuildingEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[FloodBuildingEffectResolver] Flood hit building '{building.name}'. " +
-                    $"Turn={currentTurn}, AvgDepth={averageDepth01:0.00}, MaxDepth={maxDepth01:0.00}, " +
-                    $"HitCells={hitCellsScratch.Count}/{buildingCellsScratch.Count}, " +
-                    $"BaseDamage={baseDamage}, FinalDamage={finalDamage}");
+                //Debug.Log(
+                    //$"[FloodBuildingEffectResolver] Flood hit building '{building.name}'. " +
+                    //$"Turn={currentTurn}, AvgDepth={averageDepth01:0.00}, MaxDepth={maxDepth01:0.00}, " +
+                    //$"HitCells={hitCellsScratch.Count}/{buildingCellsScratch.Count}, " +
+                    //$"BaseDamage={baseDamage}, FinalDamage={finalDamage}");
             }
 
             processed++;
@@ -356,10 +356,10 @@ public class FloodBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[FloodBuildingEffectResolver] Complete. " +
-                $"Turn={currentTurn}, Damaged={damagedCount}, HitNoDamage={hitNoDamageCount}, " +
-                $"SkippedSameTurn={skippedSameTurnCount}, ActiveFloodDamageCells={activeFloodCells.Count}");
+            //Debug.Log(
+                //$"[FloodBuildingEffectResolver] Complete. " +
+                //$"Turn={currentTurn}, Damaged={damagedCount}, HitNoDamage={hitNoDamageCount}, " +
+                //$"SkippedSameTurn={skippedSameTurnCount}, ActiveFloodDamageCells={activeFloodCells.Count}");
         }
 
         resolverRoutine = null;
@@ -430,9 +430,9 @@ public class FloodBuildingEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[FloodBuildingEffectResolver] Applied direct BuildingControl damage " +
-                    $"{hitData.finalDamage} to '{buildingControl.name}' because no BuildingFloodSecondaryEffects was found.");
+                //Debug.Log(
+                    //$"[FloodBuildingEffectResolver] Applied direct BuildingControl damage " +
+                    //$"{hitData.finalDamage} to '{buildingControl.name}' because no BuildingFloodSecondaryEffects was found.");
             }
 
             return;
@@ -445,9 +445,9 @@ public class FloodBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.LogWarning(
-                $"[FloodBuildingEffectResolver] Could not find BuildingFloodSecondaryEffects " +
-                $"or BuildingControl on '{building.name}'. SendMessage fallback used.");
+            //Debug.LogWarning(
+                //$"[FloodBuildingEffectResolver] Could not find BuildingFloodSecondaryEffects " +
+                //$"or BuildingControl on '{building.name}'. SendMessage fallback used.");
         }
     }
 

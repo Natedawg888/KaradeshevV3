@@ -101,13 +101,13 @@ public partial class BuildingPanelControl : MonoBehaviour
             {
                 if (!currentBuilding)
                 {
-                    Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Repair.");
+                    //Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Repair.");
                     return;
                 }
 
                 if (!repairPanel)
                 {
-                    Debug.LogError("[BuildingPanel] RepairPanel reference is missing (assign a SCENE instance).");
+                    //Debug.LogError("[BuildingPanel] RepairPanel reference is missing (assign a SCENE instance).");
                     return;
                 }
 
@@ -130,13 +130,13 @@ public partial class BuildingPanelControl : MonoBehaviour
             {
                 if (!currentBuilding)
                 {
-                    Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Upgrade.");
+                    //Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Upgrade.");
                     return;
                 }
 
                 if (!upgradePanel)
                 {
-                    Debug.LogError("[BuildingPanel] UpgradePanel reference is missing (assign a SCENE instance).");
+                    //Debug.LogError("[BuildingPanel] UpgradePanel reference is missing (assign a SCENE instance).");
                     return;
                 }
 
@@ -152,13 +152,13 @@ public partial class BuildingPanelControl : MonoBehaviour
             {
                 if (!currentBuilding)
                 {
-                    Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Research.");
+                    //Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Research.");
                     return;
                 }
 
                 if (!researchPanel)
                 {
-                    Debug.LogError("[BuildingPanel] ResearchPanel reference is missing (assign a SCENE instance).");
+                    //Debug.LogError("[BuildingPanel] ResearchPanel reference is missing (assign a SCENE instance).");
                     return;
                 }
 
@@ -174,13 +174,13 @@ public partial class BuildingPanelControl : MonoBehaviour
             {
                 if (!currentBuilding)
                 {
-                    Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Shelter.");
+                    //Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Shelter.");
                     return;
                 }
 
                 if (!shelterPanel)
                 {
-                    Debug.LogError("[BuildingPanel] ShelterPanel reference is missing (assign a SCENE instance).");
+                    //Debug.LogError("[BuildingPanel] ShelterPanel reference is missing (assign a SCENE instance).");
                     return;
                 }
 
@@ -197,13 +197,13 @@ public partial class BuildingPanelControl : MonoBehaviour
             {
                 if (!currentBuilding)
                 {
-                    Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Crafting.");
+                    //Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Crafting.");
                     return;
                 }
 
                 if (!craftingPanel)
                 {
-                    Debug.LogError("[BuildingPanel] CraftingPanel reference is missing (assign a SCENE instance).");
+                    //Debug.LogError("[BuildingPanel] CraftingPanel reference is missing (assign a SCENE instance).");
                     return;
                 }
 
@@ -219,7 +219,7 @@ public partial class BuildingPanelControl : MonoBehaviour
             {
                 if (!currentBuilding)
                 {
-                    Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Production.");
+                    //Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Production.");
                     return;
                 }
 
@@ -229,7 +229,7 @@ public partial class BuildingPanelControl : MonoBehaviour
 
                 if (!prod)
                 {
-                    Debug.LogError("[BuildingPanel] No ProductionBuildingControl found on currentBuilding.");
+                    //Debug.LogError("[BuildingPanel] No ProductionBuildingControl found on currentBuilding.");
                     return;
                 }
 
@@ -244,7 +244,7 @@ public partial class BuildingPanelControl : MonoBehaviour
                 {
                     if (productionPanel == null)
                     {
-                        Debug.LogError("[BuildingPanel] ProductionPanel reference is missing (assign a SCENE instance).");
+                        //Debug.LogError("[BuildingPanel] ProductionPanel reference is missing (assign a SCENE instance).");
                         return;
                     }
 
@@ -490,7 +490,7 @@ public partial class BuildingPanelControl : MonoBehaviour
 
         if (producingPanel == null)
         {
-            Debug.LogWarning("[BuildingPanel] Selection completed, but producingPanel is not assigned.");
+            //Debug.LogWarning("[BuildingPanel] Selection completed, but producingPanel is not assigned.");
             return;
         }
 
@@ -505,13 +505,13 @@ public partial class BuildingPanelControl : MonoBehaviour
     {
         if (!currentBuilding)
         {
-            Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Storage.");
+            //Debug.LogWarning("[BuildingPanel] No currentBuilding when opening Storage.");
             return;
         }
 
         if (!storagePanel)
         {
-            Debug.LogError("[BuildingPanel] StoragePanel reference is missing (assign a SCENE instance).");
+            //Debug.LogError("[BuildingPanel] StoragePanel reference is missing (assign a SCENE instance).");
             return;
         }
 
@@ -521,7 +521,7 @@ public partial class BuildingPanelControl : MonoBehaviour
 
         if (!storage)
         {
-            Debug.LogWarning("[BuildingPanel] No StorageBuildingControl on this building.");
+            //Debug.LogWarning("[BuildingPanel] No StorageBuildingControl on this building.");
             return;
         }
 

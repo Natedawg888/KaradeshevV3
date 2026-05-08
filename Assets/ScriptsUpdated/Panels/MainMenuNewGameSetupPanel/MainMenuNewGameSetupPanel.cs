@@ -279,7 +279,7 @@ public class MainMenuNewGameSetupPanel : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("[MainMenuNewGameSetupPanel] Avatar option prefab is missing a Button component.");
+                //Debug.LogWarning("[MainMenuNewGameSetupPanel] Avatar option prefab is missing a Button component.");
             }
         }
     }

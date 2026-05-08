@@ -59,7 +59,7 @@ public class BuildingCatalogPanelControl : MonoBehaviour
 
         if (!buildingItemPrefab)
         {
-            Debug.LogError("[BuildingCatalogPanel] buildingItemPrefab is not assigned.");
+            //Debug.LogError("[BuildingCatalogPanel] buildingItemPrefab is not assigned.");
             return;
         }
 
@@ -83,7 +83,7 @@ public class BuildingCatalogPanelControl : MonoBehaviour
             }
             else
             {
-                Debug.LogError("[BuildingCatalogPanel] The prefab is missing a BuildingCatalogItem component.");
+                //Debug.LogError("[BuildingCatalogPanel] The prefab is missing a BuildingCatalogItem component.");
             }
         }
     }

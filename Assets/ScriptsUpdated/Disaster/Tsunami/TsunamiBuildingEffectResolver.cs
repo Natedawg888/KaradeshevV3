@@ -108,11 +108,11 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiBuildingEffectResolver] Installed refs. " +
-                $"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
-                $"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
-                $"WorldBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
+            //Debug.Log(
+                //$"[TsunamiBuildingEffectResolver] Installed refs. " +
+                //$"Simulation={(simulationSystem != null ? simulationSystem.name : "NULL")}, " +
+                //$"GridManager={(gridManager != null ? gridManager.name : "NULL")}, " +
+                //$"WorldBuildingManager={(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
         }
     }
 
@@ -125,9 +125,9 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiBuildingEffectResolver] SetWorldBuildingManager -> " +
-                $"{(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
+            //Debug.Log(
+                //$"[TsunamiBuildingEffectResolver] SetWorldBuildingManager -> " +
+                //$"{(worldBuildingManager != null ? worldBuildingManager.name : "NULL")}");
         }
     }
 
@@ -174,7 +174,7 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
         if (gridManager == null || worldBuildingManager == null)
         {
             if (debugLogging)
-                Debug.LogWarning("[TsunamiBuildingEffectResolver] Missing references.");
+                //Debug.LogWarning("[TsunamiBuildingEffectResolver] Missing references.");
 
             resolverRoutine = null;
             yield break;
@@ -203,9 +203,9 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiBuildingEffectResolver] Energy too low for building damage. " +
-                    $"TsunamiId={data.tsunamiId}, Energy01={data.energy01:0.00}");
+                //Debug.Log(
+                    //$"[TsunamiBuildingEffectResolver] Energy too low for building damage. " +
+                    //$"TsunamiId={data.tsunamiId}, Energy01={data.energy01:0.00}");
             }
 
             resolverRoutine = null;
@@ -292,12 +292,12 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiBuildingEffectResolver] Tsunami hit building '{building.name}'. " +
-                    $"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
-                    $"Energy01={data.energy01:0.00}, " +
-                    $"HitCells={hitCellsScratch.Count}/{buildingCellsScratch.Count}, " +
-                    $"BaseDamage={baseDamage}, FinalDamage={finalDamage}");
+                //Debug.Log(
+                    //$"[TsunamiBuildingEffectResolver] Tsunami hit building '{building.name}'. " +
+                    //$"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
+                    //$"Energy01={data.energy01:0.00}, " +
+                    //$"HitCells={hitCellsScratch.Count}/{buildingCellsScratch.Count}, " +
+                    //$"BaseDamage={baseDamage}, FinalDamage={finalDamage}");
             }
 
             processed++;
@@ -311,11 +311,11 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[TsunamiBuildingEffectResolver] Complete. " +
-                $"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
-                $"Damaged={damagedCount}, HitNoDamage={hitNoDamageCount}, " +
-                $"ActiveWaveCells={activeTsunamiCells.Count}");
+            //Debug.Log(
+                //$"[TsunamiBuildingEffectResolver] Complete. " +
+                //$"TsunamiId={data.tsunamiId}, Step={data.stepCount}, " +
+                //$"Damaged={damagedCount}, HitNoDamage={hitNoDamageCount}, " +
+                //$"ActiveWaveCells={activeTsunamiCells.Count}");
         }
 
         resolverRoutine = null;
@@ -390,9 +390,9 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[TsunamiBuildingEffectResolver] Applied direct BuildingControl damage " +
-                    $"{hitData.finalDamage} to '{buildingControl.name}' because no BuildingTsunamiSecondaryEffects was found.");
+                //Debug.Log(
+                    //$"[TsunamiBuildingEffectResolver] Applied direct BuildingControl damage " +
+                    //$"{hitData.finalDamage} to '{buildingControl.name}' because no BuildingTsunamiSecondaryEffects was found.");
             }
 
             return;
@@ -405,9 +405,9 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.LogWarning(
-                $"[TsunamiBuildingEffectResolver] Could not find BuildingTsunamiSecondaryEffects " +
-                $"or BuildingControl on '{building.name}'. SendMessage fallback used.");
+            //Debug.LogWarning(
+                //$"[TsunamiBuildingEffectResolver] Could not find BuildingTsunamiSecondaryEffects " +
+                //$"or BuildingControl on '{building.name}'. SendMessage fallback used.");
         }
     }
 

@@ -307,8 +307,8 @@ public class WeatherFireSystem : MonoBehaviour
         {
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[WeatherFireSystem] Lightning hit ({x},{y}) but no environment/building footprint owner was cached there.");
+                //Debug.Log(
+                    //$"[WeatherFireSystem] Lightning hit ({x},{y}) but no environment/building footprint owner was cached there.");
             }
 
             return false;
@@ -343,9 +343,9 @@ public class WeatherFireSystem : MonoBehaviour
             string envName = targets.environment != null ? targets.environment.name : "none";
             string buildingName = targets.HasBuilding ? targets.buildingRecord.instance.name : "none";
 
-            Debug.Log(
-                $"[WeatherFireSystem] Lightning fire attempt at ({x},{y}) " +
-                $"Env={envName} Building={buildingName} Ignited={ignited}");
+            //Debug.Log(
+                //$"[WeatherFireSystem] Lightning fire attempt at ({x},{y}) " +
+                //$"Env={envName} Building={buildingName} Ignited={ignited}");
         }
 
         return ignited;
@@ -497,8 +497,8 @@ public class WeatherFireSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[WeatherFireSystem] Environment '{env.name}' ignited from footprint cell ({x},{y}).");
+            //Debug.Log(
+                //$"[WeatherFireSystem] Environment '{env.name}' ignited from footprint cell ({x},{y}).");
         }
 
         return true;
@@ -570,8 +570,8 @@ public class WeatherFireSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[WeatherFireSystem] Building '{buildingRoot.name}' ignited from footprint cell ({x},{y}).");
+            //Debug.Log(
+                //$"[WeatherFireSystem] Building '{buildingRoot.name}' ignited from footprint cell ({x},{y}).");
         }
 
         return true;
@@ -1303,9 +1303,9 @@ public class WeatherFireSystem : MonoBehaviour
 
             if (debugLogging)
             {
-                Debug.Log(
-                    $"[WeatherFireSystem] Flood extinguished fire at ({x},{y}). " +
-                    $"Depth={floodDepth01:0.00}");
+                //Debug.Log(
+                    //$"[WeatherFireSystem] Flood extinguished fire at ({x},{y}). " +
+                    //$"Depth={floodDepth01:0.00}");
             }
         }
 
@@ -1334,7 +1334,7 @@ public class WeatherFireSystem : MonoBehaviour
         RemoveBurningEnvironmentOwner(env);
 
         if (debugLogging)
-            Debug.Log($"[WeatherFireSystem] Flood extinguished environment fire on '{env.name}'.");
+            //Debug.Log($"[WeatherFireSystem] Flood extinguished environment fire on '{env.name}'.");
 
         return true;
     }
@@ -1359,7 +1359,7 @@ public class WeatherFireSystem : MonoBehaviour
         RemoveBurningBuildingOwner(buildingRoot);
 
         if (debugLogging)
-            Debug.Log($"[WeatherFireSystem] Flood extinguished building fire on '{buildingRoot.name}'.");
+            //Debug.Log($"[WeatherFireSystem] Flood extinguished building fire on '{buildingRoot.name}'.");
 
         return true;
     }
@@ -1493,9 +1493,9 @@ public class WeatherFireSystem : MonoBehaviour
 
         if (debugLogging)
         {
-            Debug.Log(
-                $"[WeatherFireSystem] Loaded fire state. " +
-                $"EnvironmentFires={restoredEnvironmentFires}, BuildingFires={restoredBuildingFires}");
+            //Debug.Log(
+                //$"[WeatherFireSystem] Loaded fire state. " +
+                //$"EnvironmentFires={restoredEnvironmentFires}, BuildingFires={restoredBuildingFires}");
         }
     }
 
@@ -1643,6 +1643,6 @@ public class WeatherFireSystem : MonoBehaviour
         fireSpreadWindBiasStrength = settings.fireSpreadWindBiasStrength;
 
         if (debugLogging)
-            Debug.Log("[WeatherFireSystem] Applied fire preset settings.");
+            //Debug.Log("[WeatherFireSystem] Applied fire preset settings.");
     }
 }

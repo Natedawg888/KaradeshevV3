@@ -80,37 +80,37 @@ public class TutorialSetupInstaller : MonoBehaviour
             productionRunningTutorial = GetComponentInChildren<ProductionRunningTutorial>(true);
 
         if (cameraIntroTutorial == null)
-            Debug.LogWarning("[TutorialSetupInstaller] CameraIntroTutorial not found in TutorialSetup scene.");
+            //Debug.LogWarning("[TutorialSetupInstaller] CameraIntroTutorial not found in TutorialSetup scene.");
 
         if (environmentTileTutorial == null)
-            Debug.LogWarning("[TutorialSetupInstaller] EnvironmentTileTutorial not found in TutorialSetup scene.");
+            //Debug.LogWarning("[TutorialSetupInstaller] EnvironmentTileTutorial not found in TutorialSetup scene.");
 
         if (populationTutorial == null)
-            Debug.LogWarning("[TutorialSetupInstaller] PopulationTutorial not found in TutorialSetup scene.");
+            //Debug.LogWarning("[TutorialSetupInstaller] PopulationTutorial not found in TutorialSetup scene.");
 
         if (discoveryTutorial == null)
-            Debug.LogWarning("[TutorialSetupInstaller] DiscoveryTutorial not found in TutorialSetup scene.");
+            //Debug.LogWarning("[TutorialSetupInstaller] DiscoveryTutorial not found in TutorialSetup scene.");
 
         if (gatheringTutorial == null)
-            Debug.LogWarning("[TutorialSetupInstaller] GatheringTutorial not found in TutorialSetup scene.");
+            //Debug.LogWarning("[TutorialSetupInstaller] GatheringTutorial not found in TutorialSetup scene.");
 
         if (inventoryTutorial == null)
-            Debug.LogWarning("[TutorialSetupInstaller] InventoryTutorial not found in TutorialSetup scene.");
+            //Debug.LogWarning("[TutorialSetupInstaller] InventoryTutorial not found in TutorialSetup scene.");
 
         if (populationStatisticsTutorial == null)
-            Debug.LogWarning("[TutorialSetupInstaller] PopulationStatisticsTutorial not found in TutorialSetup scene.");
+            //Debug.LogWarning("[TutorialSetupInstaller] PopulationStatisticsTutorial not found in TutorialSetup scene.");
 
         if (extraUITutorial == null)
-            Debug.LogWarning("[TutorialSetupInstaller] ExtraUITutorial not found in TutorialSetup scene.");
+            //Debug.LogWarning("[TutorialSetupInstaller] ExtraUITutorial not found in TutorialSetup scene.");
 
         if (profileTutorial == null)
-            Debug.LogWarning("[TutorialSetupInstaller] ProfileTutorial not found in TutorialSetup scene.");
+            //Debug.LogWarning("[TutorialSetupInstaller] ProfileTutorial not found in TutorialSetup scene.");
 
         if (buildingTutorial == null)
-            Debug.LogWarning("[TutorialSetupInstaller] BuildingTutorial not found in TutorialSetup scene.");
+            //Debug.LogWarning("[TutorialSetupInstaller] BuildingTutorial not found in TutorialSetup scene.");
 
         if (buildingTutorialPart2 == null)
-            Debug.LogWarning("[TutorialSetupInstaller] BuildingTutorialPart2 not found in TutorialSetup scene.");
+            //Debug.LogWarning("[TutorialSetupInstaller] BuildingTutorialPart2 not found in TutorialSetup scene.");
     }
 
     public void InstallBootstrapReferences(

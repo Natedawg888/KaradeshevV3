@@ -177,8 +177,8 @@ public class ProductionSphereTileScanner : MonoBehaviour
 
         if (hitCount >= _buffer.Length)
         {
-            Debug.LogWarning(
-                $"[ProductionSphereTileScanner] Collider buffer FULL ({_buffer.Length}). Increase colliderBufferSize.");
+            //Debug.LogWarning(
+                //$"[ProductionSphereTileScanner] Collider buffer FULL ({_buffer.Length}). Increase colliderBufferSize.");
         }
 
         for (int i = 0; i < hitCount; i++)

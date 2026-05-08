@@ -78,7 +78,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         if (actionItemPrefab == null || actionListContentRoot == null)
         {
-            Debug.LogWarning("[UnitGroupPanel] Action list UI not wired in inspector.");
+            //Debug.LogWarning("[UnitGroupPanel] Action list UI not wired in inspector.");
             return;
         }
 
@@ -128,13 +128,13 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         if (GroupHasActiveRoute(_group) || GroupHasActiveAction(_group))
         {
-            Debug.LogWarning("[UnitGroupPanel] Cannot start new action: group already busy.");
+            //Debug.LogWarning("[UnitGroupPanel] Cannot start new action: group already busy.");
             return;
         }
 
         if (!action.MeetsRequirements(_group))
         {
-            Debug.LogWarning($"[UnitGroupPanel] Requirements not met for action {action.displayName}.");
+            //Debug.LogWarning($"[UnitGroupPanel] Requirements not met for action {action.displayName}.");
             return;
         }
 
@@ -145,7 +145,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         {
             if (UnitGroupActionManager.Instance == null)
             {
-                Debug.LogWarning("[UnitGroupPanel] Cannot start Scout action: no UnitGroupActionManager in scene.");
+                //Debug.LogWarning("[UnitGroupPanel] Cannot start Scout action: no UnitGroupActionManager in scene.");
                 return;
             }
 
@@ -159,7 +159,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
             var originTile = ResolveOwnerTileForCombat();
             if (originTile == null)
             {
-                Debug.LogWarning("[UnitGroupPanel] Cannot run Track scan: owner has no TileControl parent.");
+                //Debug.LogWarning("[UnitGroupPanel] Cannot run Track scan: owner has no TileControl parent.");
                 return;
             }
 
@@ -181,9 +181,9 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning(
-                $"[UnitGroupPanel] StartActionMode does not handle action type {action.GetType().Name} yet. " +
-                "Add handling here when you create new action types.");
+            //Debug.LogWarning(
+                //$"[UnitGroupPanel] StartActionMode does not handle action type {action.GetType().Name} yet. " +
+                //"Add handling here when you create new action types.");
         }
     }
 
