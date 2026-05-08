@@ -3,16 +3,16 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Toggles a light-red overlay on every environment tile covered by an AnimalRepeller.
-/// Attach to a GameObject in the FinalSetup scene.
-/// Wire the button via FinalSetupInstaller (looks for "RepellerZoneButton" in the UI scene).
-/// Only shows overlays while in warfare mode (WorldCanvasMode.UnitsOnly == true).
+/// Toggles a light-red overlay on every tile in the square repel radius of each AnimalRepeller.
+/// Overlays are placed by computing world positions directly from GridManager — no tile scene scan.
+/// Attach to a GameObject in the FinalSetup scene; wire via FinalSetupInstaller ("RepellerZoneButton").
+/// Only active while in warfare mode (WorldCanvasMode.UnitsOnly == true).
 /// </summary>
 public class RepellerZoneVisualizer : MonoBehaviour
 {
     [Header("Overlay Appearance")]
-    [Tooltip("Scale applied to each tile overlay quad. Tune to match your tile size.")]
-    [SerializeField] private float overlayScale = 1f;
+    [Tooltip("Multiplier on top of GridManager.cellSize. 1 = exact tile size, <1 = slight gap.")]
+    [SerializeField] private float overlayScaleMultiplier = 0.98f;
 
     [Tooltip("Slight y-lift above the ground plane to avoid z-fighting.")]
     [SerializeField] private float yOffset = 0.05f;
@@ -20,18 +20,16 @@ public class RepellerZoneVisualizer : MonoBehaviour
     [Tooltip("Light red, semi-transparent color for the repeller zone.")]
     [SerializeField] private Color overlayColor = new Color(1f, 0.15f, 0.15f, 0.35f);
 
-    private Button _toggleButton;
-    private bool   _highlightActive;
-    private readonly List<GameObject> _overlays = new List<GameObject>();
+    private Button   _toggleButton;
+    private bool     _highlightActive;
     private Material _overlayMaterial;
+
+    private readonly List<GameObject>   _overlays = new List<GameObject>();
+    private readonly HashSet<(int, int)> _visited  = new HashSet<(int, int)>();
 
     // ------------------------------------------------------------------
 
-    private void OnEnable()
-    {
-        WorldCanvasMode.OnChanged += HandleModeChanged;
-    }
-
+    private void OnEnable()  => WorldCanvasMode.OnChanged += HandleModeChanged;
     private void OnDisable()
     {
         WorldCanvasMode.OnChanged -= HandleModeChanged;
@@ -71,17 +69,14 @@ public class RepellerZoneVisualizer : MonoBehaviour
 
         _highlightActive = !_highlightActive;
 
-        if (_highlightActive)
-            ShowHighlight();
-        else
-            HideHighlight();
+        if (_highlightActive) ShowHighlight();
+        else                  HideHighlight();
     }
 
     private void HandleModeChanged(bool unitsOnly)
     {
         UpdateButtonInteractable();
 
-        // Auto-hide overlays when leaving warfare mode
         if (!unitsOnly && _highlightActive)
         {
             _highlightActive = false;
@@ -96,33 +91,50 @@ public class RepellerZoneVisualizer : MonoBehaviour
     }
 
     // ------------------------------------------------------------------
+    // Highlight — computed directly from repeller positions, no tile scan
+    // ------------------------------------------------------------------
 
     private void ShowHighlight()
     {
-        HideHighlight(); // clear any stale overlays
+        HideHighlight();
 
-        var repelledCoords = BuildRepelledSet();
-        if (repelledCoords.Count == 0) return;
+        var grid = GridManager.Instance;
+        if (grid == null)
+        {
+            Debug.LogWarning("[RepellerZoneVisualizer] GridManager not found.");
+            return;
+        }
+
+        if (AnimalRepellerRegistry.Active.Count == 0) return;
 
         EnsureMaterial();
 
-        // Find every EnvironmentControl tile and overlay the repelled ones
-        var envControls = FindObjectsOfType<EnvironmentControl>(true);
-        for (int i = 0; i < envControls.Length; i++)
+        float tileSize = grid.cellSize;
+        float scale    = tileSize * Mathf.Max(0.01f, overlayScaleMultiplier);
+
+        _visited.Clear();
+
+        foreach (var repeller in AnimalRepellerRegistry.Active)
         {
-            var env = envControls[i];
-            if (env == null) continue;
+            if (repeller == null) continue;
 
-            var tile = env.GetComponentInParent<TileControl>(true);
-            if (tile == null) continue;
+            Vector2Int center = grid.GetGridPosition(repeller.transform.position);
+            int        radius = Mathf.Max(1, repeller.repelRadiusTiles);
 
-            var gp   = tile.GetGridPosition();
-            var coord = new TileCoord { x = gp.x, y = gp.y };
+            for (int dx = -radius; dx <= radius; dx++)
+            for (int dy = -radius; dy <= radius; dy++)
+            {
+                int tx = center.x + dx;
+                int ty = center.y + dy;
 
-            if (!repelledCoords.Contains(coord)) continue;
+                if (!_visited.Add((tx, ty))) continue; // deduplicate overlapping repellers
 
-            CreateOverlay(tile.transform.position);
+                Vector3 worldPos = grid.GetWorldPosition(tx, ty);
+                CreateOverlay(worldPos, scale);
+            }
         }
+
+        _visited.Clear(); // free entries — not needed after spawn
     }
 
     private void HideHighlight()
@@ -135,22 +147,19 @@ public class RepellerZoneVisualizer : MonoBehaviour
         _overlays.Clear();
     }
 
-    private void CreateOverlay(Vector3 tileWorldPos)
+    private void CreateOverlay(Vector3 tileWorldPos, float scale)
     {
         var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
         go.name = "RepellerZoneOverlay";
 
-        // Lay flat on the ground, facing up
         go.transform.position   = new Vector3(tileWorldPos.x, tileWorldPos.y + yOffset, tileWorldPos.z);
         go.transform.rotation   = Quaternion.Euler(90f, 0f, 0f);
-        go.transform.localScale = Vector3.one * overlayScale;
+        go.transform.localScale = Vector3.one * scale;
 
-        // No collider needed
         var col = go.GetComponent<Collider>();
         if (col != null) Destroy(col);
 
         go.GetComponent<MeshRenderer>().sharedMaterial = _overlayMaterial;
-
         _overlays.Add(go);
     }
 
@@ -158,10 +167,9 @@ public class RepellerZoneVisualizer : MonoBehaviour
     {
         if (_overlayMaterial != null) return;
 
-        // Use a built-in transparent shader available in all Unity versions
-        var shader = Shader.Find("Sprites/Default");
-        if (shader == null) shader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
-        if (shader == null) shader = Shader.Find("Unlit/Color");
+        var shader = Shader.Find("Sprites/Default")
+                  ?? Shader.Find("Legacy Shaders/Transparent/Diffuse")
+                  ?? Shader.Find("Unlit/Color");
 
         _overlayMaterial = new Material(shader) { color = overlayColor };
 
@@ -172,29 +180,5 @@ public class RepellerZoneVisualizer : MonoBehaviour
             _overlayMaterial.SetInt("_ZWrite", 0);
             _overlayMaterial.renderQueue = 3000;
         }
-    }
-
-    // Builds the full set of repelled TileCoords from the registry
-    private static HashSet<TileCoord> BuildRepelledSet()
-    {
-        var set  = new HashSet<TileCoord>();
-        var grid = GridManager.Instance;
-
-        foreach (var repeller in AnimalRepellerRegistry.Active)
-        {
-            if (repeller == null) continue;
-
-            Vector2Int center = grid != null
-                ? grid.GetGridPosition(repeller.transform.position)
-                : Vector2Int.zero;
-
-            int radius = Mathf.Max(1, repeller.repelRadiusTiles);
-
-            for (int dx = -radius; dx <= radius; dx++)
-            for (int dy = -radius; dy <= radius; dy++)
-                set.Add(new TileCoord { x = center.x + dx, y = center.y + dy });
-        }
-
-        return set;
     }
 }
