@@ -7,6 +7,7 @@ public class FinalSetupInstaller : MonoBehaviour
     [Header("Resolved UI References")]
     [SerializeField] private Button endMovementButton;
     [SerializeField] private Button battleModeButton;
+    [SerializeField] private Button repellerZoneButton;
     [SerializeField] private GameObject startingPointPickerPanel;
     [SerializeField] private Button startingPointPrevButton;
     [SerializeField] private Button startingPointNextButton;
@@ -16,12 +17,14 @@ public class FinalSetupInstaller : MonoBehaviour
     [SerializeField] private UnitGroupMovementManager unitGroupMovementManager;
     [SerializeField] private TileWorldCanvasToggleButton tileWorldCanvasToggleButton;
     [SerializeField] private AnimalSimulationController animalSimulationController;
+    [SerializeField] private RepellerZoneVisualizer repellerZoneVisualizer;
     [SerializeField] private Camera minimapCamera;
     [SerializeField] private StartingPointPicker startingPointPicker;
 
     [Header("UI Object Names")]
     [SerializeField] private string endMovementButtonObjectName = "EndMovementButton";
     [SerializeField] private string battleModeButtonObjectName = "BattleModeButton";
+    [SerializeField] private string repellerZoneButtonObjectName = "RepellerZoneButton";
     [SerializeField] private string startingPointPickerPanelObjectName = "StartingPointPicker";
     [SerializeField] private string startingPointPrevButtonObjectName = "StartLeftButton";
     [SerializeField] private string startingPointNextButtonObjectName = "StartRightButton";
@@ -45,6 +48,7 @@ public class FinalSetupInstaller : MonoBehaviour
 
         endMovementButton = FindComponentInSceneByName<Button>(uiScene, endMovementButtonObjectName);
         battleModeButton = FindComponentInSceneByName<Button>(uiScene, battleModeButtonObjectName);
+        repellerZoneButton = FindComponentInSceneByName<Button>(uiScene, repellerZoneButtonObjectName);
 
         GameObject panelGO = FindGameObjectInSceneByName(uiScene, startingPointPickerPanelObjectName);
         startingPointPickerPanel = panelGO;
@@ -55,6 +59,7 @@ public class FinalSetupInstaller : MonoBehaviour
 
         LogMissing("End Movement Button", endMovementButton, endMovementButtonObjectName);
         LogMissing("Battle Mode Button", battleModeButton, battleModeButtonObjectName);
+        LogMissing("Repeller Zone Button", repellerZoneButton, repellerZoneButtonObjectName);
         LogMissing("Starting Point Picker Panel", startingPointPickerPanel, startingPointPickerPanelObjectName);
         LogMissing("Starting Point Prev Button", startingPointPrevButton, startingPointPrevButtonObjectName);
         LogMissing("Starting Point Next Button", startingPointNextButton, startingPointNextButtonObjectName);
@@ -70,6 +75,9 @@ public class FinalSetupInstaller : MonoBehaviour
 
         if (tileWorldCanvasToggleButton == null)
             tileWorldCanvasToggleButton = FindComponentInScene<TileWorldCanvasToggleButton>(LoadedScene);
+
+        if (repellerZoneVisualizer == null)
+            repellerZoneVisualizer = FindComponentInScene<RepellerZoneVisualizer>(LoadedScene);
 
         if (animalSimulationController == null)
             animalSimulationController = FindComponentInScene<AnimalSimulationController>(LoadedScene);
@@ -100,6 +108,9 @@ public class FinalSetupInstaller : MonoBehaviour
 
         if (tileWorldCanvasToggleButton != null)
             tileWorldCanvasToggleButton.SetToggleButton(battleModeButton);
+
+        if (repellerZoneVisualizer != null)
+            repellerZoneVisualizer.SetToggleButton(repellerZoneButton);
     }
 
     public void InstallBootstrapReferences(
