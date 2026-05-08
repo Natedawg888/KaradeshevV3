@@ -103,6 +103,8 @@ private Button FindPickButtonUnder(Transform container)
 
         ProductionSelectionController.OnSelectionModeChanged -= HandleModeChanged;
         ProductionSelectionController.OnSelectionModeChanged += HandleModeChanged;
+        ProductionSelectionController.OnSelectionProgress -= HandleSelectionProgress;
+        ProductionSelectionController.OnSelectionProgress += HandleSelectionProgress;
 
         HandleModeChanged(ProductionSelectionController.IsSelectionActive);
     }
@@ -110,19 +112,18 @@ private Button FindPickButtonUnder(Transform container)
     private void OnDisable()
     {
         ProductionSelectionController.OnSelectionModeChanged -= HandleModeChanged;
+        ProductionSelectionController.OnSelectionProgress -= HandleSelectionProgress;
 
         // When this UI goes away, make sure we’re not forcing the canvas on anymore
         if (env != null)
             env.SetProductionSelectionCanvas(false);
     }
 
-    private void Update()
+    // Fires when a tile is toggled or progress changes — refresh selection color/visibility
+    private void HandleSelectionProgress(int picked, int max)
     {
-        // If in selection mode and container is visible, keep visibility in sync
-        if (ProductionSelectionController.IsSelectionActive && root && root.activeSelf)
-        {
+        if (ProductionSelectionController.IsSelectionActive)
             RefreshVisibility();
-        }
     }
 
     private void HandleModeChanged(bool active)

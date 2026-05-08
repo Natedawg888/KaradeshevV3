@@ -1,3 +1,4 @@
+using System.Text;
 using UnityEngine;
 using TMPro;
 
@@ -17,9 +18,11 @@ public class FPSCounter : MonoBehaviour
     private int _frames;
     private float _accumulatedUnscaledTime;
 
+    // Reused every interval — no per-update heap alloc
+    private readonly StringBuilder _sb = new StringBuilder(32);
+
     private void Reset()
     {
-        // Try auto-find on same object
         fpsText = GetComponent<TMP_Text>();
     }
 
@@ -34,9 +37,7 @@ public class FPSCounter : MonoBehaviour
 
     private void Update()
     {
-        // Use unscaled time so the FPS counter still reads correctly even if Time.timeScale changes.
         float dt = Time.unscaledDeltaTime;
-
         _timer += dt;
         _frames++;
         _accumulatedUnscaledTime += dt;
@@ -45,14 +46,21 @@ public class FPSCounter : MonoBehaviour
 
         float avgDelta = (_frames > 0) ? (_accumulatedUnscaledTime / _frames) : 0f;
         float fps = (avgDelta > 0f) ? (1f / avgDelta) : 0f;
-        float ms = avgDelta * 1000f;
+        float ms  = avgDelta * 1000f;
 
         if (fpsText != null)
         {
+            // Build string with no heap alloc: Append(int/char) + SetText(StringBuilder)
+            int fpsI    = Mathf.RoundToInt(fps);
+            int msWhole = (int)ms;
+            int msFrac  = Mathf.Clamp((int)((ms - msWhole) * 10f), 0, 9);
+
+            _sb.Clear();
+            _sb.Append(fpsI).Append(" FPS");
             if (showMs)
-                fpsText.text = $"{fps:0} FPS  ({ms:0.0} ms)";
-            else
-                fpsText.text = $"{fps:0} FPS";
+                _sb.Append("  (").Append(msWhole).Append('.').Append(msFrac).Append(" ms)");
+
+            fpsText.SetText(_sb);
         }
 
         _timer = 0f;

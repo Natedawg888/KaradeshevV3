@@ -1,23 +1,26 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FaceCamera : MonoBehaviour
 {
-    private Transform cameraTransform;
+    // One Camera.main lookup shared across all instances — refreshes only when null
+    private static Camera _sharedCam;
+    private Transform _camTransform;
 
-    void Start()
+    private void OnEnable()
     {
-        cameraTransform = Camera.main.transform; // Get the main camera's transform
+        if (_sharedCam == null) _sharedCam = Camera.main;
+        _camTransform = _sharedCam != null ? _sharedCam.transform : null;
     }
 
-    void Update()
+    private void Update()
     {
-        if (cameraTransform != null)
+        if (_camTransform == null)
         {
-            // Rotate the canvas to face the camera
-            transform.LookAt(transform.position + cameraTransform.rotation * Vector3.forward,
-                             cameraTransform.rotation * Vector3.up);
+            if (_sharedCam == null) _sharedCam = Camera.main;
+            _camTransform = _sharedCam != null ? _sharedCam.transform : null;
+            return;
         }
+        transform.LookAt(transform.position + _camTransform.rotation * Vector3.forward,
+                         _camTransform.rotation * Vector3.up);
     }
 }

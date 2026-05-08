@@ -276,7 +276,8 @@ public partial class AnimalSimulationController : MonoBehaviour
 
         _unitControlsCache.Clear();
 
-        var controls = FindObjectsOfType<TileUnitGroupControl>();
+        // FindAllFast uses FindObjectsSortMode.None on Unity 2022.2+ — avoids sort overhead
+        var controls = FindAllFast<TileUnitGroupControl>();
         for (int i = 0; i < controls.Length; i++)
             if (controls[i] != null)
                 _unitControlsCache.Add(controls[i]);
