@@ -183,6 +183,7 @@ SaveSystem (Singleton)
 │  ├─ JobsSaveSection
 │  ├─ WorldObjectsSaveSection
 │  ├─ WorldSimSaveSection
+│  ├─ NotificationsSaveSection (unread notifications — added May 8, 2026)
 │  └─ Custom Saveable objects
 ├─ Thread-safe: _backgroundSaveInFlight, _backgroundWriteTask
 └─ Load phases: 8 phases with progress events
@@ -1073,15 +1074,19 @@ Grid_Map/
   └─ TileActivator.cs, TileScript.cs
 
 Notifications/
-  ├─ NotificationManager.cs         (Singleton — stores List<NotificationData>, fires events)
+  ├─ NotificationManager.cs         (Singleton — stores List<NotificationData>, fires events; SaveState/LoadState)
   ├─ NotificationData.cs            (Data class + ProductionOutputEntry)
-  ├─ NotificationType.cs            (Enum — 16 types)
+  ├─ NotificationType.cs            (Enum — 37 types as of May 8, 2026)
   ├─ NotificationMessageCrafter.cs  (ScriptableObject — randomised templates, token replacement)
   ├─ NotificationMessageCrafterManager.cs (Singleton MonoBehaviour wrapper for crafter SO)
   ├─ NotificationButtonUI.cs        (HUD button, swaps sprite on unread)
   ├─ NotificationPanelUI.cs         (Scroll panel, Open/Close/Toggle, rebuilds rows on change)
   ├─ NotificationRowUI.cs           (Single row — see architecture note below)
   └─ NotificationIconSet.cs         (ScriptableObject — type → sprite map)
+
+GameSystems/SaveSystem/
+  ├─ NotificationsSaveSection.cs    (ISaveSection — captures unread notifications into SaveSnapshot)
+  └─ Data/NotificationsSaveData.cs  (Serialisable entry; producedOutputs omitted — ScriptableObject refs)
 
 NotificationManager public API (as of May 8, 2026):
   AddNotification(type, title, message)
@@ -1093,6 +1098,8 @@ NotificationManager public API (as of May 8, 2026):
   AddCraftingCompletedNotification(title, message, List<ProductionOutputEntry>, Vector3 worldPosition = default)
   AddCraftingFailedNotification(title, message, Vector3 worldPosition = default)
     └─ fires CraftingFailedWeather type
+  SaveState() → NotificationsSaveData        (only unread notifications)
+  LoadState(NotificationsSaveData)           (clears list, restores, fires OnNotificationsChanged)
   Passing worldPosition sets hasTileTarget = true → goToButton shows in row UI
 
 NotificationMessageCrafterManager craft methods (as of May 8, 2026):
@@ -1145,6 +1152,48 @@ NotificationRowUI architecture (as of May 7, 2026):
 ---
 
 ## 11. Changelog
+
+### May 8, 2026 — Notification Save/Load
+
+**Files changed/created:**
+- `ScriptsUpdated/GameSystems/SaveSystem/Data/NotificationsSaveData.cs` *(new)*
+- `ScriptsUpdated/GameSystems/SaveSystem/NotificationsSaveSection.cs` *(new)*
+- `ScriptsUpdated/GameSystems/SaveSystem/SaveSectionKeys.cs`
+- `ScriptsUpdated/GameSystems/SaveSystem/EnvironmentSaveSections.cs`
+- `ScriptsUpdated/GameSystems/SaveSystem/SaveSnapshot.cs`
+- `ScriptsUpdated/GameSystems/SaveSystem/SaveSystem.cs`
+- `ScriptsUpdated/Notifications/NotificationManager.cs`
+
+**What was added:**
+
+Unread notifications now persist across save/load. Only unread notifications are saved — read ones are discarded on save.
+
+```
+NotificationsSaveSection (ISaveSection)
+  └─ CaptureInto() → NotificationManager.Instance.SaveState()
+       └─ serialises each unread NotificationData into NotificationSaveEntry
+            fields: type (int), title, message, isRead, turnNumber,
+                    hasTileTarget, worldPositionX/Y/Z, showDeathIcon
+            NOTE: producedOutputs NOT saved (ScriptableObject refs can't be JSON-serialised)
+                  notification title/message body already contains the key info
+
+SaveSystem changes:
+  RegisterSections() → adds NotificationsSaveSection
+  Write path → writes {stem}.notifications.json when snapshot.notifications != null
+  Load path → reads .notifications.json, calls NotificationManager.Instance?.LoadState()
+  BuildMetaForSnapshot → sets hasNotifications
+  CloneMeta / SeedSnapshotCacheFromLoadedData → threads notifications through
+
+NotificationManager changes:
+  SaveState()  — iterates _notifications, skips isRead, returns NotificationsSaveData
+  LoadState()  — clears list, deserialises entries, fires OnNotificationsChanged
+  AddNotificationInternal — calls SaveSystem.MarkSectionDirty(Notifications) so incremental
+                             saves capture new notifications without a full re-save
+```
+
+**Save file produced:** `<savename>.notifications.json`
+
+---
 
 ### May 8, 2026 — Combat, Unit Death, and Animism Spirit Notifications
 
@@ -1623,5 +1672,5 @@ Auto-find: "FireIcon" and "FireFightIconTimer" children by name in OnValidate()
 **End of Report**
 
 *Status: Ready for Ruflo Integration*  
-*Last Updated: May 8, 2026 (combat + spirit notifications)*  
+*Last Updated: May 8, 2026 (notification save/load)*  
 *Audit Confidence: High (comprehensive read-only scan)*
