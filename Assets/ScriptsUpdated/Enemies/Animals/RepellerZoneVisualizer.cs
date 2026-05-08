@@ -11,8 +11,8 @@ using UnityEngine.UI;
 public class RepellerZoneVisualizer : MonoBehaviour
 {
     [Header("Overlay Appearance")]
-    [Tooltip("Multiplier on top of GridManager.cellSize. 1 = exact tile size, <1 = slight gap.")]
-    [SerializeField] private float overlayScaleMultiplier = 0.98f;
+    [Tooltip("Multiplier on top of GridManager.cellSize. 1 = full tile coverage.")]
+    [SerializeField] private float overlayScaleMultiplier = 1f;
 
     [Tooltip("Slight y-lift above the ground plane to avoid z-fighting.")]
     [SerializeField] private float yOffset = 0.05f;
@@ -150,7 +150,8 @@ public class RepellerZoneVisualizer : MonoBehaviour
     private void CreateOverlay(Vector3 tileWorldPos, float scale)
     {
         var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        go.name = "RepellerZoneOverlay";
+        go.name  = "RepellerZoneOverlay";
+        go.layer = LayerMask.NameToLayer("UI");
 
         go.transform.position   = new Vector3(tileWorldPos.x, tileWorldPos.y + yOffset, tileWorldPos.z);
         go.transform.rotation   = Quaternion.Euler(90f, 0f, 0f);
@@ -173,12 +174,11 @@ public class RepellerZoneVisualizer : MonoBehaviour
 
         _overlayMaterial = new Material(shader) { color = overlayColor };
 
-        if (_overlayMaterial.HasProperty("_SrcBlend"))
-        {
-            _overlayMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            _overlayMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            _overlayMaterial.SetInt("_ZWrite", 0);
-            _overlayMaterial.renderQueue = 3000;
-        }
+        // Render on top of all world geometry — disable depth write/test, use Overlay queue
+        _overlayMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        _overlayMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        _overlayMaterial.SetInt("_ZWrite",   0);
+        _overlayMaterial.SetInt("_ZTest",    (int)UnityEngine.Rendering.CompareFunction.Always);
+        _overlayMaterial.renderQueue = 4000; // Overlay — renders after everything else
     }
 }
