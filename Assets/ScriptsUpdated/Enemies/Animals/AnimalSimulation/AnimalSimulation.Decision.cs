@@ -38,6 +38,9 @@ public partial class AnimalSimulation
             if (species.huntsHumans && HandleHumanRaiding(ref group, hungerPct, thirstPct))
                 return;
 
+            if (species.raidsStorageForFood && HandleStorageRaiding(ref group, hungerPct))
+                return;
+
             if (TryEatHere(ref group, currentTileEnv))
                 return;
 

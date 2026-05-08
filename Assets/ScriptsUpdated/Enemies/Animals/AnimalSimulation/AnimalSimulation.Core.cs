@@ -26,6 +26,32 @@ public partial class AnimalSimulation
     public event Action<int, TileCoord> OnGroupAttackedPlayerTile;
     public event Action<int, string, TileCoord> OnGroupAttackedPlayerUnitGroup;
 
+    // For storage food raids: (animalGroupId, storageTile, requestedFoodAmount)
+    public event Action<int, TileCoord, int> OnGroupAttemptedStorageRaid;
+
+    // Storage tiles with food: tile → total food amount
+    private readonly Dictionary<TileCoord, int> _storageFoodByTile = new Dictionary<TileCoord, int>();
+
+    // Tiles repelled by AnimalRepeller components — animals avoid these when seeking food storage
+    private readonly HashSet<TileCoord> _repelledTiles = new HashSet<TileCoord>();
+
+    public void SetStorageFoodTiles(System.Collections.Generic.IEnumerable<(TileCoord tile, int foodAmount)> entries)
+    {
+        _storageFoodByTile.Clear();
+        if (entries == null) return;
+        foreach (var (tile, amount) in entries)
+            if (amount > 0) _storageFoodByTile[tile] = amount;
+    }
+
+    public void SetRepelledTiles(System.Collections.Generic.IEnumerable<TileCoord> tiles)
+    {
+        _repelledTiles.Clear();
+        if (tiles == null) return;
+        foreach (var t in tiles) _repelledTiles.Add(t);
+    }
+
+    public bool IsTileRepelled(TileCoord tile) => _repelledTiles.Contains(tile);
+
     // Global group cap (default: unlimited)
     private int _maxTotalGroups = int.MaxValue;
     public int MaxTotalGroups

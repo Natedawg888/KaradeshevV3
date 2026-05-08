@@ -157,6 +157,20 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.CraftUnitMovementCompleted(groupName, unitName);
     }
 
+    public (string title, string message) CraftAnimalStorageRaided(string speciesName, string buildingName, int amount)
+    {
+        if (crafter == null)
+            return ("Storage Raided!", $"{speciesName} stole {amount} food from {buildingName}.");
+        return crafter.CraftAnimalStorageRaided(speciesName, buildingName, amount);
+    }
+
+    public (string title, string message) CraftAnimalRaidingBuilding(string speciesName, string buildingName)
+    {
+        if (crafter == null)
+            return ("Building Under Raid!", $"{speciesName} are attacking {buildingName}!");
+        return crafter.CraftAnimalRaidingBuilding(speciesName, buildingName);
+    }
+
     public (string title, string message) CraftSpiritSummoned(string spiritName)
     {
         if (crafter == null)

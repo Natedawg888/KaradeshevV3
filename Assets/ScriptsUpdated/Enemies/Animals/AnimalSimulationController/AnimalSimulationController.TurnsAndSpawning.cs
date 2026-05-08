@@ -76,6 +76,8 @@ public partial class AnimalSimulationController : MonoBehaviour
     {
         RefreshPlayerBuildingTiles();
         RefreshHumanUnitGroups();
+        RefreshStorageTiles();
+        RefreshRepelledTiles();
 
         _attackingBuildingByGroup.Clear();
         _buildingAttackCounts.Clear();

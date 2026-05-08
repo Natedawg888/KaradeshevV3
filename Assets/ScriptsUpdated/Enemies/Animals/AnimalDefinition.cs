@@ -376,6 +376,19 @@ public class AnimalDefinition : ScriptableObject
     [Tooltip("If true, this species avoids tiles and situations involving humans.")]
     public bool avoidsHumans = false;
 
+    [Header("Food Storage Raiding")]
+    [Tooltip("If true, this species will move to storage buildings with edible food and steal it when hungry.")]
+    public bool raidsStorageForFood = false;
+
+    [Tooltip("Hunger fraction above which this species will seek out food storage buildings.")]
+    [Range(0f, 1f)] public float storageRaidHungerThreshold = 0.5f;
+
+    [Tooltip("Maximum tile range to scan for food storage buildings.")]
+    [Min(1)] public int storageRaidRangeTiles = 8;
+
+    [Tooltip("Units of food stolen per raid action (multiplied by group size).")]
+    [Min(1)] public int foodStolenPerRaidAction = 1;
+
     public bool IsMatingSeason(SeasonDefinition season)
     {
         if (matingSeasonIDs == null || matingSeasonIDs.Length == 0)

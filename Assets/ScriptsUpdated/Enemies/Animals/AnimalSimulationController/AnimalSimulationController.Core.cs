@@ -151,6 +151,7 @@ public partial class AnimalSimulationController : MonoBehaviour
         _simulation.HumanHuntersAvoidPlayerBuildings = humanHuntersAvoidPlayerBuildingsAtStart;
         _simulation.OnGroupAttackedPlayerTile += HandleGroupAttackedPlayerTile;
         _simulation.OnGroupAttackedPlayerUnitGroup += HandleGroupAttackedPlayerUnitGroup;
+        _simulation.OnGroupAttemptedStorageRaid += HandleGroupAttemptedStorageRaid;
 
         _simulation.DebugHumanTargeting = true;
         _simulation.DebugHumanStepping = true;
@@ -220,6 +221,7 @@ public partial class AnimalSimulationController : MonoBehaviour
             _simulation.OnGroupRemoved -= HandleGroupRemoved;
             _simulation.OnGroupAttackedPlayerTile -= HandleGroupAttackedPlayerTile;
             _simulation.OnGroupAttackedPlayerUnitGroup -= HandleGroupAttackedPlayerUnitGroup;
+            _simulation.OnGroupAttemptedStorageRaid -= HandleGroupAttemptedStorageRaid;
         }
 
         if (AnimalSimulationAccess.Current == _simulation)

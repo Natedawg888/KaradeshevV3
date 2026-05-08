@@ -44,4 +44,6 @@ public enum NotificationType
     SpiritMoodChanged,
     SpiritSummoned,
     SpiritOfferingMade,
+    AnimalRaidingBuilding,
+    AnimalStorageRaided,
 }

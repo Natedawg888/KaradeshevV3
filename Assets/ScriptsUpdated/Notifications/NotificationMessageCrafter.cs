@@ -214,6 +214,31 @@ public class NotificationMessageCrafter : ScriptableObject
         return (title, message);
     }
 
+    public (string title, string message) CraftAnimalStorageRaided(string speciesName, string buildingName, int amount)
+    {
+        var set = GetSuccessSet(NotificationType.AnimalStorageRaided);
+        if (set == null)
+            return ("Storage Raided!", $"{speciesName} stole {amount} food from {buildingName}.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{SPECIES}",  speciesName)
+            .Replace("{BUILDING}", buildingName)
+            .Replace("{AMOUNT}",   amount.ToString());
+        return (title, message);
+    }
+
+    public (string title, string message) CraftAnimalRaidingBuilding(string speciesName, string buildingName)
+    {
+        var set = GetSuccessSet(NotificationType.AnimalRaidingBuilding);
+        if (set == null)
+            return ("Building Under Raid!", $"{speciesName} are attacking {buildingName}!");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{SPECIES}",  speciesName)
+            .Replace("{BUILDING}", buildingName);
+        return (title, message);
+    }
+
     public (string title, string message) CraftSpiritSummoned(string spiritName)
     {
         var set = GetSuccessSet(NotificationType.SpiritSummoned);
@@ -773,6 +798,30 @@ public class NotificationMessageCrafter : ScriptableObject
                     "The ritual is complete — {SPIRIT} has accepted your call.",
                     "{SPIRIT} stirs. A new spirit has joined your settlement.",
                     "Your people have made contact with {SPIRIT}.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.AnimalStorageRaided,
+                titles   = new[] { "Storage Raided!", "Food Stolen!", "Animals Raided Storage" },
+                messages = new[]
+                {
+                    "{SPECIES} stole {AMOUNT} food from {BUILDING}.",
+                    "A pack of {SPECIES} raided {BUILDING} and took {AMOUNT} food.",
+                    "{AMOUNT} units of food were stolen from {BUILDING} by {SPECIES}.",
+                    "{BUILDING} was raided — {SPECIES} took {AMOUNT} food.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.AnimalRaidingBuilding,
+                titles   = new[] { "Building Under Raid!", "Animal Raid!", "Danger!" },
+                messages = new[]
+                {
+                    "{SPECIES} are attacking {BUILDING}!",
+                    "A pack of {SPECIES} has set upon {BUILDING}!",
+                    "{BUILDING} is under attack from {SPECIES} — act quickly!",
+                    "Raiders! {SPECIES} are assaulting {BUILDING}.",
                 },
             },
             new SuccessTemplateSet

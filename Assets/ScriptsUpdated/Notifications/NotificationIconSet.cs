@@ -61,6 +61,8 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.UnitAttackActionCompleted    },
             new Entry { type = NotificationType.UnitTargetedByAnimal         },
             new Entry { type = NotificationType.UnitGroupDestroyed           },
+            new Entry { type = NotificationType.AnimalRaidingBuilding        },
+            new Entry { type = NotificationType.AnimalStorageRaided          },
             new Entry { type = NotificationType.SpiritMoodChanged            },
             new Entry { type = NotificationType.SpiritSummoned              },
             new Entry { type = NotificationType.SpiritOfferingMade          },
