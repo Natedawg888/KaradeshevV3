@@ -53,6 +53,7 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.PopulationAgedUp               },
             new Entry { type = NotificationType.ElderDiedOfOldAge              },
             new Entry { type = NotificationType.DiseaseOutbreak                },
+            new Entry { type = NotificationType.DiseaseKilledPopulation        },
         };
     }
 }

@@ -190,6 +190,18 @@ public class NotificationMessageCrafter : ScriptableObject
         return (title, message);
     }
 
+    public (string title, string message) CraftDiseaseKilled(string diseaseName, string surname)
+    {
+        var set = GetSuccessSet(NotificationType.DiseaseKilledPopulation);
+        if (set == null)
+            return ("Death from Disease", $"{surname} has died from {diseaseName}.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{DISEASE}", diseaseName)
+            .Replace("{NAME}",    surname);
+        return (title, message);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         var set = GetSuccessSet(type);
@@ -517,6 +529,18 @@ public class NotificationMessageCrafter : ScriptableObject
                     "A {CAUSE} known as {DISEASE} has been detected in your population.",
                     "Your people are suffering from {DISEASE}. Act quickly.",
                     "An outbreak of {DISEASE} threatens your settlement.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.DiseaseKilledPopulation,
+                titles   = new[] { "Death from Disease", "Claimed by Sickness", "Lost to Illness" },
+                messages = new[]
+                {
+                    "{NAME} has died from {DISEASE}.",
+                    "{DISEASE} has claimed the life of {NAME}.",
+                    "{NAME} could not survive {DISEASE}.",
+                    "The settlement mourns {NAME}, taken by {DISEASE}.",
                 },
             },
             new SuccessTemplateSet

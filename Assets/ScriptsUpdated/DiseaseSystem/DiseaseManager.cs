@@ -774,13 +774,24 @@ public class DiseaseManager : MonoBehaviour
             pop.MarkUIDirty();
         }
 
+        string dName = disease != null ? disease.displayName : (state?.diseaseId ?? "Unknown Disease");
+        string pName = !string.IsNullOrWhiteSpace(person.Surname) ? person.Surname : "A citizen";
+
         if (debugDeath)
-        {
-            string diseaseName = disease != null ? disease.displayName : state?.diseaseId;
-            Debug.LogWarning(
-                $"[DiseaseManager] Individual died from disease. " +
-                $"Individual={person.Id}, Disease={diseaseName}");
-        }
+            Debug.LogWarning($"[DiseaseManager] Individual died from disease. Individual={person.Id}, Disease={dName}");
+
+        PostDiseaseDeathNotification(dName, pName);
+    }
+
+    private void PostDiseaseDeathNotification(string diseaseName, string surname)
+    {
+        if (NotificationManager.Instance == null) return;
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftDiseaseKilled(diseaseName, surname);
+        else
+            (title, message) = ("Death from Disease", $"{surname} has died from {diseaseName}.");
+        NotificationManager.Instance.AddNotification(NotificationType.DiseaseKilledPopulation, title, message, true);
     }
 
     private PopulationGroup FindPopulationGroup(Guid groupId)
@@ -2463,7 +2474,7 @@ public class DiseaseManager : MonoBehaviour
             (title, message) = NotificationMessageCrafterManager.Instance.CraftDiseaseOutbreak(diseaseName, causeType);
         else
             (title, message) = ("Disease Outbreak!", $"{diseaseName} has appeared in your population.");
-        NotificationManager.Instance.AddNotification(NotificationType.DiseaseOutbreak, title, message, true);
+        NotificationManager.Instance.AddNotification(NotificationType.DiseaseOutbreak, title, message, false);
     }
 
     private void MarkDiseaseSaveDirty()

@@ -136,6 +136,13 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.CraftDiseaseOutbreak(diseaseName, causeType);
     }
 
+    public (string title, string message) CraftDiseaseKilled(string diseaseName, string surname)
+    {
+        if (crafter == null)
+            return ("Death from Disease", $"{surname} has died from {diseaseName}.");
+        return crafter.CraftDiseaseKilled(diseaseName, surname);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         if (crafter == null)

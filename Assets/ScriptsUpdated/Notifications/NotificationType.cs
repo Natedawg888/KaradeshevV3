@@ -32,4 +32,5 @@ public enum NotificationType
     ElderDiedOfOldAge,
 
     DiseaseOutbreak,
+    DiseaseKilledPopulation,
 }
