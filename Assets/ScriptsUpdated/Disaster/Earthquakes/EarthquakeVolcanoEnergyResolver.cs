@@ -166,7 +166,7 @@ public class EarthquakeVolcanoEnergyResolver : MonoBehaviour
 
         if (volcanoManager == null || mapGenerator == null || gridManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("EarthquakeVolcanoEnergyResolver: Missing references.");
 
             return;

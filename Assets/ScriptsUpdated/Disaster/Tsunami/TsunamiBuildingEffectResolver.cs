@@ -173,7 +173,7 @@ public class TsunamiBuildingEffectResolver : MonoBehaviour
 
         if (gridManager == null || worldBuildingManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[TsunamiBuildingEffectResolver] Missing references.");
 
             resolverRoutine = null;

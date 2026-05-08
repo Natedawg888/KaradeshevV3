@@ -135,7 +135,7 @@ public class VolcanoAtmosphereBridge : MonoBehaviour
 
         if (!volcano.TryGetPrimaryCell(out TileCoord primaryCell))
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning($"[VolcanoAtmosphereBridge] Could not resolve primary cell for {volcano.name}");
 
             return;

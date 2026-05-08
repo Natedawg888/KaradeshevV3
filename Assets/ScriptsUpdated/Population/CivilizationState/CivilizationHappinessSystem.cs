@@ -402,7 +402,7 @@ public class CivilizationHappinessSystem : MonoBehaviour
                     float penalty = -gradePenaltyMax * Mathf.Clamp01(t);
                     civ.AdjustHappiness(penalty);
 
-                    if (debugFoodGrade)
+                    if (debugFoodGrade) {}
                         //Debug.Log($"[HAPPY][FoodGrade] bestKnown={expectedKnownGrade} avgEaten={avgGradeNonSpoiled:F2} mismatch={mismatch:F2} => {penalty:0.000;-0.000;0.000}");
                 }
                 else if (gradeBonusMax > 0f)
@@ -412,7 +412,7 @@ public class CivilizationHappinessSystem : MonoBehaviour
                     float bonus = +gradeBonusMax * Mathf.Clamp01(t);
                     civ.AdjustHappiness(bonus);
 
-                    if (debugFoodGrade)
+                    if (debugFoodGrade) {}
                         //Debug.Log($"[HAPPY][FoodGrade] bestKnown={expectedKnownGrade} avgEaten={avgGradeNonSpoiled:F2} close => +{bonus:0.000}");
                 }
             }
@@ -427,7 +427,7 @@ public class CivilizationHappinessSystem : MonoBehaviour
             float penalty = -Mathf.Clamp(p, 0f, spoiledPenaltyMax);
             civ.AdjustHappiness(penalty);
 
-            if (debugSpoiledFood)
+            if (debugSpoiledFood) {}
                 //Debug.Log($"[HAPPY][SpoiledFood] spoiledUnits={spoiledUnits} spoiledPts={spoiledNutritionPoints:F1} => happiness {penalty:0.000;-0.000;0.000}");
         }
 

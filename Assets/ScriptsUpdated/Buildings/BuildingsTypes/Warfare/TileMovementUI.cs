@@ -66,7 +66,7 @@ public class TileMovementUI : MonoBehaviour
 
         _resolveRoutine = null;
 
-        if (tile == null)
+        if (tile == null) {}
             //Debug.LogWarning($"[TileMovementUI] Could not find TileControl for {name}. Check hierarchy/sibling placement.");
     }
 

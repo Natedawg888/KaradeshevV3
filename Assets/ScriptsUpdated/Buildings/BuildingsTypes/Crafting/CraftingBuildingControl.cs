@@ -444,7 +444,7 @@ public class CraftingBuildingControl : MonoBehaviour
 
         NotifyOrdersChanged();
 
-        if (!string.IsNullOrEmpty(reason))
+        if (!string.IsNullOrEmpty(reason)) {}
             //Debug.Log($"[Crafting] All orders aborted: {reason}");
     }
 

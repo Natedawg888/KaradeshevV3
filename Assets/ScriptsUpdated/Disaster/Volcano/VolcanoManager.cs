@@ -113,7 +113,7 @@ public class VolcanoManager : MonoBehaviour
 
         RefreshEruptingList();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[VolcanoManager] Registered scene volcano states. Found={found.Length} Added={added}");
     }
 
@@ -127,7 +127,7 @@ public class VolcanoManager : MonoBehaviour
         if (volcano.IsErupting && !eruptingVolcanoes.Contains(volcano))
             eruptingVolcanoes.Add(volcano);
 
-        if (debugLogging && added)
+        if (debugLogging && added) {}
             //Debug.Log($"[VolcanoManager] Registered {volcano.name}");
 
         return added;
@@ -141,7 +141,7 @@ public class VolcanoManager : MonoBehaviour
         bool removed = registeredVolcanoes.Remove(volcano);
         eruptingVolcanoes.Remove(volcano);
 
-        if (debugLogging && removed)
+        if (debugLogging && removed) {}
             //Debug.Log($"[VolcanoManager] Unregistered {volcano.name}");
 
         return removed;
@@ -233,7 +233,7 @@ public class VolcanoManager : MonoBehaviour
 
         OnVolcanoTurnAdvanceStarted?.Invoke();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[VolcanoManager] Volcano turn started. Count={advanceBuffer.Count}");
     }
 
@@ -244,7 +244,7 @@ public class VolcanoManager : MonoBehaviour
 
         OnVolcanoTurnAdvanceFinished?.Invoke();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[VolcanoManager] Volcano turn finished. Erupting={eruptingVolcanoes.Count}");
 
         advanceBuffer.Clear();
@@ -342,7 +342,7 @@ public class VolcanoManager : MonoBehaviour
         RegisterVolcano(volcano);
         OnVolcanoCreated?.Invoke(volcano);
 
-        if (debugLogging && volcano != null)
+        if (debugLogging && volcano != null) {}
             //Debug.Log($"[VolcanoManager] Volcano created: {volcano.name}");
     }
 
@@ -353,7 +353,7 @@ public class VolcanoManager : MonoBehaviour
 
         OnVolcanoBecameDormant?.Invoke(volcano);
 
-        if (debugLogging && volcano != null)
+        if (debugLogging && volcano != null) {}
             //Debug.Log($"[VolcanoManager] Volcano became Dormant: {volcano.name}");
     }
 
@@ -366,7 +366,7 @@ public class VolcanoManager : MonoBehaviour
 
         OnEruptionStarted?.Invoke(volcano);
 
-        if (debugLogging && volcano != null)
+        if (debugLogging && volcano != null) {}
             //Debug.Log($"[VolcanoManager] Eruption started: {volcano.name}");
     }
 
@@ -383,7 +383,7 @@ public class VolcanoManager : MonoBehaviour
         eruptingVolcanoes.Remove(volcano);
         OnEruptionEnded?.Invoke(volcano);
 
-        if (debugLogging && volcano != null)
+        if (debugLogging && volcano != null) {}
             //Debug.Log($"[VolcanoManager] Eruption ended: {volcano.name}");
     }
 
@@ -392,7 +392,7 @@ public class VolcanoManager : MonoBehaviour
         eruptingVolcanoes.Remove(volcano);
         OnVolcanoRevertedToMountain?.Invoke(volcano);
 
-        if (debugLogging && volcano != null)
+        if (debugLogging && volcano != null) {}
             //Debug.Log($"[VolcanoManager] Volcano reverted to Mountain: {volcano.name}");
     }
 

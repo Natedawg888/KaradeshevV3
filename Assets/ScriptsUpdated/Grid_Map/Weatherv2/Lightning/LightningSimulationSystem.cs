@@ -342,7 +342,7 @@ public class LightningSimulationSystem : MonoBehaviour
 
             if (TryInitializeGrid())
             {
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log("[LightningSimulationSystem] Sources ready. Lightning system initialized.");
 
                 _waitForSourcesReadyCoroutine = null;
@@ -403,7 +403,7 @@ public class LightningSimulationSystem : MonoBehaviour
         if (sizeChanged)
             OnLightningGridInitialized?.Invoke();
 
-        if (debugLogging && sizeChanged)
+        if (debugLogging && sizeChanged) {}
             //Debug.Log($"[LightningSimulationSystem] Initialized {_cols}x{_rows}");
 
         return true;
@@ -482,7 +482,7 @@ public class LightningSimulationSystem : MonoBehaviour
             if (anyChanged)
                 OnLightningStateChanged?.Invoke();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[LightningSimulationSystem] Advanced lightning one sparse step.");
         }
         finally
@@ -542,7 +542,7 @@ public class LightningSimulationSystem : MonoBehaviour
             if (anyChanged)
                 OnLightningStateChanged?.Invoke();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[LightningSimulationSystem] Advanced lightning one sparse batched step.");
         }
         finally
@@ -1642,7 +1642,7 @@ public class LightningSimulationSystem : MonoBehaviour
 
         if (!TryInitializeGrid())
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[LightningSimulationSystem] Could not load lightning state because grid is not initialized yet.");
 
             return;

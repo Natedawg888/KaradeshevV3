@@ -268,7 +268,7 @@ public class TornadoAnimalEffectResolver : MonoBehaviour
                 // Mark as empty and do not check again until tornado moves/spawns/expires.
                 _knownEmptyActiveTornadoTileKeys.Add(tileKey);
 
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log($"[TornadoAnimalEffectResolver] Cached empty tornado animal tile at {tile}.");
 
                 continue;
@@ -307,7 +307,7 @@ public class TornadoAnimalEffectResolver : MonoBehaviour
             {
                 _knownEmptyActiveTornadoTileKeys.Add(tileKey);
 
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log($"[TornadoAnimalEffectResolver] Tile became empty after tornado processing at {tile}.");
             }
             else

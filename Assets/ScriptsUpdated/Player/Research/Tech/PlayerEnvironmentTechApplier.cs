@@ -67,7 +67,7 @@ public class PlayerEnvironmentTechApplier : MonoBehaviour
             }
         }
 
-        if (unlocked > 0)
+        if (unlocked > 0) {}
             //Debug.Log($"[EnvTech] Unlocked exploration on {unlocked} environment tiles for tech '{techID}'.");
     }
 

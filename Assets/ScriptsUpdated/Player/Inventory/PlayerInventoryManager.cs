@@ -151,7 +151,7 @@ public partial class PlayerInventoryManager : MonoBehaviour
             if (e.def.isGroup) continue;
 
             bool ok = TryAdd(e.def, e.amount); // uses your existing capacity + merge logic :contentReference[oaicite:3]{index=3}
-            if (!ok)
+            if (!ok) {}
                 //Debug.LogWarning($"[INV] Starter add failed (capacity?) {e.amount}x {e.def.resourceName} ({e.def.resourceID})");
             else
                 addedCount++;

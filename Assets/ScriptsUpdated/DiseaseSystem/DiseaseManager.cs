@@ -777,7 +777,7 @@ public class DiseaseManager : MonoBehaviour
         string dName = disease != null ? disease.displayName : (state?.diseaseId ?? "Unknown Disease");
         string pName = !string.IsNullOrWhiteSpace(person.Surname) ? person.Surname : "A citizen";
 
-        if (debugDeath)
+        if (debugDeath) {}
             //Debug.LogWarning($"[DiseaseManager] Individual died from disease. Individual={person.Id}, Disease={dName}");
 
         PostDiseaseDeathNotification(dName, pName);
@@ -999,7 +999,7 @@ public class DiseaseManager : MonoBehaviour
 
     private void Log(string message)
     {
-        if (enableDebugLogs)
+        if (enableDebugLogs) {}
             //Debug.Log(message);
     }
 

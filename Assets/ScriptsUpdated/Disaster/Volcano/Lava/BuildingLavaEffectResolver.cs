@@ -175,7 +175,7 @@ public class BuildingLavaEffectResolver : MonoBehaviour
 
         if (resistance != null && resistance.lavaImmune)
         {
-            if (debugLogging || resistance.debugLogging)
+            if (debugLogging || resistance.debugLogging) {}
                 //Debug.Log($"[BuildingLavaEffectResolver] Lava ignored immune building '{name}'.");
             return;
         }

@@ -199,7 +199,7 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
 
         if (mapGenerator == null || gridManager == null || worldBuildingManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("EarthquakeBuildingEffectResolver: Missing references.");
 
             resolverRoutine = null;
@@ -226,7 +226,7 @@ public class EarthquakeBuildingEffectResolver : MonoBehaviour
 
         if (magnitude01 <= 0f)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"EarthquakeBuildingEffectResolver: Magnitude {data.magnitude:0.0}, no building damage.");
 
             resolverRoutine = null;

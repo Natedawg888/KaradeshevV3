@@ -20,11 +20,11 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
         }
 
         general = GeneralPopulationManager.Instance;
-        if (general == null)
+        if (general == null) {}
             //Debug.LogError("GeneralPopulationManager missing in scene.");
 
         playerPop = PlayersPopulationManager.Instance;
-        if (playerPop == null)
+        if (playerPop == null) {}
             //Debug.LogError("PlayersPopulationManager missing in scene.");
     }
 

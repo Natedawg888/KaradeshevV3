@@ -109,12 +109,12 @@ public class EarthquakeCameraShake : MonoBehaviour
         {
             cameraTransform = found.transform;
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"EarthquakeCameraShake: Found camera '{found.name}'.");
         }
         else
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("EarthquakeCameraShake: Could not find a Camera in the scene.");
         }
     }
@@ -127,7 +127,7 @@ public class EarthquakeCameraShake : MonoBehaviour
 
         if (target == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("EarthquakeCameraShake: No camera target found.");
 
             return;

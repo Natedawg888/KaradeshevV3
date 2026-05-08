@@ -43,7 +43,7 @@ public class BuildingManager : MonoBehaviour
             Destroy(gameObject);
         }
 
-        if (buildingsByStage == null || buildingsByStage.Count == 0)
+        if (buildingsByStage == null || buildingsByStage.Count == 0) {}
             //Debug.LogError("BuildingManager: No buildings initialized! Check initialization sequence.");
     }
 

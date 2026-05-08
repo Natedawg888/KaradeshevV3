@@ -143,7 +143,7 @@ public class VolcanoLavaBridge : MonoBehaviour
 
         if (lavaOverlayManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[VolcanoLavaBridge] No LavaOverlayManager found.");
 
             return;
@@ -154,7 +154,7 @@ public class VolcanoLavaBridge : MonoBehaviour
 
         if (!volcano.TryGetPrimaryCell(out TileCoord primaryCell))
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning($"[VolcanoLavaBridge] Could not resolve primary cell for {volcano.name}");
 
             return;
@@ -289,7 +289,7 @@ public class VolcanoLavaBridge : MonoBehaviour
 
         if (!volcano.TryGetPrimaryCell(out TileCoord primaryCell))
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning($"[VolcanoLavaBridge] Could not resolve primary cell for erupting volcano {volcano.name}");
 
             return;

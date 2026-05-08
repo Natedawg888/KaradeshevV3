@@ -251,7 +251,7 @@ public class CloudSimulationSystem : MonoBehaviour
                     _seededFromValidWeather = true;
                 }
 
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log("[CloudSimulationSystem] Weather is ready. Cloud system initialized.");
 
                 _waitForWeatherReadyCoroutine = null;
@@ -357,7 +357,7 @@ public class CloudSimulationSystem : MonoBehaviour
         if (sizeChanged)
             OnCloudGridInitialized?.Invoke();
 
-        if (debugLogging && sizeChanged)
+        if (debugLogging && sizeChanged) {}
             //Debug.Log($"[CloudSimulationSystem] Initialized {_cols}x{_rows}");
 
         return true;
@@ -497,7 +497,7 @@ public class CloudSimulationSystem : MonoBehaviour
 
             OnCloudStateChanged?.Invoke();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[CloudSimulationSystem] Advanced clouds one step.");
         }
         finally
@@ -570,7 +570,7 @@ public class CloudSimulationSystem : MonoBehaviour
 
             OnCloudStateChanged?.Invoke();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[CloudSimulationSystem] Advanced clouds one batched step.");
         }
         finally
@@ -720,7 +720,7 @@ public class CloudSimulationSystem : MonoBehaviour
 
         ApplyCloudState(_nextCloudGrid);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[CloudSimulationSystem] Reseeded clouds. Seeded={seededCount}");
     }
 
@@ -769,7 +769,7 @@ public class CloudSimulationSystem : MonoBehaviour
 
         ApplyCloudState(_nextCloudGrid);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[CloudSimulationSystem] Top-up added {added} clouds.");
     }
 
@@ -781,7 +781,7 @@ public class CloudSimulationSystem : MonoBehaviour
         Array.Clear(_nextCloudGrid, 0, _nextCloudGrid.Length);
         ApplyCloudState(_nextCloudGrid);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[CloudSimulationSystem] Cleared all clouds.");
     }
 
@@ -1253,7 +1253,7 @@ public class CloudSimulationSystem : MonoBehaviour
         WindDirection8 oldDirection = windDirection;
         windDirection = GetRandomWindDirection(allowWindDirectionToStaySame ? (WindDirection8?)null : oldDirection);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[CloudSimulationSystem] Wind direction changed: {oldDirection} -> {windDirection}");
     }
 
@@ -1918,7 +1918,7 @@ public class CloudSimulationSystem : MonoBehaviour
 
         if (!TryInitializeGrid())
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[CloudSimulationSystem] Could not load cloud state because grid is not initialized yet.");
 
             return;
@@ -2079,7 +2079,7 @@ public class CloudSimulationSystem : MonoBehaviour
         lateralShuffleChance = settings.lateralShuffleChance;
         windDirectionChangeChancePerTurn = settings.windDirectionChangeChancePerTurn;
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[CloudSimulationSystem] Applied cloud preset settings.");
     }
 }

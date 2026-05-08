@@ -177,7 +177,7 @@ public class TsunamiAnimalEffectResolver : MonoBehaviour
 
         if (animalSimulation == null || gridManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[TsunamiAnimalEffectResolver] Missing references.");
 
             return;

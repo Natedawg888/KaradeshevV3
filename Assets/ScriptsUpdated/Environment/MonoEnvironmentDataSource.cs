@@ -33,7 +33,7 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
         Instance = this;
         _tilesByCoord.Clear();
 
-        if (debugTileRegistration)
+        if (debugTileRegistration) {}
             //Debug.Log("[MonoEnvironmentDataSource] Awake");
     }
 
@@ -61,7 +61,7 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
             registered++;
         }
 
-        if (debugTileRegistration)
+        if (debugTileRegistration) {}
             //Debug.Log($"[MonoEnvironmentDataSource] RebuildFromLiveTiles complete. Registered={registered}");
     }
 
@@ -131,7 +131,7 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
         GridManager grid = GridManager.Instance;
         if (grid == null || env == null)
         {
-            if (debugTileRegistration)
+            if (debugTileRegistration) {}
                 //Debug.LogWarning($"[ENV FOOTPRINT FALLBACK] env={(env != null ? env.name : "null")} used primary only because grid/env was missing. primary={primaryCoord}");
 
             results.Add(primaryCoord);
@@ -142,7 +142,7 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
 
         if (!TryGetWorldBounds(root, out Bounds bounds))
         {
-            if (debugTileRegistration)
+            if (debugTileRegistration) {}
                 //Debug.LogWarning($"[ENV FOOTPRINT FALLBACK] env={env.name} used primary only because no collider/renderer bounds were found. primary={primaryCoord}");
 
             results.Add(primaryCoord);

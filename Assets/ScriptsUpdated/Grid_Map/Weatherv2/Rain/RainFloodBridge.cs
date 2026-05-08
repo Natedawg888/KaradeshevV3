@@ -162,7 +162,7 @@ public class RainFloodBridge : MonoBehaviour
 
         if (floodSimulation == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[RainFloodBridge] No FloodSimulationSystem found.");
 
             return;
@@ -170,7 +170,7 @@ public class RainFloodBridge : MonoBehaviour
 
         if (rainSimulationSystem == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[RainFloodBridge] No RainSimulationSystem found.");
 
             return;
@@ -178,7 +178,7 @@ public class RainFloodBridge : MonoBehaviour
 
         if (!rainSimulationSystem.TryInitializeGrid())
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[RainFloodBridge] Rain grid is not initialized yet.");
 
             return;
@@ -188,7 +188,7 @@ public class RainFloodBridge : MonoBehaviour
 
         if (!rainSimulationSystem.CopyActiveRainCells(rainCellScratch))
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[RainFloodBridge] No active rain cells this turn.");
 
             return;

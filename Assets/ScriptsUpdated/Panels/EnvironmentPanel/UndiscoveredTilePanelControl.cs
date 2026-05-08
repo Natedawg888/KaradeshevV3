@@ -157,7 +157,7 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
 
         if (lowDiscoveryPopup)
             lowDiscoveryPopup.Show(title, body);
-        else
+        else {}
             //Debug.LogWarning("[UndiscoveredTilePanel] lowDiscoveryPopup not set.");
     }
 
@@ -221,7 +221,7 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
         {
             if (detailsPanel != null)
                 detailsPanel.ShowFor(currentEnv);
-            else
+            else {}
                 //Debug.LogWarning("Not enough population and detailsPanel is null.");
             return;
         }

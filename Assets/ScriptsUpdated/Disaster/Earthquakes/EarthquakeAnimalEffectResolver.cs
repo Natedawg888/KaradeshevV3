@@ -206,7 +206,7 @@ public class EarthquakeAnimalEffectResolver : MonoBehaviour
 
         if (animalSimulation == null || mapGenerator == null || gridManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("EarthquakeAnimalEffectResolver: Missing references.");
 
             return;
@@ -235,7 +235,7 @@ public class EarthquakeAnimalEffectResolver : MonoBehaviour
 
         if (magnitude01 <= 0f)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"EarthquakeAnimalEffectResolver: Magnitude {data.magnitude:0.0}, no animal effects.");
 
             processRoutine = null;
@@ -277,7 +277,7 @@ public class EarthquakeAnimalEffectResolver : MonoBehaviour
 
         if (magnitude01 <= 0f)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"EarthquakeAnimalEffectResolver: Magnitude {data.magnitude:0.0}, no animal effects.");
 
             return;

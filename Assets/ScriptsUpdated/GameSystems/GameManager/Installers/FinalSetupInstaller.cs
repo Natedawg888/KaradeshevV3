@@ -85,19 +85,19 @@ public class FinalSetupInstaller : MonoBehaviour
         if (startingPointPicker == null)
             startingPointPicker = FindComponentInScene<StartingPointPicker>(LoadedScene);
 
-        if (unitGroupMovementManager == null)
+        if (unitGroupMovementManager == null) {}
             //Debug.LogWarning("[FinalSetupInstaller] UnitGroupMovementManager not found in FinalSetup scene.");
 
-        if (tileWorldCanvasToggleButton == null)
+        if (tileWorldCanvasToggleButton == null) {}
             //Debug.LogWarning("[FinalSetupInstaller] TileWorldCanvasToggleButton not found in FinalSetup scene.");
 
-        if (animalSimulationController == null)
+        if (animalSimulationController == null) {}
             //Debug.LogWarning("[FinalSetupInstaller] AnimalSimulationController not found in FinalSetup scene.");
 
-        if (startingPointPicker == null)
+        if (startingPointPicker == null) {}
             //Debug.LogWarning("[FinalSetupInstaller] StartingPointPicker not found in FinalSetup scene.");
 
-        if (minimapCamera == null)
+        if (minimapCamera == null) {}
             //Debug.LogWarning("[FinalSetupInstaller] MinimapCamera is not assigned in FinalSetupInstaller.");
     }
 
@@ -142,7 +142,7 @@ public class FinalSetupInstaller : MonoBehaviour
 
     private static void LogMissing(string label, Object value, string objectName)
     {
-        if (value == null)
+        if (value == null) {}
             //Debug.LogWarning($"[FinalSetupInstaller] Could not resolve {label} from UI scene using object name '{objectName}'.");
     }
 

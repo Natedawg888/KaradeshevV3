@@ -166,7 +166,7 @@ public class PlayerConstructionManager : MonoBehaviour
 
         bc.BeginConstruction();
 
-        if (bc.TurnsToComplete <= 0)
+        if (bc.TurnsToComplete <= 0) {}
             //Debug.LogWarning("[ConstructionManager] Warning: turnsToComplete <= 0 (check Building.buildTurnsRequired).");
 
         TagConstructionReservation(reservationId, constructionGO);

@@ -171,7 +171,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
 
         if (preventMultipleRollsPerTurn && lastProcessedTurn == currentTurn)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"EarthquakeSimulationSystem: Already processed turn {currentTurn}, skipping duplicate roll.");
 
             return;
@@ -216,7 +216,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
 
         MarkEarthquakeSaveDirty();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"EarthquakeSimulationSystem: Added test energy. Energy={tectonicEnergy01:0.000}");
     }
 
@@ -227,7 +227,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
 
         MarkEarthquakeSaveDirty();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("EarthquakeSimulationSystem: Cleared tectonic energy.");
     }
 
@@ -299,7 +299,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
         {
             if (!forced && requireFaultForNaturalEarthquakes)
             {
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log("EarthquakeSimulationSystem: No fault lines, natural earthquake skipped. Energy remains stored.");
 
                 return;
@@ -307,7 +307,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
 
             if (forced && !forcedCanUseRandomBlockWithoutFault)
             {
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log("EarthquakeSimulationSystem: Forced earthquake skipped because no faults exist.");
 
                 return;
@@ -578,7 +578,7 @@ public class EarthquakeSimulationSystem : MonoBehaviour
 
         requireFaultForNaturalEarthquakes = settings.requireFaultForNaturalEarthquakes;
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[EarthquakeSimulationSystem] Applied earthquake preset settings.");
     }
 

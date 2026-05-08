@@ -205,7 +205,7 @@ public class TileScript : MonoBehaviour
         // (This only triggers in misconfigured edge cases.)
         if (candidates.Count == 0)
         {
-            if (logSpawnDebug)
+            if (logSpawnDebug) {}
                 //Debug.LogWarning("[TileScript] No candidates found under strict adjacency rules. Relaxing as last resort.");
             BuildCandidates_AllOptions(climateMgr, candidates, relaxAdjacencyRulesAsLastResort: true);
         }

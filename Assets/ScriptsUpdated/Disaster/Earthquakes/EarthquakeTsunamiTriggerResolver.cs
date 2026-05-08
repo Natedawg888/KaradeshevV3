@@ -160,7 +160,7 @@ public class EarthquakeTsunamiTriggerResolver : MonoBehaviour
 
         if (data.forced && !allowForcedEarthquakesToTriggerTsunamis)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[EarthquakeTsunamiTriggerResolver] Forced earthquake ignored for tsunami trigger.");
 
             return;
@@ -168,7 +168,7 @@ public class EarthquakeTsunamiTriggerResolver : MonoBehaviour
 
         if (tsunamiSimulationSystem == null || mapGenerator == null || gridManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[EarthquakeTsunamiTriggerResolver] Missing references.");
 
             return;
@@ -219,7 +219,7 @@ public class EarthquakeTsunamiTriggerResolver : MonoBehaviour
 
         if (!TryPickPreferredOceanEdge(data, out TsunamiGridEdge edge))
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[EarthquakeTsunamiTriggerResolver] No valid ocean edge found for tsunami.");
 
             return;

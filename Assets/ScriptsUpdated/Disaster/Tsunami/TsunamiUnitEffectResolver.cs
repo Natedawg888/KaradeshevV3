@@ -160,7 +160,7 @@ public class TsunamiUnitEffectResolver : MonoBehaviour
 
         if (gridManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[TsunamiUnitEffectResolver] Missing GridManager.");
 
             return;

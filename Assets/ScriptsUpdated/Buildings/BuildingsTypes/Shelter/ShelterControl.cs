@@ -909,7 +909,7 @@ public class ShelterControl : MonoBehaviour
         var father = GetIndividual(order.FatherId);
 
         int born = familySim.ResolveBirthAndReturnChildrenCount(mother, father);
-        if (born > 1)
+        if (born > 1) {}
             //Debug.Log($"[Shelter] Multiples born: {born} babies.");
 
         SyncHousedIndividualsFromFamilies();
@@ -1012,7 +1012,7 @@ public class ShelterControl : MonoBehaviour
         for (int i = 0; i < ids.Count; i++)
             RemoveOrderById(ids[i], abortIfPending:true);
 
-        if (!string.IsNullOrEmpty(reason))
+        if (!string.IsNullOrEmpty(reason)) {}
             //Debug.Log($"[Shelter] All orders failed: {reason}");
     }
 
@@ -2025,7 +2025,7 @@ public class ShelterControl : MonoBehaviour
         BuildingVolcanicResistance resistance = GetVolcanicResistance();
         if (resistance != null && resistance.IsImmune(acidRain))
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"[Shelter] {name} is immune to {(acidRain ? "acid rain" : "ash")} exposure.");
             return 0;
         }

@@ -114,7 +114,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
         generatedForCurrentMap = false;
         BeginGenerateFaultLinesFromPreset();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("EarthquakeFaultLineGenerator: Started automatic wait-for-map fault generation.");
     }
 
@@ -159,7 +159,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
             subscribedMapGenerator.OnMapGenerationStarted += HandleMapGenerationStarted;
             subscribedMapGenerator.OnMapGenerationCompleted += HandleMapGenerationCompleted;
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"EarthquakeFaultLineGenerator: Subscribed to {subscribedMapGenerator.name} map generation events.");
         }
     }
@@ -181,7 +181,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
         if (clearFaultsWhenMapGenerationStarts)
             ClearFaultLines();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("EarthquakeFaultLineGenerator: Map generation started, clearing old fault lines.");
     }
 
@@ -196,7 +196,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
         if (generatedForCurrentMap)
             return;
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("EarthquakeFaultLineGenerator: Map generation completed, generating fault lines.");
 
         BeginGenerateFaultLinesFromPreset();
@@ -303,7 +303,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
 
         if (!canHaveFaultLines)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("EarthquakeFaultLineGenerator: Fault lines disabled for this map.");
 
             return;
@@ -311,7 +311,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
 
         if (!forceFaultLineForDebug && Random.value > faultLineMapChance)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"EarthquakeFaultLineGenerator: This map rolled no fault lines. Chance={faultLineMapChance:0.00}");
 
             return;
@@ -379,7 +379,7 @@ public class EarthquakeFaultLineGenerator : MonoBehaviour
 
         if (section == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("EarthquakeFaultLineGenerator: No preset section found. Using inspector settings.");
 
             return;

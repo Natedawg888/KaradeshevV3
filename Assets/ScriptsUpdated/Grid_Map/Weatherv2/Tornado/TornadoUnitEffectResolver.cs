@@ -294,7 +294,7 @@ public class TornadoUnitEffectResolver : MonoBehaviour
             {
                 _knownEmptyActiveTornadoUnitTileKeys.Add(tileKey);
 
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log($"[TornadoUnitEffectResolver] Cached empty tornado unit tile at {tile.x},{tile.y}.");
 
                 continue;
@@ -397,7 +397,7 @@ public class TornadoUnitEffectResolver : MonoBehaviour
             {
                 _knownEmptyActiveTornadoUnitTileKeys.Add(tileKey);
 
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log($"[TornadoUnitEffectResolver] Tile became empty after unit tornado processing at {tile.x},{tile.y}.");
             }
             else

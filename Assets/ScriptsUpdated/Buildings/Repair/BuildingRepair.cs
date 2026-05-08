@@ -354,7 +354,7 @@ public class BuildingRepair : MonoBehaviour
 
         if (mRelease != null)
             mRelease.Invoke(pop, new object[] { _reservationId });
-        else
+        else {}
             //Debug.LogWarning("[BuildingRepair] Could not find a reservation release method.");
 
         _reservationId = null;

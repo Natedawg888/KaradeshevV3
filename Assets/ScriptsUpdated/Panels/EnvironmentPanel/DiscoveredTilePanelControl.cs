@@ -426,7 +426,7 @@ public class DiscoveredTilePanelControl : MonoBehaviour
 
         if (lowDiscoveryPopup)
             lowDiscoveryPopup.Show(title, body);
-        else
+        else {}
             //Debug.LogWarning("[DiscoveredTilePanel] lowDiscoveryPopup not set.");
     }
 

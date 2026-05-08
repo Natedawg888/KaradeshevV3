@@ -320,7 +320,7 @@ public partial class KineticWarfareControl
 
         if (removed)
         {
-            if (!string.IsNullOrWhiteSpace(reason))
+            if (!string.IsNullOrWhiteSpace(reason)) {}
                 //Debug.Log(
                     //$"[KineticWarfare] Cancelled training order {order.orderID} " +
                     //$"({(order.unit != null ? order.unit.unitName : "Unknown Unit")}): {reason}");

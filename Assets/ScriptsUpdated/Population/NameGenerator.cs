@@ -21,7 +21,7 @@ public class NameGenerator : MonoBehaviour
 
         rng = (seed == 0) ? new System.Random() : new System.Random(seed);
 
-        if (database == null)
+        if (database == null) {}
             //Debug.LogWarning("[NameGenerator] No NameDatabase assigned. Names may be empty.");
     }
 

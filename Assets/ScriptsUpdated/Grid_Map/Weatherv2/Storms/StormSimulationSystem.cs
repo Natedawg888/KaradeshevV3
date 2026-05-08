@@ -178,7 +178,7 @@ public class StormSimulationSystem : MonoBehaviour
             {
                 RequestAdvanceStorm();
 
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log("[StormSimulationSystem] Sources ready. Storm system initialized.");
 
                 _waitForSourcesReadyCoroutine = null;
@@ -235,7 +235,7 @@ public class StormSimulationSystem : MonoBehaviour
         if (sizeChanged)
             OnStormGridInitialized?.Invoke();
 
-        if (debugLogging && sizeChanged)
+        if (debugLogging && sizeChanged) {}
             //Debug.Log($"[StormSimulationSystem] Initialized {_cols}x{_rows}");
 
         return true;
@@ -423,7 +423,7 @@ public class StormSimulationSystem : MonoBehaviour
             if (anyChanged)
                 OnStormStateChanged?.Invoke();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[StormSimulationSystem] Advanced storms one step.");
         }
         finally
@@ -474,7 +474,7 @@ public class StormSimulationSystem : MonoBehaviour
             if (anyChanged)
                 OnStormStateChanged?.Invoke();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[StormSimulationSystem] Advanced storms one batched step.");
         }
         finally
@@ -863,7 +863,7 @@ public class StormSimulationSystem : MonoBehaviour
 
         if (!TryInitializeGrid())
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[StormSimulationSystem] Could not load storm state because grid is not initialized yet.");
 
             return;
@@ -1002,7 +1002,7 @@ public class StormSimulationSystem : MonoBehaviour
         maxStormBandCentersPerStep = settings.maxStormBandCentersPerStep;
         minStormIntensityForBands = settings.minStormIntensityForBands;
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[StormSimulationSystem] Applied storm preset settings.");
     }
 }

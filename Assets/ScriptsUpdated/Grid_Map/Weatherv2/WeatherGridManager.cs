@@ -293,7 +293,7 @@ public class WeatherGridManager : MonoBehaviour
         _isInitialized = true;
         OnWeatherGridInitialized?.Invoke();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[WeatherGridManager] Initialized weather grid {_cols}x{_rows}");
 
         return true;
@@ -332,7 +332,7 @@ public class WeatherGridManager : MonoBehaviour
         {
             ClearAllCellState();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[WeatherGridManager] Climate refresh skipped: ClimateManager missing or not ready.");
 
             OnWeatherStateRefreshed?.Invoke();
@@ -359,7 +359,7 @@ public class WeatherGridManager : MonoBehaviour
             }
         }
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[WeatherGridManager] Refreshed climate values from ClimateManager.");
 
         OnWeatherStateRefreshed?.Invoke();
@@ -381,7 +381,7 @@ public class WeatherGridManager : MonoBehaviour
 
         if (environmentDataSource == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[WeatherGridManager] Environment coverage rebuild skipped: source missing.");
 
             OnEnvironmentCoverageRebuilt?.Invoke();
@@ -399,7 +399,7 @@ public class WeatherGridManager : MonoBehaviour
             RegisterOrUpdateEnvironmentCoverage(primaryCoord, env, raiseChangedEvent: false);
         }
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[WeatherGridManager] Rebuilt environment coverage. Count={_environmentCoverageByEnv.Count}");
 
         OnEnvironmentCoverageRebuilt?.Invoke();
@@ -426,7 +426,7 @@ public class WeatherGridManager : MonoBehaviour
 
         if (worldBuildingManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[WeatherGridManager] Building coverage rebuild skipped: WorldBuildingManager not available yet.");
 
             OnBuildingCoverageRebuilt?.Invoke();
@@ -446,7 +446,7 @@ public class WeatherGridManager : MonoBehaviour
             }
         }
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[WeatherGridManager] Rebuilt building coverage. Count={_buildingCoverageById.Count}");
 
         OnBuildingCoverageRebuilt?.Invoke();

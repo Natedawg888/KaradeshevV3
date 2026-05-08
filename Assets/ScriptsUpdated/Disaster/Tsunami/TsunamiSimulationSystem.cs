@@ -197,7 +197,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (!IsMapReady())
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[TsunamiSimulationSystem] Map is not ready. Roll skipped.");
 
             return;
@@ -247,7 +247,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (!IsSeaCell(coord))
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning($"[TsunamiSimulationSystem] ForceTsunamiAtCell failed. Source is not sea: {coord}");
 
             return false;
@@ -272,7 +272,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (!IsMapReady())
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[TsunamiSimulationSystem] Cannot start tsunami. Map is not ready.");
 
             return false;
@@ -379,7 +379,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (!IsMapReady())
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[TsunamiSimulationSystem] Cannot trigger tsunami. Map is not ready.");
 
             return;
@@ -392,7 +392,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
         {
             if (!TryPickOceanGridEdge(forced, out spawnEdge))
             {
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.LogWarning("[TsunamiSimulationSystem] No valid ocean edge found. Tsunami skipped.");
 
                 return;
@@ -1439,7 +1439,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
         if (!IsMapReady())
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[TsunamiSimulationSystem] Cannot trigger earthquake tsunami. Map is not ready.");
 
             return false;
@@ -1463,7 +1463,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
 
             if (!TryPickOceanGridEdge(false, out spawnEdge))
             {
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.LogWarning("[TsunamiSimulationSystem] Earthquake tsunami failed. No valid ocean edge found.");
 
                 return false;
@@ -1887,7 +1887,7 @@ public class TsunamiSimulationSystem : MonoBehaviour
         allowDiagonalDirections = settings.allowDiagonalDirections;
         allowTsunamiIntoLakes = settings.allowTsunamiIntoLakes;
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[TsunamiSimulationSystem] Applied tsunami preset settings.");
     }
 }

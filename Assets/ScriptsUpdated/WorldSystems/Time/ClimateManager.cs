@@ -233,7 +233,7 @@ public class ClimateManager : MonoBehaviour
 
         RebuildClimateForSeason(startSeason);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[ClimateManager] Climate initialized after tiles activated.");
     }
 
@@ -264,7 +264,7 @@ public class ClimateManager : MonoBehaviour
                 currentEnvironment[x, y] = tile.GetChosenEnvironmentType();
         }
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[ClimateManager] Built climate cell lookup. Primary cells={_climateCells.Count}");
     }
 
@@ -672,7 +672,7 @@ public class ClimateManager : MonoBehaviour
             }
         }
 
-        if (debugLogging && _pendingJobs.Count > 0)
+        if (debugLogging && _pendingJobs.Count > 0) {}
             //Debug.Log($"[ClimateManager] Finished applying {_pendingJobs.Count} climate jobs.");
 
         _pendingJobs.Clear();
@@ -1525,7 +1525,7 @@ public class ClimateManager : MonoBehaviour
             }
         }
 
-        if (waterEvaporationDebugLogging && changedCells > 0)
+        if (waterEvaporationDebugLogging && changedCells > 0) {}
             //Debug.Log($"[ClimateManager] Water evaporation increased humidity on {changedCells} cells.");
 
         return changedCells > 0;

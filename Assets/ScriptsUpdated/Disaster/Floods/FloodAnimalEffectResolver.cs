@@ -196,7 +196,7 @@ public class FloodAnimalEffectResolver : MonoBehaviour
 
         if (animalSimulation == null || gridManager == null || floodSimulationSystem == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[FloodAnimalEffectResolver] Missing references.");
 
             return;
@@ -209,7 +209,7 @@ public class FloodAnimalEffectResolver : MonoBehaviour
 
         if (activeFloodDangerCells.Count == 0)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[FloodAnimalEffectResolver] No active flood danger cells.");
 
             return;

@@ -201,7 +201,7 @@ public class TornadoVisualSystem : MonoBehaviour
                 if (rebuildVisualsOnGridInitialized)
                     RebuildAllVisualsFromState();
 
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log("[TornadoVisualSystem] Sources ready. Visual system initialized.");
 
                 _waitForSourcesReadyCoroutine = null;
@@ -251,7 +251,7 @@ public class TornadoVisualSystem : MonoBehaviour
         if (sizeChanged && prewarmPoolOnInitialize)
             PrewarmTornadoPool();
 
-        if (debugLogging && sizeChanged)
+        if (debugLogging && sizeChanged) {}
             //Debug.Log($"[TornadoVisualSystem] Initialized {_cols}x{_rows}");
 
         return true;

@@ -238,7 +238,7 @@ public class BuildingDestroyedPanelControl : MonoBehaviour
         Transform tileParent = currentTile ? currentTile.transform :
                             (currentBuilding ? currentBuilding.transform.parent : null);
 
-        if (tileParent == null)
+        if (tileParent == null) {}
             //Debug.LogWarning("[DestroyedPanel] No tile parent; will place in world space.");
 
         // --- A) Spawn a DUMMY to get the snapped pose (PARENTED to the tile) ---

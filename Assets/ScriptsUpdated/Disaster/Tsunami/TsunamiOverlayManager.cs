@@ -288,7 +288,7 @@ public class TsunamiOverlayManager : MonoBehaviour
         pendingVisualRefreshes.Clear();
         pendingVisualRefreshSet.Clear();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[TsunamiOverlayManager] Cleared all overlays.");
     }
 
@@ -381,7 +381,7 @@ public class TsunamiOverlayManager : MonoBehaviour
         {
             RemoveVisual(coord);
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[TsunamiOverlayManager] Missing wavePrefab.");
 
             return;
@@ -534,7 +534,7 @@ public class TsunamiOverlayManager : MonoBehaviour
             }
         }
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[TsunamiOverlayManager] Rebuilt tsunami overlays from simulation. Waves={snapshots.Count}");
     }
 }

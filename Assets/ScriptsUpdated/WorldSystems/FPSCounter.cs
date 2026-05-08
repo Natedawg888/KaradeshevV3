@@ -28,7 +28,7 @@ public class FPSCounter : MonoBehaviour
         if (fpsText == null)
             fpsText = GetComponent<TMP_Text>();
 
-        if (fpsText == null)
+        if (fpsText == null) {}
             //Debug.LogWarning($"{nameof(FPSCounter)}: No TMP_Text assigned/found. Assign one in the inspector.");
     }
 

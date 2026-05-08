@@ -311,7 +311,7 @@ public class RainSimulationSystem : MonoBehaviour
             {
                 AdvanceRainOneStep();
 
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log("[RainSimulationSystem] Sources ready. Rain system initialized.");
 
                 _waitForSourcesReadyCoroutine = null;
@@ -376,7 +376,7 @@ public class RainSimulationSystem : MonoBehaviour
         if (sizeChanged)
             OnRainGridInitialized?.Invoke();
 
-        if (debugLogging && sizeChanged)
+        if (debugLogging && sizeChanged) {}
             //Debug.Log($"[RainSimulationSystem] Initialized {_cols}x{_rows}");
 
         return true;
@@ -613,7 +613,7 @@ public class RainSimulationSystem : MonoBehaviour
             if (anyChanged)
                 OnRainStateChanged?.Invoke();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[RainSimulationSystem] Advanced rain one step.");
         }
         finally
@@ -672,7 +672,7 @@ public class RainSimulationSystem : MonoBehaviour
             if (anyChanged)
                 OnRainStateChanged?.Invoke();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[RainSimulationSystem] Advanced rain one batched step.");
         }
         finally
@@ -1771,7 +1771,7 @@ public class RainSimulationSystem : MonoBehaviour
 
         if (!TryInitializeGrid())
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[RainSimulationSystem] Could not load rain state because grid is not initialized yet.");
 
             return;
@@ -1943,7 +1943,7 @@ public class RainSimulationSystem : MonoBehaviour
         lightRainMaxIntensity = settings.lightRainMaxIntensity;
         heavyRainMinIntensity = settings.heavyRainMinIntensity;
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[RainSimulationSystem] Applied rain preset settings.");
     }
 }

@@ -124,16 +124,16 @@ public class PlayerSetupInstaller : MonoBehaviour
         if (knownCraftingManager == null)
             knownCraftingManager = FindComponentInScene<PlayerKnownCraftingManager>(LoadedScene);
 
-        if (immigrantOfferManager == null)
+        if (immigrantOfferManager == null) {}
             //Debug.LogWarning("[PlayerSetupInstaller] ImmigrantOfferManager not found in PlayerSetup scene.");
 
-        if (turnSystem == null)
+        if (turnSystem == null) {}
             //Debug.LogWarning("[PlayerSetupInstaller] TurnSystem not found in PlayerSetup scene.");
 
-        if (playersPopulationManager == null)
+        if (playersPopulationManager == null) {}
             //Debug.LogWarning("[PlayerSetupInstaller] PlayersPopulationManager not found in PlayerSetup scene.");
 
-        if (knownResourcesManager == null)
+        if (knownResourcesManager == null) {}
             //Debug.LogWarning("[PlayerSetupInstaller] PlayerKnownResourcesManager not found in PlayerSetup scene.");
 
         if (knownBuildingsManager == null)
@@ -166,13 +166,13 @@ public class PlayerSetupInstaller : MonoBehaviour
         if (playerRitualManager == null)
             playerRitualManager = FindComponentInScene<PlayerRitualManager>(LoadedScene);
 
-        if (knownBuildingsManager == null)
+        if (knownBuildingsManager == null) {}
             //Debug.LogWarning("[PlayerSetupInstaller] PlayerKnownBuildingsManager not found in PlayerSetup scene.");
 
-        if (playerLevel == null)
+        if (playerLevel == null) {}
             //Debug.LogWarning("[PlayerSetupInstaller] PlayerLevel not found in PlayerSetup scene.");
 
-        if (playerPopulationStatistic == null)
+        if (playerPopulationStatistic == null) {}
             //Debug.LogWarning("[PlayerSetupInstaller] PlayerPopulationStatistic not found in PlayerSetup scene.");
         else if (playersPopulationManager != null)
             playerPopulationStatistic.populationManager = playersPopulationManager;
@@ -203,7 +203,7 @@ public class PlayerSetupInstaller : MonoBehaviour
 
     private static void LogMissing(string label, Object value, string objectName)
     {
-        if (value == null)
+        if (value == null) {}
             //Debug.LogWarning($"[PlayerSetupInstaller] Could not resolve {label} from UI scene using object name '{objectName}'.");
     }
 

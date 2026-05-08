@@ -362,7 +362,7 @@ public class BuildingPlacementManager : MonoBehaviour
 
         int moved = AnimalSimulationAccess.Current.EjectGroupsFromDestroyedTile(coord);
 
-        if (moved > 0)
+        if (moved > 0) {}
             //Debug.Log($"[Placement] Ejected {moved} animal group(s) from tile ({coord.x}, {coord.y}).");
     }
 

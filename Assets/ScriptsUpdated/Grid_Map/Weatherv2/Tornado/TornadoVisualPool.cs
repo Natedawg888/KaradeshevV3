@@ -48,7 +48,7 @@ public class TornadoVisualPool : MonoBehaviour
             Return(prefab, instance, stopPooledEffects: true);
         }
 
-        if (debugLogging && createNow > 0)
+        if (debugLogging && createNow > 0) {}
             //Debug.Log($"[TornadoVisualPool] Prewarmed {createNow} for prefab '{prefab.name}'.");
     }
 
@@ -96,7 +96,7 @@ public class TornadoVisualPool : MonoBehaviour
         GameObject resolvedPrefab = ResolvePrefab(prefab, instance);
         if (resolvedPrefab == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning($"[TornadoVisualPool] Could not resolve prefab for returned instance '{instance.name}'. Destroying.");
             Destroy(instance);
             return;

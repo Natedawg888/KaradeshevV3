@@ -115,7 +115,7 @@ public class GameSceneManager : MonoBehaviour
         }
         else
         {
-            if (startMode == GameStartMode.LoadGame && !SaveSystem.HasSave())
+            if (startMode == GameStartMode.LoadGame && !SaveSystem.HasSave()) {}
                 //Debug.LogWarning("[GameSceneManager] Load requested but no save exists. Falling back to New Game.");
 
             float newGameStart = Time.realtimeSinceStartup;

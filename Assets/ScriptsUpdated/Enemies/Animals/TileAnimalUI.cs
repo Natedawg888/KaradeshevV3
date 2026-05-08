@@ -130,7 +130,7 @@ public class TileAnimalUI : MonoBehaviour
 
         _resolveRoutine = null;
 
-        if (tileControl == null)
+        if (tileControl == null) {}
             //Debug.LogWarning($"[TileAnimalUI] Still no TileControl for {name}. Check hierarchy.");
     }
 

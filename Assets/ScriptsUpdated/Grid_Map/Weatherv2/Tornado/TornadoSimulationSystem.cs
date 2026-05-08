@@ -263,7 +263,7 @@ public class TornadoSimulationSystem : MonoBehaviour
             {
                 RequestAdvanceTornadoes();
 
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log("[TornadoSimulationSystem] Sources ready. Tornado system initialized.");
 
                 _waitForSourcesReadyCoroutine = null;
@@ -322,7 +322,7 @@ public class TornadoSimulationSystem : MonoBehaviour
         if (sizeChanged)
             OnTornadoGridInitialized?.Invoke();
 
-        if (debugLogging && sizeChanged)
+        if (debugLogging && sizeChanged) {}
             //Debug.Log($"[TornadoSimulationSystem] Initialized {_cols}x{_rows}");
 
         return true;
@@ -370,7 +370,7 @@ public class TornadoSimulationSystem : MonoBehaviour
             if (anyCellPositionsChanged)
                 OnTornadoCellsChanged?.Invoke();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[TornadoSimulationSystem] Advanced tornadoes one step.");
         }
         finally
@@ -433,7 +433,7 @@ public class TornadoSimulationSystem : MonoBehaviour
             if (anyCellPositionsChanged)
                 OnTornadoCellsChanged?.Invoke();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[TornadoSimulationSystem] Advanced tornadoes one batched step.");
         }
         finally
@@ -1436,7 +1436,7 @@ public class TornadoSimulationSystem : MonoBehaviour
 
         if (!TryInitializeGrid())
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[TornadoSimulationSystem] Could not load tornado state because grid is not initialized yet.");
 
             return;
@@ -1501,7 +1501,7 @@ public class TornadoSimulationSystem : MonoBehaviour
         OnTornadoStateChanged?.Invoke();
         OnTornadoCellsChanged?.Invoke();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[TornadoSimulationSystem] Loaded {_activeTornadoCells.Count} tornado cells.");
     }
 
@@ -1524,7 +1524,7 @@ public class TornadoSimulationSystem : MonoBehaviour
         maxNewTornadoesPerStep = settings.maxNewTornadoesPerStep;
         maxSpawnCandidatesPerStep = settings.maxSpawnCandidatesPerStep;
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[TornadoSimulationSystem] Applied tornado preset settings.");
     }
 }

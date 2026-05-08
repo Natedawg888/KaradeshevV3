@@ -400,7 +400,7 @@ public class LavaOverlayManager : MonoBehaviour
 
         RefreshAllTouchedCells(cells);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[LavaOverlayManager] Seeded lava cells={cells.Count}");
     }
 
@@ -440,7 +440,7 @@ public class LavaOverlayManager : MonoBehaviour
 
         MarkLavaSaveDirty();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[LavaOverlayManager] Cleared all lava.");
     }
 
@@ -503,7 +503,7 @@ public class LavaOverlayManager : MonoBehaviour
         {
             QueueFullVisualRefreshAroundLava();
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"[LavaOverlayManager] Expanded lava. NewCells={newCellsThisTurn}");
         }
     }
@@ -1805,7 +1805,7 @@ public class LavaOverlayManager : MonoBehaviour
 
         OnLavaCellsChanged?.Invoke();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[LavaOverlayManager] Loaded lava overlay. Cells={restored}");
     }
 

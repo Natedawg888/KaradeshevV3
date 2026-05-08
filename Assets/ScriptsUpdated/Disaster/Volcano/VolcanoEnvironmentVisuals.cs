@@ -53,7 +53,7 @@ public class VolcanoEnvironmentVisuals : MonoBehaviour
 
         eruptionLights = GetComponentsInChildren<Light>(true);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[VolcanoEnvironmentVisuals] Auto-found {eruptionLights.Length} lights on {name}");
     }
 
@@ -80,7 +80,7 @@ public class VolcanoEnvironmentVisuals : MonoBehaviour
 
         SetLightsEnabled(erupting);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[VolcanoEnvironmentVisuals] {name} SetState -> {state}");
     }
 

@@ -195,7 +195,7 @@ public class EarthquakeUnitEffectResolver : MonoBehaviour
 
         if (mapGenerator == null || gridManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("EarthquakeUnitEffectResolver: Missing MapGenerator or GridManager.");
 
             return;
@@ -231,7 +231,7 @@ public class EarthquakeUnitEffectResolver : MonoBehaviour
 
         if (magnitude01 <= 0f)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"EarthquakeUnitEffectResolver: Magnitude {data.magnitude:0.0}, no unit effects.");
 
             processedGroupsThisPass.Clear();
@@ -278,7 +278,7 @@ public class EarthquakeUnitEffectResolver : MonoBehaviour
 
         if (magnitude01 <= 0f)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"EarthquakeUnitEffectResolver: Magnitude {data.magnitude:0.0}, no unit effects.");
 
             processedGroupsThisPass.Clear();

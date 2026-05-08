@@ -129,7 +129,7 @@ public class TileInteraction : MonoBehaviour
         if (targetCamera == null) targetCamera = Camera.main;
 
         _cameraControl = FindObjectOfType<CameraControl>();
-        if (_cameraControl == null)
+        if (_cameraControl == null) {}
             //Debug.LogWarning($"{nameof(TileInteraction)}: {nameof(CameraControl)} not found in scene.");
     }
 

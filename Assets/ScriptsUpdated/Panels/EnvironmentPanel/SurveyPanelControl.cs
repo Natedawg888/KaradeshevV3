@@ -175,7 +175,7 @@ public class SurveyPanelControl : MonoBehaviour
             visibleEntries.Add(entry);
         }
 
-        if (knownManager == null)
+        if (knownManager == null) {}
             //Debug.LogWarning("[SurveyPanel] knownManager is not assigned. Showing all resources.");
 
         visibleEntries.Sort(CompareEntriesByDisplayName);

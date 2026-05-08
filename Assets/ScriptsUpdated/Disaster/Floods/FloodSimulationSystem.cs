@@ -628,7 +628,7 @@ public class FloodSimulationSystem : MonoBehaviour
 
         MarkDirty(coord, reason);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[FloodSimulationSystem] Flood cleared at {coord.x},{coord.y}");
 
         OnFloodCellChanged?.Invoke(new FloodCellChangedEvent(coord, oldState, reason));
@@ -675,7 +675,7 @@ public class FloodSimulationSystem : MonoBehaviour
 
         MarkFloodSaveDirty();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[FloodSimulationSystem] Cleared all floods.");
     }
 
@@ -1252,7 +1252,7 @@ public class FloodSimulationSystem : MonoBehaviour
 
         FlushDirtyCells();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[FloodSimulationSystem] Debug flooded all water sources. Added={added}");
     }
 
@@ -1561,7 +1561,7 @@ public class FloodSimulationSystem : MonoBehaviour
         tsunamiFloodInputMultiplier = settings.tsunamiFloodInputMultiplier;
         tsunamiMaxFloodDepth = settings.tsunamiMaxFloodDepth;
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[FloodSimulationSystem] Applied flood preset settings.");
     }
 }

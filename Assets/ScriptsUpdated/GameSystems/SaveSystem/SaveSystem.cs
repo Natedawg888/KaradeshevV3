@@ -657,10 +657,10 @@ public class SaveSystem : MonoBehaviour
             yield return null;
         }
 
-        if (savedTilePlacer == null)
+        if (savedTilePlacer == null) {}
             //Debug.LogWarning("[SaveSystem] SavedTilePlacer was not assigned before load.");
 
-        if (tileActivator == null)
+        if (tileActivator == null) {}
             //Debug.LogWarning("[SaveSystem] TileActivator was not assigned before load.");
     }
 
@@ -960,7 +960,7 @@ public class SaveSystem : MonoBehaviour
             ConstructionTileSaveable saveable = newConstruction.GetComponent<ConstructionTileSaveable>();
             if (saveable != null)
                 saveable.LoadFromSaveData(saved);
-            else
+            else {}
                 //Debug.LogWarning($"Loaded construction prefab '{constructionPrefab.name}' has no ConstructionTileSaveable.");
         }
     }
@@ -1261,7 +1261,7 @@ public class SaveSystem : MonoBehaviour
         {
             if (VolcanoManager.Instance != null)
                 VolcanoManager.Instance.LoadState(data.volcanoManagerData);
-            else
+            else {}
                 //Debug.LogWarning("[SaveSystem] Volcano manager save data exists, but no VolcanoManager was found.");
         }
 
@@ -1276,7 +1276,7 @@ public class SaveSystem : MonoBehaviour
 
             if (floodSystem != null)
                 floodSystem.LoadState(data.floodSimulationData);
-            else
+            else {}
                 //Debug.LogWarning("[SaveSystem] Flood save data exists, but no FloodSimulationSystem was found.");
         }
 
@@ -1288,7 +1288,7 @@ public class SaveSystem : MonoBehaviour
 
             if (faultLineGenerator != null)
                 faultLineGenerator.LoadState(data.earthquakeFaultLineData);
-            else
+            else {}
                 //Debug.LogWarning("[SaveSystem] Earthquake fault line save data exists, but no EarthquakeFaultLineGenerator was found.");
         }
 
@@ -1299,7 +1299,7 @@ public class SaveSystem : MonoBehaviour
 
             if (earthquakeSystem != null)
                 earthquakeSystem.LoadState(data.earthquakeSimulationData);
-            else
+            else {}
                 //Debug.LogWarning("[SaveSystem] Earthquake simulation save data exists, but no EarthquakeSimulationSystem was found.");
         }
 
@@ -1307,7 +1307,7 @@ public class SaveSystem : MonoBehaviour
         {
             if (WeatherFireSystem.Instance != null)
                 WeatherFireSystem.Instance.LoadState(data.fireSimulationData);
-            else
+            else {}
                 //Debug.LogWarning("[SaveSystem] Fire save data exists, but no WeatherFireSystem was found.");
         }
 
@@ -1315,7 +1315,7 @@ public class SaveSystem : MonoBehaviour
         {
             if (TsunamiSimulationSystem.Instance != null)
                 TsunamiSimulationSystem.Instance.LoadState(data.tsunamiSimulationData);
-            else
+            else {}
                 //Debug.LogWarning("[SaveSystem] Tsunami save data exists, but no TsunamiSimulationSystem was found.");
         }
     }

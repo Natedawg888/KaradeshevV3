@@ -193,7 +193,7 @@ public class VolcanoTileState : MonoBehaviour
 
         RefreshVisuals();
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[VolcanoTileState] Initialized {name} as {activityState} energy={energy01:0.00}");
     }
 
@@ -436,7 +436,7 @@ public class VolcanoTileState : MonoBehaviour
             manager.NotifyVolcanoBecameDormant(this);
         }
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[VolcanoTileState] {name} became Dormant.");
     }
 
@@ -454,7 +454,7 @@ public class VolcanoTileState : MonoBehaviour
         if (manager != null)
             manager.NotifyEruptionStarted(this);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[VolcanoTileState] {name} began Erupting for {eruptionTurnsRemaining} turns.");
     }
 
@@ -484,7 +484,7 @@ public class VolcanoTileState : MonoBehaviour
             manager.NotifyVolcanoBecameDormant(this);
         }
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[VolcanoTileState] {name} ended eruption and returned Dormant.");
     }
 
@@ -508,7 +508,7 @@ public class VolcanoTileState : MonoBehaviour
         if (notify && manager != null)
             manager.NotifyVolcanoRevertedToMountain(this);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[VolcanoTileState] {name} reverted to Mountain.");
     }
 

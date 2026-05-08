@@ -195,7 +195,7 @@ public class FloodBuildingEffectResolver : MonoBehaviour
 
         if (floodSimulationSystem == null || gridManager == null || worldBuildingManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[FloodBuildingEffectResolver] Missing references.");
 
             resolverRoutine = null;

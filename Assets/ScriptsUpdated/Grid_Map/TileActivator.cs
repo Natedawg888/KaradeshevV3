@@ -265,7 +265,7 @@ public class TileActivator : MonoBehaviour
         TileScript fallback = caveCapable[UnityEngine.Random.Range(0, caveCapable.Count)];
         bool ok = fallback.ForceSpawnSpecificTileType(EnvironmentTileType.Cave);
 
-        if (!ok)
+        if (!ok) {}
             //Debug.LogWarning("[TileActivator] Fallback cave force failed.");
     }
 }

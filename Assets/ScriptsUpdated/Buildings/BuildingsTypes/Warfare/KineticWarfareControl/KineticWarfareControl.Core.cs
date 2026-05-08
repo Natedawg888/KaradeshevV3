@@ -589,7 +589,7 @@ public partial class KineticWarfareControl : MonoBehaviour
             _widgets.Remove(k);
         }
 
-        if (!string.IsNullOrEmpty(reason))
+        if (!string.IsNullOrEmpty(reason)) {}
             //Debug.Log($"[KineticWarfare] All training orders aborted: {reason}");
     }
 

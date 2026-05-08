@@ -176,7 +176,7 @@ public class FloodUnitEffectResolver : MonoBehaviour
 
         if (floodSimulationSystem == null || gridManager == null)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.LogWarning("[FloodUnitEffectResolver] Missing references.");
 
             return;
@@ -197,7 +197,7 @@ public class FloodUnitEffectResolver : MonoBehaviour
 
         if (activeFloodDamageCells.Count == 0)
         {
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log("[FloodUnitEffectResolver] No active flood damage cells.");
 
             ClearUnitControlLookup();

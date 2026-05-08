@@ -1333,7 +1333,7 @@ public class WeatherFireSystem : MonoBehaviour
 
         RemoveBurningEnvironmentOwner(env);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[WeatherFireSystem] Flood extinguished environment fire on '{env.name}'.");
 
         return true;
@@ -1358,7 +1358,7 @@ public class WeatherFireSystem : MonoBehaviour
 
         RemoveBurningBuildingOwner(buildingRoot);
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log($"[WeatherFireSystem] Flood extinguished building fire on '{buildingRoot.name}'.");
 
         return true;
@@ -1642,7 +1642,7 @@ public class WeatherFireSystem : MonoBehaviour
         fireSpreadRainPenaltyStrength = settings.fireSpreadRainPenaltyStrength;
         fireSpreadWindBiasStrength = settings.fireSpreadWindBiasStrength;
 
-        if (debugLogging)
+        if (debugLogging) {}
             //Debug.Log("[WeatherFireSystem] Applied fire preset settings.");
     }
 }

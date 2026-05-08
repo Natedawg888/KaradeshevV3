@@ -189,7 +189,7 @@ public class TornadoBuildingEffectResolver : MonoBehaviour
             if (!weatherGridManager.TryGetBuildingAtCell(cell.x, cell.y, out WorldBuildingManager.Record record) ||
                 record == null)
             {
-                if (debugLogging)
+                if (debugLogging) {}
                     //Debug.Log($"[TornadoBuildingEffectResolver] Cell {cell} has no building record.");
 
                 continue;

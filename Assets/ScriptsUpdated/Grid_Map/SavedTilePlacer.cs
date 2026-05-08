@@ -353,7 +353,7 @@ public class SavedTilePlacer : MonoBehaviour
         EnvironmentControl envControl = tileScript.GetComponentInChildren<EnvironmentControl>(true);
         if (envControl == null)
         {
-            if (logWarnings)
+            if (logWarnings) {}
                 //Debug.LogWarning($"[SavedTilePlacer] Spawned environment on tile '{tileScript.name}' but no EnvironmentControl was found.");
             return false;
         }

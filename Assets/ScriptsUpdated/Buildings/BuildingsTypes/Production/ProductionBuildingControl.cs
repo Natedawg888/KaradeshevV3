@@ -1572,7 +1572,7 @@ public class ProductionBuildingControl : MonoBehaviour
         {
             ShowProductionTimer(_turnsLeftInCycle);
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"[ProductionBuildingControl] Resumed paused production cycle on '{name}' after tornado cleared.");
 
             return true;
@@ -1580,7 +1580,7 @@ public class ProductionBuildingControl : MonoBehaviour
 
         bool resumed = TryResumeProductionInternal(allowManualResumeAnyPause: true);
 
-        if (debugLogging && resumed)
+        if (debugLogging && resumed) {}
             //Debug.Log($"[ProductionBuildingControl] Resumed production on '{name}' after tornado cleared.");
 
         return resumed;
@@ -1715,7 +1715,7 @@ public class ProductionBuildingControl : MonoBehaviour
         {
             ShowProductionTimer(_turnsLeftInCycle);
 
-            if (debugLogging)
+            if (debugLogging) {}
                 //Debug.Log($"[ProductionBuildingControl] Resumed paused production cycle on '{name}' after fire cleared.");
 
             return true;
@@ -1723,7 +1723,7 @@ public class ProductionBuildingControl : MonoBehaviour
 
         bool resumed = TryResumeProductionInternal(allowManualResumeAnyPause: true);
 
-        if (debugLogging && resumed)
+        if (debugLogging && resumed) {}
             //Debug.Log($"[ProductionBuildingControl] Resumed production on '{name}' after fire cleared.");
 
         return resumed;
