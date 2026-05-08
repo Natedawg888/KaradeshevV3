@@ -16,6 +16,7 @@ public class EnvironmentSaveMeta
     public bool hasPopulation;
     public bool hasWorldSim;
     public bool hasJobs;
+    public bool hasNotifications;
 }
 
 [Serializable]

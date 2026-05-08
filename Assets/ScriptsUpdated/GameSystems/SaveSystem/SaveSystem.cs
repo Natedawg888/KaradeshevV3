@@ -142,6 +142,7 @@ public class SaveSystem : MonoBehaviour
         _sections.Add(SaveSectionKeys.Population, new PopulationSaveSection());
         _sections.Add(SaveSectionKeys.WorldSim, new WorldSimSaveSection());
         _sections.Add(SaveSectionKeys.Jobs, new JobsSaveSection());
+        _sections.Add(SaveSectionKeys.Notifications, new NotificationsSaveSection());
     }
 
     private void RefreshCachedReferences()
@@ -474,6 +475,12 @@ public class SaveSystem : MonoBehaviour
         {
             string path = Path.Combine(rootDir, $"{rootStem}.jobs.json");
             writeActions.Add(() => WriteJsonAtomically(path, snapshot.jobs));
+        }
+
+        if (snapshot.notifications != null)
+        {
+            string path = Path.Combine(rootDir, $"{rootStem}.notifications.json");
+            writeActions.Add(() => WriteJsonAtomically(path, snapshot.notifications));
         }
 
         // Write all sections in parallel, then meta LAST so the save is only
@@ -1178,6 +1185,12 @@ public class SaveSystem : MonoBehaviour
                 LoadJobsSection(jobs);
         }
 
+        if (meta.hasNotifications)
+        {
+            var notifData = ReadJsonFile<NotificationsSaveData>(GetSavePartPath(loadRootPath, "notifications"));
+            NotificationManager.Instance?.LoadState(notifData);
+        }
+
         ReportLoadProgress(7);
 
         SeedSnapshotCacheFromLoadedData(
@@ -1404,7 +1417,8 @@ public class SaveSystem : MonoBehaviour
             knowledge = snapshot.knowledge,
             population = snapshot.population,
             worldSim = snapshot.worldSim,
-            jobs = snapshot.jobs
+            jobs = snapshot.jobs,
+            notifications = snapshot.notifications
         };
 
         _hasCachedSnapshot = true;
@@ -1427,7 +1441,8 @@ public class SaveSystem : MonoBehaviour
             hasKnowledge = meta.hasKnowledge,
             hasPopulation = meta.hasPopulation,
             hasWorldSim = meta.hasWorldSim,
-            hasJobs = meta.hasJobs
+            hasJobs = meta.hasJobs,
+            hasNotifications = meta.hasNotifications
         };
     }
 
@@ -1444,7 +1459,8 @@ public class SaveSystem : MonoBehaviour
             hasKnowledge = snapshot.knowledge != null,
             hasPopulation = snapshot.population != null,
             hasWorldSim = snapshot.worldSim != null,
-            hasJobs = snapshot.jobs != null
+            hasJobs = snapshot.jobs != null,
+            hasNotifications = snapshot.notifications != null
         };
     }
 

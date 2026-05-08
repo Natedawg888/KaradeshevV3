@@ -6,4 +6,5 @@ public static class SaveSectionKeys
     public const string Population = "population";
     public const string WorldSim = "world_sim";
     public const string Jobs = "jobs";
+    public const string Notifications = "notifications";
 }

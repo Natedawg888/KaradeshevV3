@@ -15,4 +15,5 @@ public class SaveSnapshot
     public PopulationSectionSaveData population;
     public WorldSimSectionSaveData worldSim;
     public JobsSectionSaveData jobs;
+    public NotificationsSaveData notifications;
 }

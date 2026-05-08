@@ -93,6 +93,7 @@ public class NotificationManager : MonoBehaviour
 
         Debug.Log($"[NotificationManager] Added: [{notification.type}] {notification.title} — {notification.message}");
 
+        SaveSystem.MarkSectionDirty(SaveSectionKeys.Notifications);
         OnNotificationAdded?.Invoke(notification);
         OnNotificationsChanged?.Invoke();
     }
@@ -152,6 +153,53 @@ public class NotificationManager : MonoBehaviour
     public void ClearAll()
     {
         _notifications.Clear();
+        OnNotificationsChanged?.Invoke();
+    }
+
+    public NotificationsSaveData SaveState()
+    {
+        var data = new NotificationsSaveData();
+        for (int i = 0; i < _notifications.Count; i++)
+        {
+            var n = _notifications[i];
+            if (n.isRead) continue;
+            data.notifications.Add(new NotificationSaveEntry
+            {
+                type           = (int)n.type,
+                title          = n.title,
+                message        = n.message,
+                isRead         = n.isRead,
+                turnNumber     = n.turnNumber,
+                hasTileTarget  = n.hasTileTarget,
+                worldPositionX = n.worldPosition.x,
+                worldPositionY = n.worldPosition.y,
+                worldPositionZ = n.worldPosition.z,
+                showDeathIcon  = n.showDeathIcon,
+            });
+        }
+        return data;
+    }
+
+    public void LoadState(NotificationsSaveData data)
+    {
+        _notifications.Clear();
+        if (data?.notifications == null)
+        {
+            OnNotificationsChanged?.Invoke();
+            return;
+        }
+        for (int i = 0; i < data.notifications.Count; i++)
+        {
+            var e = data.notifications[i];
+            var n = new NotificationData((NotificationType)e.type, e.title, e.message, e.turnNumber)
+            {
+                isRead        = e.isRead,
+                hasTileTarget = e.hasTileTarget,
+                worldPosition = new UnityEngine.Vector3(e.worldPositionX, e.worldPositionY, e.worldPositionZ),
+                showDeathIcon = e.showDeathIcon,
+            };
+            _notifications.Add(n);
+        }
         OnNotificationsChanged?.Invoke();
     }
 }
