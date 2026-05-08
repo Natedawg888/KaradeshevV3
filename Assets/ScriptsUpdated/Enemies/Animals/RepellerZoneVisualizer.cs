@@ -1,37 +1,49 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Toggles a light-red overlay on every tile within the square repel radius of each AnimalRepeller.
-/// Each overlay matches the exact world-space footprint of its TileControl (reads Collider bounds),
-/// so mixed tile sizes never overlap. Renders on the UI layer above all world geometry.
-/// Attach to a GameObject in the FinalSetup scene; wire via FinalSetupInstaller ("RepellerZoneButton").
-/// Only active while in warfare mode (WorldCanvasMode.UnitsOnly == true).
+/// Highlights every environment tile within the square repel radius of each AnimalRepeller.
+/// The repeller's own tile is excluded (radius 1 = ring of adjacent tiles, 2 = two tiles out, etc.).
+/// Cache is built in a startup coroutine; overlays are created in batches to avoid frame freezes.
 /// </summary>
 public class RepellerZoneVisualizer : MonoBehaviour
 {
     [Header("Overlay Appearance")]
-    [Tooltip("Slight y-lift above the ground plane to avoid z-fighting.")]
     [SerializeField] private float yOffset = 0.05f;
-
-    [Tooltip("Light red, semi-transparent color for the repeller zone.")]
     [SerializeField] private Color overlayColor = new Color(1f, 0.15f, 0.15f, 0.35f);
+
+    [Header("Performance")]
+    [Tooltip("Tiles to scan into the cache per frame during startup.")]
+    [SerializeField] private int cacheBuildPerFrame = 50;
+
+    [Tooltip("Overlay quads to create per frame when showing the zone.")]
+    [SerializeField] private int overlaysPerFrame = 20;
 
     private Button   _toggleButton;
     private bool     _highlightActive;
     private Material _overlayMaterial;
 
-    private readonly List<GameObject>          _overlays   = new List<GameObject>();
-    private readonly HashSet<(int, int)>        _visited    = new HashSet<(int, int)>();
+    private Coroutine _cacheRoutine;
+    private Coroutine _showRoutine;
+
+    private readonly List<GameObject>            _overlays  = new List<GameObject>();
     private readonly Dictionary<(int,int), TileControl> _tileCache = new Dictionary<(int,int), TileControl>();
+    private bool _cacheReady;
 
     // ------------------------------------------------------------------
+
+    private void Start()
+    {
+        _cacheRoutine = StartCoroutine(BuildCacheRoutine());
+    }
 
     private void OnEnable()  => WorldCanvasMode.OnChanged += HandleModeChanged;
     private void OnDisable()
     {
         WorldCanvasMode.OnChanged -= HandleModeChanged;
+        StopShowRoutine();
         HideHighlight();
     }
 
@@ -68,7 +80,7 @@ public class RepellerZoneVisualizer : MonoBehaviour
 
         _highlightActive = !_highlightActive;
 
-        if (_highlightActive) ShowHighlight();
+        if (_highlightActive) BeginShowHighlight();
         else                  HideHighlight();
     }
 
@@ -79,6 +91,7 @@ public class RepellerZoneVisualizer : MonoBehaviour
         if (!unitsOnly && _highlightActive)
         {
             _highlightActive = false;
+            StopShowRoutine();
             HideHighlight();
         }
     }
@@ -90,20 +103,84 @@ public class RepellerZoneVisualizer : MonoBehaviour
     }
 
     // ------------------------------------------------------------------
+    // Cache — built once at startup in batches
+    // ------------------------------------------------------------------
 
-    private void ShowHighlight()
+    private IEnumerator BuildCacheRoutine()
     {
+        _cacheReady = false;
+        _tileCache.Clear();
+
+        var envControls = FindObjectsOfType<EnvironmentControl>(true);
+        int count = 0;
+
+        for (int i = 0; i < envControls.Length; i++)
+        {
+            var env = envControls[i];
+            if (env == null) continue;
+
+            var tile = env.GetComponentInParent<TileControl>(true);
+            if (tile == null) continue;
+
+            var gp  = tile.GetGridPosition();
+            var key = (gp.x, gp.y);
+            if (!_tileCache.ContainsKey(key))
+                _tileCache[key] = tile;
+
+            if (++count >= cacheBuildPerFrame)
+            {
+                count = 0;
+                yield return null;
+            }
+        }
+
+        _cacheReady = true;
+        _cacheRoutine = null;
+    }
+
+    public void InvalidateTileCache()
+    {
+        _cacheReady = false;
+        if (_cacheRoutine != null) StopCoroutine(_cacheRoutine);
+        _cacheRoutine = StartCoroutine(BuildCacheRoutine());
+    }
+
+    // ------------------------------------------------------------------
+    // Show / Hide
+    // ------------------------------------------------------------------
+
+    private void BeginShowHighlight()
+    {
+        StopShowRoutine();
         HideHighlight();
-
-        if (AnimalRepellerRegistry.Active.Count == 0) return;
-
         EnsureMaterial();
-        BuildTileCacheIfNeeded();
+        _showRoutine = StartCoroutine(ShowHighlightRoutine());
+    }
+
+    private void StopShowRoutine()
+    {
+        if (_showRoutine != null)
+        {
+            StopCoroutine(_showRoutine);
+            _showRoutine = null;
+        }
+    }
+
+    private IEnumerator ShowHighlightRoutine()
+    {
+        // Wait for cache if still building
+        while (!_cacheReady)
+            yield return null;
+
+        if (AnimalRepellerRegistry.Active.Count == 0)
+            yield break;
 
         var grid = GridManager.Instance;
 
-        _visited.Clear();
+        var visited = new HashSet<(int, int)>();
 
+        // Collect all unique coords to overlay
+        var coords = new List<(int, int)>();
         foreach (var repeller in AnimalRepellerRegistry.Active)
         {
             if (repeller == null) continue;
@@ -117,20 +194,35 @@ public class RepellerZoneVisualizer : MonoBehaviour
             for (int dx = -radius; dx <= radius; dx++)
             for (int dy = -radius; dy <= radius; dy++)
             {
-                if (dx == 0 && dy == 0) continue; // never highlight the repeller's own tile
+                if (dx == 0 && dy == 0) continue; // exclude the building's own tile
 
                 int tx = center.x + dx;
                 int ty = center.y + dy;
 
-                if (!_visited.Add((tx, ty))) continue;
-
-                if (!_tileCache.TryGetValue((tx, ty), out var tile) || tile == null) continue;
-
-                CreateOverlayForTile(tile);
+                if (visited.Add((tx, ty)))
+                    coords.Add((tx, ty));
             }
         }
 
-        _visited.Clear();
+        // Create overlays in batches
+        int batchCount = 0;
+        for (int i = 0; i < coords.Count; i++)
+        {
+            var (tx, ty) = coords[i];
+
+            if (!_tileCache.TryGetValue((tx, ty), out var tile) || tile == null)
+                continue;
+
+            CreateOverlayForTile(tile);
+
+            if (++batchCount >= overlaysPerFrame)
+            {
+                batchCount = 0;
+                yield return null;
+            }
+        }
+
+        _showRoutine = null;
     }
 
     private void HideHighlight()
@@ -143,34 +235,12 @@ public class RepellerZoneVisualizer : MonoBehaviour
         _overlays.Clear();
     }
 
-    // Build coord → TileControl lookup from EnvironmentControl components only.
-    // This filters to environment tiles, skipping building/empty tiles automatically.
-    // Called once; call InvalidateTileCache() if the tile set changes at runtime.
-    private void BuildTileCacheIfNeeded()
-    {
-        if (_tileCache.Count > 0) return;
-
-        var envControls = FindObjectsOfType<EnvironmentControl>(true);
-        for (int i = 0; i < envControls.Length; i++)
-        {
-            var env = envControls[i];
-            if (env == null) continue;
-
-            var tile = env.GetComponentInParent<TileControl>(true);
-            if (tile == null) continue;
-
-            var gp  = tile.GetGridPosition();
-            var key = (gp.x, gp.y);
-            if (!_tileCache.ContainsKey(key))
-                _tileCache[key] = tile;
-        }
-    }
-
-    public void InvalidateTileCache() => _tileCache.Clear();
+    // ------------------------------------------------------------------
+    // Overlay creation
+    // ------------------------------------------------------------------
 
     private void CreateOverlayForTile(TileControl tile)
     {
-        // Read the tile's actual world-space footprint from its collider bounds
         Vector3 size   = GetTileFootprint(tile);
         Vector3 center = tile.transform.position;
 
@@ -180,7 +250,7 @@ public class RepellerZoneVisualizer : MonoBehaviour
 
         go.transform.position   = new Vector3(center.x, center.y + yOffset, center.z);
         go.transform.rotation   = Quaternion.Euler(90f, 0f, 0f);
-        go.transform.localScale = new Vector3(size.x, size.z, 1f); // x/z = horizontal footprint
+        go.transform.localScale = new Vector3(size.x, size.z, 1f);
 
         var col = go.GetComponent<Collider>();
         if (col != null) Destroy(col);
@@ -191,24 +261,20 @@ public class RepellerZoneVisualizer : MonoBehaviour
 
     private static Vector3 GetTileFootprint(TileControl tile)
     {
-        // BoxCollider gives the most reliable footprint
         var box = tile.GetComponent<BoxCollider>();
         if (box != null)
         {
             Vector3 s = box.size;
-            // Scale by the tile's lossyScale so prefab-scale is respected
             return new Vector3(
                 Mathf.Abs(s.x * tile.transform.lossyScale.x),
                 Mathf.Abs(s.y * tile.transform.lossyScale.y),
                 Mathf.Abs(s.z * tile.transform.lossyScale.z));
         }
 
-        // Fall back to Renderer bounds
         var rend = tile.GetComponentInChildren<Renderer>(true);
         if (rend != null)
             return rend.bounds.size;
 
-        // Last resort: use GridManager cell size
         float cell = GridManager.Instance != null ? GridManager.Instance.cellSize : 1f;
         return new Vector3(cell, cell, cell);
     }
