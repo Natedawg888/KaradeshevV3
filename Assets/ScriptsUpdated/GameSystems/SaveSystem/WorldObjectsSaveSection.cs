@@ -1,10 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 public sealed class WorldObjectsSaveSection : SaveSectionBase
 {
     public override string Key => SaveSectionKeys.WorldObjects;
+
+    // Reused every save — no per-save heap allocation for these lists
+    private static readonly List<TileSaveable>              _tileBuf         = new List<TileSaveable>(256);
+    private static readonly List<BuildingSaveable>          _buildingBuf     = new List<BuildingSaveable>(64);
+    private static readonly List<ConstructionTileSaveable>  _constructionBuf = new List<ConstructionTileSaveable>(16);
+
+    private static readonly ProfilerMarker _pmTiles         = new ProfilerMarker("SaveSystem.Capture.WorldObjects.Tiles");
+    private static readonly ProfilerMarker _pmBuildings     = new ProfilerMarker("SaveSystem.Capture.WorldObjects.Buildings");
+    private static readonly ProfilerMarker _pmConstructions = new ProfilerMarker("SaveSystem.Capture.WorldObjects.Constructions");
 
     public override IEnumerator CaptureInto(
         SaveSnapshot snapshot,
@@ -18,23 +28,27 @@ public sealed class WorldObjectsSaveSection : SaveSectionBase
         int batchSize = Mathf.Max(1, objectsPerFrame);
         int batch = 0;
 
-        List<TileSaveable> tiles = new List<TileSaveable>(TileSaveable.Live);
-        for (int i = 0; i < tiles.Count; i++)
-        {
-            TileSaveable tileSaveable = tiles[i];
-            if (tileSaveable == null)
-                continue;
+        // --- TILES ---
+        // Use the Live registry instead of FindObjectsOfType; copy into reuse buffer
+        // so mid-iteration structural changes to Live don't cause exceptions.
+        _tileBuf.Clear();
+        foreach (TileSaveable t in TileSaveable.Live)
+            if (t != null) _tileBuf.Add(t);
 
+        for (int i = 0; i < _tileBuf.Count; i++)
+        {
+            TileSaveable tileSaveable = _tileBuf[i];
             TileScript tile = tileSaveable.GetComponent<TileScript>();
             if (tile == null)
                 continue;
 
+            _pmTiles.Begin();
             SaveData tileData = tileSaveable.SaveState();
             string tilePrefabName = CleanPrefabName(tile.gameObject.name);
             EnvironmentRuntimeSaveData environmentData = CaptureEnvironmentState(tile);
-
             snapshot.tiles.Add(new TileSaveData(tileData, tilePrefabName, environmentData));
             tileSaveable.ClearDirty();
+            _pmTiles.End();
 
             batch++;
             if (batch >= batchSize)
@@ -44,20 +58,22 @@ public sealed class WorldObjectsSaveSection : SaveSectionBase
             }
         }
 
-        BuildingSaveable[] liveBuildings = Object.FindObjectsOfType<BuildingSaveable>(true);
-        //Debug.Log($"[WorldObjectsSaveSection] Found {liveBuildings.Length} BuildingSaveables for save capture.");
+        // --- BUILDINGS ---
+        // BuildingSaveable.Live is the authoritative registry — no FindObjectsOfType needed
+        _buildingBuf.Clear();
+        foreach (BuildingSaveable b in BuildingSaveable.Live)
+            if (b != null) _buildingBuf.Add(b);
 
-        for (int i = 0; i < liveBuildings.Length; i++)
+        for (int i = 0; i < _buildingBuf.Count; i++)
         {
-            BuildingSaveable building = liveBuildings[i];
-            if (building == null)
-                continue;
+            BuildingSaveable building = _buildingBuf[i];
 
+            _pmBuildings.Begin();
             SaveData saveData = building.SaveState();
             string prefabName = CleanPrefabName(building.gameObject.name);
-
             snapshot.buildings.Add(new BuildingTileSaveData(saveData, prefabName));
             building.ClearDirty();
+            _pmBuildings.End();
 
             batch++;
             if (batch >= batchSize)
@@ -67,20 +83,19 @@ public sealed class WorldObjectsSaveSection : SaveSectionBase
             }
         }
 
-        //Debug.Log($"[WorldObjectsSaveSection] Captured {snapshot.buildings.Count} buildings.");
+        // --- CONSTRUCTIONS ---
+        _constructionBuf.Clear();
+        foreach (ConstructionTileSaveable c in ConstructionTileSaveable.Live)
+            if (c != null) _constructionBuf.Add(c);
 
-        // CONSTRUCTIONS
-        ConstructionTileSaveable[] liveConstructions = Object.FindObjectsOfType<ConstructionTileSaveable>(true);
-        //Debug.Log($"[WorldObjectsSaveSection] Found {liveConstructions.Length} ConstructionTileSaveables for save capture.");
-
-        for (int i = 0; i < liveConstructions.Length; i++)
+        for (int i = 0; i < _constructionBuf.Count; i++)
         {
-            ConstructionTileSaveable construction = liveConstructions[i];
-            if (construction == null)
-                continue;
+            ConstructionTileSaveable construction = _constructionBuf[i];
 
+            _pmConstructions.Begin();
             snapshot.constructions.Add(construction.GetSaveData());
             construction.ClearDirty();
+            _pmConstructions.End();
 
             batch++;
             if (batch >= batchSize)
@@ -89,7 +104,6 @@ public sealed class WorldObjectsSaveSection : SaveSectionBase
                 yield return null;
             }
         }
-
 
         ClearDirty();
     }

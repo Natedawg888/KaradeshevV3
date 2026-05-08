@@ -5,6 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Unity.Profiling;
 using UnityEngine;
 
 public class SaveSystem : MonoBehaviour
@@ -80,6 +81,10 @@ public class SaveSystem : MonoBehaviour
         Formatting = Formatting.None,
         ReferenceLoopHandling = ReferenceLoopHandling.Ignore
     };
+
+    // Profiler markers — zero overhead when no profiler is attached
+    private static readonly ProfilerMarker _pmSaveCapture   = new ProfilerMarker("SaveSystem.CaptureAll");
+    private static readonly ProfilerMarker _pmSaveSection   = new ProfilerMarker("SaveSystem.CaptureSection");
 
     private void Awake()
     {
@@ -320,21 +325,21 @@ public class SaveSystem : MonoBehaviour
             animalSimulationController
         );
 
+        _pmSaveCapture.Begin();
         foreach (ISaveSection section in _sections.Values)
         {
             if (_hasCachedSnapshot && !section.IsDirty)
-            {
-                //Debug.Log($"[SaveSystem] Reusing cached section '{section.Key}'.");
                 continue;
-            }
 
-            float start = Time.realtimeSinceStartup;
+            _pmSaveSection.Begin();
             yield return section.CaptureInto(snapshot, context, saveObjectsPerFrame);
-            //Debug.Log($"[SaveSystem] Captured section '{section.Key}' in {Time.realtimeSinceStartup - start:0.000}s");
+            _pmSaveSection.End();
         }
+        _pmSaveCapture.End();
 
-        int liveBuildingCount = FindObjectsOfType<BuildingSaveable>(true).Length;
-        int liveConstructionCount = FindObjectsOfType<ConstructionTileSaveable>(true).Length;
+        // Use the Live registries — same as what WorldObjectsSaveSection captured, no scene search needed
+        int liveBuildingCount = BuildingSaveable.Live.Count;
+        int liveConstructionCount = ConstructionTileSaveable.Live.Count;
 
         //Debug.Log($"[SaveSystem] Snapshot counts: tiles={snapshot.tiles.Count}, buildings={snapshot.buildings.Count}, constructions={snapshot.constructions.Count}");
         //Debug.Log($"[SaveSystem] Live counts: buildings={liveBuildingCount}, constructions={liveConstructionCount}");

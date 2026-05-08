@@ -1,96 +1,88 @@
 using System.Collections;
+using Unity.Profiling;
 using UnityEngine;
 
 public sealed class WorldSimSaveSection : SaveSectionBase
 {
     public override string Key => SaveSectionKeys.WorldSim;
 
+    // Cached on first save — avoids FindObjectOfType on every save
+    private FloodSimulationSystem        _floodSystem;
+    private EarthquakeFaultLineGenerator _faultLineGenerator;
+    private EarthquakeSimulationSystem   _earthquakeSystem;
+
+    private static readonly ProfilerMarker _pmAnimal    = new ProfilerMarker("SaveSystem.Capture.WorldSim.Animal");
+    private static readonly ProfilerMarker _pmUnits     = new ProfilerMarker("SaveSystem.Capture.WorldSim.Units");
+    private static readonly ProfilerMarker _pmDisaster  = new ProfilerMarker("SaveSystem.Capture.WorldSim.Disaster");
+    private static readonly ProfilerMarker _pmWeather   = new ProfilerMarker("SaveSystem.Capture.WorldSim.Weather");
+
     public override IEnumerator CaptureInto(
         SaveSnapshot snapshot,
         SaveCaptureContext context,
         int objectsPerFrame)
     {
-        float t0 = Time.realtimeSinceStartup;
+        // --- Animal simulation (potentially slow) ---
+        _pmAnimal.Begin();
         AnimalSimulationSaveData animalData =
             context.AnimalController != null ? context.AnimalController.SaveState() : null;
-        //Debug.Log($"[WorldSimSaveSection] animal save: {Time.realtimeSinceStartup - t0:0.000}s");
+        _pmAnimal.End();
+        yield return null;
 
-        float t1 = Time.realtimeSinceStartup;
+        // --- Units & training ---
+        _pmUnits.Begin();
         PlayerUnitsSaveData unitsData = PlayerUnitSaveLoad.SaveState();
-        //Debug.Log($"[WorldSimSaveSection] units save: {Time.realtimeSinceStartup - t1:0.000}s");
-
-        float t2 = Time.realtimeSinceStartup;
         PlayerTrainingSaveData trainingData =
             PlayerTrainingManager.Instance != null ? PlayerTrainingManager.Instance.SaveState() : null;
-        //Debug.Log($"[WorldSimSaveSection] training save: {Time.realtimeSinceStartup - t2:0.000}s");
+        _pmUnits.End();
+        yield return null;
 
-        float t3 = Time.realtimeSinceStartup;
+        // --- Disaster systems: lava, flood, earthquake ---
+        // FindObjectOfType only on first save; subsequent saves reuse cached ref
+        _pmDisaster.Begin();
         LavaOverlaySaveData lavaData =
             LavaOverlayManager.Instance != null ? LavaOverlayManager.Instance.SaveState() : null;
-        //Debug.Log($"[WorldSimSaveSection] lava overlay save: {Time.realtimeSinceStartup - t3:0.000}s");
 
-        float t4 = Time.realtimeSinceStartup;
-        FloodSimulationSystem floodSystem = Object.FindObjectOfType<FloodSimulationSystem>(true);
+        if (_floodSystem == null)
+            _floodSystem = Object.FindObjectOfType<FloodSimulationSystem>(true);
         FloodSimulationSaveData floodData =
-            floodSystem != null ? floodSystem.SaveState() : null;
-        //Debug.Log($"[WorldSimSaveSection] flood simulation save: {Time.realtimeSinceStartup - t4:0.000}s");
+            _floodSystem != null ? _floodSystem.SaveState() : null;
 
-        float t5 = Time.realtimeSinceStartup;
-        EarthquakeFaultLineGenerator faultLineGenerator =
-            Object.FindObjectOfType<EarthquakeFaultLineGenerator>(true);
-
+        if (_faultLineGenerator == null)
+            _faultLineGenerator = Object.FindObjectOfType<EarthquakeFaultLineGenerator>(true);
         EarthquakeFaultLineSaveData earthquakeFaultLineData =
-            faultLineGenerator != null ? faultLineGenerator.SaveState() : null;
+            _faultLineGenerator != null ? _faultLineGenerator.SaveState() : null;
 
-        //Debug.Log($"[WorldSimSaveSection] earthquake fault line save: {Time.realtimeSinceStartup - t5:0.000}s");
-
-        float t6 = Time.realtimeSinceStartup;
-        EarthquakeSimulationSystem earthquakeSystem =
-            Object.FindObjectOfType<EarthquakeSimulationSystem>(true);
-
+        if (_earthquakeSystem == null)
+            _earthquakeSystem = Object.FindObjectOfType<EarthquakeSimulationSystem>(true);
         EarthquakeSimulationSaveData earthquakeSimulationData =
-            earthquakeSystem != null ? earthquakeSystem.SaveState() : null;
+            _earthquakeSystem != null ? _earthquakeSystem.SaveState() : null;
+        _pmDisaster.End();
+        yield return null;
 
-        //Debug.Log($"[WorldSimSaveSection] earthquake simulation save: {Time.realtimeSinceStartup - t6:0.000}s");
-
-        float t7 = Time.realtimeSinceStartup;
+        // --- Fire, tsunami, volcano ---
+        _pmWeather.Begin();
         FireSimulationSaveData fireSimulationData =
             WeatherFireSystem.Instance != null ? WeatherFireSystem.Instance.SaveState() : null;
-
-        //Debug.Log($"[WorldSimSaveSection] fire simulation save: {Time.realtimeSinceStartup - t7:0.000}s");
-
-        float t8 = Time.realtimeSinceStartup;
         TsunamiSimulationSaveData tsunamiSimulationData =
             TsunamiSimulationSystem.Instance != null ? TsunamiSimulationSystem.Instance.SaveState() : null;
-
-        //Debug.Log($"[WorldSimSaveSection] tsunami simulation save: {Time.realtimeSinceStartup - t8:0.000}s");
-
-        float t9 = Time.realtimeSinceStartup;
         VolcanoManagerSaveData volcanoManagerData =
             VolcanoManager.Instance != null ? VolcanoManager.Instance.SaveState() : null;
-
-        //Debug.Log($"[WorldSimSaveSection] volcano manager save: {Time.realtimeSinceStartup - t9:0.000}s");
+        _pmWeather.End();
 
         snapshot.worldSim = new WorldSimSectionSaveData
         {
-            animalSimulationData = animalData,
-            playerUnitsData = unitsData,
-            playerTrainingData = trainingData,
-
-            lavaOverlayData = lavaData,
-            floodSimulationData = floodData,
-
+            animalSimulationData    = animalData,
+            playerUnitsData         = unitsData,
+            playerTrainingData      = trainingData,
+            lavaOverlayData         = lavaData,
+            floodSimulationData     = floodData,
             earthquakeFaultLineData = earthquakeFaultLineData,
             earthquakeSimulationData = earthquakeSimulationData,
-
-            fireSimulationData = fireSimulationData,
-
-            tsunamiSimulationData = tsunamiSimulationData,
-
-            volcanoManagerData = volcanoManagerData
+            fireSimulationData      = fireSimulationData,
+            tsunamiSimulationData   = tsunamiSimulationData,
+            volcanoManagerData      = volcanoManagerData
         };
 
         ClearDirty();
-        yield break;
     }
 }
