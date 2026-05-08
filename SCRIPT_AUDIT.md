@@ -1083,7 +1083,7 @@ Notifications/
   ├─ NotificationRowUI.cs           (Single row — see architecture note below)
   └─ NotificationIconSet.cs         (ScriptableObject — type → sprite map)
 
-NotificationManager public API (as of May 7, 2026):
+NotificationManager public API (as of May 8, 2026):
   AddNotification(type, title, message)
   AddNotification(type, title, message, bool showDeathIcon)
   AddNotification(type, title, message, Vector3 worldPosition)
@@ -1102,6 +1102,8 @@ NotificationMessageCrafterManager craft methods:
   CraftProduction(type, buildingName, planName)
   CraftBuilding(type, buildingName)
   CraftCrafting(type, recipeName, buildingName)           — tokens: {RECIPE}, {BUILDING}
+  CraftDiseaseOutbreak(diseaseName, causeType)            — tokens: {DISEASE}, {CAUSE}
+  CraftDiseaseKilled(diseaseName, surname)                — tokens: {DISEASE}, {NAME}
 
 NotificationRowUI architecture (as of May 7, 2026):
   Fields:
@@ -1132,6 +1134,38 @@ NotificationRowUI architecture (as of May 7, 2026):
 ---
 
 ## 11. Changelog
+
+### May 8, 2026 — Disease Death Notification + DiseaseOutbreak Death Icon Fix
+
+**Files changed:**
+- `ScriptsUpdated/DiseaseSystem/DiseaseManager.cs`
+- `ScriptsUpdated/Notifications/NotificationType.cs`
+- `ScriptsUpdated/Notifications/NotificationMessageCrafter.cs`
+- `ScriptsUpdated/Notifications/NotificationMessageCrafterManager.cs`
+- `ScriptsUpdated/Notifications/NotificationIconSet.cs`
+
+**Bug fix — `DiseaseOutbreak` was showing the death icon:**
+`PostDiseaseOutbreakNotification` was hardcoding `showDeathIcon: true`. Changed to `false` — a disease being applied to the population is not a death event.
+
+**New notification type — `DiseaseKilledPopulation`:**
+Fires from `DiseaseManager.KillIndividualFromDisease()` immediately after an individual dies.
+
+```
+KillIndividualFromDisease(person, disease, state)
+  └─ PostDiseaseDeathNotification(diseaseName, surname)
+       ├─ surname = person.Surname (falls back to "A citizen" if blank)
+       ├─ CraftDiseaseKilled(diseaseName, surname) via NotificationMessageCrafterManager
+       └─ NotificationManager.AddNotification(DiseaseKilledPopulation, title, message, showDeathIcon: true)
+```
+
+**`NotificationMessageCrafter` / `NotificationMessageCrafterManager`:**
+- New `CraftDiseaseKilled(diseaseName, surname)` method added to both
+- Tokens: `{DISEASE}`, `{NAME}`
+- 4 randomised templates in `PopulateDefaults()`
+
+**`NotificationIconSet`:** new entry for `DiseaseKilledPopulation` — assign sprite in Inspector
+
+---
 
 ### May 7, 2026 — Notification System Refactor
 
@@ -1518,5 +1552,5 @@ Auto-find: "FireIcon" and "FireFightIconTimer" children by name in OnValidate()
 **End of Report**
 
 *Status: Ready for Ruflo Integration*  
-*Last Updated: May 7, 2026*  
+*Last Updated: May 8, 2026*  
 *Audit Confidence: High (comprehensive read-only scan)*
