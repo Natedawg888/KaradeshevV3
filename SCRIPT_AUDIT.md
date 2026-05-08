@@ -1095,20 +1095,26 @@ NotificationManager public API (as of May 8, 2026):
     └─ fires CraftingFailedWeather type
   Passing worldPosition sets hasTileTarget = true → goToButton shows in row UI
 
-NotificationMessageCrafterManager craft methods:
-  Craft(type, EnvironmentControl, int populationLost)             — gathering / discovery
+NotificationMessageCrafterManager craft methods (as of May 8, 2026):
+  Craft(type, EnvironmentControl, int populationLost)              — gathering / discovery
   CraftResearch(type, techName)
   CraftBirth(type, motherSurname, bornAlive, motherDied)
   CraftProduction(type, buildingName, planName)
   CraftBuilding(type, buildingName)
-  CraftCrafting(type, recipeName, buildingName)                   — tokens: {RECIPE}, {BUILDING}
-  CraftFireFight(type, targetName, casualties)                    — tokens: {NAME}, {CASUALTIES}
-  CraftDiseaseOutbreak(diseaseName, causeType)                    — tokens: {DISEASE}, {CAUSE}
-  CraftDiseaseKilled(diseaseName, surname)                        — tokens: {DISEASE}, {NAME}
-  CraftUnitTrainingCompleted(unitName, count)                     — tokens: {UNIT}, {COUNT}
-  CraftUnitSkillTrainingCompleted(groupName, unitName, skillLevel)— tokens: {GROUP}, {UNIT}, {LEVEL}
-  CraftUnitTrainingFailedWeather(unitName, count, cause)          — tokens: {UNIT}, {COUNT}, {CAUSE}
-  CraftUnitMovementCompleted(groupName, unitName)                 — tokens: {GROUP}, {UNIT}
+  CraftCrafting(type, recipeName, buildingName)                    — tokens: {RECIPE}, {BUILDING}
+  CraftFireFight(type, targetName, casualties)                     — tokens: {NAME}, {CASUALTIES}
+  CraftDiseaseOutbreak(diseaseName, causeType)                     — tokens: {DISEASE}, {CAUSE}
+  CraftDiseaseKilled(diseaseName, surname)                         — tokens: {DISEASE}, {NAME}
+  CraftUnitTrainingCompleted(unitName, count)                      — tokens: {UNIT}, {COUNT}
+  CraftUnitSkillTrainingCompleted(groupName, unitName, skillLevel) — tokens: {GROUP}, {UNIT}, {LEVEL}
+  CraftUnitTrainingFailedWeather(unitName, count, cause)           — tokens: {UNIT}, {COUNT}, {CAUSE}
+  CraftUnitMovementCompleted(groupName, unitName)                  — tokens: {GROUP}, {UNIT}
+  CraftUnitAttackActionCompleted(groupName, unitName, actionName)  — tokens: {GROUP}, {UNIT}, {ACTION}
+  CraftUnitTargetedByAnimal(groupName, unitName, speciesName)      — tokens: {GROUP}, {UNIT}, {SPECIES}
+  CraftUnitGroupDestroyed(groupName, unitName)                     — tokens: {GROUP}, {UNIT}
+  CraftSpiritMoodChanged(spiritName, newMood, previousMood)        — tokens: {SPIRIT}, {MOOD}, {PREVIOUS}
+  CraftSpiritSummoned(spiritName)                                  — tokens: {SPIRIT}
+  CraftSpiritOfferingMade(spiritName, favorChange)                 — tokens: {SPIRIT}, {FAVOR}
 
 NotificationRowUI architecture (as of May 7, 2026):
   Fields:
@@ -1139,6 +1145,33 @@ NotificationRowUI architecture (as of May 7, 2026):
 ---
 
 ## 11. Changelog
+
+### May 8, 2026 — Combat, Unit Death, and Animism Spirit Notifications
+
+**Files changed:**
+- `ScriptsUpdated/Buildings/BuildingsTypes/Warfare/UnitGroupActionManager.cs`
+- `ScriptsUpdated/Enemies/Animals/AnimalSimulationController/AnimalSimulationController.UnitAttacks.cs`
+- `ScriptsUpdated/Warfare/Militia/TileUnitGroupControl.cs`
+- `ScriptsUpdated/Religion/PlayerReligionManager.cs`
+- `ScriptsUpdated/Notifications/NotificationType.cs`
+- `ScriptsUpdated/Notifications/NotificationMessageCrafter.cs`
+- `ScriptsUpdated/Notifications/NotificationMessageCrafterManager.cs`
+- `ScriptsUpdated/Notifications/NotificationIconSet.cs`
+
+**New notification types:**
+
+| Type | Fired by | Notes |
+|------|----------|-------|
+| `UnitAttackActionCompleted` | `UnitGroupActionManager.ProcessActionForTurn` | Only for `MeleeAttackActionSO` / `RangedAttackActionSO`; uses target tile position |
+| `UnitTargetedByAnimal` | `AnimalSimulationController.HandleGroupAttackedPlayerUnitGroup` | Fires only on first hit per attacker per turn (not every tick); uses unit tile position |
+| `UnitGroupDestroyed` | `TileUnitGroupControl.RemoveGroupDueToFatalities` | Single funnel for all death sources; neutral phrasing works for 1 unit or many |
+| `SpiritMoodChanged` | `PlayerReligionManager.AddFavor` + `ApplyEndTurnDecay` | Fires only when favor crosses a mood threshold (Angry/Sad/Neutral/Pleased/Exalted) |
+| `SpiritSummoned` | `PlayerReligionManager.TryAcceptSpirit` | Fires on successful spirit acceptance |
+| `SpiritOfferingMade` | `PlayerReligionManager.TryOfferResource` + `TryOfferPopulationSacrifice` | Includes favor change amount; covers resource and population sacrifice offerings |
+
+**`NotificationIconSet`:** six new entries — assign sprites in Inspector
+
+---
 
 ### May 8, 2026 — Warfare Notifications (Training, Skill Training, Weather Failure, Movement)
 
@@ -1590,5 +1623,5 @@ Auto-find: "FireIcon" and "FireFightIconTimer" children by name in OnValidate()
 **End of Report**
 
 *Status: Ready for Ruflo Integration*  
-*Last Updated: May 8, 2026 (warfare notifications)*  
+*Last Updated: May 8, 2026 (combat + spirit notifications)*  
 *Audit Confidence: High (comprehensive read-only scan)*
