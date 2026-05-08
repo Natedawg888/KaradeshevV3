@@ -1076,7 +1076,7 @@ Grid_Map/
 Notifications/
   ├─ NotificationManager.cs         (Singleton — stores List<NotificationData>, fires events; SaveState/LoadState)
   ├─ NotificationData.cs            (Data class + ProductionOutputEntry)
-  ├─ NotificationType.cs            (Enum — 37 types as of May 8, 2026)
+  ├─ NotificationType.cs            (Enum — 41 types as of May 8, 2026)
   ├─ NotificationMessageCrafter.cs  (ScriptableObject — randomised templates, token replacement)
   ├─ NotificationMessageCrafterManager.cs (Singleton MonoBehaviour wrapper for crafter SO)
   ├─ NotificationButtonUI.cs        (HUD button, swaps sprite on unread)
@@ -1122,6 +1122,8 @@ NotificationMessageCrafterManager craft methods (as of May 8, 2026):
   CraftSpiritMoodChanged(spiritName, newMood, previousMood)        — tokens: {SPIRIT}, {MOOD}, {PREVIOUS}
   CraftSpiritSummoned(spiritName)                                  — tokens: {SPIRIT}
   CraftSpiritOfferingMade(spiritName, favorChange)                 — tokens: {SPIRIT}, {FAVOR}
+  CraftAnimalRaidingBuilding(speciesName, buildingName)            — tokens: {SPECIES}, {BUILDING}
+  CraftAnimalStorageRaided(speciesName, buildingName, amount)      — tokens: {SPECIES}, {BUILDING}, {AMOUNT}
 
 NotificationRowUI architecture (as of May 7, 2026):
   Fields:
@@ -1152,6 +1154,109 @@ NotificationRowUI architecture (as of May 7, 2026):
 ---
 
 ## 11. Changelog
+
+### May 8, 2026 — RepellerZoneVisualizer (Warfare Mode Tile Highlight)
+
+**Files changed/created:**
+- `ScriptsUpdated/Enemies/Animals/RepellerZoneVisualizer.cs` *(new)*
+- `ScriptsUpdated/GameSystems/GameManager/Installers/FinalSetupInstaller.cs`
+
+**What was added:**
+
+`RepellerZoneVisualizer` — MonoBehaviour added to the FinalSetup scene. Wired by `FinalSetupInstaller` to a button named `"RepellerZoneButton"` in the main UI canvas.
+
+```
+Behaviour:
+  - Button only interactable while WorldCanvasMode.UnitsOnly == true (warfare mode)
+  - Toggle ON  → finds all EnvironmentControl tiles, checks each coord against the
+                  repelled set from AnimalRepellerRegistry, spawns a semi-transparent
+                  light-red quad (Sprites/Default, alpha 0.35) flat on each tile
+  - Toggle OFF → destroys all overlay quads
+  - Leaves warfare mode → auto-hides overlays
+```
+
+**Inspector tuning:** `overlayScale` (match tile size), `yOffset`, `overlayColor`
+
+**Editor setup required:**
+1. Add `RepellerZoneVisualizer` component to a GameObject in the FinalSetup scene
+2. Add a Button named `"RepellerZoneButton"` to the main UI canvas
+
+---
+
+### May 8, 2026 — Animal Food Storage Raiding + AnimalRepeller
+
+**Files changed/created:**
+- `ScriptsUpdated/Enemies/Animals/AnimalRepeller.cs` *(new)*
+- `ScriptsUpdated/Enemies/Animals/AnimalRepellerRegistry.cs` *(new)*
+- `ScriptsUpdated/Enemies/Animals/AnimalSimulation/AnimalSimulation.StorageRaids.cs` *(new)*
+- `ScriptsUpdated/Enemies/Animals/AnimalSimulationController/AnimalSimulationController.StorageRaids.cs` *(new)*
+- `ScriptsUpdated/Enemies/Animals/AnimalDefinition.cs`
+- `ScriptsUpdated/Enemies/Animals/AnimalSimulation/AnimalSimulation.Core.cs`
+- `ScriptsUpdated/Enemies/Animals/AnimalSimulation/AnimalSimulation.Decision.cs`
+- `ScriptsUpdated/Enemies/Animals/AnimalSimulationController/AnimalSimulationController.Core.cs`
+- `ScriptsUpdated/Enemies/Animals/AnimalSimulationController/AnimalSimulationController.TurnsAndSpawning.cs`
+- Notification files (NotificationType, Crafter, CrafterManager, IconSet)
+
+**AnimalDefinition — new "Food Storage Raiding" fields:**
+```
+raidsStorageForFood          — master toggle per species
+storageRaidHungerThreshold   — hunger fraction to trigger raiding (default 0.5)
+storageRaidRangeTiles        — tile scan radius (default 8)
+foodStolenPerRaidAction      — units stolen × group size per raid tick
+```
+
+**AnimalSimulation.StorageRaids (new partial):**
+```
+HandleStorageRaiding(ref group, hungerPct)
+  — checks adjacent tiles for edible food storage; fires OnGroupAttemptedStorageRaid
+    when adjacent
+  — scans within range for nearest food storage (skips repelled tiles); steps toward it
+  — wired in Decision.cs after HandleHumanRaiding in the hunger branch
+```
+
+**AnimalSimulation.Core additions:**
+```
+OnGroupAttemptedStorageRaid event (animalId, storageTile, requestedAmount)
+SetStorageFoodTiles(entries)   — pushed from controller each turn
+SetRepelledTiles(tiles)        — pushed from controller each turn
+IsTileRepelled(coord)          — checked in storage raid pathfinding
+```
+
+**AnimalRepeller / AnimalRepellerRegistry (new):**
+```
+AnimalRepeller        — MonoBehaviour, attach to any building
+  repelRadiusTiles    — radius (default 2)
+  OnEnable/Disable    — registers with AnimalRepellerRegistry
+
+AnimalRepellerRegistry — static registry of active AnimalRepeller instances
+```
+
+**AnimalSimulationController.StorageRaids (new partial):**
+```
+RefreshStorageTiles()            — finds all StorageBuildingControl with Food items,
+                                   builds tile→food map, pushes to simulation
+RefreshRepelledTiles()           — iterates AnimalRepellerRegistry, builds repelled
+                                   tile set, pushes to simulation
+HandleGroupAttemptedStorageRaid  — removes edible food from storage, reduces animal
+                                   hunger, refreshes storage cache, fires notification
+IsEdibleForSpecies()             — checks species.edibleResources or accepts any Food
+CountEdibleFood()                — counts food-type items in a StorageBuildingControl
+```
+Both refresh methods called from `HandleTurnEnded` each turn.
+
+**New notification type:** `AnimalStorageRaided` — tokens `{SPECIES}`, `{BUILDING}`, `{AMOUNT}`
+
+---
+
+### May 8, 2026 — Animal Building Raid Notification
+
+**Files changed:**
+- `ScriptsUpdated/Enemies/Animals/AnimalSimulationController/AnimalSimulationController.BuildingAttacks.cs`
+- Notification files
+
+**New notification type:** `AnimalRaidingBuilding` — fires once when an animal first begins raiding a given building (or switches targets); tokens `{SPECIES}`, `{BUILDING}`
+
+---
 
 ### May 8, 2026 — Notification Save/Load
 
@@ -1672,5 +1777,5 @@ Auto-find: "FireIcon" and "FireFightIconTimer" children by name in OnValidate()
 **End of Report**
 
 *Status: Ready for Ruflo Integration*  
-*Last Updated: May 8, 2026 (notification save/load)*  
+*Last Updated: May 8, 2026 (animal storage raiding + repeller + zone visualizer)*  
 *Audit Confidence: High (comprehensive read-only scan)*
