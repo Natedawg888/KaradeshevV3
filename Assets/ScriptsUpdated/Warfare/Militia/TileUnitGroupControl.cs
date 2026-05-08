@@ -268,6 +268,8 @@ public class TileUnitGroupControl : MonoBehaviour
     {
         if (group == null) return;
 
+        PostUnitGroupDestroyedNotification(group);
+
         if (!string.IsNullOrEmpty(group.populationReservationId))
         {
             var pop = PlayersPopulationManager.Instance;
@@ -294,6 +296,20 @@ public class TileUnitGroupControl : MonoBehaviour
         RefreshUnitsOnlyEmptyCanvasState();
         UnitGroupActionManager.Instance?.RefreshRegisteredUnitControl(this);
         RefreshSaveRegistry();
+    }
+
+    private void PostUnitGroupDestroyedNotification(TileUnitGroupData group)
+    {
+        if (NotificationManager.Instance == null) return;
+        string groupName = !string.IsNullOrWhiteSpace(group.groupName) ? group.groupName : "Unit Group";
+        string unitName  = group.unitType != null && !string.IsNullOrWhiteSpace(group.unitType.unitName)
+            ? group.unitType.unitName : "Unit";
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftUnitGroupDestroyed(groupName, unitName);
+        else
+            (title, message) = ("Unit Lost", $"{groupName} has been destroyed.");
+        NotificationManager.Instance.AddNotification(NotificationType.UnitGroupDestroyed, title, message, transform.position);
     }
 
     public void RefreshMarker(TileUnitGroupData group)

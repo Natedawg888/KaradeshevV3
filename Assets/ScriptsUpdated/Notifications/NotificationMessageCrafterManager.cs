@@ -157,6 +157,51 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.CraftUnitMovementCompleted(groupName, unitName);
     }
 
+    public (string title, string message) CraftSpiritSummoned(string spiritName)
+    {
+        if (crafter == null)
+            return ("Spirit Summoned", $"{spiritName} has been summoned and accepted.");
+        return crafter.CraftSpiritSummoned(spiritName);
+    }
+
+    public (string title, string message) CraftSpiritOfferingMade(string spiritName, int favorChange)
+    {
+        if (crafter == null)
+        {
+            string s = favorChange >= 0 ? $"+{favorChange}" : favorChange.ToString();
+            return ("Offering Made", $"An offering was made to {spiritName} ({s} favor).");
+        }
+        return crafter.CraftSpiritOfferingMade(spiritName, favorChange);
+    }
+
+    public (string title, string message) CraftSpiritMoodChanged(string spiritName, string newMood, string previousMood)
+    {
+        if (crafter == null)
+            return ("Spirit Mood Changed", $"{spiritName} is now {newMood}.");
+        return crafter.CraftSpiritMoodChanged(spiritName, newMood, previousMood);
+    }
+
+    public (string title, string message) CraftUnitGroupDestroyed(string groupName, string unitName)
+    {
+        if (crafter == null)
+            return ("Unit Lost", $"{groupName} has been destroyed.");
+        return crafter.CraftUnitGroupDestroyed(groupName, unitName);
+    }
+
+    public (string title, string message) CraftUnitAttackActionCompleted(string groupName, string unitName, string actionName)
+    {
+        if (crafter == null)
+            return ("Attack Complete", $"{groupName} has finished their {actionName}.");
+        return crafter.CraftUnitAttackActionCompleted(groupName, unitName, actionName);
+    }
+
+    public (string title, string message) CraftUnitTargetedByAnimal(string groupName, string unitName, string speciesName)
+    {
+        if (crafter == null)
+            return ("Under Attack!", $"{groupName} is being attacked by {speciesName}.");
+        return crafter.CraftUnitTargetedByAnimal(groupName, unitName, speciesName);
+    }
+
     public (string title, string message) CraftUnitTrainingFailedWeather(string unitName, int count, string cause)
     {
         if (crafter == null)

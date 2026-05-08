@@ -38,4 +38,10 @@ public enum NotificationType
     UnitSkillTrainingCompleted,
     UnitTrainingFailedWeather,
     UnitMovementCompleted,
+    UnitAttackActionCompleted,
+    UnitTargetedByAnimal,
+    UnitGroupDestroyed,
+    SpiritMoodChanged,
+    SpiritSummoned,
+    SpiritOfferingMade,
 }

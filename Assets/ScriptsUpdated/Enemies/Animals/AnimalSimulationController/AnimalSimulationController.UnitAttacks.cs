@@ -66,7 +66,13 @@ public partial class AnimalSimulationController : MonoBehaviour
         if (!_simulation.TryGetGroup(animalGroupId, out var animal) || animal == null || animal.species == null || !animal.isAlive)
             return;
 
+        bool isNewAttacker = !_animalToUnitTargetNext.ContainsKey(animalGroupId) ||
+                             _animalToUnitTargetNext[animalGroupId] != unitGroupId;
+
         RegisterUnitAttackThisTurn(animalGroupId, unitGroupId);
+
+        if (isNewAttacker)
+            PostAnimalTargetedUnitNotification(target, animal.species, owner);
 
         var species = animal.species;
 
@@ -312,6 +318,23 @@ public partial class AnimalSimulationController : MonoBehaviour
 
             marker.SetPlayerTargeted(_playerTargetedAnimalIds.Contains(animalId));
         }
+    }
+
+    private static void PostAnimalTargetedUnitNotification(TileUnitGroupData target, AnimalDefinition species, TileUnitGroupControl owner)
+    {
+        if (NotificationManager.Instance == null) return;
+        string groupName   = !string.IsNullOrWhiteSpace(target.groupName) ? target.groupName : "Unit Group";
+        string unitName    = target.unitType != null && !string.IsNullOrWhiteSpace(target.unitType.unitName)
+            ? target.unitType.unitName : "Unit";
+        string speciesName = species != null && !string.IsNullOrWhiteSpace(species.displayName)
+            ? species.displayName : "Animal";
+        Vector3 pos = owner != null ? owner.transform.position : default;
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftUnitTargetedByAnimal(groupName, unitName, speciesName);
+        else
+            (title, message) = ("Under Attack!", $"{groupName} is being attacked by {speciesName}!");
+        NotificationManager.Instance.AddNotification(NotificationType.UnitTargetedByAnimal, title, message, pos);
     }
 
     private float GetAnimalHitChanceVsUnit(AnimalDefinition species, TileUnitGroupData target)

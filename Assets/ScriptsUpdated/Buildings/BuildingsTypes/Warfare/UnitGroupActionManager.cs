@@ -264,7 +264,10 @@ public partial class UnitGroupActionManager : MonoBehaviour
             group.remainingActionTurns = Mathf.Max(0, group.remainingActionTurns - 1);
 
             if (endNow || group.remainingActionTurns <= 0)
+            {
+                PostAttackActionCompletedNotification(group, targetTile);
                 ClearActiveAction(group);
+            }
 
             owner.RefreshMarker(group);
             RaiseGroupActionStateChanged(group);
@@ -286,6 +289,24 @@ public partial class UnitGroupActionManager : MonoBehaviour
         ClearActiveAction(group);
         owner.RefreshMarker(group);
         RaiseGroupActionStateChanged(group);
+    }
+
+    private static void PostAttackActionCompletedNotification(TileUnitGroupData group, TileControl targetTile)
+    {
+        if (NotificationManager.Instance == null) return;
+        if (!(group.activeAction is MeleeAttackActionSO || group.activeAction is RangedAttackActionSO)) return;
+        string groupName  = !string.IsNullOrWhiteSpace(group.groupName) ? group.groupName : "Unit Group";
+        string unitName   = group.unitType != null && !string.IsNullOrWhiteSpace(group.unitType.unitName)
+            ? group.unitType.unitName : "Unit";
+        string actionName = !string.IsNullOrWhiteSpace(group.activeAction.displayName)
+            ? group.activeAction.displayName : "Attack";
+        Vector3 pos = targetTile != null ? targetTile.transform.position : default;
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftUnitAttackActionCompleted(groupName, unitName, actionName);
+        else
+            (title, message) = ("Attack Complete", $"{groupName} has finished their {actionName}.");
+        NotificationManager.Instance.AddNotification(NotificationType.UnitAttackActionCompleted, title, message, pos);
     }
 
     private void ClearActiveAction(TileUnitGroupData group)

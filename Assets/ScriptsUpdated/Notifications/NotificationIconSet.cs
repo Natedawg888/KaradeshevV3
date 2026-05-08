@@ -58,6 +58,12 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.UnitSkillTrainingCompleted     },
             new Entry { type = NotificationType.UnitTrainingFailedWeather      },
             new Entry { type = NotificationType.UnitMovementCompleted         },
+            new Entry { type = NotificationType.UnitAttackActionCompleted    },
+            new Entry { type = NotificationType.UnitTargetedByAnimal         },
+            new Entry { type = NotificationType.UnitGroupDestroyed           },
+            new Entry { type = NotificationType.SpiritMoodChanged            },
+            new Entry { type = NotificationType.SpiritSummoned              },
+            new Entry { type = NotificationType.SpiritOfferingMade          },
         };
     }
 }

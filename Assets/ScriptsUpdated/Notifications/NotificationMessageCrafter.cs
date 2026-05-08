@@ -214,6 +214,80 @@ public class NotificationMessageCrafter : ScriptableObject
         return (title, message);
     }
 
+    public (string title, string message) CraftSpiritSummoned(string spiritName)
+    {
+        var set = GetSuccessSet(NotificationType.SpiritSummoned);
+        if (set == null)
+            return ("Spirit Summoned", $"{spiritName} has been summoned and accepted.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages).Replace("{SPIRIT}", spiritName);
+        return (title, message);
+    }
+
+    public (string title, string message) CraftSpiritOfferingMade(string spiritName, int favorChange)
+    {
+        var set = GetSuccessSet(NotificationType.SpiritOfferingMade);
+        if (set == null)
+            return ("Offering Made", $"An offering was made to {spiritName} (+{favorChange} favor).");
+        string favorStr = favorChange >= 0 ? $"+{favorChange}" : favorChange.ToString();
+        string title    = Pick(set.titles);
+        string message  = Pick(set.messages)
+            .Replace("{SPIRIT}", spiritName)
+            .Replace("{FAVOR}",  favorStr);
+        return (title, message);
+    }
+
+    public (string title, string message) CraftSpiritMoodChanged(string spiritName, string newMood, string previousMood)
+    {
+        var set = GetSuccessSet(NotificationType.SpiritMoodChanged);
+        if (set == null)
+            return ("Spirit Mood Changed", $"{spiritName} is now {newMood}.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{SPIRIT}",   spiritName)
+            .Replace("{MOOD}",     newMood)
+            .Replace("{PREVIOUS}", previousMood);
+        return (title, message);
+    }
+
+    public (string title, string message) CraftUnitGroupDestroyed(string groupName, string unitName)
+    {
+        var set = GetSuccessSet(NotificationType.UnitGroupDestroyed);
+        if (set == null)
+            return ("Unit Lost", $"{groupName} has been destroyed.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{GROUP}", groupName)
+            .Replace("{UNIT}",  unitName);
+        return (title, message);
+    }
+
+    public (string title, string message) CraftUnitAttackActionCompleted(string groupName, string unitName, string actionName)
+    {
+        var set = GetSuccessSet(NotificationType.UnitAttackActionCompleted);
+        if (set == null)
+            return ("Attack Complete", $"{groupName} has finished their {actionName}.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{GROUP}",  groupName)
+            .Replace("{UNIT}",   unitName)
+            .Replace("{ACTION}", actionName);
+        return (title, message);
+    }
+
+    public (string title, string message) CraftUnitTargetedByAnimal(string groupName, string unitName, string speciesName)
+    {
+        var set = GetSuccessSet(NotificationType.UnitTargetedByAnimal);
+        if (set == null)
+            return ("Under Attack!", $"{groupName} is being attacked by {speciesName}.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages)
+            .Replace("{GROUP}",   groupName)
+            .Replace("{UNIT}",    unitName)
+            .Replace("{SPECIES}", speciesName);
+        return (title, message);
+    }
+
     public (string title, string message) CraftUnitMovementCompleted(string groupName, string unitName)
     {
         var set = GetSuccessSet(NotificationType.UnitMovementCompleted);
@@ -639,6 +713,78 @@ public class NotificationMessageCrafter : ScriptableObject
                     "Your {UNIT} group '{GROUP}' has arrived at their destination.",
                     "{GROUP} has completed their march and is now in position.",
                     "The {UNIT} group '{GROUP}' has finished moving.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.UnitAttackActionCompleted,
+                titles   = new[] { "Attack Complete", "Action Resolved", "Combat Over" },
+                messages = new[]
+                {
+                    "{GROUP} has finished their {ACTION}.",
+                    "The {UNIT} group '{GROUP}' has completed their {ACTION}.",
+                    "{GROUP}'s {ACTION} has concluded.",
+                    "Combat action resolved: {GROUP} ({UNIT}) finished their {ACTION}.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.UnitTargetedByAnimal,
+                titles   = new[] { "Under Attack!", "Animal Attack!", "Danger!" },
+                messages = new[]
+                {
+                    "{GROUP} is being attacked by {SPECIES}!",
+                    "A {SPECIES} is attacking your {UNIT} group '{GROUP}'!",
+                    "{SPECIES} have set upon {GROUP} — respond immediately!",
+                    "Your {UNIT} group '{GROUP}' is under attack from {SPECIES}!",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.UnitGroupDestroyed,
+                titles   = new[] { "Unit Lost", "Fallen in Battle", "Lost in Combat" },
+                messages = new[]
+                {
+                    "{GROUP} has fallen.",
+                    "Your {UNIT} '{GROUP}' has been lost.",
+                    "{GROUP} has been destroyed in battle.",
+                    "The {UNIT} '{GROUP}' is no more.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.SpiritMoodChanged,
+                titles   = new[] { "Spirit Mood Changed", "The Spirits Stir", "Spirit Shift" },
+                messages = new[]
+                {
+                    "{SPIRIT} is now {MOOD}.",
+                    "The spirit {SPIRIT} has shifted from {PREVIOUS} to {MOOD}.",
+                    "{SPIRIT}'s mood has changed — now {MOOD}.",
+                    "The spirit {SPIRIT} feels {MOOD}. They were {PREVIOUS} before.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.SpiritSummoned,
+                titles   = new[] { "Spirit Summoned", "A Spirit Answers", "Presence Felt" },
+                messages = new[]
+                {
+                    "{SPIRIT} has been summoned and is now watching over your people.",
+                    "The ritual is complete — {SPIRIT} has accepted your call.",
+                    "{SPIRIT} stirs. A new spirit has joined your settlement.",
+                    "Your people have made contact with {SPIRIT}.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.SpiritOfferingMade,
+                titles   = new[] { "Offering Made", "The Spirits Accept", "Ritual Complete" },
+                messages = new[]
+                {
+                    "An offering was made to {SPIRIT} ({FAVOR} favor).",
+                    "{SPIRIT} has received your offering. Favor: {FAVOR}.",
+                    "Your people performed a ritual for {SPIRIT}. Favor changed by {FAVOR}.",
+                    "The offering to {SPIRIT} is complete — {FAVOR} favor gained.",
                 },
             },
             new SuccessTemplateSet

@@ -205,6 +205,7 @@ public class PlayerReligionManager : MonoBehaviour
 
         ApplyRelationshipAdjustmentsOnAcceptance(spirit);
         RefreshSacredAnimalGroups(forceRotateAll: false, replaceMissingOnly: true);
+        PostSpiritSummonedNotification(spirit);
         MarkKnowledgeDirty();
         NotifyReligionChanged();
         return true;
@@ -255,9 +256,54 @@ public class PlayerReligionManager : MonoBehaviour
         if (state == null || state.definition == null)
             return;
 
+        SpiritMoodState previousMood = state.definition.GetMoodForFavor(state.favor);
         state.favor = state.definition.ClampFavor(state.favor + amount);
+        CheckAndNotifyMoodChange(state, previousMood);
         MarkKnowledgeDirty();
         NotifyReligionChanged();
+    }
+
+    private static void PostSpiritSummonedNotification(SpiritDefinitionSO spirit)
+    {
+        if (NotificationManager.Instance == null) return;
+        string spiritName = !string.IsNullOrWhiteSpace(spirit.displayName) ? spirit.displayName : "A spirit";
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftSpiritSummoned(spiritName);
+        else
+            (title, message) = ("Spirit Summoned", $"{spiritName} has been summoned and accepted.");
+        NotificationManager.Instance.AddNotification(NotificationType.SpiritSummoned, title, message, false);
+    }
+
+    private static void PostSpiritOfferingNotification(SpiritDefinitionSO spirit, int favorChange)
+    {
+        if (NotificationManager.Instance == null) return;
+        string spiritName = !string.IsNullOrWhiteSpace(spirit.displayName) ? spirit.displayName : "A spirit";
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftSpiritOfferingMade(spiritName, favorChange);
+        else
+        {
+            string s = favorChange >= 0 ? $"+{favorChange}" : favorChange.ToString();
+            (title, message) = ("Offering Made", $"An offering was made to {spiritName} ({s} favor).");
+        }
+        NotificationManager.Instance.AddNotification(NotificationType.SpiritOfferingMade, title, message, false);
+    }
+
+    private void CheckAndNotifyMoodChange(SpiritRuntimeState state, SpiritMoodState previousMood)
+    {
+        if (state == null || state.definition == null || NotificationManager.Instance == null) return;
+        SpiritMoodState newMood = state.definition.GetMoodForFavor(state.favor);
+        if (newMood == previousMood) return;
+        string spiritName = !string.IsNullOrWhiteSpace(state.definition.displayName)
+            ? state.definition.displayName : "A spirit";
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftSpiritMoodChanged(
+                spiritName, newMood.ToString(), previousMood.ToString());
+        else
+            (title, message) = ("Spirit Mood Changed", $"{spiritName} is now {newMood}.");
+        NotificationManager.Instance.AddNotification(NotificationType.SpiritMoodChanged, title, message, false);
     }
 
     public SpiritMoodState GetMood(SpiritDefinitionSO spirit)
@@ -286,7 +332,9 @@ public class PlayerReligionManager : MonoBehaviour
             int next = state.definition.ClampFavor(state.favor - decay);
             if (next != state.favor)
             {
+                SpiritMoodState previousMood = state.definition.GetMoodForFavor(state.favor);
                 state.favor = next;
+                CheckAndNotifyMoodChange(state, previousMood);
                 changed = true;
             }
         }
@@ -322,6 +370,7 @@ public class PlayerReligionManager : MonoBehaviour
         state.lastOfferingTurn = currentTurn;
         state.favor = spirit.ClampFavor(state.favor + matchedOffering.favorChange);
 
+        PostSpiritOfferingNotification(spirit, matchedOffering.favorChange);
         NotifyReligionChanged();
         return true;
     }
@@ -353,6 +402,7 @@ public class PlayerReligionManager : MonoBehaviour
         state.lastOfferingTurn = currentTurn;
         state.favor = spirit.ClampFavor(state.favor + matchedOffering.favorChange);
 
+        PostSpiritOfferingNotification(spirit, matchedOffering.favorChange);
         NotifyReligionChanged();
         return true;
     }
