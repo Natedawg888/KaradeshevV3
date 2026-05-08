@@ -39,7 +39,7 @@ public class PlayerHealthTechApplier : MonoBehaviour
         var rules = PlayerHealthRulebook.Instance;
         //if (rules == null) { Debug.LogWarning("[PlayerHealthTechApplier] Missing PlayerHealthRulebook."); return; }
 //
-        //int dCH=0, dTH=0, dAH=0, dEH=0;
+        int dCH=0, dTH=0, dAH=0, dEH=0;
         int dC2T=0, dT2A=0, dA2E=0, dLife=0;
         float dCR=0, dTR=0, dAR=0, dER=0;
 
@@ -115,7 +115,7 @@ public class PlayerHealthTechApplier : MonoBehaviour
         var rules = PlayerHealthRulebook.Instance;
         //if (rules == null) { Debug.LogWarning("[PlayerHealthTechApplier] Missing PlayerHealthRulebook."); return; }
 //
-        //int dCH=0, dTH=0, dAH=0, dEH=0;
+        int dCH=0, dTH=0, dAH=0, dEH=0;
         int dC2T=0, dT2A=0, dA2E=0, dLife=0;
         float dCR=0, dTR=0, dAR=0, dER=0;
         float dResC=0f, dResT=0f, dResA=0f, dResE=0f;

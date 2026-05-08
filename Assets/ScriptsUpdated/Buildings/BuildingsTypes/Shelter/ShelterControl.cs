@@ -825,7 +825,7 @@ public class ShelterControl : MonoBehaviour
 
         int roomForOrders = Mathf.Max(0, maxConcurrentOrders - activeOrders.Count);
         //if (roomForOrders <= 0) { Debug.Log("[Shelter] blocked: at order capacity"); return; }
-        //int toStart = Mathf.Min(requestedCount, roomForOrders);
+        int toStart = Mathf.Min(requestedCount, roomForOrders);
 
         var cfg = familySim.GetConfig();
         float minH = cfg != null ? cfg.minHealthForBirth        : 0.6f;
