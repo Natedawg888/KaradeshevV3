@@ -117,6 +117,8 @@ public class RepellerZoneVisualizer : MonoBehaviour
             for (int dx = -radius; dx <= radius; dx++)
             for (int dy = -radius; dy <= radius; dy++)
             {
+                if (dx == 0 && dy == 0) continue; // never highlight the repeller's own tile
+
                 int tx = center.x + dx;
                 int ty = center.y + dy;
 
@@ -141,19 +143,23 @@ public class RepellerZoneVisualizer : MonoBehaviour
         _overlays.Clear();
     }
 
-    // Build coord → TileControl lookup from all tiles currently in the scene.
-    // Called once per ShowHighlight; call InvalidateTileCache() if tiles change.
+    // Build coord → TileControl lookup from EnvironmentControl components only.
+    // This filters to environment tiles, skipping building/empty tiles automatically.
+    // Called once; call InvalidateTileCache() if the tile set changes at runtime.
     private void BuildTileCacheIfNeeded()
     {
         if (_tileCache.Count > 0) return;
 
-        var allTiles = FindObjectsOfType<TileControl>(true);
-        for (int i = 0; i < allTiles.Length; i++)
+        var envControls = FindObjectsOfType<EnvironmentControl>(true);
+        for (int i = 0; i < envControls.Length; i++)
         {
-            var tile = allTiles[i];
+            var env = envControls[i];
+            if (env == null) continue;
+
+            var tile = env.GetComponentInParent<TileControl>(true);
             if (tile == null) continue;
 
-            var gp = tile.GetGridPosition();
+            var gp  = tile.GetGridPosition();
             var key = (gp.x, gp.y);
             if (!_tileCache.ContainsKey(key))
                 _tileCache[key] = tile;
