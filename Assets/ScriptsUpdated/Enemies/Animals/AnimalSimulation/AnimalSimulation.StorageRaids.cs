@@ -65,4 +65,19 @@ public partial class AnimalSimulation
         predator.lastAction = AnimalActionType.Move;
         return true;
     }
+
+    private bool TryFleeRepelledTile(ref AnimalGroupState group)
+    {
+        var neighbours = GetNeighbourTilesCached(group.tile, 1);
+        for (int i = 0; i < neighbours.Count; i++)
+        {
+            var n = neighbours[i];
+            if (IsTileRepelled(n)) continue;
+            if (IsPlayerBuildingTile(n)) continue;
+            group.tile = n;
+            group.lastAction = AnimalActionType.Move;
+            return true;
+        }
+        return false;
+    }
 }

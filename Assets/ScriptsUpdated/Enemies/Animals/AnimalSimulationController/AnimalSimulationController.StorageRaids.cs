@@ -44,6 +44,9 @@ public partial class AnimalSimulationController : MonoBehaviour
         var repelled = new HashSet<TileCoord>();
         if (_grid == null) _grid = FindObjectOfType<GridManager>();
 
+        int cols = _grid != null ? _grid.columns : int.MaxValue;
+        int rows = _grid != null ? _grid.rows    : int.MaxValue;
+
         foreach (var repeller in AnimalRepellerRegistry.Active)
         {
             if (repeller == null) continue;
@@ -53,7 +56,12 @@ public partial class AnimalSimulationController : MonoBehaviour
 
             for (int dx = -radius; dx <= radius; dx++)
             for (int dy = -radius; dy <= radius; dy++)
-                repelled.Add(new TileCoord { x = gp.x + dx, y = gp.y + dy });
+            {
+                int tx = gp.x + dx;
+                int ty = gp.y + dy;
+                if (tx < 0 || ty < 0 || tx >= cols || ty >= rows) continue;
+                repelled.Add(new TileCoord { x = tx, y = ty });
+            }
         }
 
         _simulation.SetRepelledTiles(repelled);

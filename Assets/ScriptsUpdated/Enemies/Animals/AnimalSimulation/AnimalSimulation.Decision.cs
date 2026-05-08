@@ -13,6 +13,10 @@ public partial class AnimalSimulation
         if (TryBlockActionsWhileTargetedByHumanUnit(ref group))
             return;
 
+        // If already inside a repeller zone, step out before doing anything else
+        if (IsTileRepelled(group.tile) && TryFleeRepelledTile(ref group))
+            return;
+
         float hungerPct = species.maxHunger > 0f ? group.hunger / species.maxHunger : 0f;
         float thirstPct = species.maxThirst > 0f ? group.thirst / species.maxThirst : 0f;
 
@@ -297,6 +301,9 @@ public partial class AnimalSimulation
         for (int i = 0; i < candidates.Count; i++)
         {
             var coord = candidates[i];
+
+            if (IsTileRepelled(coord)) continue;
+
             var data = _env.GetTileData(coord);
 
             if (IsAvoidedHabitat(species, data))
@@ -441,6 +448,9 @@ public partial class AnimalSimulation
         for (int i = 0; i < candidates.Count; i++)
         {
             var coord = candidates[i];
+
+            if (IsTileRepelled(coord)) continue;
+
             var data = _env.GetTileData(coord);
 
             if (IsAvoidedHabitat(species, data))

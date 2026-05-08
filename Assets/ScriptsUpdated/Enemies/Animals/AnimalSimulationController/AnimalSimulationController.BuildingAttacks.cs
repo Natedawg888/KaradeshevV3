@@ -186,7 +186,13 @@ public partial class AnimalSimulationController : MonoBehaviour
             return;
 
         // ✅ Register immediately from the ATTACK EVENT (don’t rely on TryGetGroup state being updated yet)
+        bool isNewRaid = !_attackingBuildingByGroup.TryGetValue(animalGroupId, out var existingTile)
+                         || !existingTile.Equals(tile);
+
         RegisterBuildingAttackerFromAttackEvent(animalGroupId, tile);
+
+        if (isNewRaid)
+            PostAnimalRaidNotification(animal.species, building);
 
         var species = animal.species;
 
@@ -259,6 +265,22 @@ public partial class AnimalSimulationController : MonoBehaviour
         var trimmed = new BuildingUnderAttackIconView[keep];
         for (int i = 0; i < keep; i++) trimmed[i] = all[i];
         return trimmed;
+    }
+
+    private static void PostAnimalRaidNotification(AnimalDefinition species, BuildingControl building)
+    {
+        if (NotificationManager.Instance == null) return;
+        string speciesName   = species != null && !string.IsNullOrWhiteSpace(species.displayName)
+            ? species.displayName : "Animals";
+        string buildingName  = building != null && !string.IsNullOrWhiteSpace(building.buildingName)
+            ? building.buildingName : "a building";
+        Vector3 pos = building != null ? building.transform.position : default;
+        string title, message;
+        if (NotificationMessageCrafterManager.Instance != null)
+            (title, message) = NotificationMessageCrafterManager.Instance.CraftAnimalRaidingBuilding(speciesName, buildingName);
+        else
+            (title, message) = ("Building Under Raid!", $"{speciesName} are attacking {buildingName}!");
+        NotificationManager.Instance.AddNotification(NotificationType.AnimalRaidingBuilding, title, message, pos);
     }
 
     private void RegisterBuildingAttackerFromAttackEvent(int attackerGroupId, TileCoord buildingTile)
