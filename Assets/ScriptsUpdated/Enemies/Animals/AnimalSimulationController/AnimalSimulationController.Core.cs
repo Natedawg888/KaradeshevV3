@@ -165,6 +165,9 @@ public partial class AnimalSimulationController : MonoBehaviour
         if (tileActivator != null)
             tileActivator.OnTilesActivated += HandleTilesActivated;
 
+        AnimalRepellerRegistry.OnChanged += RefreshRepelledTiles;
+        RefreshRepelledTiles();
+
         BuildTileUiLookup();
     }
 
@@ -204,6 +207,8 @@ public partial class AnimalSimulationController : MonoBehaviour
 
         if (tileActivator != null)
             tileActivator.OnTilesActivated -= HandleTilesActivated;
+
+        AnimalRepellerRegistry.OnChanged -= RefreshRepelledTiles;
 
         if (_spawnRoutine != null)
             StopCoroutine(_spawnRoutine);
