@@ -818,8 +818,8 @@ public class ShelterControl : MonoBehaviour
         //if (requireHousedForPairing && housedFamilyIds.Count == 0)
         //{
             //Debug.Log("[Shelter] blocked: no housed families");
-            return;
-        }
+            //return;
+        //}
         if (requestedCount <= 0) return;
         if (familySim == null || playerPop == null) return;
 
