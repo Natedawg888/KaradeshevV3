@@ -136,6 +136,9 @@ public partial class AnimalSimulation
                 string.IsNullOrWhiteSpace(reason)
                     ? $"RemoveGroup called at tile {tile}."
                     : reason);
+
+            // Fire before erasing so listeners still have species/size/tile data
+            OnGroupDiedAtTile?.Invoke(group, tile);
         }
 
         DeregisterGroupFromSpeciesRegistry(groupId);

@@ -40,6 +40,42 @@ public class UnitGroupMovementManager : MonoBehaviour
     private float _turnCostMultiplier = 1f;
     private float _minTurnCost = 0.1f;
 
+    // Lazy caches — rebuilt only when dirty, not every turn
+    private static readonly List<TileUnitGroupControl> s_controlsCache = new();
+    private static bool s_controlsCacheDirty = true;
+
+    private static readonly List<UnitGroupMarker> s_markersCache = new();
+    private static bool s_markersCacheDirty = true;
+
+    // Call when unit groups are added or removed from the scene
+    public static void InvalidateUnitCaches()
+    {
+        s_controlsCacheDirty = true;
+        s_markersCacheDirty  = true;
+    }
+
+    private static List<TileUnitGroupControl> GetAllControls()
+    {
+        if (s_controlsCacheDirty)
+        {
+            s_controlsCache.Clear();
+            s_controlsCache.AddRange(FindObjectsOfType<TileUnitGroupControl>());
+            s_controlsCacheDirty = false;
+        }
+        return s_controlsCache;
+    }
+
+    private static List<UnitGroupMarker> GetAllMarkers()
+    {
+        if (s_markersCacheDirty)
+        {
+            s_markersCache.Clear();
+            s_markersCache.AddRange(FindObjectsOfType<UnitGroupMarker>());
+            s_markersCacheDirty = false;
+        }
+        return s_markersCache;
+    }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -51,6 +87,10 @@ public class UnitGroupMovementManager : MonoBehaviour
 
         if (tileLayerMask == 0)
             tileLayerMask = LayerMask.GetMask("TileClickable");
+
+        // Mark caches dirty on startup so first use does a fresh FindObjectsOfType
+        s_controlsCacheDirty = true;
+        s_markersCacheDirty  = true;
 
         if (endMovementButton != null)
         {
@@ -546,7 +586,7 @@ public class UnitGroupMovementManager : MonoBehaviour
     {
         var toProcess = new List<(TileUnitGroupData group, TileUnitGroupControl owner)>();
 
-        var allControls = GameObject.FindObjectsOfType<TileUnitGroupControl>();
+        var allControls = GetAllControls();  // cached — no FindObjectsOfType per turn
         foreach (var control in allControls)
         {
             var groups = control.Groups;
@@ -854,8 +894,8 @@ public class UnitGroupMovementManager : MonoBehaviour
     {
         if (group == null) return;
 
-        var markers = GameObject.FindObjectsOfType<UnitGroupMarker>();
-        for (int i = 0; i < markers.Length; i++)
+        var markers = GetAllMarkers();  // cached — no FindObjectsOfType per call
+        for (int i = 0; i < markers.Count; i++)
         {
             var m = markers[i];
             if (m == null) continue;

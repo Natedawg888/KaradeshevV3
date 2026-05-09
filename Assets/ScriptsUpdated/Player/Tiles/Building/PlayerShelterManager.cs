@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class PlayerShelterManager : MonoBehaviour
@@ -15,6 +14,20 @@ public class PlayerShelterManager : MonoBehaviour
 
     private Coroutine _processCo;
     private bool _isProcessing;
+
+    // Pre-allocated buffer and comparer — avoids LINQ allocation every turn
+    private readonly List<ShelterControl> _shelterBuffer = new();
+    private static readonly ShelterLevelComparer _shelterComparer = new();
+
+    private sealed class ShelterLevelComparer : IComparer<ShelterControl>
+    {
+        public int Compare(ShelterControl x, ShelterControl y)
+        {
+            if (x == null || y == null) return 0;
+            int cmp = x.shelterLevel.CompareTo(y.shelterLevel);
+            return cmp != 0 ? cmp : string.Compare(x.name, y.name, System.StringComparison.Ordinal);
+        }
+    }
 
     public bool IsProcessing => _isProcessing;
 
@@ -61,11 +74,16 @@ public class PlayerShelterManager : MonoBehaviour
     {
         _isProcessing = true;
 
-        var shelters = ShelterControl.GetAllSheltersSnapshot()
-            .Where(s => s != null && s.isActiveAndEnabled)
-            .OrderBy(s => s.shelterLevel)
-            .ThenBy(s => s.name)
-            .ToList();
+        // Build sorted shelter list without LINQ allocation
+        _shelterBuffer.Clear();
+        var snapshot = ShelterControl.GetAllSheltersSnapshot();
+        foreach (var s in snapshot)
+        {
+            if (s != null && s.isActiveAndEnabled)
+                _shelterBuffer.Add(s);
+        }
+        _shelterBuffer.Sort(_shelterComparer);
+        var shelters = _shelterBuffer;
 
         int processedThisFrame = 0;
 

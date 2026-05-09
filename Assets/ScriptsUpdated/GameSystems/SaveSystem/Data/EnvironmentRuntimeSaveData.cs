@@ -2,9 +2,15 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-using System;
-using System.Collections.Generic;
-using UnityEngine;
+[Serializable]
+public class SpawnerRuntimeSaveData
+{
+    public string spawnerID;
+    public int    sourceReason;            // SpawnerSourceReason cast to int
+    public int    turnsSinceLastSpawn;
+    public int    remainingUses;           // -1 = unlimited
+    public int    remainingLifetimeTurns;  // -1 = unlimited
+}
 
 [Serializable]
 public class PendingLootSaveData
@@ -23,7 +29,6 @@ public class EnvironmentNodeResourceEntrySaveData
 [Serializable]
 public class EnvironmentResourceNodeRuntimeSaveData
 {
-    public int maxVarietyCap;
     public int totalCapacity;
 
     public int maxEnvironmentHealth;
@@ -39,9 +44,11 @@ public class EnvironmentResourceNodeRuntimeSaveData
     public int barrenTurnsLeft;
 
     public int turnsSinceLastExtraSpawn;
-    public float outOfSeasonFavorMultiplier;
 
-    public List<EnvironmentNodeResourceEntrySaveData> spawnedResources = new();
+    public int tileStateFlags;  // TileStateFlags cast to int
+
+    public List<EnvironmentNodeResourceEntrySaveData> spawnedResources  = new();
+    public List<SpawnerRuntimeSaveData>               activeSpawners    = new();
 }
 
 [Serializable]

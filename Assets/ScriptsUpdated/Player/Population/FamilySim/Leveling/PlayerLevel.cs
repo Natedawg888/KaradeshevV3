@@ -71,10 +71,19 @@ public class PlayerLevel : MonoBehaviour
             MarkCoreSystemsDirty();
 
             OnLevelUp?.Invoke(currentLevel);
+            PostLevelUpNotification(currentLevel);
         }
 
         if (!HasNextLevel())
             currentXP = 0;
+    }
+
+    private void PostLevelUpNotification(int newLevel)
+    {
+        var crafter = NotificationMessageCrafterManager.Instance;
+        if (crafter == null) return;
+        var (title, msg) = crafter.CraftLevelUp(newLevel);
+        NotificationManager.Instance?.AddNotification(NotificationType.PlayerLevelUp, title, msg);
     }
 
     private bool HasNextLevel()

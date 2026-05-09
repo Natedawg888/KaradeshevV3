@@ -83,6 +83,7 @@ public class PlayerGatheringManager : MonoBehaviour
     }
 
     private Coroutine processingCoroutine;
+    private readonly List<GatheringInfo> _gatheringSnapshot = new();
 
     private void Awake()
     {
@@ -301,7 +302,9 @@ public class PlayerGatheringManager : MonoBehaviour
 
     private void OnTurnEnded()
     {
-        var snapshot = inProgress.Values.ToList();
+        _gatheringSnapshot.Clear();
+        foreach (var v in inProgress.Values) _gatheringSnapshot.Add(v);
+        var snapshot = _gatheringSnapshot;
         if (processingCoroutine != null)
             StopCoroutine(processingCoroutine);
         processingCoroutine = StartCoroutine(ProcessGatheringUpdates(snapshot));
@@ -558,16 +561,18 @@ public class PlayerGatheringManager : MonoBehaviour
         if (populationManager == null || populationManager.AllPopulations == null || populationManager.AllPopulations.Count == 0)
             return (0f, 0f);
 
-        int total = populationManager.AllPopulations.Sum(g => Mathf.Max(0, g.count));
-        if (total <= 0) return (0f, 0f);
-
+        int total = 0;
         float hungerSum = 0f, thirstSum = 0f;
-        foreach (var g in populationManager.AllPopulations)
+        var pops = populationManager.AllPopulations;
+        for (int i = 0; i < pops.Count; i++)
         {
+            var g = pops[i];
             int c = Mathf.Max(0, g.count);
-            hungerSum += g.hungerLevel * c;
-            thirstSum += g.thirstLevel * c;
+            total      += c;
+            hungerSum  += g.hungerLevel * c;
+            thirstSum  += g.thirstLevel * c;
         }
+        if (total <= 0) return (0f, 0f);
         return (hungerSum / total, thirstSum / total);
     }
 

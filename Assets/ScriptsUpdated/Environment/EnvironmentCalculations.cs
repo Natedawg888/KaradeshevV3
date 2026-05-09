@@ -133,18 +133,26 @@ public class EnvironmentCalculations : ScriptableObject
     {
         environmentSettings = new List<EnvironmentTypeSettings>
         {
-            Env(EnvironmentType.Desert,          12, 60, 2.3f, 1.3f, 2,  8, 0, 1.6f, 0, 4, 12,  true, 1, 0.95f, 1.00f, 0.15f, 0.40f),
-            Env(EnvironmentType.Grassland,       11, 20, 2.0f, 1.0f, 2,  7, 0, 1.1f, 0, 2,  7,  true, 3, 0.80f, 1.00f, 1.35f, 1.45f),
-            Env(EnvironmentType.Savanna,         11, 25, 2.0f, 1.0f, 2,  7, 0, 1.2f, 0, 3,  8,  true, 3, 0.80f, 1.00f, 1.35f, 1.45f),
-            Env(EnvironmentType.TemperateForest, 13, 30, 2.9f, 0.9f, 2,  9, 0, 1.3f, 0, 3,  9,  true, 5, 0.50f, 0.80f, 1.00f, 1.00f),
-            Env(EnvironmentType.BorealForest,    13, 40, 2.9f, 0.85f,2,  7, 0, 1.5f, 0, 5, 14,  true, 5, 0.50f, 0.80f, 1.00f, 1.00f),
-            Env(EnvironmentType.TropicalForest,  15, 60, 2.8f, 0.8f, 2, 10, 0, 1.8f, 0, 6, 16,  true, 6, 0.55f, 0.75f, 1.20f, 1.10f),
-            Env(EnvironmentType.SubTropical,     15, 50, 2.3f, 1.4f, 2, 10, 0, 1.6f, 0, 5, 13,  true, 5, 0.50f, 0.80f, 1.00f, 1.00f),
-            Env(EnvironmentType.Lake,            16, 60, 2.2f, 1.2f, 2, 10, 0, 1.4f, 0, 4, 12,  true, 4, 0.50f, 0.85f, 1.00f, 1.00f),
-            Env(EnvironmentType.Tundra,          22, 60, 2.3f, 1.2f, 2, 15, 0, 1.4f, 0, 5, 14,  true, 2, 0.30f, 0.55f, 0.40f, 0.60f),
-            Env(EnvironmentType.Mountain,        30, 80, 2.4f, 1.2f, 2, 20, 0, 1.5f, 0, 5, 15,  true, 4, 0.50f, 0.85f, 1.00f, 1.00f),
-            Env(EnvironmentType.Ocean,           17, 60, 3.0f, 1.5f, 2, 30, 0, 1.9f, 0, 7, 18,  true, 4, 0.50f, 0.85f, 1.00f, 1.00f),
-            Env(EnvironmentType.SaltLake,        10, 20, 2.25f,0.75f,2, 12, 0, 1.25f,0, 8, 10,  true, 4, 0.50f, 0.85f, 1.00f, 1.00f),
+            // Env(type, discTurns, discFail, discPopMult, discPenMult, discPenOnFail,
+            //          gthTurns, gthFail, gthPopMult, gthPenOnFail,
+            //          surveyTurns, resurveyBase,
+            //          canFire, burnTurns, dryness, maxDry, ignition, burnSpeed)
+
+            Env(EnvironmentType.Grassland,       9,  18, 1.6f, 0.9f, 1,   6, 0, 1.0f, 0,   2,  7,   true,  3, 0.65f, 0.95f, 1.15f, 1.20f),
+            Env(EnvironmentType.Savanna,        10,  25, 1.8f, 1.0f, 2,   7, 0, 1.15f,0,   3,  8,   true,  3, 0.78f, 1.00f, 1.35f, 1.35f),
+            Env(EnvironmentType.Desert,         12,  55, 2.1f, 1.3f, 2,   9, 0, 1.45f,0,   4, 11,   true,  1, 0.92f, 1.00f, 0.25f, 0.45f),
+
+            Env(EnvironmentType.TemperateForest,13,  32, 2.3f, 0.9f, 2,   8, 0, 1.25f,0,   3,  9,   true,  5, 0.50f, 0.85f, 1.00f, 1.00f),
+            Env(EnvironmentType.BorealForest,   14,  40, 2.5f, 0.9f, 2,   8, 0, 1.35f,0,   4, 12,   true,  5, 0.45f, 0.80f, 0.85f, 0.90f),
+            Env(EnvironmentType.TropicalForest, 16,  55, 2.8f, 0.85f,2,  10, 0, 1.65f,0,   5, 14,   true,  6, 0.55f, 0.80f, 1.10f, 1.00f),
+            Env(EnvironmentType.SubTropical,    14,  42, 2.4f, 1.0f, 2,   9, 0, 1.45f,0,   4, 12,   true,  5, 0.55f, 0.85f, 1.00f, 1.00f),
+
+            Env(EnvironmentType.Tundra,         18,  55, 2.2f, 1.2f, 2,  12, 0, 1.35f,0,   5, 13,   true,  2, 0.28f, 0.55f, 0.35f, 0.55f),
+            Env(EnvironmentType.Mountain,       24,  70, 2.5f, 1.25f,2,  16, 0, 1.45f,0,   5, 15,   true,  3, 0.45f, 0.80f, 0.50f, 0.70f),
+
+            Env(EnvironmentType.Lake,           14,  45, 2.0f, 1.1f, 2,   9, 0, 1.25f,0,   4, 11,   false, 0, 0.00f, 0.00f, 0.00f, 0.00f),
+            Env(EnvironmentType.Ocean,          20,  65, 3.0f, 1.5f, 2,  24, 0, 1.8f, 0,   7, 18,   false, 0, 0.00f, 0.00f, 0.00f, 0.00f),
+            Env(EnvironmentType.SaltLake,       13,  35, 2.1f, 0.9f, 2,  11, 0, 1.3f, 0,   6, 10,   false, 0, 0.00f, 0.00f, 0.00f, 0.00f),
         };
 
         // Tile type modifiers — turn multipliers for discovery/gathering are identical in the original calculators.
@@ -152,36 +160,45 @@ public class EnvironmentCalculations : ScriptableObject
         // Beach/Mountain-type tiles: overridesFire=true with low ignition values.
         tileModifiers = new List<TileTypeModifierEntry>
         {
-            //                              tileType              discTrn gthTrn  srvTrn  rsvTrn  discFail discPop  discPen  gthPop  override  canFire  brn  dry    maxD   ign    spd
-            Tile(EnvironmentTileType.Land,             0.80f, 0.80f, 1.00f, 1.00f,   0,  1.0f,  1.0f,  1.0f,   false, false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.River,            0.90f, 0.90f, 1.20f, 1.10f,  -2,  1.2f,  1.1f,  1.1f,   true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.RiverCorner,      0.95f, 0.95f, 1.20f, 1.10f,  -1,  1.2f,  1.1f,  1.1f,   true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.RiverSplit,       1.00f, 1.00f, 1.30f, 1.20f,   1,  1.3f,  1.2f,  1.2f,   true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.RiverCross,       1.10f, 1.10f, 1.30f, 1.20f,   1,  1.5f,  1.4f,  1.3f,   true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.RiverEnd,         0.95f, 0.95f, 1.10f, 1.10f,  -1,  1.3f,  1.2f,  1.1f,   true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.RiverMouth,       1.00f, 1.00f, 1.30f, 1.20f,   0,  1.3f,  1.2f,  1.2f,   true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.Water,            0.75f, 0.75f, 1.10f, 1.10f,  -2,  1.5f,  1.2f,  1.2f,   true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.Lake,             1.15f, 1.15f, 1.30f, 1.30f,   2,  1.7f,  1.25f, 1.25f,  true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.LakeEdge,         1.00f, 1.00f, 1.30f, 1.30f,  -1,  1.1f,  1.1f,  1.1f,   true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.LakeCorner,       1.05f, 1.05f, 1.30f, 1.30f,  -1,  1.1f,  1.1f,  1.1f,   true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.LakeMouth,        1.00f, 1.00f, 1.30f, 1.20f,   0,  1.3f,  1.2f,  1.2f,   true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.Ocean,            1.40f, 1.40f, 2.50f, 1.60f,   5,  2.0f,  1.5f,  1.5f,   true,  false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.Coastline,        1.10f, 1.10f, 1.10f, 1.20f,  -1,  1.1f,  1.0f,  1.2f,   false, false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.CoastlineCorner,  1.10f, 1.10f, 1.20f, 1.20f,   0,  1.1f,  1.0f,  1.2f,   false, false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.Mountain,         1.45f, 1.45f, 1.50f, 1.40f,   3,  2.0f,  1.3f,  1.5f,   true,  true,  1, 0.70f,0.95f,0.20f,0.50f),
-            Tile(EnvironmentTileType.Cave,             0.80f, 0.80f, 2.00f, 1.50f,  -5,  1.1f,  2.0f,  1.6f,   false, false, 0, 0f,   0f,   0f,   0f),
-            Tile(EnvironmentTileType.SaltLake,         1.15f, 1.15f, 1.75f, 1.20f,   2,  1.5f,  1.25f, 1.25f,  false, false, 0, 0f,   0f,   0f,   0f),
+            // Tile(type, discTrn, gthTrn, srvTrn, rsvTrn,
+            //          discFail, discPop, discPen, gthPop,
+            //          overridesFire, canFire, burnTurns, dryness, maxDry, ignition, burnSpeed)
+
+            Tile(EnvironmentTileType.Land,             0.85f, 0.85f, 1.00f, 1.00f,   0, 1.00f, 1.00f, 1.00f,   false, false, 0, 0f,    0f,    0f,    0f),
+
+            Tile(EnvironmentTileType.River,            0.90f, 0.90f, 1.20f, 1.10f,  -2, 1.20f, 1.10f, 1.10f,   true,  false, 0, 0f,    0f,    0f,    0f),
+            Tile(EnvironmentTileType.RiverCorner,      0.95f, 0.95f, 1.20f, 1.10f,  -1, 1.20f, 1.10f, 1.10f,   true,  false, 0, 0f,    0f,    0f,    0f),
+            Tile(EnvironmentTileType.RiverSplit,       1.00f, 1.00f, 1.30f, 1.20f,   1, 1.30f, 1.20f, 1.20f,   true,  false, 0, 0f,    0f,    0f,    0f),
+            Tile(EnvironmentTileType.RiverCross,       1.10f, 1.10f, 1.35f, 1.25f,   2, 1.45f, 1.35f, 1.30f,   true,  false, 0, 0f,    0f,    0f,    0f),
+            Tile(EnvironmentTileType.RiverEnd,         0.95f, 0.95f, 1.15f, 1.10f,  -1, 1.20f, 1.10f, 1.10f,   true,  false, 0, 0f,    0f,    0f,    0f),
+            Tile(EnvironmentTileType.RiverMouth,       1.05f, 1.05f, 1.35f, 1.20f,   1, 1.35f, 1.20f, 1.20f,   true,  false, 0, 0f,    0f,    0f,    0f),
+
+            Tile(EnvironmentTileType.Water,            0.80f, 0.80f, 1.10f, 1.10f,  -2, 1.40f, 1.15f, 1.15f,   true,  false, 0, 0f,    0f,    0f,    0f),
+            Tile(EnvironmentTileType.Lake,             1.15f, 1.15f, 1.35f, 1.30f,   2, 1.60f, 1.25f, 1.25f,   true,  false, 0, 0f,    0f,    0f,    0f),
+            Tile(EnvironmentTileType.LakeEdge,         0.95f, 0.95f, 1.25f, 1.25f,  -1, 1.10f, 1.05f, 1.10f,   true,  false, 0, 0f,    0f,    0f,    0f),
+            Tile(EnvironmentTileType.LakeCorner,       1.00f, 1.00f, 1.25f, 1.25f,  -1, 1.10f, 1.05f, 1.10f,   true,  false, 0, 0f,    0f,    0f,    0f),
+            Tile(EnvironmentTileType.LakeMouth,        1.00f, 1.00f, 1.30f, 1.20f,   0, 1.25f, 1.15f, 1.15f,   true,  false, 0, 0f,    0f,    0f,    0f),
+
+            Tile(EnvironmentTileType.Ocean,            1.50f, 1.50f, 2.50f, 1.60f,   5, 2.00f, 1.50f, 1.50f,   true,  false, 0, 0f,    0f,    0f,    0f),
+            Tile(EnvironmentTileType.SaltLake,         1.20f, 1.20f, 1.75f, 1.25f,   2, 1.50f, 1.25f, 1.25f,   true,  false, 0, 0f,    0f,    0f,    0f),
+
+            Tile(EnvironmentTileType.Coastline,        1.05f, 1.05f, 1.15f, 1.20f,  -1, 1.10f, 1.00f, 1.15f,   false, false, 0, 0f,    0f,    0f,    0f),
+            Tile(EnvironmentTileType.CoastlineCorner,  1.10f, 1.10f, 1.20f, 1.20f,   0, 1.10f, 1.00f, 1.15f,   false, false, 0, 0f,    0f,    0f,    0f),
+
+            Tile(EnvironmentTileType.Mountain,         1.45f, 1.45f, 1.50f, 1.40f,   3, 1.90f, 1.30f, 1.45f,   true,  true,  2, 0.45f, 0.80f, 0.30f, 0.55f),
+            Tile(EnvironmentTileType.Cave,             0.75f, 0.75f, 2.00f, 1.50f,  -5, 1.10f, 1.80f, 1.50f,   true,  true,  2, 0.35f, 0.65f, 0.35f, 0.60f),
         };
 
         sizeSettings = new List<TileSizeEntry>
         {
-            //                  size              discTrn  gthTrn  srvTrn  rsvTrn  discFail  discPop  gthPop  srvPop  penBase
-            Size(TileSize.Tiny,    0.75f, 0.75f, 0.50f, 2.50f,  2,   2,  1,  2,  1),
-            Size(TileSize.Small,   1.50f, 1.50f, 0.75f, 2.00f,  3,   4,  2,  3,  1),
-            Size(TileSize.Medium,  3.00f, 3.00f, 1.00f, 1.50f,  4,   8,  4,  5,  2),
-            Size(TileSize.Large,   6.00f, 6.00f, 1.25f, 1.25f,  5,  16,  8,  8,  3),
-            Size(TileSize.Giant,  12.00f,12.00f, 1.50f, 0.75f,  6,  32, 10, 12,  4),
-            Size(TileSize.Massive,24.00f,24.00f, 2.00f, 0.50f,  7,  64, 20, 20,  5),
+            // Size(size, discTrn, gthTrn, srvTrn, rsvTrn, discFail, discPop, gthPop, srvPop, penBase)
+
+            Size(TileSize.Tiny,     0.75f,  0.75f, 0.50f, -2.50f, 2,  2,  1,  2, 1),
+            Size(TileSize.Small,    1.50f,  1.50f, 0.75f, -2.00f, 3,  4,  2,  3, 1),
+            Size(TileSize.Medium,   3.00f,  3.00f, 1.00f, 1.50f, 4,  8,  4,  5, 2),
+            Size(TileSize.Large,    6.00f,  6.00f, 1.25f, 1.25f, 5, 16,  8,  8, 3),
+            Size(TileSize.Giant,   12.00f, 12.00f, 1.50f, 0.75f, 6, 32, 12, 12, 4),
+            Size(TileSize.Massive, 24.00f, 24.00f, 2.00f, 0.50f, 7, 64, 24, 20, 5),
         };
 
         BuildCaches();

@@ -1774,8 +1774,41 @@ Auto-find: "FireIcon" and "FireFightIconTimer" children by name in OnValidate()
 
 ---
 
+## 12. Resource Spawner System
+
+See **SPAWNER_AUDIT.md** for the full reference.
+
+**Added:** May 9, 2026  
+**Location:** `ScriptsUpdated/Environment/ResourceSpawners/`  
+**Editor scripts:** `Assets/Editor/ResourceSpawnerDefinitionCreator.cs`, `Assets/Editor/SavannaSpawnerCreator.cs`  
+**Generated assets:** `Assets/Resources/ResourceSpawners/`, `Assets/ScriptableObjects/ResourceSpawners/`  
+**Summary:** Resources now spawn from `ResourceSpawnerDefinition` ScriptableObjects instead of `ResourceDefinition` lists. `EnvironmentResourceNode` keeps `spawnedResources`/`ResourceSpawnEntry` unchanged — only the spawning decision layer changed. Three spawner types: permanent base spawners, event-triggered temporary spawners (fire, animal death, dung), and climate-conditional spawners driven by `ClimateManager` temperature/humidity curves.
+
+---
+
+### May 9, 2026 — Resource Spawner System
+
+**Files created:**
+- `ScriptsUpdated/Environment/ResourceSpawners/ResourceSpawnerDefinition.cs` *(new)*
+- `ScriptsUpdated/Environment/ResourceSpawners/ResourceSpawnerRuntime.cs` *(new)*
+- `ScriptsUpdated/Environment/ResourceSpawners/TileStateResourceSpawnerHandler.cs` *(new)*
+- `ScriptsUpdated/Environment/ResourceSpawners/AnimalDeathResourceSpawnerHandler.cs` *(new)*
+- `ScriptsUpdated/Environment/ResourceSpawners/AnimalDroppingHandler.cs` *(new)*
+- `ScriptsUpdated/Environment/EnvironmentResourceNode/EnvironmentResourceNode.SpawnerAPI.cs` *(new partial)*
+- `Assets/Editor/ResourceSpawnerDefinitionCreator.cs` *(new)*
+- `Assets/Editor/SavannaSpawnerCreator.cs` *(new)*
+
+**Files modified:**
+- `ScriptsUpdated/Environment/EnvironmentResourceNode/EnvironmentResourceNode.Core.cs` — added `baseSpawners`, `activeSpawners`, `currentTileState` fields; `InitializeSpawners()` call in `Start()`
+- `ScriptsUpdated/Environment/EnvironmentResourceNode/EnvironmentResourceNode.Spawning.cs` — `GenerateResources()` and `TickResourceLifecycle()` route to spawner system; legacy path kept as fallback
+
+**What changed:**
+Resources now spawn from `ResourceSpawnerDefinition` ScriptableObjects instead of `ResourceDefinition` lists. Three spawner types: permanent base spawners (on tile), event-triggered temporary spawners (fire/death/weather), and climate-conditional spawners. Climate multiplier reads from `ClimateManager` — temperature and humidity curves scale `baseSpawnChance` per tick. 30 base spawner SOs and 9 Savanna SOs created by editor menu scripts. Dung → Dried Dung conversion system added as a tile-level MonoBehaviour.
+
+---
+
 **End of Report**
 
 *Status: Ready for Ruflo Integration*  
-*Last Updated: May 8, 2026 (animal storage raiding + repeller + zone visualizer)*  
+*Last Updated: May 9, 2026 (Resource Spawner System — spawner templates, climate modifiers, dung system)*  
 *Audit Confidence: High (comprehensive read-only scan)*

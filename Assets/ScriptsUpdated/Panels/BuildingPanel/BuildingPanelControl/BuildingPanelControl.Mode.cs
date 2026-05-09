@@ -184,7 +184,9 @@ public partial class BuildingPanelControl : MonoBehaviour
             hasAvailable = byLevel != null && byLevel.Count > 0;
         }
 
-        openResearchButton.interactable = !destroyed && hasAvailable;
+        bool show = !destroyed && hasAvailable;
+        openResearchButton.gameObject.SetActive(show);
+        openResearchButton.interactable = show;
     }
 
     private void RefreshDestroyButton()

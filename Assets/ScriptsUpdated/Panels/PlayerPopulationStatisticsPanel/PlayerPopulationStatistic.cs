@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class PlayerPopulationStatistic : MonoBehaviour
@@ -145,41 +144,54 @@ public class PlayerPopulationStatistic : MonoBehaviour
             return s;
 
         var pops = populationManager.AllPopulations;
-        s.total  = pops.Sum(g => g.count);
 
-        s.child  = Sum(pops, AgeGroup.Child);
-        s.teen   = Sum(pops, AgeGroup.Teen);
-        s.adult  = Sum(pops, AgeGroup.Adult);
-        s.elder  = Sum(pops, AgeGroup.Elder);
+        // Single pass for all counts
+        float wHealthChild = 0, wHealthTeen = 0, wHealthAdult = 0, wHealthElder = 0;
+        int   nHealthChild = 0, nHealthTeen = 0, nHealthAdult = 0, nHealthElder = 0;
 
-        s.male   = pops.Where(g => g.gender == Gender.Male).Sum(g => g.count);
-        s.female = pops.Where(g => g.gender == Gender.Female).Sum(g => g.count);
+        for (int i = 0; i < pops.Count; i++)
+        {
+            var g = pops[i];
+            if (g == null) continue;
+            int c = g.count;
+            s.total += c;
+            if      (g.gender == Gender.Male)   s.male   += c;
+            else if (g.gender == Gender.Female) s.female += c;
+            switch (g.ageGroup)
+            {
+                case AgeGroup.Child:
+                    s.child       += c;
+                    wHealthChild  += g.averageHealth * c;
+                    nHealthChild  += c;
+                    break;
+                case AgeGroup.Teen:
+                    s.teen        += c;
+                    wHealthTeen   += g.averageHealth * c;
+                    nHealthTeen   += c;
+                    break;
+                case AgeGroup.Adult:
+                    s.adult       += c;
+                    wHealthAdult  += g.averageHealth * c;
+                    nHealthAdult  += c;
+                    break;
+                case AgeGroup.Elder:
+                    s.elder       += c;
+                    wHealthElder  += g.averageHealth * c;
+                    nHealthElder  += c;
+                    break;
+            }
+        }
 
-        s.healthChild = WeightedHealth(pops, AgeGroup.Child);
-        s.healthTeen  = WeightedHealth(pops, AgeGroup.Teen);
-        s.healthAdult = WeightedHealth(pops, AgeGroup.Adult);
-        s.healthElder = WeightedHealth(pops, AgeGroup.Elder);
+        s.healthChild = nHealthChild > 0 ? wHealthChild / nHealthChild : 0f;
+        s.healthTeen  = nHealthTeen  > 0 ? wHealthTeen  / nHealthTeen  : 0f;
+        s.healthAdult = nHealthAdult > 0 ? wHealthAdult / nHealthAdult : 0f;
+        s.healthElder = nHealthElder > 0 ? wHealthElder / nHealthElder : 0f;
 
         return s;
     }
 
-    private int Sum(List<PopulationGroup> pops, AgeGroup ag)
-        => pops.Where(g => g.ageGroup == ag).Sum(g => g.count);
 
-    private float WeightedHealth(List<PopulationGroup> pops, AgeGroup ag)
-    {
-        int total = 0;
-        float weighted = 0f;
-        foreach (var g in pops)
-        {
-            if (g.ageGroup != ag) continue;
-            total += g.count;
-            weighted += g.averageHealth * g.count; // averageHealth in 0..1
-        }
-        return total > 0 ? weighted / total : 0f;
-    }
-
-    public PlayerPopulationStatisticSaveData SaveState()
+public PlayerPopulationStatisticSaveData SaveState()
     {
         return new PlayerPopulationStatisticSaveData
         {

@@ -1,21 +1,38 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class BuildingTechnology : MonoBehaviour
 {
     private BuildingControl building;
 
-    // Runtime cache of Technology objects for this building
     private List<Technology> allForThisBuilding = new List<Technology>();
     public IReadOnlyList<Technology> AllForThisBuilding => allForThisBuilding;
 
-    // Inspector-visible: store ONLY tech IDs
     [SerializeField] private List<string> allForThisBuildingIds = new List<string>();
     public IReadOnlyList<string> AllForThisBuildingIds => allForThisBuildingIds;
 
     [SerializeField] private List<string> availableAtPlayerLevelIds = new List<string>();
     public IReadOnlyList<string> AvailableAtPlayerLevelIds => availableAtPlayerLevelIds;
+
+    // Cached result — rebuilt only when tech list changes
+    private readonly List<Technology> _availableAtPlayerLevelCache = new();
+    private bool _availableCacheDirty = true;
+
+    // Cached comparer — avoids allocation per sort
+    private static readonly TechLevelComparer s_comparer = new TechLevelComparer();
+
+    private sealed class TechLevelComparer : IComparer<Technology>
+    {
+        public int Compare(Technology x, Technology y)
+        {
+            if (x == null || y == null) return 0;
+            int cmp = x.requiredPlayerLevel.CompareTo(y.requiredPlayerLevel);
+            if (cmp != 0) return cmp;
+            string nx = x.techName ?? x.techID ?? string.Empty;
+            string ny = y.techName ?? y.techID ?? string.Empty;
+            return string.Compare(nx, ny, System.StringComparison.Ordinal);
+        }
+    }
 
     private void Awake()
     {
@@ -75,10 +92,10 @@ public class BuildingTechnology : MonoBehaviour
         RefreshInspectorLists();
     }
 
-    /// Cache every Technology this building can research (by buildingID only).
     public void BuildCache()
     {
         allForThisBuilding.Clear();
+        _availableCacheDirty = true;
 
         var tm = TechnologyManager.Instance;
         if (!tm || building == null || string.IsNullOrWhiteSpace(building.buildingID)) return;
@@ -86,51 +103,60 @@ public class BuildingTechnology : MonoBehaviour
         var all = tm.GetAll();
         if (all == null) return;
 
-        var knownMgr = PlayerKnownTechnologyManager.Instance; // may be null in early boot
+        var knownMgr = PlayerKnownTechnologyManager.Instance;
 
         foreach (var t in all)
         {
             if (t == null) continue;
-
-            // NEW: skip if not known (when manager exists)
             if (knownMgr != null && !knownMgr.IsKnown(t.techID)) continue;
-
             if (t.IsResearchableBy(building.buildingID))
                 allForThisBuilding.Add(t);
         }
 
-        // Stable order for determinism (level then name/id)
-        allForThisBuilding = allForThisBuilding
-            .OrderBy(t => t.requiredPlayerLevel)
-            .ThenBy(t => t.techName ?? t.techID)
-            .ToList();
+        // Sort in-place — no LINQ allocation
+        allForThisBuilding.Sort(s_comparer);
     }
 
-    /// Techs visible by **player level** only (no cost/knowledge/pop checks).
     public List<Technology> GetAvailableAtPlayerLevel()
     {
+        if (!_availableCacheDirty)
+            return _availableAtPlayerLevelCache;
+
         int playerLevel = PlayerLevel.Instance ? PlayerLevel.Instance.GetCurrentLevel() : 1;
         var knownMgr = PlayerKnownTechnologyManager.Instance;
 
-        return allForThisBuilding
-            .Where(t => t != null
-                && (knownMgr == null || knownMgr.IsKnown(t.techID)) // NEW safety
-                && t.IsEligibleForLevel(playerLevel))
-            .ToList();
+        _availableAtPlayerLevelCache.Clear();
+        for (int i = 0; i < allForThisBuilding.Count; i++)
+        {
+            var t = allForThisBuilding[i];
+            if (t == null) continue;
+            if (knownMgr != null && !knownMgr.IsKnown(t.techID)) continue;
+            if (t.IsEligibleForLevel(playerLevel))
+                _availableAtPlayerLevelCache.Add(t);
+        }
+
+        _availableCacheDirty = false;
+        return _availableAtPlayerLevelCache;
     }
 
-    /// Mirror to inspector lists with **IDs only**.
     private void RefreshInspectorLists()
     {
-        allForThisBuildingIds = allForThisBuilding
-            .Where(t => t != null && !string.IsNullOrWhiteSpace(t.techID))
-            .Select(t => t.techID)
-            .ToList();
+        // Rebuild IDs without LINQ
+        allForThisBuildingIds.Clear();
+        for (int i = 0; i < allForThisBuilding.Count; i++)
+        {
+            var t = allForThisBuilding[i];
+            if (t != null && !string.IsNullOrWhiteSpace(t.techID))
+                allForThisBuildingIds.Add(t.techID);
+        }
 
         var byLevel = GetAvailableAtPlayerLevel();
-        availableAtPlayerLevelIds = byLevel
-            .Where(t => t != null && !string.IsNullOrWhiteSpace(t.techID))
-            .Select(t => t.techID)
-            .ToList();
+        availableAtPlayerLevelIds.Clear();
+        for (int i = 0; i < byLevel.Count; i++)
+        {
+            var t = byLevel[i];
+            if (t != null && !string.IsNullOrWhiteSpace(t.techID))
+                availableAtPlayerLevelIds.Add(t.techID);
+        }
     }
 }

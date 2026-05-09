@@ -66,6 +66,7 @@ public class NotificationIconSet : ScriptableObject
             new Entry { type = NotificationType.SpiritMoodChanged            },
             new Entry { type = NotificationType.SpiritSummoned              },
             new Entry { type = NotificationType.SpiritOfferingMade          },
+            new Entry { type = NotificationType.PlayerLevelUp               },
         };
     }
 }

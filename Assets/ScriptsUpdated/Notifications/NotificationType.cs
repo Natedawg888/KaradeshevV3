@@ -46,4 +46,6 @@ public enum NotificationType
     SpiritOfferingMade,
     AnimalRaidingBuilding,
     AnimalStorageRaided,
+
+    PlayerLevelUp,
 }

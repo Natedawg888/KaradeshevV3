@@ -74,4 +74,19 @@ public static class EnvironmentResourceAmountCalculator
     {
         return tileModifiers.TryGetValue(tileType, out var m) ? m : 1f;
     }
+
+    // Spawn-amount multiplier by tile size. Medium = 1× baseline.
+    public static float GetSizeMultiplier(TileSize size)
+    {
+        return size switch
+        {
+            TileSize.Tiny    => 0.5f,
+            TileSize.Small   => 0.75f,
+            TileSize.Medium  => 1.0f,
+            TileSize.Large   => 1.5f,
+            TileSize.Giant   => 2.0f,
+            TileSize.Massive => 3.0f,
+            _                => 1.0f,
+        };
+    }
 }

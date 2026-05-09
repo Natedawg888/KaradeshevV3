@@ -192,7 +192,9 @@ public class CivilizationHappinessSystem : MonoBehaviour
         if (pop == null) return;
 
         var groups = pop.AllPopulations;
-        int total = groups.Sum(g => Mathf.Max(0, g?.count ?? 0));
+        int total = 0;
+        for (int i = 0; i < groups.Count; i++)
+            total += Mathf.Max(0, groups[i]?.count ?? 0);
         if (total <= 0) return;
 
         float hSum = 0f, tSum = 0f;

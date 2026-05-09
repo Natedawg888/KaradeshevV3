@@ -230,6 +230,13 @@ public class NotificationMessageCrafterManager : MonoBehaviour
         return crafter.CraftUnitSkillTrainingCompleted(groupName, unitName, skillLevel);
     }
 
+    public (string title, string message) CraftLevelUp(int newLevel)
+    {
+        if (crafter == null)
+            return ("Level Up!", $"Your civilization has reached level {newLevel}.");
+        return crafter.CraftLevelUp(newLevel);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         if (crafter == null)

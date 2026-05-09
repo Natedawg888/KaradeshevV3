@@ -11,10 +11,19 @@ public class PairingService : IPairingService
     private readonly IPregnancyService _pregnancy;
     private readonly RandomService _rng;
 
-    // buffers
+    // Pre-allocated buffers — reused every call to avoid per-turn GC
     private readonly List<Individual> _eligible = new();
-    private readonly List<Individual> _females = new();
-    private readonly List<Individual> _males = new();
+    private readonly List<Individual> _females  = new();
+    private readonly List<Individual> _males    = new();
+    private readonly List<string>     _keyBuffer      = new();
+    private readonly List<string>     _toRemoveBuffer = new();
+    private readonly HashSet<string>  _familyIdSet    = new();
+
+    // Cached config booleans — reflection is called once at construction, not per property access
+    private readonly bool _preferUncommittedMaleFirst;
+    private readonly bool _allowMaleMultipleCommitments;
+    private readonly bool _allowFallbackWhenCommittedUnavailable;
+    private readonly bool _clearInvalidCommitments;
 
     public PairingService(
         IndividualRepository indRepo,
@@ -23,11 +32,17 @@ public class PairingService : IPairingService
         IPregnancyService pregnancy,
         RandomService rng)
     {
-        _indRepo = indRepo;
-        _famRepo = famRepo;
-        _config = config;
+        _indRepo   = indRepo;
+        _famRepo   = famRepo;
+        _config    = config;
         _pregnancy = pregnancy;
-        _rng = rng;
+        _rng       = rng;
+
+        // Cache once — avoids reflection on every property access during pairing
+        _preferUncommittedMaleFirst           = GetOptionalBoolConfig("preferUncommittedMaleFirst",                    true);
+        _allowMaleMultipleCommitments         = GetOptionalBoolConfig("allowMaleMultipleCommitments",                  true);
+        _allowFallbackWhenCommittedUnavailable = GetOptionalBoolConfig("allowFallbackWhenCommittedPartnerUnavailable", true);
+        _clearInvalidCommitments              = GetOptionalBoolConfig("clearInvalidCommitments",                       true);
     }
 
     // motherId -> fatherId (persisted “current partner”)
@@ -57,17 +72,10 @@ public class PairingService : IPairingService
         return fallback;
     }
 
-    private bool PreferUncommittedMaleFirst =>
-        GetOptionalBoolConfig("preferUncommittedMaleFirst", true);
-
-    private bool AllowMaleMultipleCommitments =>
-        GetOptionalBoolConfig("allowMaleMultipleCommitments", true);
-
-    private bool AllowFallbackWhenCommittedPartnerUnavailable =>
-        GetOptionalBoolConfig("allowFallbackWhenCommittedPartnerUnavailable", true);
-
-    private bool ClearInvalidCommitments =>
-        GetOptionalBoolConfig("clearInvalidCommitments", true);
+    private bool PreferUncommittedMaleFirst               => _preferUncommittedMaleFirst;
+    private bool AllowMaleMultipleCommitments             => _allowMaleMultipleCommitments;
+    private bool AllowFallbackWhenCommittedPartnerUnavailable => _allowFallbackWhenCommittedUnavailable;
+    private bool ClearInvalidCommitments                  => _clearInvalidCommitments;
 
     private int MinBirthAgeTurns => _config != null ? _config.minAdultAgeForBirthTurns : 180;
     private int MaxBirthAgeTurns => _config != null ? _config.maxAdultAgeForBirthTurns : 525;
@@ -570,7 +578,9 @@ public class PairingService : IPairingService
         if (added >= maxPairs) return added;
 
         // PASS 1: remembered commitments
-        foreach (var motherId in _partnerOf.Keys.ToList())
+        _keyBuffer.Clear();
+        _keyBuffer.AddRange(_partnerOf.Keys);
+        foreach (var motherId in _keyBuffer)
         {
             if (added >= maxPairs) break;
 
@@ -593,12 +603,20 @@ public class PairingService : IPairingService
 
         if (added >= maxPairs) return added;
 
-        // Gather remaining eligible people
-        var pool = _indRepo.All.Where(IsElig).ToList();
-        if (pool.Count < 2) return added;
-
-        var females = pool.Where(p => p.Gender == Gender.Female && !usedMothers.Contains(p.Id)).ToList();
-        var males = pool.Where(p => p.Gender == Gender.Male).ToList();
+        // Gather remaining eligible people — use pre-allocated buffers
+        _eligible.Clear();
+        _females.Clear();
+        _males.Clear();
+        foreach (var p in _indRepo.All)
+        {
+            if (!IsElig(p)) continue;
+            _eligible.Add(p);
+            if (p.Gender == Gender.Female && !usedMothers.Contains(p.Id)) _females.Add(p);
+            else if (p.Gender == Gender.Male) _males.Add(p);
+        }
+        if (_eligible.Count < 2) return added;
+        var females = _females;
+        var males   = _males;
 
         _rng.Shuffle(females);
         _rng.Shuffle(males);
@@ -628,7 +646,10 @@ public class PairingService : IPairingService
         if (added >= maxPairs) return added;
 
         // PASS 3: same-family fallback on low diversity
-        float diversityRatio = pool.Select(a => a.FamilyId).Distinct().Count() / (float)Math.Max(1, pool.Count);
+        _familyIdSet.Clear();
+        foreach (var p in _eligible)
+            if (p.FamilyId != null) _familyIdSet.Add(p.FamilyId);
+        float diversityRatio = _familyIdSet.Count / (float)Math.Max(1, _eligible.Count);
         if (diversityRatio < _config.lowDiversityThreshold)
         {
             for (int i = 0; i < females.Count && added < maxPairs; i++)
@@ -658,7 +679,7 @@ public class PairingService : IPairingService
 
     public void CleanupInvalidPairs()
     {
-        var toRemove = new List<string>();
+        _toRemoveBuffer.Clear();
 
         foreach (var kv in _partnerOf)
         {
@@ -666,11 +687,11 @@ public class PairingService : IPairingService
             var father = FindById(kv.Value);
 
             if (!IsCommitmentStillValid(mother, father))
-                toRemove.Add(kv.Key);
+                _toRemoveBuffer.Add(kv.Key);
         }
 
-        for (int i = 0; i < toRemove.Count; i++)
-            _partnerOf.Remove(toRemove[i]);
+        for (int i = 0; i < _toRemoveBuffer.Count; i++)
+            _partnerOf.Remove(_toRemoveBuffer[i]);
     }
 
     public void SeedPairsFromExistingFamilies()
@@ -720,26 +741,23 @@ public class PairingService : IPairingService
 
         CleanupInvalidPairs();
 
-        var adults = _indRepo.All
-            .Where(a =>
-                a != null &&
-                !string.IsNullOrEmpty(a.FamilyId) &&
-                allowedFamilyIds.Contains(a.FamilyId) &&
-                IsEligibleByAgeWindow(a, minHealth, minAgeTurns, maxAgeTurns))
-            .ToList();
-
-        if (adults.Count < 2)
-            return false;
-
+        // Populate adults/females/males directly — no intermediate ToList allocation
+        _eligible.Clear();
         _females.Clear();
         _males.Clear();
-
-        for (int i = 0; i < adults.Count; i++)
+        foreach (var a in _indRepo.All)
         {
-            var a = adults[i];
+            if (a == null || string.IsNullOrEmpty(a.FamilyId)) continue;
+            if (!allowedFamilyIds.Contains(a.FamilyId)) continue;
+            if (!IsEligibleByAgeWindow(a, minHealth, minAgeTurns, maxAgeTurns)) continue;
+            _eligible.Add(a);
             if (a.Gender == Gender.Female) _females.Add(a);
             else if (a.Gender == Gender.Male) _males.Add(a);
         }
+        var adults = _eligible; // alias so the rest of the method is unchanged
+
+        if (adults.Count < 2)
+            return false;
 
         if (_females.Count == 0 || _males.Count == 0)
             return false;
@@ -747,7 +765,10 @@ public class PairingService : IPairingService
         _rng.Shuffle(_females);
         _rng.Shuffle(_males);
 
-        int uniqueFamilies = adults.Select(a => a.FamilyId).Distinct().Count();
+        _familyIdSet.Clear();
+        foreach (var a in adults)
+            if (a.FamilyId != null) _familyIdSet.Add(a.FamilyId);
+        int uniqueFamilies = _familyIdSet.Count;
         float diversityRatio = (float)uniqueFamilies / Math.Max(1, adults.Count);
 
         // 1) cross-family preferred

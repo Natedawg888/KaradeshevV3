@@ -1,4 +1,3 @@
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,13 +19,20 @@ public class PopStatsPieView : PopStatsSubviewBase
         int maleCount = 0, femaleCount = 0;
         if (populationManager && populationManager.AllPopulations != null)
         {
-            maleCount   = populationManager.AllPopulations.Where(p => p.gender == Gender.Male).Sum(p => p.count);
-            femaleCount = populationManager.AllPopulations.Where(p => p.gender == Gender.Female).Sum(p => p.count);
+            var pops = populationManager.AllPopulations;
+            for (int i = 0; i < pops.Count; i++)
+            {
+                var p = pops[i];
+                if (p == null) continue;
+                if      (p.gender == Gender.Male)   maleCount   += p.count;
+                else if (p.gender == Gender.Female) femaleCount += p.count;
+            }
         }
         else if (stats != null)
         {
             var g = stats.GetGenderRatios();
-            int total = stats.History?.LastOrDefault().total ?? 0;
+            var hist = stats.History;
+            int total = (hist != null && hist.Count > 0) ? hist[hist.Count - 1].total : 0;
             maleCount   = Mathf.RoundToInt(total * Mathf.Clamp01(g.male));
             femaleCount = Mathf.Max(0, total - maleCount);
         }

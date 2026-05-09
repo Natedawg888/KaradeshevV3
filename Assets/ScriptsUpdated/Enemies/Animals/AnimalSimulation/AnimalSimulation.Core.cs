@@ -21,6 +21,8 @@ public partial class AnimalSimulation
     public event Action<AnimalGroupState> OnGroupCreated;
     public event Action<AnimalGroupState> OnGroupUpdated;
     public event Action<int> OnGroupRemoved;
+    // Fires just before the group is erased — group state is still valid (tile, species, size)
+    public event Action<AnimalGroupState, TileCoord> OnGroupDiedAtTile;
 
     // For predator attacks
     public event Action<int, TileCoord> OnGroupAttackedPlayerTile;

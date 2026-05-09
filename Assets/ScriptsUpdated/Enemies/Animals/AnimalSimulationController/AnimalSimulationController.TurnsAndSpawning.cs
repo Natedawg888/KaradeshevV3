@@ -94,6 +94,7 @@ public partial class AnimalSimulationController : MonoBehaviour
     private void HandleTilesActivated()
     {
         BuildTileUiLookup();
+        _spawnerNodeCacheBuilt = false; // force rebuild on next event
 
         var presetManager = EnvironmentPresetManager.Instance;
         if (presetManager == null)

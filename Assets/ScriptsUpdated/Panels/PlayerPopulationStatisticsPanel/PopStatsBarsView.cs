@@ -1,4 +1,3 @@
-using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -36,11 +35,20 @@ public class PopStatsBarsView : PopStatsSubviewBase
         Canvas.ForceUpdateCanvases(); // make sure sizes are current
 
         var groups = populationManager.AllPopulations;
-        int cChild = groups.Where(g => g.ageGroup == AgeGroup.Child).Sum(g => g.count);
-        int cTeen  = groups.Where(g => g.ageGroup == AgeGroup.Teen ).Sum(g => g.count);
-        int cAdult = groups.Where(g => g.ageGroup == AgeGroup.Adult).Sum(g => g.count);
-        int cElder = groups.Where(g => g.ageGroup == AgeGroup.Elder).Sum(g => g.count);
-        int total  = Mathf.Max(0, cChild + cTeen + cAdult + cElder);
+        int cChild = 0, cTeen = 0, cAdult = 0, cElder = 0;
+        for (int i = 0; i < groups.Count; i++)
+        {
+            var g = groups[i];
+            if (g == null) continue;
+            switch (g.ageGroup)
+            {
+                case AgeGroup.Child: cChild += g.count; break;
+                case AgeGroup.Teen:  cTeen  += g.count; break;
+                case AgeGroup.Adult: cAdult += g.count; break;
+                case AgeGroup.Elder: cElder += g.count; break;
+            }
+        }
+        int total = Mathf.Max(0, cChild + cTeen + cAdult + cElder);
 
         SetBarAndMarker(barChild, markerChildContainer, cChild, total);
         SetBarAndMarker(barTeen,  markerTeenContainer,  cTeen,  total);

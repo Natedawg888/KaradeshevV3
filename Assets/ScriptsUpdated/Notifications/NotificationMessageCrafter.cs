@@ -351,6 +351,16 @@ public class NotificationMessageCrafter : ScriptableObject
         return (title, message);
     }
 
+    public (string title, string message) CraftLevelUp(int newLevel)
+    {
+        var set = GetSuccessSet(NotificationType.PlayerLevelUp);
+        if (set == null)
+            return ("Level Up!", $"Your civilization has reached level {newLevel}.");
+        string title   = Pick(set.titles);
+        string message = Pick(set.messages).Replace("{LEVEL}", newLevel.ToString());
+        return (title, message);
+    }
+
     public (string title, string message) CraftBuilding(NotificationType type, string buildingName)
     {
         var set = GetSuccessSet(type);
@@ -858,6 +868,18 @@ public class NotificationMessageCrafter : ScriptableObject
                     "{COUNT} of your elders have reached the end of their lives at {LIFESPAN} turns.",
                     "After {LIFESPAN} turns of life, {COUNT} elder(s) have passed away.",
                     "{COUNT} people have lived a full life and passed on at age {LIFESPAN}.",
+                },
+            },
+            new SuccessTemplateSet
+            {
+                type     = NotificationType.PlayerLevelUp,
+                titles   = new[] { "Level Up!", "Civilization Advances", "A New Era Begins" },
+                messages = new[]
+                {
+                    "Your civilization has reached level {LEVEL}!",
+                    "A new age dawns — your people have advanced to level {LEVEL}.",
+                    "Level {LEVEL} achieved. New possibilities await your civilization.",
+                    "Your settlement has grown to level {LEVEL}.",
                 },
             },
         };
