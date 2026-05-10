@@ -561,6 +561,19 @@ public class RainSimulationSystem : MonoBehaviour
                     Mathf.Abs(oldIntensity - newIntensity) > 0.05f ||
                     oldRain != newRain;
 
+                // Ash on dry cells never builds rain charge, so rain-state change never fires.
+                // Separately detect when ash eligibility and the current visual diverge.
+                if (!changed && enableVolcanicRainVisuals)
+                {
+                    float soot01 = GetSoot01AtCell(x, y);
+                    bool ashEligible = soot01 >= ashFallSootThreshold
+                        && GetHumidity01(x, y) <= ashFallMaxHumidity
+                        && (ashCanShowWithoutRain || newRain);
+                    bool ashShowing = _rainVisualPrefabs != null && _rainVisualPrefabs[x, y] == ashParticlePrefab;
+                    if (ashEligible != ashShowing)
+                        changed = true;
+                }
+
                 if (changed)
                 {
                     QueueRainVisualRefresh(x, y);
@@ -1173,6 +1186,18 @@ public class RainSimulationSystem : MonoBehaviour
 
         float intensity01 = GetRainIntensity01AtCell(x, y);
         RainIntensityLevel level = GetRainIntensityLevelAtCell(x, y);
+
+        // Ash on a non-raining cell has zero rain intensity — derive from soot so particles emit.
+        bool isAsh = GetRainVisualKindAtCell(x, y) == RainVisualKind.AshFall;
+        if (isAsh && intensity01 <= 0f)
+        {
+            float soot01 = GetSoot01AtCell(x, y);
+            intensity01 = Mathf.Clamp01(Mathf.Max(minimumActiveRainIntensity,
+                Mathf.InverseLerp(ashFallSootThreshold, 1f, soot01)));
+            level = intensity01 >= heavyRainMinIntensity ? RainIntensityLevel.Heavy
+                  : intensity01 >= lightRainMaxIntensity ? RainIntensityLevel.Normal
+                  : RainIntensityLevel.Light;
+        }
 
         ParticleSystem[] particleSystems =
             rainInstance.GetComponentsInChildren<ParticleSystem>(true);

@@ -137,11 +137,11 @@ public class TileFireOverlayControl : MonoBehaviour
         {
             int avail = PlayersPopulationManager.Instance != null
                 ? PlayersPopulationManager.Instance.GetAvailableTaskPopulation() : 0;
-            populationText.text = $"Workers needed: {_fireState.populationRequired}  (available: {avail})";
+            populationText.text = $"{_fireState.populationRequired} / {avail})";
         }
 
         if (turnsEstimateText != null)
-            turnsEstimateText.text = $"Est. turns to extinguish: ~{_fireState.baseFightTurns}";
+            turnsEstimateText.text = $"{_fireState.baseFightTurns}";
     }
 
     private void RefreshFightProgress()
@@ -162,18 +162,18 @@ public class TileFireOverlayControl : MonoBehaviour
 
         int active = Mathf.Max(0, _fireState.populationRequired - _fireState.CasualtiesSoFar);
         if (populationText != null)
-            populationText.text = $"Workers fighting: {active} / {_fireState.populationRequired}";
+            populationText.text = $"{active} / {_fireState.populationRequired}";
 
         if (casualtyText != null)
         {
-            casualtyText.text  = $"Lost: {_fireState.CasualtiesSoFar}";
+            casualtyText.text  = $"{_fireState.CasualtiesSoFar}";
             casualtyText.color = _fireState.CasualtiesSoFar > 0 ? Color.red : Color.white;
         }
 
         if (riskText != null)
         {
             int riskPct = Mathf.RoundToInt(_fireState.CurrentCasualtyChance * 100f);
-            riskText.text  = $"Risk: {riskPct}%";
+            riskText.text  = $"{riskPct}%";
             riskText.color = Color.Lerp(Color.green, Color.red, _fireState.CurrentCasualtyChance);
         }
     }
