@@ -78,17 +78,27 @@ public class BuildingTechnology : MonoBehaviour
     {
         if (PlayerKnownTechnologyManager.Instance != null)
             PlayerKnownTechnologyManager.Instance.OnKnownTechnologyChanged += HandleKnownTechChanged;
+        if (PlayerLevel.Instance != null)
+            PlayerLevel.Instance.OnLevelUp += HandlePlayerLevelUp;
     }
 
     private void OnDisable()
     {
         if (PlayerKnownTechnologyManager.Instance != null)
             PlayerKnownTechnologyManager.Instance.OnKnownTechnologyChanged -= HandleKnownTechChanged;
+        if (PlayerLevel.Instance != null)
+            PlayerLevel.Instance.OnLevelUp -= HandlePlayerLevelUp;
     }
 
     private void HandleKnownTechChanged()
     {
         BuildCache();
+        RefreshInspectorLists();
+    }
+
+    private void HandlePlayerLevelUp(int newLevel)
+    {
+        _availableCacheDirty = true;
         RefreshInspectorLists();
     }
 
