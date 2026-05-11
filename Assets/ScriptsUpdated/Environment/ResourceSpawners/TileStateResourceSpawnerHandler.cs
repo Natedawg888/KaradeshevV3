@@ -38,16 +38,28 @@ public class TileStateResourceSpawnerHandler : MonoBehaviour
 
     private void OnEnable()
     {
-        if (fireState == null) return;
-        fireState.OnIgnited      += HandleIgnited;
-        fireState.OnExtinguished += HandleExtinguished;
+        if (fireState != null)
+        {
+            fireState.OnIgnited      += HandleIgnited;
+            fireState.OnExtinguished += HandleExtinguished;
+        }
+
+        ResourceSourceCache.RegisterDynamicSpawner(emberSpawner);
+        ResourceSourceCache.RegisterDynamicSpawner(charcoalSpawner);
+        ResourceSourceCache.RegisterDynamicSpawner(ashSpawner);
     }
 
     private void OnDisable()
     {
-        if (fireState == null) return;
-        fireState.OnIgnited      -= HandleIgnited;
-        fireState.OnExtinguished -= HandleExtinguished;
+        if (fireState != null)
+        {
+            fireState.OnIgnited      -= HandleIgnited;
+            fireState.OnExtinguished -= HandleExtinguished;
+        }
+
+        ResourceSourceCache.UnregisterDynamicSpawner(emberSpawner);
+        ResourceSourceCache.UnregisterDynamicSpawner(charcoalSpawner);
+        ResourceSourceCache.UnregisterDynamicSpawner(ashSpawner);
     }
 
     private void HandleIgnited(EnvironmentFireState state)

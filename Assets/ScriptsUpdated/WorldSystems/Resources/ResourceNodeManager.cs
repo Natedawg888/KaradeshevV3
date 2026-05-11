@@ -85,6 +85,9 @@ public class ResourceNodeManager : MonoBehaviour
         _nodes.Remove(node);
     }
 
+    public IReadOnlyList<EnvironmentResourceNode> GetAllNodes()
+        => _nodes ?? (IReadOnlyList<EnvironmentResourceNode>)System.Array.Empty<EnvironmentResourceNode>();
+
     // ---------- INITIAL GENERATION (one-off, batched) ----------
 
     /// <summary>

@@ -87,11 +87,17 @@ public class PlayerResearchManager : MonoBehaviour
         RefreshAvailableByPlayerLevel();
 
         TurnSystem.SubscribeToEndOfTurn(OnEndTurn);
+
+        if (PlayerLevel.Instance != null)
+            PlayerLevel.Instance.OnLevelUp += HandlePlayerLevelUp;
     }
 
     private void OnDestroy()
     {
         TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+
+        if (PlayerLevel.Instance != null)
+            PlayerLevel.Instance.OnLevelUp -= HandlePlayerLevelUp;
     }
 
     private string GetResearchReservationOwnerId(Technology tech)
@@ -129,6 +135,11 @@ public class PlayerResearchManager : MonoBehaviour
 
             TagResearchReservation(ar.tech, ar.reservationId);
         }
+    }
+
+    private void HandlePlayerLevelUp(int newLevel)
+    {
+        RefreshAvailableByPlayerLevel();
     }
 
     public void RefreshAvailableByPlayerLevel()

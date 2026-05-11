@@ -370,6 +370,7 @@ public class EnvironmentControl : MonoBehaviour
     private void SetFireIconActive(bool on)
     {
         if (fireIcon != null) fireIcon.SetActive(on);
+        UpdateCanvasVisibility();
     }
 
     private void SetFireTimerActive(bool on)
@@ -543,7 +544,8 @@ public class EnvironmentControl : MonoBehaviour
             HasLootReady ||
             _showForProductionSelection ||
             _pendingDiscoveryFailIcon ||
-            _pendingGatheringFailIcon;
+            _pendingGatheringFailIcon ||
+            (fireIcon != null && fireIcon.activeSelf);
 
         canvas.SetActive(shouldShow);
     }

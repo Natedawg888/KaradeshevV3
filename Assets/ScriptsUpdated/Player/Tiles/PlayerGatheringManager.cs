@@ -380,6 +380,8 @@ public class PlayerGatheringManager : MonoBehaviour
                         populationManager.ReleaseReservation(info.reservationId);
                     }
 
+                    PlayersPopulationManager.Instance?.ForceSyncUI();
+
                     MarkJobsDirty();
                     env.FailGatheringVisuals(lost);
                     env.isGathering = false;

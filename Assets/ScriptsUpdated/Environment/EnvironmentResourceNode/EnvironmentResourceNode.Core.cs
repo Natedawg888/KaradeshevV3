@@ -37,6 +37,23 @@ public partial class EnvironmentResourceNode : MonoBehaviour
     [SerializeField, HideInInspector]
     private List<ResourceSpawnerRuntime> activeSpawners = new();
 
+    /// <summary>
+    /// Returns every spawner definition this node knows about — both base-environment
+    /// spawners and any currently-active dynamic spawners (burnt, carcass, flood, etc.).
+    /// Definitions are deduplicated by spawnerID.
+    /// </summary>
+    public void CollectAllSpawnerDefinitions(HashSet<string> seenIds, List<ResourceSpawnerDefinition> results)
+    {
+        if (baseSpawners != null)
+            foreach (var def in baseSpawners)
+                if (def != null && seenIds.Add(def.spawnerID)) results.Add(def);
+
+        if (activeSpawners != null)
+            foreach (var runtime in activeSpawners)
+                if (runtime?.definition != null && seenIds.Add(runtime.definition.spawnerID))
+                    results.Add(runtime.definition);
+    }
+
     [HideInInspector]
     public TileStateFlags currentTileState = TileStateFlags.None;
 

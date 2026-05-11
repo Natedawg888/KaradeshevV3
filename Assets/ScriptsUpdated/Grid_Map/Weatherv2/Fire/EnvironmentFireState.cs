@@ -263,13 +263,14 @@ public class EnvironmentFireState : MonoBehaviour
         {
             CasualtiesSoFar++;
             OnFightCasualty?.Invoke(this, CasualtiesSoFar);
+            PlayersPopulationManager.Instance?.ForceSyncUI();
 
             if (CasualtiesSoFar >= populationRequired)
             {
-                // All workers lost — fight collapses
+                // All workers lost — stop first so IsFighting is false when UI reacts
+                StopFighting();
                 OnFightProgress?.Invoke(this, LastRollResult, FightTurnsRemaining);
                 PostFightOutcomeNotification(succeeded: false);
-                StopFighting();
                 return;
             }
         }

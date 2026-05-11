@@ -248,7 +248,7 @@ public class TileFireOverlayControl : MonoBehaviour
     private void HandleExtinguished(EnvironmentFireState state) => Hide();
 
     private void HandleFightProgress(EnvironmentFireState state, int rollResult, int turnsRemaining)
-        => RefreshFightProgress();
+        => Refresh();
 
     // ------------------------------------------------------------------
     // Helpers

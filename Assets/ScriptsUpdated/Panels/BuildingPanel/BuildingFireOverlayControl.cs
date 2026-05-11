@@ -259,9 +259,7 @@ public class BuildingFireOverlayControl : MonoBehaviour
     private void HandleExtinguished(BuildingFireState state) => Hide();
 
     private void HandleFightProgress(BuildingFireState state, int rollResult, int turnsRemaining)
-    {
-        RefreshFightProgress();
-    }
+        => Refresh();
 
     // ------------------------------------------------------------------
     // Helpers

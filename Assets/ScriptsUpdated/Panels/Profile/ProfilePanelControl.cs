@@ -131,6 +131,12 @@ public class ProfilePanelControl : MonoBehaviour
             cameraControl = FindObjectOfType<CameraControl>();
     }
 
+    public string CivilizationName =>
+        civilizationNameInput != null ? civilizationNameInput.text : string.Empty;
+
+    public string PlayerName =>
+        playerNameInput != null ? playerNameInput.text : string.Empty;
+
     private void OnDestroy()
     {
         if (Instance == this)
