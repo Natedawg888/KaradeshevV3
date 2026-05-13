@@ -263,7 +263,12 @@ public class StartingPointPicker : MonoBehaviour
         if (cameraControl == null || _cameraLockedByPicker)
             return;
 
-        cameraControl.PushInputLock();
+        // Allow zoom but block drag while picking a starting point.
+        cameraControl.SetTutorialInputRestrictions(
+            restrictInput:          true,
+            allowWorldDrag:         false,
+            allowZoom:              true,
+            allowMinimapRotation:   true);
         _cameraLockedByPicker = true;
     }
 
@@ -272,7 +277,8 @@ public class StartingPointPicker : MonoBehaviour
         if (cameraControl == null || !_cameraLockedByPicker)
             return;
 
-        cameraControl.PopInputLock();
+        cameraControl.ClearTutorialInputRestrictions();
+        cameraControl.ClearOrbitTarget();
         _cameraLockedByPicker = false;
     }
 
@@ -332,6 +338,7 @@ public class StartingPointPicker : MonoBehaviour
         }
 
         cameraControl.FocusOnPoint(envGO.transform.position, envGO.transform.right, 5f);
+        cameraControl.SetOrbitTarget(envGO.transform.position);
 
         ts.DeactivateSpawnedInstance();
 

@@ -67,6 +67,10 @@ public class CameraControl : MonoBehaviour
     private bool _allowTutorialZoom = true;
     private bool _allowTutorialMinimapRotation = true;
 
+    // minimap orbit-around-point override
+    private bool    _hasOrbitTarget = false;
+    private Vector3 _orbitTarget;
+
     private int _externalInputLockCount = 0;
 
     // cached rect
@@ -125,10 +129,10 @@ public class CameraControl : MonoBehaviour
 
         if (!IsInputLocked)
         {
+            HandleZoom();
             if (!IsCameraInputBlocked())
             {
                 HandleMouseDrag();
-                HandleZoom();
             }
         }
 
@@ -235,7 +239,12 @@ public class CameraControl : MonoBehaviour
         {
             Vector3 delta = Input.mousePosition - _lastMousePosition;
             float yaw = delta.x * rotationSpeed * Time.deltaTime;
-            mainCamera.transform.Rotate(Vector3.up, yaw, Space.World);
+
+            if (_hasOrbitTarget)
+                transform.RotateAround(_orbitTarget, Vector3.up, yaw);
+            else
+                mainCamera.transform.Rotate(Vector3.up, yaw, Space.World);
+
             _lastMousePosition = Input.mousePosition;
         }
 
@@ -621,6 +630,17 @@ public class CameraControl : MonoBehaviour
 
         if (!_allowTutorialMinimapRotation)
             _rotatingFromMinimap = false;
+    }
+
+    public void SetOrbitTarget(Vector3 point)
+    {
+        _orbitTarget    = point;
+        _hasOrbitTarget = true;
+    }
+
+    public void ClearOrbitTarget()
+    {
+        _hasOrbitTarget = false;
     }
 
     public void ClearTutorialInputRestrictions()
