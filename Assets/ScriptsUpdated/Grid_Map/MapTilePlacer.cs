@@ -846,6 +846,49 @@ public class MapTilePlacer : MonoBehaviour
         WorldReady = ready;
     }
 
+    public void ClearPlacedTilesAndState()
+    {
+        if (_placementRoutine != null)
+        {
+            StopCoroutine(_placementRoutine);
+            _placementRoutine = null;
+        }
+
+        WorldReady = false;
+
+        // Destroy everything this placer created.
+        HashSet<GameObject> toDestroy = new HashSet<GameObject>();
+
+        for (int i = 0; i < spawned.Count; i++)
+        {
+            if (spawned[i] != null)
+                toDestroy.Add(spawned[i]);
+        }
+
+        // Fallback: also clear any child tile objects under this placer.
+        foreach (Transform child in transform)
+        {
+            if (child != null)
+                toDestroy.Add(child.gameObject);
+        }
+
+        foreach (GameObject go in toDestroy)
+        {
+            if (go != null)
+                Destroy(go);
+        }
+
+        spawned.Clear();
+        beachCells.Clear();
+        oceanCells.Clear();
+        coastCornerCells.Clear();
+        riverCells.Clear();
+        riverBlocks.Clear();
+
+        if (gridManager != null)
+            gridManager.InitializeGrid();
+    }
+
     /* =================================================================
        DEBUG / VISUALISATION
        =================================================================*/

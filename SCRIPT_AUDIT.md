@@ -1774,6 +1774,122 @@ Auto-find: "FireIcon" and "FireFightIconTimer" children by name in OnValidate()
 
 ---
 
+### May 13, 2026 — Tech Encyclopedia Panel, Action Detail Panels, Camera Starting Point
+
+#### Tech Panel — Technology Filter + Detail Panel
+
+**Files created:**
+- `ScriptsUpdated/Panels/TechPanel/TechnologyDetailPanelControl.cs` *(new)*
+- `ScriptsUpdated/Panels/TechPanel/TechDetailValueRowUI.cs` *(new)*
+- `ScriptsUpdated/Panels/TechPanel/TechTechnologyEntryUI.cs` *(new)*
+
+**Files modified:**
+- `ScriptsUpdated/Panels/TechPanel/TechPanelControl.cs`
+
+**What was added:**
+
+`TechPanelControl.PopulateTech()` was a stub — now implemented. The Tech filter tab shows all technologies the player knows AND is eligible for at their current level (`TechnologyManager.GetAll()` filtered by `IsKnown` + `IsEligibleForLevel`). Respects the existing `HandleLevelUp` event so the list refreshes on level-up.
+
+```
+TechTechnologyEntryUI
+  — list row matching TechUnitEntryUI pattern
+  — fields: icon (Image), nameText (TMP_Text), detailButton (Button)
+  — Bind(tech, onClicked) sets display name (falls back to techID), icon
+```
+
+`TechnologyDetailPanelControl` — read-only detail panel, display only (no research actions):
+
+```
+Sections:
+  Header        — icon (hidden if null), techName (falls back to techID), description
+  Research Info — turns required, required knowledge, required player level,
+                  required population (hidden when 0)
+  Rewards       — knowledge reward + XP reward (section hidden when both 0)
+  Research Costs — BuildingCostEntry rows with owned count (same as crafting/production panels)
+  Researchable Buildings — TechBuildingEntryUI rows; shows "Any research building" if list is empty
+  Effects       — TechDetailValueRowUI rows, one per effectSO:
+                    World effect: resolves resource names, building names (BuildingManager),
+                      crafting recipe names (CraftingRecipeManager), production plan names
+                      (ProductionPlanManager), technology names (TechnologyManager), unit names
+                    Health effect: signed deltas for health/recovery/resistance/lifespan per age group
+                    Buildings effect: affected building names + health/degen deltas
+                    Environment effect: filter scope (environments/tile types/sizes) + signed
+                      discovery/gathering deltas and multipliers
+
+TechDetailValueRowUI
+  — generic reusable title+value row (two TMP_Text fields)
+  — Setup(title, value) / Setup(title, value, Sprite icon)
+  — used for Effects section; icon variant intentionally stripped down (no iconRoot)
+```
+
+Close button wired in `Awake()` → `Hide()`. `Hide()` destroys all instantiated rows (no memory buildup across tech switches).
+
+**Inspector setup:**
+- `TechPanelControl`: assign `techEntryPrefab` (TechTechnologyEntryUI) + `techDetailPanel` (TechnologyDetailPanelControl)
+- `TechnologyDetailPanelControl`: `root`, `closeButton`, `techIconImage`, `techNameText`, `descriptionText`, stat texts, `rewardsSectionRoot`/`rewardsText`, `researchCostSectionRoot`/`researchCostContentRoot`/`costEntryPrefab` (BuildingCostEntry), `researchBuildingsSectionRoot`/`researchBuildingsContentRoot`/`buildingEntryPrefab` (TechBuildingEntryUI)/`anyBuildingText`, `effectsSectionRoot`/`effectsContentRoot`/`valueRowPrefab` (TechDetailValueRowUI)
+
+---
+
+#### Action Detail Panels — Ranged Attack + Action Router
+
+**Files created:**
+- `ScriptsUpdated/Panels/TechPanel/MeleeActionDetailPanel.cs` *(new — moved from untracked)*
+- `ScriptsUpdated/Panels/TechPanel/RangedActionDetailPanel.cs` *(new)*
+
+**Files modified:**
+- `ScriptsUpdated/Panels/TechPanel/TechUnitActionDetailPanel.cs` (`ActionDetailPanelRouter`)
+
+**What was added:**
+
+`MeleeActionDetailPanel.durationText` — now shows the raw numeric value only (e.g. `2` not `2 turns`).
+
+`RangedActionDetailPanel` — display-only panel for `RangedAttackActionSO`. No selected unit or target required; all values from SO only.
+
+```
+Sections: Header, Requirements (hidden if none), Targeting & Range, Timing & Damage,
+          Hit Chance (hidden if useHitChance is false)
+Hit chance shows: Base %, Min %, Max %, and readable modifier lines
+  ("Higher Accuracy improves hit chance.", "Each tile of distance makes the shot harder.")
+```
+
+`ActionDetailPanelRouter` updated:
+- New `rangedPanel (RangedActionDetailPanel)` field under `[Header("Type Panels")]`
+- `RouteToPanel()` dispatches `RangedAttackActionSO` → `rangedPanel.ShowFor(ranged)`
+- `HideAllPanels()` includes `rangedPanel?.Hide()`
+
+---
+
+#### Camera — Zoom Over UI + Starting Point Orbit
+
+**Files modified:**
+- `ScriptsUpdated/GameSystems/Cameras/CameraControl.cs`
+- `ScriptsUpdated/Grid_Map/StartingPointPicker.cs`
+
+**`CameraControl` changes:**
+
+`Update()` — `HandleZoom()` moved outside the `IsCameraInputBlocked()` guard. Zoom now works even when the pointer is over UI (scroll wheel / pinch-to-zoom always active as long as `IsInputLocked` is false). Drag remains gated by `IsCameraInputBlocked()`.
+
+New orbit-target API:
+```
+_hasOrbitTarget (bool) / _orbitTarget (Vector3)
+SetOrbitTarget(Vector3 point)  — enables orbit mode
+ClearOrbitTarget()             — restores normal minimap rotation
+
+HandleMinimapRotation():
+  _hasOrbitTarget == true  → transform.RotateAround(_orbitTarget, Vector3.up, yaw)
+  _hasOrbitTarget == false → mainCamera.transform.Rotate(Vector3.up, yaw, Space.World)  (unchanged)
+```
+
+**`StartingPointPicker` changes:**
+
+`LockCameraInput()` — replaced `PushInputLock()` with `SetTutorialInputRestrictions(true, false, true, true)`: drag blocked, zoom allowed, minimap rotation allowed.
+
+`UnlockCameraInput()` — replaced `PopInputLock()` with `ClearTutorialInputRestrictions()` + `ClearOrbitTarget()`.
+
+`ShowPreviewFor()` — calls `cameraControl.SetOrbitTarget(envGO.transform.position)` after `FocusOnPoint()`, updating the orbit pivot each time the player cycles to a new starter tile. Minimap drag now orbits the camera around the selected tile instead of spinning in place.
+
+---
+
 ## 12. Resource Spawner System
 
 See **SPAWNER_AUDIT.md** for the full reference.

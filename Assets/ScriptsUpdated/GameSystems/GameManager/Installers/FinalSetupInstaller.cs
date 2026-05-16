@@ -12,6 +12,7 @@ public class FinalSetupInstaller : MonoBehaviour
     [SerializeField] private Button startingPointPrevButton;
     [SerializeField] private Button startingPointNextButton;
     [SerializeField] private Button startingPointConfirmButton;
+    [SerializeField] private Button startingPointRegenerateButton;
 
     [Header("Target Components In FinalSetup Scene")]
     [SerializeField] private UnitGroupMovementManager unitGroupMovementManager;
@@ -29,7 +30,7 @@ public class FinalSetupInstaller : MonoBehaviour
     [SerializeField] private string startingPointPrevButtonObjectName = "StartLeftButton";
     [SerializeField] private string startingPointNextButtonObjectName = "StartRightButton";
     [SerializeField] private string startingPointConfirmButtonObjectName = "StartingConfirmButton";
-
+    [SerializeField] private string startingPointRegenerateButtonObjectName = "StartingRegenerateButton";
     public Scene LoadedScene => gameObject.scene;
 
     public Camera MinimapCamera => minimapCamera;
@@ -56,6 +57,7 @@ public class FinalSetupInstaller : MonoBehaviour
         startingPointPrevButton = FindComponentInSceneByName<Button>(uiScene, startingPointPrevButtonObjectName);
         startingPointNextButton = FindComponentInSceneByName<Button>(uiScene, startingPointNextButtonObjectName);
         startingPointConfirmButton = FindComponentInSceneByName<Button>(uiScene, startingPointConfirmButtonObjectName);
+        startingPointRegenerateButton = FindComponentInSceneByName<Button>(uiScene, startingPointRegenerateButtonObjectName);
 
         LogMissing("End Movement Button", endMovementButton, endMovementButtonObjectName);
         LogMissing("Battle Mode Button", battleModeButton, battleModeButtonObjectName);
@@ -64,6 +66,7 @@ public class FinalSetupInstaller : MonoBehaviour
         LogMissing("Starting Point Prev Button", startingPointPrevButton, startingPointPrevButtonObjectName);
         LogMissing("Starting Point Next Button", startingPointNextButton, startingPointNextButtonObjectName);
         LogMissing("Starting Point Confirm Button", startingPointConfirmButton, startingPointConfirmButtonObjectName);
+        LogMissing("Starting Point Regenerate Button", startingPointRegenerateButton, startingPointRegenerateButtonObjectName);
 
         InstallResolvedRefs();
     }
@@ -126,6 +129,7 @@ public class FinalSetupInstaller : MonoBehaviour
                 newPrevButton: startingPointPrevButton,
                 newNextButton: startingPointNextButton,
                 newConfirmButton: startingPointConfirmButton,
+                newRegenerateMapButton: startingPointRegenerateButton,
                 newCameraControl: cameraControl,
                 newTileActivator: tileActivator,
                 newCameraIntroTutorial: cameraIntroTutorial,

@@ -17,6 +17,14 @@ public class StartingPointPicker : MonoBehaviour
     [SerializeField] private CameraIntroTutorial cameraIntroTutorial;
     [SerializeField] private EnvironmentTileTutorial environmentTileTutorial;
 
+    public Button regenerateMapButton;
+
+    [Header("Map Regeneration")]
+    [SerializeField] private MapGenerator mapGenerator;
+    [SerializeField] private MapTilePlacer mapTilePlacer;
+
+    private bool _isRegeneratingMap = false;
+
     private class StarterCandidate
     {
         public TileScript tile;
@@ -40,6 +48,12 @@ public class StartingPointPicker : MonoBehaviour
 
         if (tileActivator == null)
             tileActivator = FindObjectOfType<TileActivator>();
+
+        if (mapGenerator == null)
+            mapGenerator = FindObjectOfType<MapGenerator>();
+
+        if (mapTilePlacer == null)
+            mapTilePlacer = FindObjectOfType<MapTilePlacer>();
 
         if (panel != null)
             panel.SetActive(false);
@@ -70,7 +84,10 @@ public class StartingPointPicker : MonoBehaviour
         CameraControl newCameraControl = null,
         TileActivator newTileActivator = null,
         CameraIntroTutorial newCameraIntroTutorial = null,
-        EnvironmentTileTutorial newEnvironmentTileTutorial = null)
+        EnvironmentTileTutorial newEnvironmentTileTutorial = null,
+        Button newRegenerateMapButton = null,
+        MapGenerator newMapGenerator = null,
+        MapTilePlacer newMapTilePlacer = null)
     {
         if (newPanel != null)
             panel = newPanel;
@@ -84,6 +101,9 @@ public class StartingPointPicker : MonoBehaviour
         if (newConfirmButton != null)
             confirmButton = newConfirmButton;
 
+        if (newRegenerateMapButton != null)
+            regenerateMapButton = newRegenerateMapButton;
+
         if (newCameraControl != null)
             cameraControl = newCameraControl;
 
@@ -92,6 +112,12 @@ public class StartingPointPicker : MonoBehaviour
 
         if (newEnvironmentTileTutorial != null)
             environmentTileTutorial = newEnvironmentTileTutorial;
+
+        if (newMapGenerator != null)
+            mapGenerator = newMapGenerator;
+
+        if (newMapTilePlacer != null)
+            mapTilePlacer = newMapTilePlacer;
 
         if (newTileActivator != null && tileActivator != newTileActivator)
         {
@@ -118,6 +144,9 @@ public class StartingPointPicker : MonoBehaviour
 
         if (confirmButton != null)
             confirmButton.onClick.AddListener(OnConfirm);
+
+        if (regenerateMapButton != null)
+            regenerateMapButton.onClick.AddListener(OnRegenerateMapClicked);
     }
 
     private void SubscribeToTileActivator()
@@ -287,6 +316,7 @@ public class StartingPointPicker : MonoBehaviour
         if (prevButton != null) prevButton.onClick.RemoveAllListeners();
         if (nextButton != null) nextButton.onClick.RemoveAllListeners();
         if (confirmButton != null) confirmButton.onClick.RemoveAllListeners();
+        if (regenerateMapButton != null) regenerateMapButton.onClick.RemoveAllListeners();
     }
 
     private void OnPrev()
@@ -479,5 +509,92 @@ public class StartingPointPicker : MonoBehaviour
     private bool ShouldBlockForLoadedGame()
     {
         return SaveSystem.Instance != null && SaveSystem.Instance.IsLoading;
+    }
+
+    private void OnRegenerateMapClicked()
+    {
+        if (_isRegeneratingMap)
+            return;
+
+        StartCoroutine(RegenerateMapFromPickerCoroutine());
+    }
+
+    private IEnumerator RegenerateMapFromPickerCoroutine()
+    {
+        _isRegeneratingMap = true;
+
+        ResetPickerStateForMapRegeneration();
+
+        TileInteraction.SetSelectionEnabled(false);
+        TileInteraction.GetInstance()?.DeselectCurrent();
+
+        if (panel != null)
+            panel.SetActive(false);
+
+        if (tileActivator != null && tileActivator.loadingScreen != null)
+            tileActivator.loadingScreen.SetActive(true);
+
+        if (tileActivator != null && tileActivator.timerUI != null)
+            tileActivator.timerUI.gameObject.SetActive(true);
+
+        if (mapGenerator == null)
+            mapGenerator = FindObjectOfType<MapGenerator>();
+
+        if (mapTilePlacer == null)
+            mapTilePlacer = FindObjectOfType<MapTilePlacer>();
+
+        if (tileActivator == null)
+            tileActivator = FindObjectOfType<TileActivator>();
+
+        if (mapGenerator == null || mapTilePlacer == null || tileActivator == null)
+        {
+            Debug.LogWarning("[StartingPointPicker] Cannot regenerate map. Missing MapGenerator, MapTilePlacer, or TileActivator.");
+            _isRegeneratingMap = false;
+            yield break;
+        }
+
+        // Clear old preview and old generated map objects.
+        mapTilePlacer.ClearPlacedTilesAndState();
+
+        // Let Destroy() process before building the new map.
+        yield return null;
+
+        MapTilePlacer.ResetWorldReady();
+
+        mapGenerator.enabled = true;
+        mapTilePlacer.enabled = true;
+
+        yield return StartCoroutine(mapGenerator.RegenerateCoroutine());
+
+        mapTilePlacer.BeginPlacement();
+
+        yield return new WaitUntil(() => MapTilePlacer.WorldReady);
+
+        // This will show/update the loading screen, activate all TileScripts,
+        // then fire OnTilesActivated, which makes this picker BeginSelection() again.
+        tileActivator.BeginActivation(tileActivator.timerUI, true, true);
+
+        yield return new WaitUntil(() => !tileActivator.IsRunning);
+
+        _isRegeneratingMap = false;
+    }
+
+    private void ResetPickerStateForMapRegeneration()
+    {
+        ClearButtonListeners();
+
+        if (previewInstance != null)
+        {
+            Destroy(previewInstance);
+            previewInstance = null;
+        }
+
+        starterCandidates.Clear();
+
+        currentIndex = 0;
+        previousIndex = -1;
+        currentStarterDef = null;
+
+        _initialized = false;
     }
 }
