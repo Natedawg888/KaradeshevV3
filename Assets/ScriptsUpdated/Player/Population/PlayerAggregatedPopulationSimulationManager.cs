@@ -80,6 +80,13 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
 
             TickHealth_Player(group);
 
+            int healthZeroDeaths = beforeHealthCount - group.count;
+            if (healthZeroDeaths > 0)
+            {
+                if (!deathsByGroup.TryAdd(group.GroupID, healthZeroDeaths))
+                    deathsByGroup[group.GroupID] += healthZeroDeaths;
+            }
+
             LogTurnLoss(
                 "HealthZeroFromNeeds",
                 group,
@@ -165,6 +172,9 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
             // Now run family pass (handles births + household upkeep)
             fam.AdvanceFamilies(isCycleTick);
         }
+
+        if (deathsByGroup.Count > 0)
+            playerPop.MarkUIDirty();
     }
 
     private PlayerHealthRulebook Rules => PlayerHealthRulebook.Instance;
