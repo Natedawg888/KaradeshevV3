@@ -1959,8 +1959,54 @@ if (healthZeroDeaths > 0)
 
 ---
 
+### May 17, 2026 — Environment Tech Delta Fixes (Discovery & Gathering)
+
+**Files modified:**
+- `ScriptsUpdated/Technology/Effects/EnvironmentTechEffectSO.cs`
+- `ScriptsUpdated/Player/Research/Tech/PlayerTechBuffs.cs` *(no logic change — already correct)*
+- `ScriptsUpdated/Player/Tiles/PlayerDiscoveryManager.cs`
+- `ScriptsUpdated/Player/Tiles/PlayerGatheringManager.cs`
+- `ScriptsUpdated/Environment/EnvironmentControl.cs`
+- `ScriptsUpdated/Panels/EnvironmentPanel/DiscoveryDetailsPanelControl.cs`
+- `ScriptsUpdated/Panels/EnvironmentPanel/GatheringDetailsPanelControl.cs`
+- `ScriptsUpdated/Panels/TechPanel/TechnologyDetailPanelControl.cs`
+
+**Sign convention (established / enforced):**
+
+All environment tech delta fields follow: **positive value = reduction, negative value = increase**.
+
+```
+discoveryFailureDeltaPct = 2   →  failure 22% → 20%   ✅
+gatheringTurnsDelta = 3        →  turns 8 → 5          ✅
+discoveryRequiredPopDelta = 2  →  pop req 5 → 3        ✅
+```
+
+The computation in `PlayerTechBuffs` was already correct (`result = base - sum(deltas)`). The fixes addressed three separate issues:
+
+**Fix 1 — Live re-evaluation each turn (PlayerDiscoveryManager, PlayerGatheringManager):**
+
+`effectiveFailureChance` was baked into the task at start time. If a tech was researched mid-task, the failure roll used the old (un-buffed) value. Now each turn's failure roll calls `env.GetEffectiveDiscovery()` / `env.GetEffectiveGathering()` live so newly researched techs apply immediately. `info.effectiveFailureChance` is preserved unchanged for XP calculation (reflects difficulty at task start).
+
+**Fix 2 — Tooltip clarification (EnvironmentTechEffectSO):**
+
+Added `[Tooltip]` attributes to `discoveryFailureDeltaPct`, `discoveryTurnsDelta`, `gatheringFailureDeltaPct`, and `gatheringTurnsDelta` so the sign convention is visible in the Unity Inspector.
+
+**Fix 3 — Tech panel display sign (TechnologyDetailPanelControl):**
+
+All delta fields were displayed with their raw SO value (`+2` for a `discoveryFailureDeltaPct = 2`). Since positive = reduction, the display now negates the value so a delta of 2 shows as `-2%` — correctly indicating the stat goes down.
+
+**Fix 4 — Detail panel display and base comparison (DiscoveryDetailsPanelControl, GatheringDetailsPanelControl, EnvironmentControl):**
+
+Added `GetPreTechDiscovery()` / `GetPreTechGathering()` to `EnvironmentControl`. These return values after seasonal + predator adjustments but before tech buffs — providing the correct base for comparison. Both detail panels now use:
+- `BaseDiscoveryRequiredPop` / `BaseGatheringRequiredPop` (cached base, consistent with `GetEffective...`)
+- `GetPreTechDiscovery` / `GetPreTechGathering` for turns and failure base
+
+Display shows the effective value only (e.g. `20%`), not a delta suffix.
+
+---
+
 **End of Report**
 
 *Status: Ready for Ruflo Integration*  
-*Last Updated: May 17, 2026 (Population count fix — health-zero and mortality deaths now sync Individual.IsAlive and refresh UI)*  
+*Last Updated: May 17, 2026 (Environment tech delta sign fix — live re-evaluation, correct display, Inspector tooltips)*  
 *Audit Confidence: High (comprehensive read-only scan)*
