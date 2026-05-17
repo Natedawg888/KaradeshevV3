@@ -1933,6 +1933,12 @@ public class ProductionBuildingControl : MonoBehaviour
         if (!TryCollectReservedProductionWorkerIds(_tmpProductionWeatherDiseaseIds))
             return 0;
 
+        DiseaseManager.Instance?.TrySpreadContagiousVirusesWithinGroup(
+            _tmpProductionWeatherDiseaseIds,
+            "Production",
+            name,
+            1f);
+
         int totalInfections = 0;
 
         if (plan.isExternalExtractor)
@@ -2018,15 +2024,6 @@ public class ProductionBuildingControl : MonoBehaviour
             reservedIds.Count == 0)
         {
             return false;
-        }
-
-        if (TryCollectReservedProductionWorkerIds(_tmpProductionWeatherDiseaseIds))
-        {
-            DiseaseManager.Instance?.TrySpreadContagiousVirusesWithinGroup(
-                _tmpProductionWeatherDiseaseIds,
-                "Production",
-                name,
-                1f);
         }
 
         for (int i = 0; i < reservedIds.Count; i++)
