@@ -40,6 +40,8 @@ public class ProfilePanelControl : MonoBehaviour
     [Header("Support")]
     public Button patreonButton;
     [SerializeField] private string patreonUrl = "https://www.patreon.com/c/celtstudio/";
+    public Button facebookButton;
+    [SerializeField] private string facebookUrl = "https://www.facebook.com/celtstudio/";
 
     [Header("Profile Image")]
     public Image profileImage;
@@ -135,6 +137,12 @@ public class ProfilePanelControl : MonoBehaviour
         {
             patreonButton.onClick.RemoveAllListeners();
             patreonButton.onClick.AddListener(OpenPatreonPage);
+        }
+
+        if (facebookButton != null)
+        {
+            facebookButton.onClick.RemoveAllListeners();
+            facebookButton.onClick.AddListener(OpenFacebookPage);
         }
 
         if (cameraControl == null)
@@ -417,6 +425,12 @@ public class ProfilePanelControl : MonoBehaviour
     {
         if (!string.IsNullOrWhiteSpace(patreonUrl))
             Application.OpenURL(patreonUrl);
+    }
+
+    public void OpenFacebookPage()
+    {
+        if (!string.IsNullOrWhiteSpace(facebookUrl))
+            Application.OpenURL(facebookUrl);
     }
 
     public void InstallRuntimeRefs(CameraControl newCameraControl = null, EnvironmentPresetManager newEnvironmentPresetManager = null)
