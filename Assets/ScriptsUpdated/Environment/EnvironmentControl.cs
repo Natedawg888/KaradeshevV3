@@ -619,6 +619,25 @@ public class EnvironmentControl : MonoBehaviour
         effRequiredPop = Mathf.Max(1, effRequiredPop);
     }
 
+    // Returns turns/fail after seasonal + predator adjustments but before tech buffs.
+    public void GetPreTechDiscovery(out int preTechTurns, out float preTechFail)
+    {
+        preTechTurns = Mathf.Max(1, _baseDiscoveryTurnsRequired);
+        preTechFail = Mathf.Clamp(_baseDiscoveryFailChance, 0f, 100f);
+        var tile = GetComponentInParent<TileControl>();
+        preTechFail = Mathf.Clamp(preTechFail + PredatorFailureBonus.GetBonusPercent(tile), 0f, 100f);
+        SeasonalTaskDifficulty.Apply(TaskFailureType.Discovery, ref preTechTurns, ref preTechFail);
+    }
+
+    public void GetPreTechGathering(out int preTechTurns, out float preTechFail)
+    {
+        preTechTurns = Mathf.Max(1, _baseGatheringTurnsRequired);
+        preTechFail = Mathf.Clamp(_baseGatheringFailChance, 0f, 100f);
+        var tile = GetComponentInParent<TileControl>();
+        preTechFail = Mathf.Clamp(preTechFail + PredatorFailureBonus.GetBonusPercent(tile), 0f, 100f);
+        SeasonalTaskDifficulty.Apply(TaskFailureType.Gathering, ref preTechTurns, ref preTechFail);
+    }
+
     // ---------------- Discovery Visuals ----------------
     public void BeginDiscoveryVisuals()
     {

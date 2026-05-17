@@ -56,22 +56,23 @@ public class GatheringDetailsPanelControl : MonoBehaviour
         if (noResourceBlock != null)
             noResourceBlock.SetActive(showNoResources);
 
+        env.GetPreTechGathering(out int preTechTurns, out float preTechFail);
         env.GetEffectiveGathering(out int effTurns, out float effFail);
 
-        turnsText.text = $"{effTurns}";
-        failureChanceText.text = $"{Mathf.Round(effFail)}%";
+        turnsText.text = FormatWithDelta(effTurns, preTechTurns);
+        failureChanceText.text = FormatPctWithDelta(effFail, preTechFail);
 
-        int effectiveRequiredPop = env.requireGatheringPopulation;
+        int basePop = env.BaseGatheringRequiredPop;
+        int effectiveRequiredPop = PlayerTechBuffs.Instance != null
+            ? PlayerTechBuffs.Instance.GetGatheringRequiredPopEffective(env, basePop)
+            : basePop;
+        populationRequirementText.text = FormatWithDelta(effectiveRequiredPop, basePop);
 
-        if (PlayerTechBuffs.Instance != null)
-            effectiveRequiredPop = PlayerTechBuffs.Instance.GetGatheringRequiredPopEffective(env, env.requireGatheringPopulation);
-
-        populationRequirementText.text = $"{effectiveRequiredPop}";
-        int effectivePenalty = env.GatheringPopPenaltyOnFailure;
-        if (PlayerTechBuffs.Instance != null)
-            effectivePenalty = PlayerTechBuffs.Instance.GetGatheringPenaltyEffective(env, effectivePenalty);
-
-        penaltyText.text = $"{effectivePenalty}";
+        int basePenalty = env.GatheringPopPenaltyOnFailure;
+        int effectivePenalty = PlayerTechBuffs.Instance != null
+            ? PlayerTechBuffs.Instance.GetGatheringPenaltyEffective(env, basePenalty)
+            : basePenalty;
+        penaltyText.text = FormatWithDelta(effectivePenalty, basePenalty);
 
         bool hasEnough = false;
         if (PlayersPopulationManager.Instance != null)
@@ -81,6 +82,9 @@ public class GatheringDetailsPanelControl : MonoBehaviour
         }
         populationRequirementText.color = hasEnough ? Color.green : Color.red;
     }
+
+    private static string FormatWithDelta(int effective, int preTech) => $"{effective}";
+    private static string FormatPctWithDelta(float effective, float preTech) => $"{Mathf.RoundToInt(effective)}%";
 
     public void Hide()
     {

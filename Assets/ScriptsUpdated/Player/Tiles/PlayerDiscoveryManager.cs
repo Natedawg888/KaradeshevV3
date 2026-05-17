@@ -348,7 +348,8 @@ public class PlayerDiscoveryManager : MonoBehaviour
 
                 env.UpdateDiscoveryTimerUI();
 
-                float currentFailureChance = info.effectiveFailureChance;
+                env.GetEffectiveDiscovery(out _, out float currentFailureChance);
+                currentFailureChance = Mathf.Clamp(currentFailureChance, 0f, 100f);
 
                 float baseAdjustedFailureChance = currentFailureChance / (info.turnsCompleted + 1);
 

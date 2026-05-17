@@ -337,8 +337,9 @@ public class PlayerGatheringManager : MonoBehaviour
                 env.UpdateGatheringTimerUI();
                 MarkJobsDirty();
 
-                // failure roll shrinks over time
-                float currentFailureChance = info.effectiveFailureChance;
+                // failure roll re-evaluated each turn so tech upgrades apply immediately
+                env.GetEffectiveGathering(out _, out float currentFailureChance);
+                currentFailureChance = Mathf.Clamp(currentFailureChance, 0f, 100f);
 
                 float baseAdjustedFailure = currentFailureChance / (info.turnsCompleted + 1);
 

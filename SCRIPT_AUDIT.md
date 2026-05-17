@@ -1923,8 +1923,44 @@ Resources now spawn from `ResourceSpawnerDefinition` ScriptableObjects instead o
 
 ---
 
+### May 17, 2026 — Population Count Fix (Health-Zero & Disease Deaths)
+
+**Files modified:**
+- `ScriptsUpdated/Player/Population/PlayerAggregatedPopulationSimulationManager.cs`
+
+**What was fixed:**
+
+Two bugs caused the total population display and available/used worker counts to fall out of sync after non-disease deaths.
+
+**Bug 1 — Health-zero deaths not propagated to FamilySim:**
+
+`TickHealth_Player` calls `group.ApplyPopulationLoss(group.count)` when `averageHealth <= 0`, but the lost count was never added to `deathsByGroup`. This meant `fam.ApplyDeathsToIndividuals` was never called for those individuals — leaving `Individual.IsAlive = true` while the aggregate group count dropped to 0. `GetTotalTaskPool()` and `GetAvailableTaskPopulation()` both iterate live `Individual` objects, so they over-counted after health-zero group deaths.
+
+**Fix:** After `TickHealth_Player`, the delta `beforeHealthCount - group.count` is captured and merged into `deathsByGroup`:
+
+```csharp
+int healthZeroDeaths = beforeHealthCount - group.count;
+if (healthZeroDeaths > 0)
+{
+    if (!deathsByGroup.TryAdd(group.GroupID, healthZeroDeaths))
+        deathsByGroup[group.GroupID] += healthZeroDeaths;
+}
+```
+
+**Bug 2 — UI not refreshed when deaths don't empty a group:**
+
+`PruneDeadOrEmptyGroups` only calls `MarkUIDirty` when it removes at least one group. If a mortality roll killed some members of a group but left it non-empty, the population display could stay stale for the rest of the turn.
+
+**Fix:** `playerPop.MarkUIDirty()` is called at the end of `AdvanceTurn` whenever `deathsByGroup` is non-empty. The batch system (`_batchDepth`) defers the actual UI sync to `EndTurnBatch` at end of turn, so it fires once with the final post-death, post-birth state.
+
+**Affected counters:** `populationDisplayText` (total / cap), `availableText` (available / task pool), and any subscriber to `OnPopulationChanged`.
+
+**Note:** Disease deaths via `DiseaseManager.KillIndividualFromDisease` were already handled correctly (sets `IsAlive = false`, calls `group.ApplyPopulationLoss(1)`, and calls `pop.MarkUIDirty()` immediately). No changes needed there.
+
+---
+
 **End of Report**
 
 *Status: Ready for Ruflo Integration*  
-*Last Updated: May 9, 2026 (Resource Spawner System — spawner templates, climate modifiers, dung system)*  
+*Last Updated: May 17, 2026 (Population count fix — health-zero and mortality deaths now sync Individual.IsAlive and refresh UI)*  
 *Audit Confidence: High (comprehensive read-only scan)*

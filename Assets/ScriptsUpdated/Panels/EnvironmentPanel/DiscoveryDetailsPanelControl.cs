@@ -56,32 +56,24 @@ public class DiscoveryDetailsPanelControl : MonoBehaviour
         if (root != null) root.SetActive(true);
         else gameObject.SetActive(true);
 
-        // Base
-        int baseTurns = Mathf.Max(1, env.discoveryTurnsRequired);
-        float baseFail = Mathf.Clamp(env.DiscoveryFailureChance, 0f, 100f);
-
-        var tile = env.GetComponentInParent<TileControl>();
-        baseFail = Mathf.Clamp(baseFail + PredatorFailureBonus.GetBonusPercent(tile), 0f, 100f);
-
+        env.GetPreTechDiscovery(out int preTechTurns, out float preTechFail);
         env.GetEffectiveDiscovery(out int effTurns, out float effFail);
 
-        // ✅ Show combined/effective values ONLY
-        turnsText.text = $"{effTurns}";
-        failureChanceText.text = $"{Mathf.Round(effFail)}%";
+        turnsText.text = FormatWithDelta(effTurns, preTechTurns);
+        failureChanceText.text = FormatPctWithDelta(effFail, preTechFail);
 
-        int effectiveRequiredPop = env.requireDiscoveryPopulation;
+        int basePop = env.BaseDiscoveryRequiredPop;
+        int effectiveRequiredPop = PlayerTechBuffs.Instance != null
+            ? PlayerTechBuffs.Instance.GetDiscoveryRequiredPopEffective(env, basePop)
+            : basePop;
+        populationRequirementText.text = FormatWithDelta(effectiveRequiredPop, basePop);
 
-        if (PlayerTechBuffs.Instance != null)
-            effectiveRequiredPop = PlayerTechBuffs.Instance.GetDiscoveryRequiredPopEffective(env, env.requireDiscoveryPopulation);
+        int basePenalty = env.DiscoveryPopPenaltyOnFailure;
+        int effectivePenalty = PlayerTechBuffs.Instance != null
+            ? PlayerTechBuffs.Instance.GetDiscoveryPenaltyEffective(env, basePenalty)
+            : basePenalty;
+        penaltyText.text = FormatWithDelta(effectivePenalty, basePenalty);
 
-        populationRequirementText.text = $"{effectiveRequiredPop}";
-        int effectivePenalty = env.DiscoveryPopPenaltyOnFailure;
-        if (PlayerTechBuffs.Instance != null)
-            effectivePenalty = PlayerTechBuffs.Instance.GetDiscoveryPenaltyEffective(env, effectivePenalty);
-
-        penaltyText.text = $"{effectivePenalty}";
-
-        // Colour population requirement based on availability
         bool hasEnough = false;
         if (PlayersPopulationManager.Instance != null)
         {
@@ -90,6 +82,9 @@ public class DiscoveryDetailsPanelControl : MonoBehaviour
         }
         populationRequirementText.color = hasEnough ? Color.green : Color.red;
     }
+
+    private static string FormatWithDelta(int effective, int preTech) => $"{effective}";
+    private static string FormatPctWithDelta(float effective, float preTech) => $"{Mathf.RoundToInt(effective)}%";
 
     public void Hide()
     {

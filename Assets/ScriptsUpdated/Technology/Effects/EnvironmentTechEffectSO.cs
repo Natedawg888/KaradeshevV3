@@ -21,8 +21,10 @@ public class EnvironmentTechEffectSO : TechnologyEffectSO
         public bool unlockExplore;
 
         [Header("Discovery Buffs")]
+        [Tooltip("Positive = reduce failure chance by N percentage points. Negative = increase by N.")]
         public float discoveryFailureDeltaPct;
         public float discoveryFailureMult;
+        [Tooltip("Positive = reduce required turns by N. Negative = increase by N.")]
         public int discoveryTurnsDelta;
         public float discoveryTurnsMult;
 
@@ -39,8 +41,10 @@ public class EnvironmentTechEffectSO : TechnologyEffectSO
         public float discoveryPenaltyMult;
 
         [Header("Gathering Buffs")]
+        [Tooltip("Positive = reduce failure chance by N percentage points. Negative = increase by N.")]
         public float gatheringFailureDeltaPct;
         public float gatheringFailureMult;
+        [Tooltip("Positive = reduce required turns by N. Negative = increase by N.")]
         public int   gatheringTurnsDelta;
         public float gatheringTurnsMult;
 

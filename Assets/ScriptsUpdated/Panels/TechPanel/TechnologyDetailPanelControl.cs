@@ -311,31 +311,32 @@ public class TechnologyDetailPanelControl : MonoBehaviour
             if (fx.unlockExplore)
                 sb.AppendLine("Unlocks exploration");
 
+            // Deltas: positive SO value = reduction → negate for display so "+2 failure% reduction" shows as "-2%"
             if (fx.discoveryFailureDeltaPct != 0f)
-                sb.AppendLine($"Discovery failure: {SignedPct(fx.discoveryFailureDeltaPct)}");
+                sb.AppendLine($"Discovery failure: {SignedPct(-fx.discoveryFailureDeltaPct)}");
             if (fx.discoveryFailureMult != 0f)
                 sb.AppendLine($"Discovery failure: ×{fx.discoveryFailureMult:0.##}");
             if (fx.discoveryTurnsDelta != 0)
-                sb.AppendLine($"Discovery turns: {SignedInt(fx.discoveryTurnsDelta)}");
+                sb.AppendLine($"Discovery turns: {SignedInt(-fx.discoveryTurnsDelta)}");
             if (fx.discoveryTurnsMult != 0f)
                 sb.AppendLine($"Discovery turns: ×{fx.discoveryTurnsMult:0.##}");
             if (fx.discoveryRequiredPopDelta != 0)
-                sb.AppendLine($"Discovery pop: {SignedInt(fx.discoveryRequiredPopDelta)}");
+                sb.AppendLine($"Discovery pop: {SignedInt(-fx.discoveryRequiredPopDelta)}");
             if (fx.discoveryPenaltyDelta != 0)
-                sb.AppendLine($"Discovery penalty: {SignedInt(fx.discoveryPenaltyDelta)}");
+                sb.AppendLine($"Discovery penalty: {SignedInt(-fx.discoveryPenaltyDelta)}");
 
             if (fx.gatheringFailureDeltaPct != 0f)
-                sb.AppendLine($"Gathering failure: {SignedPct(fx.gatheringFailureDeltaPct)}");
+                sb.AppendLine($"Gathering failure: {SignedPct(-fx.gatheringFailureDeltaPct)}");
             if (fx.gatheringFailureMult != 0f)
                 sb.AppendLine($"Gathering failure: ×{fx.gatheringFailureMult:0.##}");
             if (fx.gatheringTurnsDelta != 0)
-                sb.AppendLine($"Gathering turns: {SignedInt(fx.gatheringTurnsDelta)}");
+                sb.AppendLine($"Gathering turns: {SignedInt(-fx.gatheringTurnsDelta)}");
             if (fx.gatheringTurnsMult != 0f)
                 sb.AppendLine($"Gathering turns: ×{fx.gatheringTurnsMult:0.##}");
             if (fx.gatheringRequiredPopDelta != 0)
-                sb.AppendLine($"Gathering pop: {SignedInt(fx.gatheringRequiredPopDelta)}");
+                sb.AppendLine($"Gathering pop: {SignedInt(-fx.gatheringRequiredPopDelta)}");
             if (fx.gatheringPenaltyDelta != 0)
-                sb.AppendLine($"Gathering penalty: {SignedInt(fx.gatheringPenaltyDelta)}");
+                sb.AppendLine($"Gathering penalty: {SignedInt(-fx.gatheringPenaltyDelta)}");
         }
 
         return sb.Length > 0 ? sb.ToString().TrimEnd() : "No changes";
