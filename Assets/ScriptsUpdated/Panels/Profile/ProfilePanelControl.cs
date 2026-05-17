@@ -37,6 +37,10 @@ public class ProfilePanelControl : MonoBehaviour
     public Button returnToTitleButton;
     [SerializeField] private string titleSceneName = "TitleScene";
 
+    [Header("Support")]
+    public Button patreonButton;
+    [SerializeField] private string patreonUrl = "https://www.patreon.com/c/celtstudio/";
+
     [Header("Profile Image")]
     public Image profileImage;
 
@@ -125,6 +129,12 @@ public class ProfilePanelControl : MonoBehaviour
         {
             returnToTitleButton.onClick.RemoveAllListeners();
             returnToTitleButton.onClick.AddListener(ReturnToTitleScreen);
+        }
+
+        if (patreonButton != null)
+        {
+            patreonButton.onClick.RemoveAllListeners();
+            patreonButton.onClick.AddListener(OpenPatreonPage);
         }
 
         if (cameraControl == null)
@@ -401,6 +411,12 @@ public class ProfilePanelControl : MonoBehaviour
     private void MarkCoreSystemsDirty()
     {
         SaveSystem.MarkSectionDirty(SaveSectionKeys.CoreSystems);
+    }
+
+    public void OpenPatreonPage()
+    {
+        if (!string.IsNullOrWhiteSpace(patreonUrl))
+            Application.OpenURL(patreonUrl);
     }
 
     public void InstallRuntimeRefs(CameraControl newCameraControl = null, EnvironmentPresetManager newEnvironmentPresetManager = null)
