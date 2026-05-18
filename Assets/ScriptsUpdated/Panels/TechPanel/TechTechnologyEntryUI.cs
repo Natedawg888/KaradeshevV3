@@ -14,6 +14,9 @@ public class TechTechnologyEntryUI : MonoBehaviour
     public TMP_Text nameText;
     public Button   detailButton;
 
+    [Tooltip("Shown when this tech has already been researched.")]
+    public GameObject researchedIcon;
+
     private Technology           _tech;
     private Action<Technology>   _onClicked;
 
@@ -36,6 +39,11 @@ public class TechTechnologyEntryUI : MonoBehaviour
             detailButton.onClick.RemoveAllListeners();
             if (onClicked != null) detailButton.onClick.AddListener(OnClicked);
         }
+
+        bool isResearched = PlayerResearchManager.Instance != null &&
+                            PlayerResearchManager.Instance.IsResearched(tech.techID);
+        if (researchedIcon != null)
+            researchedIcon.SetActive(isResearched);
     }
 
     private void OnClicked() => _onClicked?.Invoke(_tech);
