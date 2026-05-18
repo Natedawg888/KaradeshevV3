@@ -165,7 +165,10 @@ public class PlayerTrainingManager : MonoBehaviour
                     spawned = (group != null);
 
                     if (spawned)
+                    {
                         PostUnitTrainingNotification(tc);
+                        ScoreManager.NotifyTrainingCompleted();
+                    }
                 }
                 else
                 {

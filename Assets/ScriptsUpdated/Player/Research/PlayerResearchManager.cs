@@ -431,6 +431,7 @@ public class PlayerResearchManager : MonoBehaviour
         }
 
         PostResearchNotification(NotificationType.ResearchCompleted, ar.tech);
+        ScoreManager.NotifyResearchCompleted();
 
         MarkKnowledgeDirty();
     }

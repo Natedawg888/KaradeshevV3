@@ -728,6 +728,7 @@ public class PlayerFamilySimulationManager : MonoBehaviour
             {
                 _indRepo.SetAggregatedAgeGroup(p, newGroup);
                 anyChanged = true;
+                ScoreManager.NotifyPopulationAged();
 
                 bool wasTaskCapable = oldGroup == AgeGroup.Teen || oldGroup == AgeGroup.Adult;
                 bool isTaskCapable = newGroup == AgeGroup.Teen || newGroup == AgeGroup.Adult;

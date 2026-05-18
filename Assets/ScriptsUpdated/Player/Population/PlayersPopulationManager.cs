@@ -474,6 +474,7 @@ public class PlayersPopulationManager : MonoBehaviour
         {
             g.count += 1;
             MarkUIDirty();
+            ScoreManager.NotifyBirth();
             return g;
         }
 

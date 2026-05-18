@@ -234,6 +234,7 @@ public class PlayerProductionManager : MonoBehaviour
             return false;
         }
 
+        ScoreManager.NotifyProductionCycle();
         return true;
     }
 

@@ -135,6 +135,7 @@ public class GameSceneManager : MonoBehaviour
         LogTiming("Startup", "StageThemeRefresh", Time.realtimeSinceStartup - themeStart);
 
         HideLoadScreen();
+        ScoreManager.Instance?.OnGameStarted();
         _startupComplete = true;
 
         LogTiming("Startup", "COMPLETE", Time.realtimeSinceStartup - startupStartTime);

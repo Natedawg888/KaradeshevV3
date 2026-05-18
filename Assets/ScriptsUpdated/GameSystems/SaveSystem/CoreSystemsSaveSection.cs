@@ -21,7 +21,8 @@ public sealed class CoreSystemsSaveSection : SaveSectionBase
 
             playerLevelData = PlayerLevel.Instance != null ? PlayerLevel.Instance.SaveState() : null,
             playerProfileData = ProfilePanelControl.Instance != null ? ProfilePanelControl.Instance.SaveState() : null,
-            civilizationStateData = CivilizationStateManager.Instance != null ? CivilizationStateManager.Instance.SaveState() : null
+            civilizationStateData = CivilizationStateManager.Instance != null ? CivilizationStateManager.Instance.SaveState() : null,
+            currentScore = ScoreManager.Instance != null ? ScoreManager.Instance.SaveState() : 0
         };
 
         ClearDirty();

@@ -1154,6 +1154,7 @@ public class SaveSystem : MonoBehaviour
                 PlayerLevel.Instance?.LoadState(core.playerLevelData);
                 ProfilePanelControl.Instance?.LoadState(core.playerProfileData);
                 CivilizationStateManager.Instance?.LoadState(core.civilizationStateData);
+                ScoreManager.Instance?.LoadState(core.currentScore);
             }
         }
         ReportLoadProgress(6);

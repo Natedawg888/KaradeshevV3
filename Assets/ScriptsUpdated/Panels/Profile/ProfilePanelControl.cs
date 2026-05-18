@@ -38,6 +38,11 @@ public class ProfilePanelControl : MonoBehaviour
     public Button returnToTitleButton;
     [SerializeField] private string titleSceneName = "TitleScene";
 
+    [Header("Score")]
+    [SerializeField] private TMP_Text currentScoreText;
+    [SerializeField] private Transform scoreboardContentParent;
+    [SerializeField] private GameObject scoreboardEntryPrefab;
+
     [Header("Support")]
     public Button patreonButton;
     [SerializeField] private string patreonUrl = "https://www.patreon.com/c/celtstudio/";
@@ -165,15 +170,63 @@ public class ProfilePanelControl : MonoBehaviour
     public string PlayerName =>
         playerNameInput != null ? playerNameInput.text : string.Empty;
 
+    private void OnEnable()
+    {
+        if (ScoreManager.Instance != null)
+            ScoreManager.Instance.OnScoreChanged += HandleScoreChanged;
+    }
+
+    private void OnDisable()
+    {
+        if (ScoreManager.Instance != null)
+            ScoreManager.Instance.OnScoreChanged -= HandleScoreChanged;
+    }
+
     private void OnDestroy()
     {
         if (Instance == this)
             Instance = null;
     }
 
+    private void HandleScoreChanged(int _) => RefreshScoreDisplay();
+
+    private void RefreshScoreDisplay()
+    {
+        if (currentScoreText != null && ScoreManager.Instance != null)
+            currentScoreText.text = ScoreManager.Instance.CurrentScore.ToString("N0");
+
+        RefreshScoreboardEntries();
+    }
+
+    private void RefreshScoreboardEntries()
+    {
+        if (scoreboardContentParent == null || scoreboardEntryPrefab == null || ScoreManager.Instance == null)
+            return;
+
+        for (int i = scoreboardContentParent.childCount - 1; i >= 0; i--)
+            Destroy(scoreboardContentParent.GetChild(i).gameObject);
+
+        ScoreboardData data = ScoreManager.Instance.GetLeaderboard();
+        if (data == null || data.entries == null || data.entries.Count == 0)
+            return;
+
+        int count = Mathf.Min(data.entries.Count, 5);
+        for (int i = 0; i < count; i++)
+        {
+            GameObject go = Instantiate(scoreboardEntryPrefab, scoreboardContentParent);
+            ScoreboardEntryUI ui = go.GetComponent<ScoreboardEntryUI>();
+            if (ui == null)
+                continue;
+
+            Sprite avatar = availableAvatars?.Find(s => s != null && s.name == data.entries[i].avatarName);
+            ui.SetEntry(i + 1, data.entries[i], avatar);
+        }
+    }
+
     private void ShowProfilePanel()
     {
         RefreshEnvironmentPresetText();
+        RefreshScoreDisplay();
 
         if (profilePanel != null)
             profilePanel.SetActive(true);
@@ -513,6 +566,12 @@ public class ProfilePanelControl : MonoBehaviour
             while (saveSystem.IsSaving)
                 yield return null;
         }
+
+        ScoreManager.Instance?.CommitScoreToLeaderboard(
+            playerNameInput != null ? playerNameInput.text : string.Empty,
+            civilizationNameInput != null ? civilizationNameInput.text : string.Empty,
+            CurrentAvatarName
+        );
 
         SceneManager.LoadScene(titleSceneName, LoadSceneMode.Single);
     }

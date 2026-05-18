@@ -215,6 +215,7 @@ public class BuildingRepair : MonoBehaviour
         _health?.SetDegenerationPaused(false);
 
         OnRepairCompleted?.Invoke();
+        ScoreManager.NotifyBuildingRepaired();
     }
 
     private List<CalculatedCost> CalculateCosts(RepairOption option)

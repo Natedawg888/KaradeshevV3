@@ -166,6 +166,8 @@ public class PlayerCraftingManager : MonoBehaviour
 
                 if (cc.source != null)
                     cc.source.OnOrderFinalizedExternally(cc.orderId);
+
+                ScoreManager.NotifyCraftCompleted();
             }
 
             if (refreshedInvThisFrame)
