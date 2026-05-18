@@ -43,6 +43,8 @@ public class ProfilePanelControl : MonoBehaviour
     [SerializeField] private string patreonUrl = "https://www.patreon.com/c/celtstudio/";
     public Button facebookButton;
     [SerializeField] private string facebookUrl = "https://www.facebook.com/celtstudio/";
+    public Button tiktokButton;
+    [SerializeField] private string tiktokUrl = "https://www.tiktok.com/@celtstudio";
 
     [Header("Profile Image")]
     public Image profileImage;
@@ -145,6 +147,12 @@ public class ProfilePanelControl : MonoBehaviour
         {
             facebookButton.onClick.RemoveAllListeners();
             facebookButton.onClick.AddListener(OpenFacebookPage);
+        }
+
+        if (tiktokButton != null)
+        {
+            tiktokButton.onClick.RemoveAllListeners();
+            tiktokButton.onClick.AddListener(OpenTikTokPage);
         }
 
         if (cameraControl == null)
@@ -425,14 +433,23 @@ public class ProfilePanelControl : MonoBehaviour
 
     public void OpenPatreonPage()
     {
+        SaveSystem.SaveCloseGameNow();
         if (!string.IsNullOrWhiteSpace(patreonUrl))
             Application.OpenURL(patreonUrl);
     }
 
     public void OpenFacebookPage()
     {
+        SaveSystem.SaveCloseGameNow();
         if (!string.IsNullOrWhiteSpace(facebookUrl))
             Application.OpenURL(facebookUrl);
+    }
+
+    public void OpenTikTokPage()
+    {
+        SaveSystem.SaveCloseGameNow();
+        if (!string.IsNullOrWhiteSpace(tiktokUrl))
+            Application.OpenURL(tiktokUrl);
     }
 
     public void InstallRuntimeRefs(CameraControl newCameraControl = null, EnvironmentPresetManager newEnvironmentPresetManager = null)
