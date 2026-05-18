@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -66,6 +67,7 @@ public class ProfilePanelControl : MonoBehaviour
     public CameraControl cameraControl;
 
     private string _pendingAvatarName;
+    private bool _returningToTitle;
 
     private EnvironmentPresetManager environmentPresetManager;
 
@@ -466,6 +468,15 @@ public class ProfilePanelControl : MonoBehaviour
             return;
         }
 
+        if (_returningToTitle)
+            return;
+
+        _returningToTitle = true;
+        StartCoroutine(SaveThenReturnToTitleCoroutine());
+    }
+
+    private IEnumerator SaveThenReturnToTitleCoroutine()
+    {
         if (profilePictureMenuPanel != null)
             profilePictureMenuPanel.SetActive(false);
 
@@ -476,6 +487,15 @@ public class ProfilePanelControl : MonoBehaviour
 
         if (cameraControl != null)
             cameraControl.PopInputLock();
+
+        SaveSystem.SaveCloseGameNow();
+
+        SaveSystem saveSystem = SaveSystem.Instance;
+        if (saveSystem != null)
+        {
+            while (saveSystem.IsSaving)
+                yield return null;
+        }
 
         SceneManager.LoadScene(titleSceneName, LoadSceneMode.Single);
     }
