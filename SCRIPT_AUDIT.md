@@ -2005,8 +2005,203 @@ Display shows the effective value only (e.g. `20%`), not a delta suffix.
 
 ---
 
+---
+
+### May 18, 2026 — Save-on-Exit & Social Buttons (ProfilePanelControl)
+
+**Files modified:**
+- `ScriptsUpdated/Panels/Profile/ProfilePanelControl.cs`
+
+**What was fixed/added:**
+
+**1. Save before returning to title screen:**
+
+`ReturnToTitleScreen()` previously called `SceneManager.LoadScene` immediately with no save. Now starts `SaveThenReturnToTitleCoroutine()`:
+
+```
+SaveThenReturnToTitleCoroutine:
+  1. Hides panels, pops input lock
+  2. SaveSystem.SaveCloseGameNow()
+  3. Waits while SaveSystem.IsSaving == true
+  4. ScoreManager.Instance?.CommitScoreToLeaderboard(...)
+  5. SceneManager.LoadScene(titleSceneName, Single)
+```
+
+Guard flag `_returningToTitle` prevents double-trigger.
+
+**2. TikTok button:**
+
+Added alongside Patreon and Facebook under the `[Header("Support")]` block:
+- `tiktokButton (Button)` — public serialized field
+- `tiktokUrl (string)` — serialized, defaults to `"https://www.tiktok.com/@celtstudio"`
+- `OpenTikTokPage()` — wired in `Awake()` onClick
+
+**3. Save on social button click:**
+
+All three social open methods (`OpenPatreonPage`, `OpenFacebookPage`, `OpenTikTokPage`) now call `SaveSystem.SaveCloseGameNow()` before `Application.OpenURL()`. Fire-and-forget (no wait needed — background write finishes while the browser is open).
+
+**App backgrounding** (already in `GameSceneManager`, confirmed working):
+- `OnApplicationPause(true)` → `SaveSystem.SaveCloseGameNow()` (all platforms)
+- `OnApplicationFocus(false)` → `SaveSystem.SaveCloseGameNow()` (Android/iOS only, as backup)
+- `Application.wantsToQuit` → `SaveThenQuitCoroutine()` (blocks quit until write completes)
+
+---
+
+### May 18, 2026 — ScoreManager & Scoreboard System
+
+**Files created:**
+- `ScriptsUpdated/GameSystems/Score/ScoreManager.cs` *(new)*
+- `ScriptsUpdated/GameSystems/Score/ScoreboardData.cs` *(new)*
+- `ScriptsUpdated/Panels/Profile/ScoreboardEntryUI.cs` *(new)*
+
+**Files modified:**
+- `ScriptsUpdated/GameSystems/SaveSystem/EnvironmentSaveSections.cs`
+- `ScriptsUpdated/GameSystems/SaveSystem/CoreSystemsSaveSection.cs`
+- `ScriptsUpdated/GameSystems/SaveSystem/SaveSystem.cs`
+- `ScriptsUpdated/GameSystems/GameManager/GameSceneManager.cs`
+- `ScriptsUpdated/Buildings/Repair/BuildingRepair.cs`
+- `ScriptsUpdated/Player/Tiles/Building/PlayerProductionManager.cs`
+- `ScriptsUpdated/Player/Tiles/Building/PlayerCraftingManager.cs`
+- `ScriptsUpdated/Player/Tiles/Building/PlayerTrainingManager.cs`
+- `ScriptsUpdated/Player/Population/PlayersPopulationManager.cs`
+- `ScriptsUpdated/Player/Population/FamilySim/Core/PlayerFamilySimulationManager.cs`
+- `ScriptsUpdated/Player/Research/PlayerResearchManager.cs`
+- `ScriptsUpdated/Panels/Profile/ProfilePanelControl.cs`
+
+---
+
+#### ScoreManager (new singleton)
+
+```
+ScoreManager
+├─ Singleton MonoBehaviour — place on any manager GameObject in the manager scene
+├─ Configurable point values (Inspector):
+│  ├─ discoveryPoints      = 10
+│  ├─ gatheringPoints      = 5
+│  ├─ craftingPoints       = 15
+│  ├─ productionCyclePoints= 8
+│  ├─ birthPoints          = 20
+│  ├─ buildingCompletePoints = 25
+│  ├─ buildingRepairPoints = 10
+│  ├─ trainingPoints       = 20
+│  ├─ combatVictoryPoints  = 15   (hook: ScoreManager.NotifyCombatVictory())
+│  ├─ researchPoints       = 30
+│  └─ populationAgedPoints = 5
+├─ CurrentScore (int, read-only property)
+├─ OnScoreChanged (event Action<int>)
+├─ _gameStarted flag — score events are ignored until GameSceneManager calls OnGameStarted()
+│  └─ prevents points firing during save-load phase when managers register/fire events
+├─ Save/Load: SaveState() → int, LoadState(int) — integrated into CoreSystems section
+└─ Leaderboard: persists to Application.persistentDataPath/scoreboard.json (plain JSON, not encrypted)
+```
+
+**Event-based hooks (subscribed in Start, unsubscribed in OnDestroy):**
+
+| Event | Manager | Points |
+|-------|---------|--------|
+| `PlayerDiscoveryManager.OnDiscoveryCompleted` | PlayerDiscoveryManager | discoveryPoints |
+| `PlayerGatheringManager.OnGatheringCompleted` | PlayerGatheringManager | gatheringPoints |
+| `PlayerBuildingManager.OnBuildingPlaced` | PlayerBuildingManager | buildingCompletePoints |
+
+**Direct-call hooks (called from within manager code):**
+
+| Static method | Called from | Points |
+|--------------|-------------|--------|
+| `ScoreManager.NotifyCraftCompleted()` | `PlayerCraftingManager.ProcessCompletions()` after `OnOrderFinalizedExternally` | craftingPoints |
+| `ScoreManager.NotifyProductionCycle()` | `PlayerProductionManager.OnProductionCycleCompleted()` before `return true` | productionCyclePoints |
+| `ScoreManager.NotifyBirth()` | `PlayersPopulationManager.AddBirthAndReturnGroup()` before `return g` | birthPoints |
+| `ScoreManager.NotifyBuildingRepaired()` | `BuildingRepair.FinishJob()` after `OnRepairCompleted?.Invoke()` | buildingRepairPoints |
+| `ScoreManager.NotifyTrainingCompleted()` | `PlayerTrainingManager.ProcessCompletions()` inside `if (spawned)` | trainingPoints |
+| `ScoreManager.NotifyResearchCompleted()` | `PlayerResearchManager.Complete()` after `PostResearchNotification` | researchPoints |
+| `ScoreManager.NotifyPopulationAged()` | `PlayerFamilySimulationManager` inside `if (newGroup != oldGroup)` | populationAgedPoints |
+| `ScoreManager.NotifyCombatVictory()` | *Not yet wired — call from player-unit combat resolution* | combatVictoryPoints |
+
+**Leaderboard API:**
+```
+CommitScoreToLeaderboard(playerName, civName, avatarName)
+  — appends entry, sorts descending by score, trims to 5
+  — only commits if CurrentScore > 0
+  — called from ProfilePanelControl.SaveThenReturnToTitleCoroutine() before scene load
+
+GetLeaderboard() → ScoreboardData
+  — reads scoreboard.json; returns empty ScoreboardData if file missing or corrupt
+```
+
+---
+
+#### ScoreboardData / ScoreboardEntry (new)
+
+```csharp
+[Serializable] class ScoreboardData  { List<ScoreboardEntry> entries; }
+[Serializable] class ScoreboardEntry { int score; string playerName; string civilizationName; string avatarName; }
+```
+
+Stored at `Application.persistentDataPath/scoreboard.json` — plain JSON, survives across game sessions, independent of the main save files.
+
+---
+
+#### ScoreboardEntryUI (new)
+
+MonoBehaviour component for each scoreboard row prefab:
+
+```
+Fields (wire in Inspector):
+  rankText       (TMP_Text)   — "1" through "5"
+  playerNameText (TMP_Text)
+  civNameText    (TMP_Text)
+  scoreText      (TMP_Text)
+  profileImage   (Image)      — avatar sprite resolved by name from ProfilePanelControl.availableAvatars
+
+Methods:
+  SetEntry(int rank, ScoreboardEntry entry, Sprite avatar)
+  SetEmpty(int rank)
+```
+
+---
+
+#### ProfilePanelControl — score display additions
+
+New Inspector fields:
+```
+[Header("Score")]
+  currentScoreText        (TMP_Text)  — displays live CurrentScore, updated via OnScoreChanged event
+  scoreboardContentParent (Transform) — Content transform of the scoreboard ScrollView
+  scoreboardEntryPrefab   (GameObject)— prefab with ScoreboardEntryUI component
+```
+
+`RefreshScoreDisplay()` — called on `ShowProfilePanel()` and via `OnScoreChanged`:
+- Updates `currentScoreText` (formatted with "N0" — thousands separator)
+- Calls `RefreshScoreboardEntries()`
+
+`RefreshScoreboardEntries()`:
+- Destroys all existing children of `scoreboardContentParent`
+- Reads leaderboard from `ScoreManager.Instance.GetLeaderboard()`
+- If empty — does nothing (no placeholder rows shown)
+- Instantiates 1–5 entries (only as many as there are actual scores)
+- Resolves avatar sprite by name from `availableAvatars`
+
+`OnEnable` / `OnDisable` — subscribes / unsubscribes `ScoreManager.Instance.OnScoreChanged`
+
+**Save integration:**
+- `int currentScore` added to `CoreSystemsSectionSaveData`
+- `CoreSystemsSaveSection.CaptureInto()` → `ScoreManager.Instance.SaveState()`
+- `SaveSystem.LoadWorldStateCoroutine()` → `ScoreManager.Instance.LoadState(core.currentScore)`
+
+**Startup guard:**
+- `GameSceneManager.RunStartupRoutine()` calls `ScoreManager.Instance?.OnGameStarted()` just before `_startupComplete = true`
+- Score events fired before this point (e.g. during load) are silently ignored
+
+**Inspector setup required:**
+1. Add `ScoreManager` component to a manager scene GameObject
+2. Wire `currentScoreText` (TMP_Text) on `ProfilePanelControl`
+3. Set up a ScrollView; assign its `Content` to `scoreboardContentParent`
+4. Build a `ScoreboardEntryUI` prefab; assign to `scoreboardEntryPrefab`
+5. Give the Content a `Vertical Layout Group` + `Content Size Fitter (Preferred Size)` so it grows with entries
+
+---
+
 **End of Report**
 
 *Status: Ready for Ruflo Integration*  
-*Last Updated: May 17, 2026 (Environment tech delta sign fix — live re-evaluation, correct display, Inspector tooltips)*  
+*Last Updated: May 18, 2026 (ScoreManager system, scoreboard UI, save-on-exit improvements, TikTok button)*  
 *Audit Confidence: High (comprehensive read-only scan)*
