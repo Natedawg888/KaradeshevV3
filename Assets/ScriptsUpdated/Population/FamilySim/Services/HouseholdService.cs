@@ -86,6 +86,8 @@ public class HouseholdService : IHouseholdService
             var fam = famRepo.CreateFamily(m.Id, f.Id, familyNameFactory()); // NEW
             m.FamilyId = fam.FamilyId; m.Surname = fam.FamilyName;
             f.FamilyId = fam.FamilyId; f.Surname = fam.FamilyName;
+
+            ScoreManager.NotifyFamilyFormed();
         }
 
         // prune empty families

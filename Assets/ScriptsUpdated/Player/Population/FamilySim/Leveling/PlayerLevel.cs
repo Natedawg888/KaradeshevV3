@@ -72,6 +72,7 @@ public class PlayerLevel : MonoBehaviour
 
             OnLevelUp?.Invoke(currentLevel);
             PostLevelUpNotification(currentLevel);
+            ScoreManager.NotifyLevelUp();
         }
 
         if (!HasNextLevel())

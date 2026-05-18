@@ -20,6 +20,8 @@ public class ScoreManager : MonoBehaviour
     [SerializeField, Min(0)] private int combatVictoryPoints  = 15;
     [SerializeField, Min(0)] private int researchPoints       = 30;
     [SerializeField, Min(0)] private int populationAgedPoints = 5;
+    [SerializeField, Min(0)] private int familyFormedPoints  = 30;
+    [SerializeField, Min(0)] private int levelUpPoints       = 50;
 
     public int CurrentScore { get; private set; }
     public event Action<int> OnScoreChanged;
@@ -99,6 +101,8 @@ public class ScoreManager : MonoBehaviour
     public static void NotifyCombatVictory()      => Instance?.AddScore(Instance.combatVictoryPoints);
     public static void NotifyResearchCompleted()  => Instance?.AddScore(Instance.researchPoints);
     public static void NotifyPopulationAged()     => Instance?.AddScore(Instance.populationAgedPoints);
+    public static void NotifyFamilyFormed()       => Instance?.AddScore(Instance.familyFormedPoints);
+    public static void NotifyLevelUp()            => Instance?.AddScore(Instance.levelUpPoints);
 
     // Save / Load (integrated with CoreSystems save section)
     public int SaveState() => CurrentScore;
