@@ -45,24 +45,12 @@ public class ScoreManager : MonoBehaviour
 
     private void Start()
     {
-        if (PlayerDiscoveryManager.Instance != null)
-            PlayerDiscoveryManager.Instance.OnDiscoveryCompleted += HandleDiscovery;
-
-        if (PlayerGatheringManager.Instance != null)
-            PlayerGatheringManager.Instance.OnGatheringCompleted += HandleGathering;
-
         if (PlayerBuildingManager.Instance != null)
             PlayerBuildingManager.Instance.OnBuildingPlaced += HandleBuildingPlaced;
     }
 
     private void OnDestroy()
     {
-        if (PlayerDiscoveryManager.Instance != null)
-            PlayerDiscoveryManager.Instance.OnDiscoveryCompleted -= HandleDiscovery;
-
-        if (PlayerGatheringManager.Instance != null)
-            PlayerGatheringManager.Instance.OnGatheringCompleted -= HandleGathering;
-
         if (PlayerBuildingManager.Instance != null)
             PlayerBuildingManager.Instance.OnBuildingPlaced -= HandleBuildingPlaced;
     }
@@ -82,17 +70,13 @@ public class ScoreManager : MonoBehaviour
         SaveSystem.MarkSectionDirty(SaveSectionKeys.CoreSystems);
     }
 
-    // Event-based hooks
-    private void HandleDiscovery(EnvironmentControl _)
-        => AddScore(discoveryPoints);
-
-    private void HandleGathering(EnvironmentControl _, List<(ResourceDefinition def, int amount)> __)
-        => AddScore(gatheringPoints);
-
+    // Event-based hook (building placed — reliable because PlayerBuildingManager is in the manager scene)
     private void HandleBuildingPlaced(PlayerBuildingManager.Record _)
         => AddScore(buildingCompletePoints);
 
     // Direct-call hooks (called from within manager code)
+    public static void NotifyDiscovery()          => Instance?.AddScore(Instance.discoveryPoints);
+    public static void NotifyGathering()          => Instance?.AddScore(Instance.gatheringPoints);
     public static void NotifyCraftCompleted()     => Instance?.AddScore(Instance.craftingPoints);
     public static void NotifyProductionCycle()    => Instance?.AddScore(Instance.productionCyclePoints);
     public static void NotifyBirth()              => Instance?.AddScore(Instance.birthPoints);

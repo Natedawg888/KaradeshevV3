@@ -445,6 +445,7 @@ public class PlayerGatheringManager : MonoBehaviour
                     PostGatheringNotification(NotificationType.GatheringCompleted, env, 0, "Gathering Complete",
                         $"{env.environmentName} has been gathered.");
 
+                    ScoreManager.NotifyGathering();
                     OnGatheringCompleted?.Invoke(env, loot);
                     toRemove.Add(env);
                 }

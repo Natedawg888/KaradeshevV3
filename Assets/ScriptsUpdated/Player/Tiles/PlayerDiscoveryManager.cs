@@ -490,6 +490,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
         PostDiscoveryNotification(NotificationType.DiscoveryCompleted, env, 0, "Discovery Complete",
             $"{env.environmentName} has been discovered.");
 
+        ScoreManager.NotifyDiscovery();
         OnDiscoveryCompleted?.Invoke(env);
     }
 

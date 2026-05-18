@@ -225,6 +225,12 @@ public class ProfilePanelControl : MonoBehaviour
 
     private void ShowProfilePanel()
     {
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.OnScoreChanged -= HandleScoreChanged;
+            ScoreManager.Instance.OnScoreChanged += HandleScoreChanged;
+        }
+
         RefreshEnvironmentPresetText();
         RefreshScoreDisplay();
 
