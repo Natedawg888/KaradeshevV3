@@ -16,6 +16,7 @@ public class ScoreManager : MonoBehaviour
     [SerializeField, Min(0)] private int birthPoints          = 20;
     [SerializeField, Min(0)] private int buildingCompletePoints = 25;
     [SerializeField, Min(0)] private int buildingRepairPoints = 10;
+    [SerializeField, Min(0)] private int firefightVictoryPoints = 20;
     [SerializeField, Min(0)] private int trainingPoints       = 20;
     [SerializeField, Min(0)] private int combatVictoryPoints  = 15;
     [SerializeField, Min(0)] private int researchPoints       = 30;
@@ -68,6 +69,7 @@ public class ScoreManager : MonoBehaviour
     public static void NotifyProductionCycle()    => Instance?.AddScore(Instance.productionCyclePoints);
     public static void NotifyBirth()              => Instance?.AddScore(Instance.birthPoints);
     public static void NotifyBuildingRepaired()   => Instance?.AddScore(Instance.buildingRepairPoints);
+    public static void NotifyFirefightVictory()   => Instance?.AddScore(Instance.firefightVictoryPoints);
     public static void NotifyTrainingCompleted()  => Instance?.AddScore(Instance.trainingPoints);
     public static void NotifyCombatVictory()      => Instance?.AddScore(Instance.combatVictoryPoints);
     public static void NotifyResearchCompleted()  => Instance?.AddScore(Instance.researchPoints);

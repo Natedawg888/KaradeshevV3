@@ -285,6 +285,7 @@ public class EnvironmentFireState : MonoBehaviour
         if (FightTurnsRemaining <= 0)
         {
             PostFightOutcomeNotification(succeeded: true);
+            ScoreManager.NotifyFirefightVictory();
             Extinguish();
         }
     }
