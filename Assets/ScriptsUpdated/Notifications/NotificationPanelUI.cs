@@ -24,6 +24,9 @@ public class NotificationPanelUI : MonoBehaviour
     [SerializeField] private Button clearAllButton;
     [SerializeField] private Button closeButton;
 
+    [Header("Camera")]
+    [SerializeField] private CameraControl cameraControl;
+
     private readonly List<NotificationRowUI> _rows = new();
 
     private void Awake()
@@ -36,6 +39,9 @@ public class NotificationPanelUI : MonoBehaviour
 
         if (panelRoot != null)
             panelRoot.SetActive(false);
+
+        if (cameraControl == null)
+            cameraControl = FindObjectOfType<CameraControl>();
     }
 
     private void OnEnable()
@@ -61,6 +67,9 @@ public class NotificationPanelUI : MonoBehaviour
         if (panelRoot != null)
             panelRoot.SetActive(true);
 
+        TileInteraction.SetSelectionEnabled(false);
+        cameraControl?.PushInputLock();
+
         Refresh();
         NotificationManager.Instance?.MarkAllAsRead();
     }
@@ -69,6 +78,10 @@ public class NotificationPanelUI : MonoBehaviour
     {
         if (panelRoot != null)
             panelRoot.SetActive(false);
+
+        TileInteraction.SetSelectionEnabled(false);
+        TileInteraction.GetInstance()?.EnableSelectionAfter(0.01f);
+        cameraControl?.PopInputLock();
     }
 
     public void Toggle()

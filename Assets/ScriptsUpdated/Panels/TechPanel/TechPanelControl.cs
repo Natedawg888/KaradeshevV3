@@ -64,6 +64,9 @@ public class TechPanelControl : MonoBehaviour
     public TechTechnologyEntryUI      techEntryPrefab;
     public TechnologyDetailPanelControl techDetailPanel;
 
+    [Header("Camera")]
+    [SerializeField] private CameraControl cameraControl;
+
     private enum FilterMode { Resources, Buildings, Crafting, Production, Units, Tech }
     private FilterMode _currentFilter = FilterMode.Resources;
 
@@ -85,6 +88,9 @@ public class TechPanelControl : MonoBehaviour
         BindFilter(filterTech,       FilterMode.Tech);
 
         if (root) root.SetActive(false);
+
+        if (cameraControl == null)
+            cameraControl = FindObjectOfType<CameraControl>();
     }
 
     private void OnEnable()
@@ -148,6 +154,9 @@ public class TechPanelControl : MonoBehaviour
         if (root) root.SetActive(true);
         gameObject.SetActive(true);
 
+        TileInteraction.SetSelectionEnabled(false);
+        cameraControl?.PushInputLock();
+
         ResourceSourceCache.BuildCache();
 
         RefreshHeader();
@@ -159,6 +168,10 @@ public class TechPanelControl : MonoBehaviour
     {
         HideAllDetailPanels();
         if (root) root.SetActive(false);
+
+        TileInteraction.SetSelectionEnabled(false);
+        TileInteraction.GetInstance()?.EnableSelectionAfter(0.01f);
+        cameraControl?.PopInputLock();
     }
 
     // ── Header ────────────────────────────────────────────────────────────────
