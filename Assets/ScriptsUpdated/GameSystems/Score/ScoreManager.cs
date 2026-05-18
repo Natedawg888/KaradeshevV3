@@ -38,6 +38,7 @@ public class ScoreManager : MonoBehaviour
     private string _leaderboardPath;
 
     private const string LeaderboardFileName = "scoreboard.json";
+    private static string LeaderboardFilePath => Path.Combine(Application.persistentDataPath, LeaderboardFileName);
 
     private void Awake()
     {
@@ -137,6 +138,25 @@ public class ScoreManager : MonoBehaviour
     public ScoreboardData GetLeaderboard()
     {
         return LoadLeaderboardFromDisk() ?? new ScoreboardData();
+    }
+
+    // Reads the leaderboard from disk without requiring a live instance — safe to call
+    // at any point, including before ScoreManager has initialized in the current scene.
+    public static ScoreboardData ReadLeaderboard()
+    {
+        try
+        {
+            string path = LeaderboardFilePath;
+            if (!File.Exists(path))
+                return new ScoreboardData();
+
+            string json = File.ReadAllText(path);
+            return JsonConvert.DeserializeObject<ScoreboardData>(json) ?? new ScoreboardData();
+        }
+        catch
+        {
+            return new ScoreboardData();
+        }
     }
 
     private ScoreboardData LoadLeaderboardFromDisk()

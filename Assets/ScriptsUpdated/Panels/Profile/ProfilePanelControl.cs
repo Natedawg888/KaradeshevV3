@@ -200,13 +200,13 @@ public class ProfilePanelControl : MonoBehaviour
 
     private void RefreshScoreboardEntries()
     {
-        if (scoreboardContentParent == null || scoreboardEntryPrefab == null || ScoreManager.Instance == null)
+        if (scoreboardContentParent == null || scoreboardEntryPrefab == null)
             return;
 
         for (int i = scoreboardContentParent.childCount - 1; i >= 0; i--)
             Destroy(scoreboardContentParent.GetChild(i).gameObject);
 
-        ScoreboardData data = ScoreManager.Instance.GetLeaderboard();
+        ScoreboardData data = ScoreManager.ReadLeaderboard();
         if (data == null || data.entries == null || data.entries.Count == 0)
             return;
 
