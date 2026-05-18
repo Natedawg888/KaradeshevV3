@@ -392,6 +392,7 @@ public class PlayerGatheringManager : MonoBehaviour
 
                     CivilizationHappinessSystem.Instance?.NotifyTaskResult(success: false, weight: 2f);
 
+                    if (lost > 0) ScoreManager.NotifyGatheringPopLost(lost);
                     OnGatheringFailedDetailed?.Invoke(env, lost);
 
                     string lossMsg = lost > 0 ? $" {lost} population lost." : "";

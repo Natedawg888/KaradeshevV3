@@ -187,6 +187,9 @@ public class BuildingStatus : MonoBehaviour
             }
         }
 
+        if (newState == BuildingState.Destroyed)
+            ScoreManager.NotifyBuildingDestroyed();
+
         PostBuildingStateNotification(newState);
 
         OnStateChanged?.Invoke(newState);

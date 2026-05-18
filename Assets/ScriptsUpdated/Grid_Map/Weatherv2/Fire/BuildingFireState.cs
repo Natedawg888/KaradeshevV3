@@ -232,6 +232,7 @@ public class BuildingFireState : MonoBehaviour
                 StopFighting();
                 OnFightProgress?.Invoke(this, LastRollResult, FightTurnsRemaining);
                 PostFightOutcomeNotification(succeeded: false);
+                ScoreManager.NotifyFirefightLost();
                 return;
             }
         }

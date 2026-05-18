@@ -119,6 +119,7 @@ public class PregnancyService : IPregnancyService
                 AbortPregnancy(motherId);
                 _pregnancies.Remove(motherId);
 
+                ScoreManager.NotifyBirthFailure();
                 PostBirthNotification(NotificationType.BirthFailed, mother, 0, true);
                 OnPregnancyFailed?.Invoke(motherId);
                 continue;
@@ -152,6 +153,7 @@ public class PregnancyService : IPregnancyService
 
                 CivilizationHappinessSystem.Instance?.NotifyPregnancyFailure(motherDies);
 
+                ScoreManager.NotifyBirthFailure();
                 PostBirthNotification(NotificationType.BirthFailed, mother, 0, motherDies);
                 OnPregnancyFailed?.Invoke(motherId);
                 continue;

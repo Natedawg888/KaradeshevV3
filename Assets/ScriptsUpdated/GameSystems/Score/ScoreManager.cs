@@ -24,6 +24,13 @@ public class ScoreManager : MonoBehaviour
     [SerializeField, Min(0)] private int familyFormedPoints  = 30;
     [SerializeField, Min(0)] private int levelUpPoints       = 50;
 
+    [Header("Penalties")]
+    [SerializeField, Min(0)] private int buildingDestroyedPenalty = 25;
+    [SerializeField, Min(0)] private int firefightLostPenalty     = 15;
+    [SerializeField, Min(0)] private int discoveryPopLostPenalty  = 10;
+    [SerializeField, Min(0)] private int gatheringPopLostPenalty  = 10;
+    [SerializeField, Min(0)] private int birthFailurePenalty      = 20;
+
     public int CurrentScore { get; private set; }
     public event Action<int> OnScoreChanged;
 
@@ -60,6 +67,16 @@ public class ScoreManager : MonoBehaviour
         SaveSystem.MarkSectionDirty(SaveSectionKeys.CoreSystems);
     }
 
+    private void SubtractScore(int penalty)
+    {
+        if (!_gameStarted || penalty <= 0)
+            return;
+
+        CurrentScore = Mathf.Max(0, CurrentScore - penalty);
+        OnScoreChanged?.Invoke(CurrentScore);
+        SaveSystem.MarkSectionDirty(SaveSectionKeys.CoreSystems);
+    }
+
     public static void NotifyBuildingCompleted()  => Instance?.AddScore(Instance.buildingCompletePoints);
 
     // Direct-call hooks (called from within manager code)
@@ -70,6 +87,13 @@ public class ScoreManager : MonoBehaviour
     public static void NotifyBirth()              => Instance?.AddScore(Instance.birthPoints);
     public static void NotifyBuildingRepaired()   => Instance?.AddScore(Instance.buildingRepairPoints);
     public static void NotifyFirefightVictory()   => Instance?.AddScore(Instance.firefightVictoryPoints);
+
+    // Penalties
+    public static void NotifyBuildingDestroyed()               => Instance?.SubtractScore(Instance.buildingDestroyedPenalty);
+    public static void NotifyFirefightLost()                   => Instance?.SubtractScore(Instance.firefightLostPenalty);
+    public static void NotifyDiscoveryPopLost(int count)       => Instance?.SubtractScore(Instance.discoveryPopLostPenalty * Mathf.Max(1, count));
+    public static void NotifyGatheringPopLost(int count)       => Instance?.SubtractScore(Instance.gatheringPopLostPenalty * Mathf.Max(1, count));
+    public static void NotifyBirthFailure()                    => Instance?.SubtractScore(Instance.birthFailurePenalty);
     public static void NotifyTrainingCompleted()  => Instance?.AddScore(Instance.trainingPoints);
     public static void NotifyCombatVictory()      => Instance?.AddScore(Instance.combatVictoryPoints);
     public static void NotifyResearchCompleted()  => Instance?.AddScore(Instance.researchPoints);

@@ -393,6 +393,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
 
                     PlayersPopulationManager.Instance?.ForceSyncUI();
 
+                    if (lost > 0) ScoreManager.NotifyDiscoveryPopLost(lost);
                     OnDiscoveryFailedDetailed?.Invoke(env, lost);
 
                     SetTileInteractable(env, true);
