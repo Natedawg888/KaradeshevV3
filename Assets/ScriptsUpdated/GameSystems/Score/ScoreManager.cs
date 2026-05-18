@@ -43,17 +43,6 @@ public class ScoreManager : MonoBehaviour
         _leaderboardPath = Path.Combine(Application.persistentDataPath, LeaderboardFileName);
     }
 
-    private void Start()
-    {
-        if (PlayerBuildingManager.Instance != null)
-            PlayerBuildingManager.Instance.OnBuildingPlaced += HandleBuildingPlaced;
-    }
-
-    private void OnDestroy()
-    {
-        if (PlayerBuildingManager.Instance != null)
-            PlayerBuildingManager.Instance.OnBuildingPlaced -= HandleBuildingPlaced;
-    }
 
     public void OnGameStarted()
     {
@@ -70,9 +59,7 @@ public class ScoreManager : MonoBehaviour
         SaveSystem.MarkSectionDirty(SaveSectionKeys.CoreSystems);
     }
 
-    // Event-based hook (building placed — reliable because PlayerBuildingManager is in the manager scene)
-    private void HandleBuildingPlaced(PlayerBuildingManager.Record _)
-        => AddScore(buildingCompletePoints);
+    public static void NotifyBuildingCompleted()  => Instance?.AddScore(Instance.buildingCompletePoints);
 
     // Direct-call hooks (called from within manager code)
     public static void NotifyDiscovery()          => Instance?.AddScore(Instance.discoveryPoints);

@@ -115,6 +115,9 @@ public class BuildingConstruction : MonoBehaviour
             //Debug.LogWarning("[BuildingConstruction] Final building missing BuildingControl or def was null; ID/Name not set.");
         }
 
+        if (finalGO != null)
+            ScoreManager.NotifyBuildingCompleted();
+
         return finalGO;
     }
 
