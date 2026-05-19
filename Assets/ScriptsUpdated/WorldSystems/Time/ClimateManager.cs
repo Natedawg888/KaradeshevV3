@@ -1433,6 +1433,7 @@ public class ClimateManager : MonoBehaviour
         ApplyJupiterGravitationalInfluence(ref ecc, ref obl, ref pre, settings, t01, twoPi);
         ApplyVenusGravitationalInfluence(ref ecc, ref obl, ref pre, settings, t01, twoPi);
         ApplyMarsGravitationalInfluence(ref ecc, ref obl, ref pre, settings, t01, twoPi);
+        ApplySaturnGravitationalInfluence(ref ecc, ref obl, ref pre, settings, t01, twoPi);
 
         PlanetaryForcingSample sample = PlanetaryForcingSample.Default;
 
@@ -1515,6 +1516,27 @@ public class ClimateManager : MonoBehaviour
         float beat = Mathf.Sin(t01 * twoPi * m.resonanceBeatFrequency);
         ecc += beat * (m.resonanceBeatAmplitude * 0.5f) * s;
         pre += beat * (m.resonanceBeatAmplitude * 0.5f) * s;
+    }
+
+    // Saturn's secondary eccentricity modulation (different frequency from Jupiter) produces
+    // the ~95kyr and ~125kyr sub-cycles. Its near 5:2 resonance with Jupiter generates
+    // the great inequality beat, a very slow long-period envelope on eccentricity.
+    private void ApplySaturnGravitationalInfluence(
+        ref float ecc, ref float obl, ref float pre,
+        PlanetaryForcingSettings settings, float t01, float twoPi)
+    {
+        SaturnGravitationalInfluence sat = settings.saturnGravity;
+        if (!sat.enabled || sat.strength <= 0f) return;
+
+        float s = sat.strength;
+        float eccMod = Mathf.Sin(t01 * twoPi * sat.eccModFrequency);
+        ecc *= 1f + eccMod * sat.eccModDepth * s;
+
+        float greatIneq = Mathf.Sin(t01 * twoPi * sat.greatInequalityFrequency);
+        ecc += greatIneq * sat.greatInequalityEccAmplitude * s;
+
+        float oblMod = Mathf.Sin(t01 * twoPi * sat.obliquityInfluenceFrequency);
+        obl += oblMod * sat.obliquityInfluenceAmplitude * s;
     }
 
     private bool ApplyWaterEvaporationHumidityTurnEnd()

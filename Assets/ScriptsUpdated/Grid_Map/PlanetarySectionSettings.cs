@@ -191,6 +191,32 @@ public class MarsGravitationalInfluence
     [Range(0f, 1f)] public float resonanceBeatAmplitude = 0.08f;
 }
 
+// Saturn works with Jupiter to drive eccentricity sub-cycles (~95kyr and ~125kyr bands).
+// Its near 5:2 resonance with Jupiter creates the long-period great inequality beat,
+// and it provides the second-largest contribution to Earth's apsidal precession rate.
+[System.Serializable]
+public class SaturnGravitationalInfluence
+{
+    public bool enabled = true;
+    [Range(0f, 1f)] public float strength = 1f;
+
+    [Header("Secondary Eccentricity Modulation")]
+    [Tooltip("Saturn's amplitude modulation on the eccentricity cycle. Different frequency from Jupiter gives the ~95/125kyr sub-cycles.")]
+    public float eccModFrequency = 0.22f;
+    [Tooltip("Depth of Saturn's eccentricity modulation. Weaker than Jupiter due to greater distance.")]
+    [Range(0f, 1f)] public float eccModDepth = 0.40f;
+
+    [Header("Jupiter-Saturn Great Inequality Beat")]
+    [Tooltip("The near 5:2 orbital resonance between Jupiter and Saturn creates a very slow long-period beat on eccentricity.")]
+    public float greatInequalityFrequency = 0.06f;
+    [Range(0f, 1f)] public float greatInequalityEccAmplitude = 0.30f;
+
+    [Header("Obliquity Contribution")]
+    [Tooltip("Saturn's mass contribution to the solar system invariable plane slowly modulates Earth's obliquity.")]
+    public float obliquityInfluenceFrequency = 0.55f;
+    [Range(0f, 1f)] public float obliquityInfluenceAmplitude = 0.15f;
+}
+
 [System.Serializable]
 public class PlanetaryForcingSettings
 {
@@ -228,6 +254,7 @@ public class PlanetaryForcingSettings
     public JupiterGravitationalInfluence jupiterGravity = new JupiterGravitationalInfluence();
     public VenusGravitationalInfluence venusGravity = new VenusGravitationalInfluence();
     public MarsGravitationalInfluence marsGravity = new MarsGravitationalInfluence();
+    public SaturnGravitationalInfluence saturnGravity = new SaturnGravitationalInfluence();
 }
 
 [System.Serializable]
