@@ -5,7 +5,8 @@ using UnityEngine.UI;
 
 /// <summary>
 /// Main tech/knowledge encyclopedia panel.
-/// Filter tabs: Resources | Buildings | Crafting | Production | Units | Tech
+/// Filter tabs: Resources | Buildings | Crafting | Production | Units
+/// Currently populates Resources only; other tabs are stubbed.
 /// </summary>
 public class TechPanelControl : MonoBehaviour
 {
@@ -28,50 +29,24 @@ public class TechPanelControl : MonoBehaviour
     public TMP_Text xpText;
     public Slider xpSlider;
 
-    [Header("Filter")]
-    public TMP_Text activeFilterText;
+    [Header("Filter Buttons")]
     public Button filterResources;
     public Button filterBuildings;
     public Button filterCrafting;
     public Button filterProduction;
     public Button filterUnits;
-    public Button filterTech;
 
     [Header("List")]
     public Transform contentRoot;
-
-    [Header("Resources")]
     public TechResourceEntryUI resourceEntryPrefab;
-    public TechResourceDetailPanel resourceDetailPanel;
 
-    [Header("Buildings")]
-    public TechBuildingEntryUI buildingEntryPrefab;
-    public TechBuildingDetailPanel buildingDetailPanel;
+    [Header("Detail Panel")]
+    public TechResourceDetailPanel detailPanel;
 
-    [Header("Crafting")]
-    public TechCraftingEntryUI craftingEntryPrefab;
-    public TechCraftingDetailPanel craftingDetailPanel;
-
-    [Header("Production")]
-    public TechProductionEntryUI productionEntryPrefab;
-    public TechProductionDetailPanel productionDetailPanel;
-
-    [Header("Units")]
-    public TechUnitEntryUI unitEntryPrefab;
-    public TechUnitDetailPanel unitDetailPanel;
-
-    [Header("Technology")]
-    public TechTechnologyEntryUI      techEntryPrefab;
-    public TechnologyDetailPanelControl techDetailPanel;
-
-    [Header("Camera")]
-    [SerializeField] private CameraControl cameraControl;
-
-    private enum FilterMode { Resources, Buildings, Crafting, Production, Units, Tech }
+    private enum FilterMode { Resources, Buildings, Crafting, Production, Units }
     private FilterMode _currentFilter = FilterMode.Resources;
 
-    private readonly List<GameObject> _spawnedEntries = new();
-    private LevelManager _levelManager;
+    private readonly List<TechResourceEntryUI> _spawnedEntries = new();
 
     private void Awake()
     {
@@ -85,12 +60,8 @@ public class TechPanelControl : MonoBehaviour
         BindFilter(filterCrafting,   FilterMode.Crafting);
         BindFilter(filterProduction, FilterMode.Production);
         BindFilter(filterUnits,      FilterMode.Units);
-        BindFilter(filterTech,       FilterMode.Tech);
 
         if (root) root.SetActive(false);
-
-        if (cameraControl == null)
-            cameraControl = FindObjectOfType<CameraControl>();
     }
 
     private void OnEnable()
@@ -98,24 +69,9 @@ public class TechPanelControl : MonoBehaviour
         if (PlayerKnownResourcesManager.Instance != null)
             PlayerKnownResourcesManager.Instance.OnKnownChanged += HandleKnownChanged;
 
-        if (PlayerKnownBuildingsManager.Instance != null)
-            PlayerKnownBuildingsManager.Instance.OnKnownBuildingsChanged += HandleKnownChanged;
-
-        if (PlayerKnownCraftingManager.Instance != null)
-            PlayerKnownCraftingManager.Instance.OnKnownCraftingChanged += HandleKnownChanged;
-
-        if (PlayerKnownProductionManager.Instance != null)
-            PlayerKnownProductionManager.Instance.OnKnownProductionChanged += HandleKnownChanged;
-
-        if (PlayerKnownUnitsManager.Instance != null)
-            PlayerKnownUnitsManager.Instance.OnKnownChanged += HandleKnownChanged;
-
-        if (PlayerKnownTechnologyManager.Instance != null)
-            PlayerKnownTechnologyManager.Instance.OnKnownTechnologyChanged += HandleKnownChanged;
-
         if (PlayerLevel.Instance != null)
         {
-            PlayerLevel.Instance.OnLevelUp   += HandleLevelUp;
+            PlayerLevel.Instance.OnLevelUp  += HandleLevelUp;
             PlayerLevel.Instance.OnXPChanged += HandleXPChanged;
         }
     }
@@ -125,24 +81,9 @@ public class TechPanelControl : MonoBehaviour
         if (PlayerKnownResourcesManager.Instance != null)
             PlayerKnownResourcesManager.Instance.OnKnownChanged -= HandleKnownChanged;
 
-        if (PlayerKnownBuildingsManager.Instance != null)
-            PlayerKnownBuildingsManager.Instance.OnKnownBuildingsChanged -= HandleKnownChanged;
-
-        if (PlayerKnownCraftingManager.Instance != null)
-            PlayerKnownCraftingManager.Instance.OnKnownCraftingChanged -= HandleKnownChanged;
-
-        if (PlayerKnownProductionManager.Instance != null)
-            PlayerKnownProductionManager.Instance.OnKnownProductionChanged -= HandleKnownChanged;
-
-        if (PlayerKnownUnitsManager.Instance != null)
-            PlayerKnownUnitsManager.Instance.OnKnownChanged -= HandleKnownChanged;
-
-        if (PlayerKnownTechnologyManager.Instance != null)
-            PlayerKnownTechnologyManager.Instance.OnKnownTechnologyChanged -= HandleKnownChanged;
-
         if (PlayerLevel.Instance != null)
         {
-            PlayerLevel.Instance.OnLevelUp   -= HandleLevelUp;
+            PlayerLevel.Instance.OnLevelUp  -= HandleLevelUp;
             PlayerLevel.Instance.OnXPChanged -= HandleXPChanged;
         }
     }
@@ -154,9 +95,6 @@ public class TechPanelControl : MonoBehaviour
         if (root) root.SetActive(true);
         gameObject.SetActive(true);
 
-        TileInteraction.SetSelectionEnabled(false);
-        cameraControl?.PushInputLock();
-
         ResourceSourceCache.BuildCache();
 
         RefreshHeader();
@@ -166,18 +104,15 @@ public class TechPanelControl : MonoBehaviour
 
     public void Close()
     {
-        HideAllDetailPanels();
+        if (detailPanel != null) detailPanel.Hide();
         if (root) root.SetActive(false);
-
-        TileInteraction.SetSelectionEnabled(false);
-        TileInteraction.GetInstance()?.EnableSelectionAfter(0.01f);
-        cameraControl?.PopInputLock();
     }
 
     // ── Header ────────────────────────────────────────────────────────────────
 
     private void RefreshHeader()
     {
+        // Title: "[Civ Name] Tech Panel"
         if (titleText != null)
         {
             string civName = ProfilePanelControl.Instance != null
@@ -189,8 +124,8 @@ public class TechPanelControl : MonoBehaviour
                 : $"{civName} Tech Panel";
         }
 
-        if (_levelManager == null) _levelManager = FindObjectOfType<LevelManager>();
-        var levelMgr = _levelManager;
+        // Stage name + icons
+        var levelMgr = FindObjectOfType<LevelManager>();
         var pl = PlayerLevel.Instance;
         int currentLevel = pl ? pl.GetCurrentLevel() : 1;
         StageData stageData = null;
@@ -206,25 +141,40 @@ public class TechPanelControl : MonoBehaviour
 
         Sprite stageIcon = stageData?.icon;
 
-        if (levelIconLeft  != null) { levelIconLeft.sprite  = stageIcon; levelIconLeft.enabled  = stageIcon != null; }
-        if (levelIconRight != null) { levelIconRight.sprite = stageIcon; levelIconRight.enabled = stageIcon != null; }
+        if (levelIconLeft != null)
+        {
+            levelIconLeft.sprite  = stageIcon;
+            levelIconLeft.enabled = stageIcon != null;
+        }
 
+        if (levelIconRight != null)
+        {
+            levelIconRight.sprite  = stageIcon;
+            levelIconRight.enabled = stageIcon != null;
+        }
+
+        // Player name
         if (playerNameText != null)
-            playerNameText.text = ProfilePanelControl.Instance != null
+        {
+            string pName = ProfilePanelControl.Instance != null
                 ? ProfilePanelControl.Instance.PlayerName
                 : string.Empty;
+            playerNameText.text = pName;
+        }
 
+        // Current / next level
         if (currentLevelText != null)
-            currentLevelText.text = $"Level {currentLevel}";
+            currentLevelText.text = $"{currentLevel}";
 
         if (nextLevelText != null)
         {
+            int next = currentLevel + 1;
             bool maxed = pl != null && pl.XPToNextLevel <= 0;
-            nextLevelText.text = maxed ? "Max" : $"Level {currentLevel + 1}";
+            nextLevelText.text = maxed ? "Max" : $"Level {next}";
         }
     }
 
-    // ── Filter ────────────────────────────────────────────────────────────────
+    // ── Internal ──────────────────────────────────────────────────────────────
 
     private void BindFilter(Button btn, FilterMode mode)
     {
@@ -235,36 +185,9 @@ public class TechPanelControl : MonoBehaviour
     private void SetFilter(FilterMode mode)
     {
         _currentFilter = mode;
-        HideAllDetailPanels();
+        if (detailPanel != null) detailPanel.Hide();
         RefreshList();
     }
-
-    private void HideAllDetailPanels()
-    {
-        if (resourceDetailPanel   != null) resourceDetailPanel.Hide();
-        if (buildingDetailPanel   != null) buildingDetailPanel.Hide();
-        if (craftingDetailPanel   != null) craftingDetailPanel.Hide();
-        if (productionDetailPanel != null) productionDetailPanel.Hide();
-        if (unitDetailPanel       != null) unitDetailPanel.Hide();
-        if (techDetailPanel       != null) techDetailPanel.Hide();
-    }
-
-    private void RefreshActiveFilterText()
-    {
-        if (activeFilterText == null) return;
-        activeFilterText.text = _currentFilter switch
-        {
-            FilterMode.Resources  => "Resources",
-            FilterMode.Buildings  => "Buildings",
-            FilterMode.Crafting   => "Crafting",
-            FilterMode.Production => "Production",
-            FilterMode.Units      => "Units",
-            FilterMode.Tech       => "Tech",
-            _                     => string.Empty
-        };
-    }
-
-    // ── Event handlers ────────────────────────────────────────────────────────
 
     private void HandleKnownChanged()
     {
@@ -287,8 +210,6 @@ public class TechPanelControl : MonoBehaviour
             RefreshXP();
     }
 
-    // ── XP ────────────────────────────────────────────────────────────────────
-
     private void RefreshXP()
     {
         var pl = PlayerLevel.Instance;
@@ -308,21 +229,16 @@ public class TechPanelControl : MonoBehaviour
         }
     }
 
-    // ── List ──────────────────────────────────────────────────────────────────
-
     private void RefreshList()
     {
-        RefreshActiveFilterText();
         ClearList();
 
         switch (_currentFilter)
         {
-            case FilterMode.Resources:  PopulateResources();  break;
-            case FilterMode.Buildings:  PopulateBuildings();  break;
-            case FilterMode.Crafting:    PopulateCrafting();    break;
-            case FilterMode.Production:  PopulateProduction();  break;
-            case FilterMode.Units:       PopulateUnits();       break;
-            case FilterMode.Tech:        PopulateTech();        break;
+            case FilterMode.Resources:
+                PopulateResources();
+                break;
+            // Buildings, Crafting, Production, Units — to be implemented
         }
     }
 
@@ -335,94 +251,24 @@ public class TechPanelControl : MonoBehaviour
         {
             if (resource == null) continue;
             var entry = Instantiate(resourceEntryPrefab, contentRoot);
-            entry.Bind(resource, r => resourceDetailPanel?.ShowFor(r));
-            _spawnedEntries.Add(entry.gameObject);
+            entry.Bind(resource, OnResourceEntryClicked);
+            _spawnedEntries.Add(entry);
         }
     }
 
-    private void PopulateBuildings()
+    private void OnResourceEntryClicked(ResourceDefinition resource)
     {
-        var knownMgr = PlayerKnownBuildingsManager.Instance;
-        if (knownMgr == null || buildingEntryPrefab == null || contentRoot == null) return;
-
-        var buildings = knownMgr.GetKnownBuildings();
-        if (buildings == null) return;
-
-        foreach (var building in buildings)
-        {
-            if (building == null) continue;
-            var entry = Instantiate(buildingEntryPrefab, contentRoot);
-            entry.Bind(building, b => buildingDetailPanel?.ShowFor(b));
-            _spawnedEntries.Add(entry.gameObject);
-        }
-    }
-
-    private void PopulateCrafting()
-    {
-        var knownMgr = PlayerKnownCraftingManager.Instance;
-        if (knownMgr == null || craftingEntryPrefab == null || contentRoot == null) return;
-
-        foreach (var recipe in knownMgr.GetKnownRecipes())
-        {
-            if (recipe == null) continue;
-            var entry = Instantiate(craftingEntryPrefab, contentRoot);
-            entry.Bind(recipe, r => craftingDetailPanel?.ShowFor(r));
-            _spawnedEntries.Add(entry.gameObject);
-        }
-    }
-
-    private void PopulateProduction()
-    {
-        var knownMgr = PlayerKnownProductionManager.Instance;
-        if (knownMgr == null || productionEntryPrefab == null || contentRoot == null) return;
-
-        foreach (var plan in knownMgr.GetKnownPlans())
-        {
-            if (plan == null) continue;
-            var entry = Instantiate(productionEntryPrefab, contentRoot);
-            entry.Bind(plan, p => productionDetailPanel?.ShowFor(p));
-            _spawnedEntries.Add(entry.gameObject);
-        }
-    }
-
-    private void PopulateUnits()
-    {
-        var knownMgr = PlayerKnownUnitsManager.Instance;
-        if (knownMgr == null || unitEntryPrefab == null || contentRoot == null) return;
-
-        foreach (var unit in knownMgr.GetAllKnown())
-        {
-            if (unit == null) continue;
-            var entry = Instantiate(unitEntryPrefab, contentRoot);
-            entry.Bind(unit, u => unitDetailPanel?.ShowFor(u));
-            _spawnedEntries.Add(entry.gameObject);
-        }
-    }
-
-    private void PopulateTech()
-    {
-        var techMgr  = TechnologyManager.Instance;
-        var knownMgr = PlayerKnownTechnologyManager.Instance;
-        if (techMgr == null || techEntryPrefab == null || contentRoot == null) return;
-
-        int playerLevel = PlayerLevel.Instance != null ? PlayerLevel.Instance.GetCurrentLevel() : 0;
-
-        foreach (var tech in techMgr.GetAll())
-        {
-            if (tech == null) continue;
-            if (knownMgr != null && !knownMgr.IsKnown(tech.techID)) continue;
-            if (!tech.IsEligibleForLevel(playerLevel)) continue;
-
-            var entry = Instantiate(techEntryPrefab, contentRoot);
-            entry.Bind(tech, t => techDetailPanel?.Show(t));
-            _spawnedEntries.Add(entry.gameObject);
-        }
+        if (detailPanel != null)
+            detailPanel.ShowFor(resource);
     }
 
     private void ClearList()
     {
         for (int i = _spawnedEntries.Count - 1; i >= 0; i--)
-            if (_spawnedEntries[i] != null) Destroy(_spawnedEntries[i]);
+        {
+            if (_spawnedEntries[i] != null)
+                Destroy(_spawnedEntries[i].gameObject);
+        }
         _spawnedEntries.Clear();
     }
 }

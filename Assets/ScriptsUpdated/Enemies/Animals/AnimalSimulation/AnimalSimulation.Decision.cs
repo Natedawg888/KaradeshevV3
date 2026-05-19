@@ -1440,6 +1440,10 @@ public partial class AnimalSimulation
             if (coord == origin)
                 continue;
 
+            // Hard-blocked: repeller zone tiles are never valid movement destinations.
+            if (IsTileRepelled(coord))
+                continue;
+
             // If this neighbour is a building tile the animal should avoid,
             // try to "hop" over it to the next tile in the same direction.
             if (ShouldAvoidHumans(species) && IsPlayerBuildingTile(coord))

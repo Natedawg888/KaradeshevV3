@@ -47,18 +47,39 @@ public partial class AnimalSimulationController : MonoBehaviour
         int cols = _grid != null ? _grid.columns : int.MaxValue;
         int rows = _grid != null ? _grid.rows    : int.MaxValue;
 
+        var monoEnv = MonoEnvironmentDataSource.Instance;
+
         foreach (var repeller in AnimalRepellerRegistry.Active)
         {
             if (repeller == null) continue;
 
-            var gp     = _grid != null ? _grid.GetGridPosition(repeller.transform.position) : Vector2Int.zero;
+            TileCoord center;
+            if (repeller.HasCachedTile)
+            {
+                center = repeller.CachedTileCoord;
+            }
+            else if (monoEnv != null && monoEnv.TryGetTileCoordForPosition(repeller.transform.position, out TileCoord coord))
+            {
+                center = coord;
+            }
+            else
+            {
+                if (_grid == null) continue;
+                var gp = _grid.GetGridPosition(repeller.transform.position);
+                center = new TileCoord(gp.x, gp.y);
+            }
+
+            // Always block the building's own tile, regardless of radius.
+            repelled.Add(center);
+
             int radius = Mathf.Max(1, repeller.repelRadiusTiles);
 
             for (int dx = -radius; dx <= radius; dx++)
             for (int dy = -radius; dy <= radius; dy++)
             {
-                int tx = gp.x + dx;
-                int ty = gp.y + dy;
+                if (dx == 0 && dy == 0) continue;
+                int tx = center.x + dx;
+                int ty = center.y + dy;
                 if (tx < 0 || ty < 0 || tx >= cols || ty >= rows) continue;
                 repelled.Add(new TileCoord { x = tx, y = ty });
             }

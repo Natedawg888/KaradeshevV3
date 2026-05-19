@@ -95,7 +95,9 @@ public class GameSceneManager : MonoBehaviour
 
         LogTiming("Startup", "FramesBeforeStartupWork", Time.realtimeSinceStartup - sceneSettlingStart);
 
-        GameStartMode startMode = GameStartContext.ConsumeRequestedMode(defaultStartMode);
+        // Treat None as NewGame so a stale defaultStartMode=LoadGame never auto-loads
+        // when the scene is entered without going through the main menu.
+        GameStartMode startMode = GameStartContext.ConsumeRequestedMode(GameStartMode.NewGame);
 
         if (startMode == GameStartMode.LoadGame && SaveSystem.HasSave())
         {
@@ -117,6 +119,10 @@ public class GameSceneManager : MonoBehaviour
         {
             if (startMode == GameStartMode.LoadGame && !SaveSystem.HasSave()) {}
                 //Debug.LogWarning("[GameSceneManager] Load requested but no save exists. Falling back to New Game.");
+
+            // Delete any old save so HasSave() is false during generation and stale
+            // data cannot be re-loaded if something triggers a load attempt mid-startup.
+            SaveSystem.DeleteSave();
 
             float newGameStart = Time.realtimeSinceStartup;
             yield return RunNewGameGeneration();
@@ -327,6 +333,7 @@ public class GameSceneManager : MonoBehaviour
         if (saveSystem == null)
             saveSystem = SaveSystem.Instance;
 
+        CommitScoreToLeaderboard();
         SaveSystem.SaveCloseGameNow();
     }
 
@@ -342,8 +349,21 @@ public class GameSceneManager : MonoBehaviour
         if (saveSystem == null)
             saveSystem = SaveSystem.Instance;
 
+        CommitScoreToLeaderboard();
         SaveSystem.SaveCloseGameNow();
 #endif
+    }
+
+    private static void CommitScoreToLeaderboard()
+    {
+        if (ScoreManager.Instance == null)
+            return;
+
+        string playerName  = ProfilePanelControl.Instance != null ? ProfilePanelControl.Instance.PlayerName        : string.Empty;
+        string civName     = ProfilePanelControl.Instance != null ? ProfilePanelControl.Instance.CivilizationName  : string.Empty;
+        string avatarName  = ProfilePanelControl.Instance != null ? ProfilePanelControl.Instance.CurrentAvatarName : string.Empty;
+
+        ScoreManager.Instance.CommitScoreToLeaderboard(playerName, civName, avatarName);
     }
 
     private void ShowLoadScreen(int maxTurns, int turnsLeft)
@@ -427,6 +447,7 @@ public class GameSceneManager : MonoBehaviour
         yield return null;
 
         _quitSaveInProgress = false;
+        CommitScoreToLeaderboard();
         Application.Quit();
     }
 }

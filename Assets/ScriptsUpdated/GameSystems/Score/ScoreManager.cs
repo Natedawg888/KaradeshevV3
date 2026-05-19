@@ -56,6 +56,7 @@ public class ScoreManager : MonoBehaviour
     public void OnGameStarted()
     {
         _gameStarted = true;
+        OnScoreChanged?.Invoke(CurrentScore);
     }
 
     private void AddScore(int points)

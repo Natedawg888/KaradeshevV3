@@ -173,7 +173,10 @@ public class ProfilePanelControl : MonoBehaviour
     private void OnEnable()
     {
         if (ScoreManager.Instance != null)
+        {
             ScoreManager.Instance.OnScoreChanged += HandleScoreChanged;
+            RefreshScoreDisplay();
+        }
     }
 
     private void OnDisable()

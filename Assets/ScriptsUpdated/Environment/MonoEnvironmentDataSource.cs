@@ -182,6 +182,17 @@ public class MonoEnvironmentDataSource : MonoBehaviour, IEnvironmentDataSource
         return results;
     }
 
+    public bool TryGetTileCoordForPosition(Vector3 worldPos, out TileCoord coord)
+    {
+        coord = default;
+        GridManager grid = GridManager.Instance;
+        if (grid == null)
+            return false;
+        Vector2Int gp = grid.GetGridPosition(worldPos);
+        coord = new TileCoord(gp.x, gp.y);
+        return true;
+    }
+
     private bool TryGetWorldBounds(Transform root, out Bounds bounds)
     {
         if (root == null)
