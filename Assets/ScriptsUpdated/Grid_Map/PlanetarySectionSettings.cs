@@ -128,6 +128,132 @@ public class AnimalSpawnPresetSettings
 }
 
 [System.Serializable]
+public class MarsEffectSettings
+{
+    public bool enabled = false;
+    [Range(0f, 1f)] public float strength = 1f;
+
+    [Header("Temperature")]
+    public float globalTempOffset = -30f;
+    public float equatorTempOffset = -10f;
+    public float poleTempOffset = -50f;
+
+    [Header("Humidity")]
+    public float globalHumidityOffset = -0.6f;
+    public float equatorHumidityOffset = -0.2f;
+    public float poleHumidityOffset = -0.5f;
+
+    [Header("Seasonal (thin atmosphere)")]
+    public float seasonalTemperatureStrengthAdd = 0.8f;
+    public float seasonalHumidityStrengthAdd = -0.5f;
+}
+
+[System.Serializable]
+public class VenusEffectSettings
+{
+    public bool enabled = false;
+    [Range(0f, 1f)] public float strength = 1f;
+
+    [Header("Temperature")]
+    public float globalTempOffset = 40f;
+    public float equatorTempOffset = 5f;
+    public float poleTempOffset = 15f;
+
+    [Header("Humidity")]
+    public float globalHumidityOffset = 0.35f;
+    public float equatorHumidityOffset = 0.1f;
+    public float poleHumidityOffset = 0.2f;
+
+    [Header("Seasonal (greenhouse suppression)")]
+    public float seasonalTemperatureStrengthAdd = -0.6f;
+    public float seasonalHumidityStrengthAdd = -0.4f;
+}
+
+[System.Serializable]
+public class JupiterEffectSettings
+{
+    public bool enabled = false;
+    [Range(0f, 1f)] public float strength = 1f;
+
+    [Header("Atmospheric Banding")]
+    public float bandingFrequency = 4f;
+    public float bandingTempAmplitude = 12f;
+    [Range(0f, 1f)] public float bandingHumidityAmplitude = 0.2f;
+
+    [Header("Temperature Gradient")]
+    public float equatorTempOffset = 15f;
+    public float poleTempOffset = -25f;
+
+    [Header("Seasonal Extremes")]
+    public float seasonalTemperatureStrengthAdd = 1.5f;
+    public float seasonalHumidityStrengthAdd = 0.8f;
+}
+
+// Jupiter's gravity amplitude-modulates Earth's eccentricity cycle (dominant 100kyr driver)
+// and contributes to apsidal precession (perihelion timing drift).
+[System.Serializable]
+public class JupiterGravitationalInfluence
+{
+    public bool enabled = true;
+    [Range(0f, 1f)] public float strength = 1f;
+
+    [Header("Eccentricity Amplitude Modulation")]
+    [Tooltip("Frequency of Jupiter's slow amplitude modulation envelope on the eccentricity cycle.")]
+    public float eccModFrequency = 0.15f;
+    [Tooltip("How deeply Jupiter modulates eccentricity amplitude (0=none, 1=can double or zero it).")]
+    [Range(0f, 1f)] public float eccModDepth = 0.65f;
+
+    [Header("Apsidal Precession Contribution")]
+    [Tooltip("Jupiter's contribution to Earth's apsidal / perihelion precession rate.")]
+    public float apsidalFrequency = 0.45f;
+    [Range(0f, 1f)] public float apsidalAmplitude = 0.35f;
+}
+
+// Venus has the strongest close-approach perturbation of any planet.
+// It drives the long ~400kyr eccentricity envelope and couples into the obliquity cycle.
+[System.Serializable]
+public class VenusGravitationalInfluence
+{
+    public bool enabled = true;
+    [Range(0f, 1f)] public float strength = 1f;
+
+    [Header("Long-Period Eccentricity Envelope")]
+    [Tooltip("Frequency of Venus's very slow (~4x slower than base ecc cycle) amplitude envelope.")]
+    public float longEccFrequency = 0.09f;
+    [Tooltip("Depth of Venus's long eccentricity modulation.")]
+    [Range(0f, 1f)] public float longEccDepth = 0.45f;
+
+    [Header("Obliquity Coupling")]
+    [Tooltip("Venus's orbital plane coupling introduces a secondary wobble into the obliquity signal.")]
+    public float obliquityInfluenceFrequency = 0.72f;
+    [Range(0f, 1f)] public float obliquityInfluenceAmplitude = 0.22f;
+}
+
+// Mars drives fast, small eccentricity perturbations and a near-resonance beat
+// from its ~1.88 yr orbit. Its inclination also weakly couples into obliquity.
+[System.Serializable]
+public class MarsGravitationalInfluence
+{
+    public bool enabled = true;
+    [Range(0f, 1f)] public float strength = 1f;
+
+    [Header("Fast Eccentricity Perturbation")]
+    [Tooltip("Mars drives higher-frequency, lower-amplitude eccentricity oscillations.")]
+    public float eccPerturbFrequency = 2.35f;
+    [Range(0f, 1f)] public float eccPerturbAmplitude = 0.18f;
+
+    [Header("Inclination / Obliquity Coupling")]
+    [Tooltip("Mars's orbital inclination weakly couples into Earth's obliquity signal.")]
+    public float oblPerturbFrequency = 1.65f;
+    [Range(0f, 1f)] public float oblPerturbAmplitude = 0.12f;
+
+    [Header("Near-Resonance Beat (2:1)")]
+    [Tooltip("The near 2:1 Earth-Mars orbital resonance creates a high-frequency beat on both ecc and precession.")]
+    public float resonanceBeatFrequency = 3.8f;
+    [Range(0f, 1f)] public float resonanceBeatAmplitude = 0.08f;
+}
+
+[System.Serializable]
 public class PlanetaryForcingSettings
 {
     public bool enabled = true;
@@ -159,6 +285,16 @@ public class PlanetaryForcingSettings
     [Range(0f, 1f)] public float precessionNorthSouthHumidityBiasAmplitude = 0.08f;
     public float precessionMeanTempAmplitude = 0.75f;
     [Range(0f, 1f)] public float precessionMeanHumidityAmplitude = 0.03f;
+
+    [Header("Planetary Archetype Effects")]
+    public MarsEffectSettings marsEffect = new MarsEffectSettings();
+    public VenusEffectSettings venusEffect = new VenusEffectSettings();
+    public JupiterEffectSettings jupiterEffect = new JupiterEffectSettings();
+
+    [Header("Planetary Gravitational Perturbations")]
+    public JupiterGravitationalInfluence jupiterGravity = new JupiterGravitationalInfluence();
+    public VenusGravitationalInfluence venusGravity = new VenusGravitationalInfluence();
+    public MarsGravitationalInfluence marsGravity = new MarsGravitationalInfluence();
 }
 
 [System.Serializable]
