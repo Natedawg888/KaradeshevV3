@@ -1456,61 +1456,10 @@ public class ClimateManager : MonoBehaviour
         sample.meanTemperatureOffset += pre * settings.precessionMeanTempAmplitude;
         sample.meanHumidityOffset += pre * settings.precessionMeanHumidityAmplitude;
 
-        ApplyMarsEffect(ref sample, settings, t01);
-        ApplyVenusEffect(ref sample, settings);
-        ApplyJupiterEffect(ref sample, settings, t01);
-
         sample.seasonalTemperatureStrengthMultiplier = Mathf.Max(0.1f, sample.seasonalTemperatureStrengthMultiplier);
         sample.seasonalHumidityStrengthMultiplier = Mathf.Max(0.1f, sample.seasonalHumidityStrengthMultiplier);
 
         return sample;
-    }
-
-    private void ApplyMarsEffect(ref PlanetaryForcingSample sample, PlanetaryForcingSettings settings, float t01)
-    {
-        MarsEffectSettings m = settings.marsEffect;
-        if (!m.enabled || m.strength <= 0f) return;
-
-        float s = m.strength;
-        sample.meanTemperatureOffset      += m.globalTempOffset * s;
-        sample.meanHumidityOffset         += m.globalHumidityOffset * s;
-        sample.equatorTemperatureOffset   += m.equatorTempOffset * s;
-        sample.poleTemperatureOffset      += m.poleTempOffset * s;
-        sample.equatorHumidityOffset      += m.equatorHumidityOffset * s;
-        sample.poleHumidityOffset         += m.poleHumidityOffset * s;
-        sample.seasonalTemperatureStrengthMultiplier += m.seasonalTemperatureStrengthAdd * s;
-        sample.seasonalHumidityStrengthMultiplier    += m.seasonalHumidityStrengthAdd * s;
-    }
-
-    private void ApplyVenusEffect(ref PlanetaryForcingSample sample, PlanetaryForcingSettings settings)
-    {
-        VenusEffectSettings v = settings.venusEffect;
-        if (!v.enabled || v.strength <= 0f) return;
-
-        float s = v.strength;
-        sample.meanTemperatureOffset      += v.globalTempOffset * s;
-        sample.meanHumidityOffset         += v.globalHumidityOffset * s;
-        sample.equatorTemperatureOffset   += v.equatorTempOffset * s;
-        sample.poleTemperatureOffset      += v.poleTempOffset * s;
-        sample.equatorHumidityOffset      += v.equatorHumidityOffset * s;
-        sample.poleHumidityOffset         += v.poleHumidityOffset * s;
-        sample.seasonalTemperatureStrengthMultiplier += v.seasonalTemperatureStrengthAdd * s;
-        sample.seasonalHumidityStrengthMultiplier    += v.seasonalHumidityStrengthAdd * s;
-    }
-
-    private void ApplyJupiterEffect(ref PlanetaryForcingSample sample, PlanetaryForcingSettings settings, float t01)
-    {
-        JupiterEffectSettings j = settings.jupiterEffect;
-        if (!j.enabled || j.strength <= 0f) return;
-
-        float s = j.strength;
-        float band = Mathf.Sin(t01 * Mathf.PI * 2f * j.bandingFrequency);
-        sample.northSouthTemperatureBias += band * j.bandingTempAmplitude * s;
-        sample.northSouthHumidityBias    += band * j.bandingHumidityAmplitude * s;
-        sample.equatorTemperatureOffset  += j.equatorTempOffset * s;
-        sample.poleTemperatureOffset     += j.poleTempOffset * s;
-        sample.seasonalTemperatureStrengthMultiplier += j.seasonalTemperatureStrengthAdd * s;
-        sample.seasonalHumidityStrengthMultiplier    += j.seasonalHumidityStrengthAdd * s;
     }
 
     // Jupiter amplitude-modulates the eccentricity cycle (dominant 100kyr driver)

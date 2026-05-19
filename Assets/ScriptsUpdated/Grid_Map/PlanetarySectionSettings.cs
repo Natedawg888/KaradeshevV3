@@ -127,68 +127,6 @@ public class AnimalSpawnPresetSettings
     [Min(1)] public int maxTotalGroups = 150;
 }
 
-[System.Serializable]
-public class MarsEffectSettings
-{
-    public bool enabled = false;
-    [Range(0f, 1f)] public float strength = 1f;
-
-    [Header("Temperature")]
-    public float globalTempOffset = -30f;
-    public float equatorTempOffset = -10f;
-    public float poleTempOffset = -50f;
-
-    [Header("Humidity")]
-    public float globalHumidityOffset = -0.6f;
-    public float equatorHumidityOffset = -0.2f;
-    public float poleHumidityOffset = -0.5f;
-
-    [Header("Seasonal (thin atmosphere)")]
-    public float seasonalTemperatureStrengthAdd = 0.8f;
-    public float seasonalHumidityStrengthAdd = -0.5f;
-}
-
-[System.Serializable]
-public class VenusEffectSettings
-{
-    public bool enabled = false;
-    [Range(0f, 1f)] public float strength = 1f;
-
-    [Header("Temperature")]
-    public float globalTempOffset = 40f;
-    public float equatorTempOffset = 5f;
-    public float poleTempOffset = 15f;
-
-    [Header("Humidity")]
-    public float globalHumidityOffset = 0.35f;
-    public float equatorHumidityOffset = 0.1f;
-    public float poleHumidityOffset = 0.2f;
-
-    [Header("Seasonal (greenhouse suppression)")]
-    public float seasonalTemperatureStrengthAdd = -0.6f;
-    public float seasonalHumidityStrengthAdd = -0.4f;
-}
-
-[System.Serializable]
-public class JupiterEffectSettings
-{
-    public bool enabled = false;
-    [Range(0f, 1f)] public float strength = 1f;
-
-    [Header("Atmospheric Banding")]
-    public float bandingFrequency = 4f;
-    public float bandingTempAmplitude = 12f;
-    [Range(0f, 1f)] public float bandingHumidityAmplitude = 0.2f;
-
-    [Header("Temperature Gradient")]
-    public float equatorTempOffset = 15f;
-    public float poleTempOffset = -25f;
-
-    [Header("Seasonal Extremes")]
-    public float seasonalTemperatureStrengthAdd = 1.5f;
-    public float seasonalHumidityStrengthAdd = 0.8f;
-}
-
 // Jupiter's gravity amplitude-modulates Earth's eccentricity cycle (dominant 100kyr driver)
 // and contributes to apsidal precession (perihelion timing drift).
 [System.Serializable]
@@ -285,11 +223,6 @@ public class PlanetaryForcingSettings
     [Range(0f, 1f)] public float precessionNorthSouthHumidityBiasAmplitude = 0.08f;
     public float precessionMeanTempAmplitude = 0.75f;
     [Range(0f, 1f)] public float precessionMeanHumidityAmplitude = 0.03f;
-
-    [Header("Planetary Archetype Effects")]
-    public MarsEffectSettings marsEffect = new MarsEffectSettings();
-    public VenusEffectSettings venusEffect = new VenusEffectSettings();
-    public JupiterEffectSettings jupiterEffect = new JupiterEffectSettings();
 
     [Header("Planetary Gravitational Perturbations")]
     public JupiterGravitationalInfluence jupiterGravity = new JupiterGravitationalInfluence();
