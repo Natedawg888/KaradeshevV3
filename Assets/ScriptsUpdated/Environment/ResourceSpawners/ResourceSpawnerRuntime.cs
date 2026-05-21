@@ -5,7 +5,8 @@ public enum SpawnerSourceReason
     AnimalDeath,
     WeatherCreated,
     PlayerAction,
-    AnimalPresence
+    AnimalPresence,
+    SpawnerTriggered
 }
 
 [System.Flags]

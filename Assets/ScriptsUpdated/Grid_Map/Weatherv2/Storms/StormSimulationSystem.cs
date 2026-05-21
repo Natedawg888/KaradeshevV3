@@ -68,6 +68,8 @@ public class StormSimulationSystem : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool debugLogging = false;
 
+    public float SolarStormIntensityGainBonus { get; set; }
+
     public event Action OnStormGridInitialized;
     public event Action OnStormStateChanged;
 
@@ -347,7 +349,7 @@ public class StormSimulationSystem : MonoBehaviour
                 {
                     float seededIntensity = initialStormIntensityFromWeather * weatherStrength;
                     intensity = Mathf.Max(intensity, seededIntensity);
-                    intensity = Mathf.Clamp01(intensity + stormIntensityGainPerStep * weatherStrength);
+                    intensity = Mathf.Clamp01(intensity + (stormIntensityGainPerStep + SolarStormIntensityGainBonus) * weatherStrength);
                 }
                 else
                 {

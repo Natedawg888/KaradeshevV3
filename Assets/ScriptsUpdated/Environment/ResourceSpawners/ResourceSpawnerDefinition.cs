@@ -86,6 +86,22 @@ public class ResourceSpawnerConditionSettings
     public bool requiresNotDry;
 }
 
+[System.Serializable]
+public class SpawnerTriggerEntry
+{
+    [Tooltip("The spawner to add to this tile when the parent spawner successfully fires.")]
+    public ResourceSpawnerDefinition triggeredSpawner;
+
+    [Tooltip("Chance (0-1) this trigger fires each time the parent spawner completes an output cycle.")]
+    [Range(0f, 1f)] public float triggerChance = 1f;
+
+    [Tooltip("If > 0, the triggered spawner is temporary and expires after this many turns. 0 = permanent.")]
+    [Min(0)] public int lifetimeTurns = 0;
+
+    [Tooltip("If true, skips adding the triggered spawner if it is already active on this tile.")]
+    public bool onlyIfNotAlreadyPresent = true;
+}
+
 [CreateAssetMenu(menuName = "Resources/ResourceSpawnerDefinition", fileName = "NewResourceSpawner")]
 public class ResourceSpawnerDefinition : ScriptableObject
 {
@@ -125,6 +141,11 @@ public class ResourceSpawnerDefinition : ScriptableObject
 
     [Header("Conditions")]
     public ResourceSpawnerConditionSettings conditions = new();
+
+    [Header("Triggered Spawners")]
+    [Tooltip("When this spawner fires an output cycle, these spawners are added to the tile. " +
+             "Example: a Dung spawner that triggers a Mushroom spawner nearby.")]
+    public List<SpawnerTriggerEntry> triggeredSpawners = new();
 
     [Header("Guaranteed Spawn")]
     [Tooltip("If true, this spawner always fires when its interval and conditions are met — no random roll against baseSpawnChance. The climate multiplier still applies, so drought (low humidity → multiplier 0) can stop it. Use for resources that must always be present, like water on ponds.")]

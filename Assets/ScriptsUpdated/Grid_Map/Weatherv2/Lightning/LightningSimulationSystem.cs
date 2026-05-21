@@ -192,6 +192,8 @@ public class LightningSimulationSystem : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool debugLogging = false;
 
+    public float SolarStormChargeGainBonus { get; set; }
+
     public event Action OnLightningGridInitialized;
     public event Action OnLightningStateChanged;
     public event Action<LightningBurstInfo> OnLightningBurstQueued;
@@ -712,7 +714,7 @@ public class LightningSimulationSystem : MonoBehaviour
             if (support01 > 0f)
             {
                 float gain =
-                    baseChargeGainPerStep +
+                    baseChargeGainPerStep + SolarStormChargeGainBonus +
                     stormChargeGainPerStep * stormIntensity01 +
                     cloudChargeGainPerStep * cloudSupport01 +
                     rainChargeGainPerStep * rainSupport01;

@@ -205,6 +205,7 @@ public partial class EnvironmentResourceNode : MonoBehaviour
                 }
 
                 remaining = RunSpawnerOutputs(runtime, remaining, sizeMultiplier);
+                CheckAndAddTriggeredSpawners(def);
 
                 if (def.canExpire && def.maxUses > 0 && runtime.remainingUses > 0)
                     runtime.remainingUses--;
@@ -257,6 +258,28 @@ public partial class EnvironmentResourceNode : MonoBehaviour
     }
 
     // ── Internal helpers ─────────────────────────────────────────────────────
+
+    private void CheckAndAddTriggeredSpawners(ResourceSpawnerDefinition def)
+    {
+        if (def.triggeredSpawners == null || def.triggeredSpawners.Count == 0) return;
+
+        for (int i = 0; i < def.triggeredSpawners.Count; i++)
+        {
+            var trigger = def.triggeredSpawners[i];
+            if (trigger?.triggeredSpawner == null) continue;
+            if (trigger.triggerChance < 1f && Random.value > trigger.triggerChance) continue;
+            if (trigger.onlyIfNotAlreadyPresent && HasSpawner(trigger.triggeredSpawner.spawnerID)) continue;
+
+            if (trigger.lifetimeTurns > 0)
+                AddTemporarySpawner(trigger.triggeredSpawner, trigger.lifetimeTurns,
+                                    SpawnerSourceReason.SpawnerTriggered);
+            else
+                AddSpawner(trigger.triggeredSpawner, SpawnerSourceReason.SpawnerTriggered);
+
+            if (debugSpawnerLogging)
+                Debug.Log($"[Spawner] [{name}] '{def.displayName}' triggered '{trigger.triggeredSpawner.displayName}'");
+        }
+    }
 
     private int RunSpawnerOutputs(ResourceSpawnerRuntime runtime, int remaining, float sizeMultiplier = 1f)
     {

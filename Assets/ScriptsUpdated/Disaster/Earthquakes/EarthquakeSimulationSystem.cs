@@ -231,6 +231,15 @@ public class EarthquakeSimulationSystem : MonoBehaviour
             //Debug.Log("EarthquakeSimulationSystem: Cleared tectonic energy.");
     }
 
+    public void AddExternalTectonicEnergy(float amount)
+    {
+        if (amount <= 0f)
+            return;
+
+        tectonicEnergy01 = Mathf.Clamp01(tectonicEnergy01 + amount);
+        MarkEarthquakeSaveDirty();
+    }
+
     private void AddTectonicEnergyForTurn()
     {
         float minGain = Mathf.Min(minEnergyGainPerTurn, maxEnergyGainPerTurn);
