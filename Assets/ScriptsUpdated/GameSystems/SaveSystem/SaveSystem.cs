@@ -1324,6 +1324,14 @@ public class SaveSystem : MonoBehaviour
             else {}
                 //Debug.LogWarning("[SaveSystem] Tsunami save data exists, but no TsunamiSimulationSystem was found.");
         }
+
+        if (data.solarStormData != null)
+        {
+            if (SolarStormSystem.Instance != null)
+                SolarStormSystem.Instance.LoadState(data.solarStormData);
+            else {}
+                //Debug.LogWarning("[SaveSystem] Solar storm save data exists, but no SolarStormSystem was found.");
+        }
     }
 
     private void LoadJobsSection(JobsSectionSaveData data)

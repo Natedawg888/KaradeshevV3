@@ -67,6 +67,8 @@ public sealed class WorldSimSaveSection : SaveSectionBase
             TsunamiSimulationSystem.Instance != null ? TsunamiSimulationSystem.Instance.SaveState() : null;
         VolcanoManagerSaveData volcanoManagerData =
             VolcanoManager.Instance != null ? VolcanoManager.Instance.SaveState() : null;
+        SolarStormSaveData solarStormData =
+            SolarStormSystem.Instance != null ? SolarStormSystem.Instance.SaveState() : null;
         _pmWeather.End();
 
         snapshot.worldSim = new WorldSimSectionSaveData
@@ -80,7 +82,8 @@ public sealed class WorldSimSaveSection : SaveSectionBase
             earthquakeSimulationData = earthquakeSimulationData,
             fireSimulationData      = fireSimulationData,
             tsunamiSimulationData   = tsunamiSimulationData,
-            volcanoManagerData      = volcanoManagerData
+            volcanoManagerData      = volcanoManagerData,
+            solarStormData          = solarStormData
         };
 
         ClearDirty();

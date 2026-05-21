@@ -93,6 +93,8 @@ public class WorldSimSectionSaveData
     public TsunamiSimulationSaveData tsunamiSimulationData;
 
     public VolcanoManagerSaveData volcanoManagerData;
+
+    public SolarStormSaveData solarStormData;
 }
 
 [Serializable]
