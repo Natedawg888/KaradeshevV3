@@ -39,6 +39,12 @@ public class CivilizationStateManager : MonoBehaviour
         MarkCoreSystemsDirty();
     }
 
+    public void AdjustHealth(float delta)
+    {
+        health01 = Mathf.Clamp01(health01 + delta);
+        MarkCoreSystemsDirty();
+    }
+
     public void AdjustDiversity(float delta)
     {
         diversity01 = Mathf.Clamp01(diversity01 + delta);
