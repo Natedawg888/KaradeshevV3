@@ -43,7 +43,6 @@ public class ReligionRitualDefinitionSO : ScriptableObject
     [Header("Faith")]
     [Tooltip("Minimum civilization faith (0..1) needed to perform this ritual. 0 = no requirement.")]
     [Range(0f, 1f)] public float faithRequired = 0f;
-    [Tooltip("Faith gained on successful completion. 0 = no gain.")]
     [Range(0f, 1f)] public float faithReward = 0f;
 
     [Header("Turn Flow")]
