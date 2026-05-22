@@ -14,6 +14,7 @@ public class CivilizationStateBarsView : MonoBehaviour
     public RectTransform barOrder;
     public RectTransform barDiscovery;
     public RectTransform barKnowledge;
+    public RectTransform barFaith;
 
     [Header("Marker Containers (ride the bars)")]
     public RectTransform markerHappinessContainer;
@@ -23,6 +24,7 @@ public class CivilizationStateBarsView : MonoBehaviour
     public RectTransform markerOrderContainer;
     public RectTransform markerDiscoveryContainer;
     public RectTransform markerKnowledgeContainer;
+    public RectTransform markerFaithContainer;
 
     [Header("Marker Labels (optional)")]
     public TMP_Text markerHappinessText;
@@ -32,6 +34,7 @@ public class CivilizationStateBarsView : MonoBehaviour
     public TMP_Text markerOrderText;
     public TMP_Text markerDiscoveryText;
     public TMP_Text markerKnowledgeText;
+    public TMP_Text markerFaithText;
 
     [Header("Marker Layout")]
     [Tooltip("Offset above the bar top (px).")]
@@ -62,6 +65,7 @@ public class CivilizationStateBarsView : MonoBehaviour
         float order         = civ ? Mathf.Clamp01(civ.order01)       : 0f;
         float discovery     = civ ? Mathf.Clamp01(civ.discovery01)   : 0f;
         float knowledge     = civ ? Mathf.Clamp01(civ.knowledge01)   : 0f;
+        float faith         = civ ? Mathf.Clamp01(civ.faith01)       : 0f;
 
         Canvas.ForceUpdateCanvases();
 
@@ -72,6 +76,7 @@ public class CivilizationStateBarsView : MonoBehaviour
         SetBarAndMarker01(barOrder,         markerOrderContainer,         order,         markerOrderText);
         SetBarAndMarker01(barDiscovery,     markerDiscoveryContainer,     discovery,     markerDiscoveryText);
         SetBarAndMarker01(barKnowledge,     markerKnowledgeContainer,     knowledge,     markerKnowledgeText);
+        SetBarAndMarker01(barFaith,         markerFaithContainer,         faith,         markerFaithText);
     }
 
     private float ComputeOverallHealth01()
