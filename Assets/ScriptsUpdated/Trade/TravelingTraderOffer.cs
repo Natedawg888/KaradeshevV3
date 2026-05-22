@@ -9,6 +9,12 @@ public class TravelingTraderOffer
     public TradePopulationAmount offeredPopulation = new TradePopulationAmount();
     public List<TradeResourcePreference> preferences = new List<TradeResourcePreference>();
     public float greedMultiplier = 1.15f;
+    public float counterOfferTolerance = 0.75f;
+    public bool acceptsPopulationFromPlayer = true;
+    public float childValue = 1f;
+    public float teenValue = 2f;
+    public float adultValue = 4f;
+    public float elderValue = 2f;
     public int turnsRemaining;
     public string flavorDescription;
 }

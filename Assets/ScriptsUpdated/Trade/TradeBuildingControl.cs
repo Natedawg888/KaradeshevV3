@@ -45,6 +45,10 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     [SerializeField] private float baseGreedMultiplier = 1.15f;
     [SerializeField] private float counterOfferTolerance = 0.75f;
 
+    [Header("Trader Pool")]
+    [Tooltip("Optional. When populated, a random definition is picked each visit instead of the inline settings above.")]
+    [SerializeField] private List<TraderDefinitionSO> traderPool = new List<TraderDefinitionSO>();
+
     [Header("State")]
     [SerializeField] private bool hasActiveTrader;
     [SerializeField] private int traderTurnsRemaining;
@@ -151,7 +155,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
             ClearTrader();
         }
-        else if (playerValue >= traderValue * counterOfferTolerance)
+        else if (playerValue >= traderValue * currentTraderOffer.counterOfferTolerance)
         {
             result.resultType = TradeResultType.CounterOffer;
             result.title      = "Counter Offer";
@@ -310,56 +314,107 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
     private TravelingTraderOffer BuildTraderOffer()
     {
+        TraderDefinitionSO def = PickTraderDefinition();
+        return def != null ? BuildOfferFromDefinition(def) : BuildOfferFromInlineSettings();
+    }
+
+    private TraderDefinitionSO PickTraderDefinition()
+    {
+        if (traderPool == null || traderPool.Count == 0) return null;
+        var valid = new List<TraderDefinitionSO>();
+        for (int i = 0; i < traderPool.Count; i++)
+            if (traderPool[i] != null) valid.Add(traderPool[i]);
+        return valid.Count > 0 ? valid[UnityEngine.Random.Range(0, valid.Count)] : null;
+    }
+
+    private TravelingTraderOffer BuildOfferFromDefinition(TraderDefinitionSO def)
+    {
         var offer = new TravelingTraderOffer
         {
-            traderName        = DefaultTraderNames[UnityEngine.Random.Range(0, DefaultTraderNames.Length)],
-            greedMultiplier   = baseGreedMultiplier,
-            turnsRemaining    = traderAvailableTurns,
-            flavorDescription = "A wandering trader arrives bearing goods.",
-            preferences       = new List<TradeResourcePreference>(resourcePreferences)
+            traderName                = string.IsNullOrWhiteSpace(def.traderName)
+                                        ? DefaultTraderNames[UnityEngine.Random.Range(0, DefaultTraderNames.Length)]
+                                        : def.traderName,
+            greedMultiplier           = def.greedMultiplier,
+            counterOfferTolerance     = def.counterOfferTolerance,
+            turnsRemaining            = traderAvailableTurns,
+            flavorDescription         = def.flavorDescription,
+            preferences               = new List<TradeResourcePreference>(def.resourcePreferences),
+            acceptsPopulationFromPlayer = def.acceptsPopulationFromPlayer,
+            childValue                = def.childValue,
+            teenValue                 = def.teenValue,
+            adultValue                = def.adultValue,
+            elderValue                = def.elderValue,
         };
 
-        if (possibleTraderResources != null && possibleTraderResources.Count > 0)
+        FillResources(offer, def.possibleResources, def.resourceAmountRange, def.minResourceTypes, def.maxResourceTypes);
+
+        if (def.canOfferPopulation && def.maxPopulationOffered > 0)
         {
-            int typeCount = Mathf.Clamp(
-                UnityEngine.Random.Range(minResourceTypesOffered, maxResourceTypesOffered + 1),
-                1, possibleTraderResources.Count);
-
-            var pool = new List<ResourceAmount>(possibleTraderResources);
-            ShuffleList(pool);
-
-            for (int i = 0; i < typeCount; i++)
-            {
-                var entry = pool[i];
-                if (entry?.resource == null) continue;
-                offer.offeredResources.Add(new ResourceAmount
-                {
-                    resource = entry.resource,
-                    amount   = UnityEngine.Random.Range(
-                        Mathf.Max(1, traderResourceAmountRange.x),
-                        Mathf.Max(1, traderResourceAmountRange.y) + 1)
-                });
-            }
-        }
-
-        if (traderCanOfferPopulation && maxPopulationOffered > 0)
-        {
-            int total = UnityEngine.Random.Range(minPopulationOffered, maxPopulationOffered + 1);
+            int total = UnityEngine.Random.Range(def.minPopulationOffered, def.maxPopulationOffered + 1);
             if (total > 0)
-                offer.offeredPopulation = BuildRandomPopulation(total);
+                offer.offeredPopulation = BuildRandomPopulation(
+                    total, def.canOfferChildren, def.canOfferTeens, def.canOfferAdults, def.canOfferElders);
         }
 
         return offer;
     }
 
-    private TradePopulationAmount BuildRandomPopulation(int total)
+    private TravelingTraderOffer BuildOfferFromInlineSettings()
+    {
+        var offer = new TravelingTraderOffer
+        {
+            traderName                = DefaultTraderNames[UnityEngine.Random.Range(0, DefaultTraderNames.Length)],
+            greedMultiplier           = baseGreedMultiplier,
+            counterOfferTolerance     = counterOfferTolerance,
+            turnsRemaining            = traderAvailableTurns,
+            flavorDescription         = "A wandering trader arrives bearing goods.",
+            preferences               = new List<TradeResourcePreference>(resourcePreferences),
+            acceptsPopulationFromPlayer = acceptsPopulationFromPlayer,
+            childValue                = childValue,
+            teenValue                 = teenValue,
+            adultValue                = adultValue,
+            elderValue                = elderValue,
+        };
+
+        FillResources(offer, possibleTraderResources, traderResourceAmountRange, minResourceTypesOffered, maxResourceTypesOffered);
+
+        if (traderCanOfferPopulation && maxPopulationOffered > 0)
+        {
+            int total = UnityEngine.Random.Range(minPopulationOffered, maxPopulationOffered + 1);
+            if (total > 0)
+                offer.offeredPopulation = BuildRandomPopulation(
+                    total, canOfferChildren, canOfferTeens, canOfferAdults, canOfferElders);
+        }
+
+        return offer;
+    }
+
+    private void FillResources(TravelingTraderOffer offer, List<ResourceAmount> pool, Vector2Int amountRange, int minTypes, int maxTypes)
+    {
+        if (pool == null || pool.Count == 0) return;
+        int typeCount = Mathf.Clamp(UnityEngine.Random.Range(minTypes, maxTypes + 1), 1, pool.Count);
+        var shuffled = new List<ResourceAmount>(pool);
+        ShuffleList(shuffled);
+        for (int i = 0; i < typeCount; i++)
+        {
+            var entry = shuffled[i];
+            if (entry?.resource == null) continue;
+            offer.offeredResources.Add(new ResourceAmount
+            {
+                resource = entry.resource,
+                amount   = UnityEngine.Random.Range(Mathf.Max(1, amountRange.x), Mathf.Max(1, amountRange.y) + 1)
+            });
+        }
+    }
+
+    private TradePopulationAmount BuildRandomPopulation(int total, bool children, bool teens, bool adults, bool elders)
     {
         var pop   = new TradePopulationAmount();
         var slots = new List<int>();
-        if (canOfferChildren) slots.Add(0);
-        if (canOfferTeens)    slots.Add(1);
-        if (canOfferAdults)   slots.Add(2);
-        if (canOfferElders)   slots.Add(3);
+        if (children) slots.Add(0);
+        if (teens)    slots.Add(1);
+        if (adults)   slots.Add(2);
+        if (elders)   slots.Add(3);
 
         if (slots.Count == 0) return pop;
 
@@ -402,16 +457,18 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             foreach (var r in offer.playerGivesResources)
                 if (r?.resource != null) total += r.amount * GetBaseValue(r.resource) * GetPreferenceMult(r.resource);
 
-        if (acceptsPopulationFromPlayer)
+        if (currentTraderOffer != null && currentTraderOffer.acceptsPopulationFromPlayer)
             total += PopValue(offer.playerGivesPopulation);
         return total;
     }
 
     private float PopValue(TradePopulationAmount pop)
     {
-        if (pop == null) return 0f;
-        return pop.children * childValue + pop.teens * teenValue
-             + pop.adults   * adultValue + pop.elders * elderValue;
+        if (pop == null || currentTraderOffer == null) return 0f;
+        return pop.children * currentTraderOffer.childValue
+             + pop.teens    * currentTraderOffer.teenValue
+             + pop.adults   * currentTraderOffer.adultValue
+             + pop.elders   * currentTraderOffer.elderValue;
     }
 
     // Extension point: read ResourceDefinition.tradeValue here when the field is added.
@@ -608,7 +665,10 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
                 if (p?.resource != null && p.valueMultiplier > 1f)
                     hints.Add($"They want more {p.resource.resourceName}.");
 
-        if (acceptsPopulationFromPlayer && adultValue >= teenValue && adultValue >= childValue)
+        if (currentTraderOffer != null
+            && currentTraderOffer.acceptsPopulationFromPlayer
+            && currentTraderOffer.adultValue >= currentTraderOffer.teenValue
+            && currentTraderOffer.adultValue >= currentTraderOffer.childValue)
             hints.Add("They are looking for adults who can work.");
 
         if (hints.Count == 0)
@@ -677,11 +737,17 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
         var offer = new TravelingTraderOffer
         {
-            traderName        = data.traderName ?? "Trader",
-            greedMultiplier   = data.traderGreedMultiplier > 0 ? data.traderGreedMultiplier : baseGreedMultiplier,
-            turnsRemaining    = data.traderTurnsRemaining,
-            flavorDescription = data.traderFlavorDescription,
-            preferences       = new List<TradeResourcePreference>(resourcePreferences)
+            traderName                = data.traderName ?? "Trader",
+            greedMultiplier           = data.traderGreedMultiplier > 0 ? data.traderGreedMultiplier : baseGreedMultiplier,
+            counterOfferTolerance     = counterOfferTolerance,
+            turnsRemaining            = data.traderTurnsRemaining,
+            flavorDescription         = data.traderFlavorDescription,
+            preferences               = new List<TradeResourcePreference>(resourcePreferences),
+            acceptsPopulationFromPlayer = acceptsPopulationFromPlayer,
+            childValue                = childValue,
+            teenValue                 = teenValue,
+            adultValue                = adultValue,
+            elderValue                = elderValue,
         };
 
         if (data.traderOfferedResources != null && resolveResource != null)
