@@ -638,6 +638,8 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler
         else
         {
             //Debug.LogWarning($"[ReligiousBuildingControl] Ritual '{ritual?.displayName}' failed on completion: {failureReason}");
+            if (ritual != null && ritual.faithReward > 0f)
+                CivilizationStateManager.Instance?.AdjustFaith(-ritual.faithReward);
         }
 
         activeRitual = null;
