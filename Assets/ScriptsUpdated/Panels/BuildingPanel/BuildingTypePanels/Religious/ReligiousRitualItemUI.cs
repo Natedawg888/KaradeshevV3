@@ -128,7 +128,7 @@ public class ReligiousRitualItemUI : MonoBehaviour
             bool hasFaithReq = ritual != null && ritual.faithRequired > 0f;
             faithRequiredText.gameObject.SetActive(hasFaithReq);
             if (hasFaithReq)
-                faithRequiredText.text = $"Faith: {Mathf.RoundToInt(ritual.faithRequired * 100f)}%";
+                faithRequiredText.text = $"{Mathf.RoundToInt(ritual.faithRequired * 100f)}%";
         }
 
         if (startButton != null)
