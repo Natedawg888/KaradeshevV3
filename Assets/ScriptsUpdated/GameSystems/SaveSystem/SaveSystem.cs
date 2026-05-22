@@ -1350,6 +1350,7 @@ public class SaveSystem : MonoBehaviour
         PlayerStorageSaveLoad.LoadState(data.playerStorageData);
 
         PlayerReligionBuildingSaveLoad.LoadState(data.playerReligionBuildingsData);
+        PlayerTradeBuildingSaveLoad.LoadState(data.playerTradeBuildingsData);
     }
 
     private void contextPopulationStatSafe(PlayerPopulationStatisticSaveData data)

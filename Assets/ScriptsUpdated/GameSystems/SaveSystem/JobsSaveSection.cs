@@ -36,7 +36,10 @@ public sealed class JobsSaveSection : SaveSectionBase
                 PlayerStorageSaveLoad.SaveState(),
 
             playerReligionBuildingsData =
-                PlayerReligionBuildingSaveLoad.SaveState()
+                PlayerReligionBuildingSaveLoad.SaveState(),
+
+            playerTradeBuildingsData =
+                PlayerTradeBuildingSaveLoad.SaveState()
         };
 
         ClearDirty();

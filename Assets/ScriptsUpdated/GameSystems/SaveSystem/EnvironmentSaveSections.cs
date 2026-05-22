@@ -109,4 +109,5 @@ public class JobsSectionSaveData
     public PlayerShelterSaveData playerShelterData;
     public PlayerStorageSaveData playerStorageData;
     public PlayerReligionBuildingsSaveData playerReligionBuildingsData;
+    public PlayerTradeBuildingsSaveData playerTradeBuildingsData;
 }

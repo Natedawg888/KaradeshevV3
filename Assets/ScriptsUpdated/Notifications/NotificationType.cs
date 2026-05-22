@@ -48,4 +48,10 @@ public enum NotificationType
     AnimalStorageRaided,
 
     PlayerLevelUp,
+
+    TraderArrived,
+    TradeAccepted,
+    TradeDeclined,
+    TradeCounterOffered,
+    TraderLeft,
 }
