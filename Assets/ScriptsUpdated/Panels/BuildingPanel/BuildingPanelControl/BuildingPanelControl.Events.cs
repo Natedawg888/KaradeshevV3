@@ -20,6 +20,7 @@ public partial class BuildingPanelControl : MonoBehaviour
     private KineticWarfareControl currentKineticControl;
     private StorageBuildingControl currentStorageControl;
     private ReligiousBuildingControl currentReligiousControl;
+    private CultureBuildingControl currentCultureControl;
     private BuildingTechnology currentTechnology;
 
     public event Action OnClose;
@@ -274,6 +275,12 @@ public partial class BuildingPanelControl : MonoBehaviour
             openReligiousButton.onClick.RemoveAllListeners();
             openReligiousButton.onClick.AddListener(OnClickOpenReligious);
         }
+
+        if (openCultureButton)
+        {
+            openCultureButton.onClick.RemoveAllListeners();
+            openCultureButton.onClick.AddListener(OnClickOpenCulture);
+        }
     }
 
     private void OnEnable()
@@ -324,6 +331,7 @@ public partial class BuildingPanelControl : MonoBehaviour
         currentKineticControl = building.GetComponent<KineticWarfareControl>();
         currentStorageControl = building.GetComponent<StorageBuildingControl>();
         currentReligiousControl = building.GetComponent<ReligiousBuildingControl>();
+        currentCultureControl = building.GetComponent<CultureBuildingControl>();
         currentTechnology = building.GetComponent<BuildingTechnology>();
 
         if (currentBuilding != null)

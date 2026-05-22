@@ -52,6 +52,10 @@ public partial class BuildingPanelControl : MonoBehaviour
     public Button openReligiousButton;
     public ReligiousBuildingPanelControl religiousPanel;
 
+    [Header("Culture")]
+    public Button openCultureButton;
+    public CultureBuildingPanelControl culturePanel;
+
     private void RefreshModeSpecificButtons()
     {
         if (!currentBuilding)
@@ -75,6 +79,7 @@ public partial class BuildingPanelControl : MonoBehaviour
         bool hasKinetic = currentKineticControl != null && currentKineticControl.enabled;
         bool hasStorage = currentStorageControl != null && currentStorageControl.enabled;
         bool hasReligious = currentReligiousControl != null && currentReligiousControl.enabled;
+        bool hasCulture = currentCultureControl != null && currentCultureControl.enabled;
 
         if (openShelterButton)
         {
@@ -116,6 +121,13 @@ public partial class BuildingPanelControl : MonoBehaviour
             bool showReligious = !destroyed && active == BuildingType.Religious && hasReligious;
             openReligiousButton.gameObject.SetActive(showReligious);
             openReligiousButton.interactable = showReligious;
+        }
+
+        if (openCultureButton)
+        {
+            bool showCulture = !destroyed && hasCulture;
+            openCultureButton.gameObject.SetActive(showCulture);
+            openCultureButton.interactable = showCulture;
         }
     }
 
@@ -257,6 +269,25 @@ public partial class BuildingPanelControl : MonoBehaviour
 
         SoftHideForChild();
         kineticWarfarePanel.OpenFor(currentBuilding, this, currentTile);
+    }
+
+    public void OnClickOpenCulture()
+    {
+        if (!currentBuilding)
+            return;
+
+        if (!culturePanel)
+            return;
+
+        var culture = currentCultureControl != null
+            ? currentCultureControl
+            : currentBuilding.GetComponent<CultureBuildingControl>();
+
+        if (culture == null)
+            return;
+
+        SoftHideForChild();
+        culturePanel.OpenFor(currentBuilding, this, currentTile);
     }
 
     public void OnClickOpenReligious()
