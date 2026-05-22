@@ -10,4 +10,5 @@ public class CivilizationStateSaveData
     public float order01;
     public float discovery01;
     public float knowledge01;
+    public float faith01;
 }

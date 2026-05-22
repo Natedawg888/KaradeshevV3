@@ -13,6 +13,7 @@ public class CivilizationStateManager : MonoBehaviour
     [Range(0f, 1f)] public float order01 = 0.5f;
     [Range(0f, 1f)] public float discovery01 = 0.6f;
     [Range(0f, 1f)] public float knowledge01   = 0.01f;
+    [Range(0f, 1f)] public float faith01       = 0.5f;
 
     private void Awake()
     {
@@ -27,6 +28,7 @@ public class CivilizationStateManager : MonoBehaviour
     public void SetDiscovery01(float v) => discovery01 = Mathf.Clamp01(v);
     
     public void SetKnowledge01(float v)   => knowledge01   = Mathf.Clamp01(v);
+    public void SetFaith01(float v)       => faith01       = Mathf.Clamp01(v);
 
     private void MarkCoreSystemsDirty()
     {
@@ -75,6 +77,12 @@ public class CivilizationStateManager : MonoBehaviour
         MarkCoreSystemsDirty();
     }
 
+    public void AdjustFaith(float delta)
+    {
+        faith01 = Mathf.Clamp01(faith01 + delta);
+        MarkCoreSystemsDirty();
+    }
+
     public CivilizationStateSaveData SaveState()
     {
         return new CivilizationStateSaveData
@@ -85,7 +93,8 @@ public class CivilizationStateManager : MonoBehaviour
             integration01 = integration01,
             order01 = order01,
             discovery01 = discovery01,
-            knowledge01 = knowledge01
+            knowledge01 = knowledge01,
+            faith01 = faith01
         };
     }
 
@@ -101,5 +110,6 @@ public class CivilizationStateManager : MonoBehaviour
         order01 = Mathf.Clamp01(data.order01);
         discovery01 = Mathf.Clamp01(data.discovery01);
         knowledge01 = Mathf.Clamp01(data.knowledge01);
+        faith01     = Mathf.Clamp01(data.faith01);
     }
 }

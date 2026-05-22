@@ -10,7 +10,8 @@ public enum CivilizationStat
     Integration,
     Order,
     Discovery,
-    Knowledge
+    Knowledge,
+    Faith
 }
 
 [Serializable]
@@ -75,6 +76,7 @@ public class CultureBuildingControl : MonoBehaviour
             case CivilizationStat.Order:       civ.AdjustOrder(delta);       break;
             case CivilizationStat.Discovery:   civ.AdjustDiscovery(delta);   break;
             case CivilizationStat.Knowledge:   civ.AdjustKnowledge(delta);   break;
+            case CivilizationStat.Faith:       civ.AdjustFaith(delta);       break;
         }
     }
 
