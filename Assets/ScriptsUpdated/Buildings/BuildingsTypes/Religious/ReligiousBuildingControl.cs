@@ -631,6 +631,9 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
             if (ritual.faithRequired > 0f)
                 CivilizationStateManager.Instance?.AdjustFaith(-(ritual.faithRequired * 0.5f));
+
+            if (ritual.faithReward > 0f)
+                CivilizationStateManager.Instance?.AdjustFaith(ritual.faithReward);
         }
         else
         {
