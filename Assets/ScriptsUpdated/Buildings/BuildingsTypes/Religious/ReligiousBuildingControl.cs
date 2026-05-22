@@ -628,6 +628,9 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
             if (!ritual.repeatable && !completedNonRepeatableRituals.Contains(ritual))
                 completedNonRepeatableRituals.Add(ritual);
+
+            if (ritual.faithRequired > 0f)
+                CivilizationStateManager.Instance?.AdjustFaith(-(ritual.faithRequired * 0.5f));
         }
         else
         {
