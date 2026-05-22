@@ -14,6 +14,7 @@ public class ReligiousRitualItemUI : MonoBehaviour
     [Header("Requirements")]
     public TMP_Text turnsRequiredText;
     public TMP_Text workerCountText;
+    public TMP_Text faithRequiredText;
 
     [Header("Actions")]
     public Button startButton;
@@ -122,6 +123,14 @@ public class ReligiousRitualItemUI : MonoBehaviour
             workerCountText.text = $"Pop: {workers}";
         }
 
+        if (faithRequiredText != null)
+        {
+            bool hasFaithReq = ritual != null && ritual.faithRequired > 0f;
+            faithRequiredText.gameObject.SetActive(hasFaithReq);
+            if (hasFaithReq)
+                faithRequiredText.text = $"Faith: {Mathf.RoundToInt(ritual.faithRequired * 100f)}%";
+        }
+
         if (startButton != null)
         {
             startButton.onClick.RemoveAllListeners();
@@ -165,6 +174,13 @@ public class ReligiousRitualItemUI : MonoBehaviour
         {
             canStart = false;
             status = $"Cooldown: {cooldownLeft} turns";
+        }
+        else if (HasFaithRequirement() && !MeetsFaithRequirement())
+        {
+            canStart = false;
+            int needed = Mathf.RoundToInt(_ritual.faithRequired * 100f);
+            int current = Mathf.RoundToInt((CivilizationStateManager.Instance != null ? CivilizationStateManager.Instance.faith01 : 0f) * 100f);
+            status = $"Need {needed}% faith ({current}% current).";
         }
         else if (_ritual.IsSummoningRitual)
         {
@@ -212,6 +228,15 @@ public class ReligiousRitualItemUI : MonoBehaviour
             string hex = ColorUtility.ToHtmlStringRGB(HasEnoughPopulation() ? popEnoughColor : popNotEnoughColor);
             workerCountText.richText = true;
             workerCountText.text = $"Pop: <color=#{hex}>{workers}</color>";
+        }
+
+        if (faithRequiredText != null && HasFaithRequirement())
+        {
+            bool meets = MeetsFaithRequirement();
+            int needed = Mathf.RoundToInt(_ritual.faithRequired * 100f);
+            string hex = ColorUtility.ToHtmlStringRGB(meets ? popEnoughColor : popNotEnoughColor);
+            faithRequiredText.richText = true;
+            faithRequiredText.text = $"Faith: <color=#{hex}>{needed}%</color>";
         }
 
         if (costPanelRoot != null && costPanelRoot.activeSelf)
@@ -306,6 +331,23 @@ public class ReligiousRitualItemUI : MonoBehaviour
             return true;
 
         return GetEligiblePopulationSacrificeCount() >= Mathf.Max(1, _ritual.sacrificeCount);
+    }
+
+    private bool HasFaithRequirement()
+    {
+        return _ritual != null && _ritual.faithRequired > 0f;
+    }
+
+    private bool MeetsFaithRequirement()
+    {
+        if (!HasFaithRequirement())
+            return true;
+
+        float current = CivilizationStateManager.Instance != null
+            ? CivilizationStateManager.Instance.faith01
+            : 0f;
+
+        return current >= _ritual.faithRequired;
     }
 
     private bool HasEnoughPopulation()

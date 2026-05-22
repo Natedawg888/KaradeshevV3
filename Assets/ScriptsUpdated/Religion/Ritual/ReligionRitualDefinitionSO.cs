@@ -40,6 +40,10 @@ public class ReligionRitualDefinitionSO : ScriptableObject
     [Tooltip("If false, the building can only complete this ritual once ever.")]
     public bool repeatable = true;
 
+    [Header("Faith Requirement")]
+    [Tooltip("Minimum civilization faith (0..1) needed to perform this ritual. 0 = no requirement.")]
+    [Range(0f, 1f)] public float faithRequired = 0f;
+
     [Header("Turn Flow")]
     [Min(1)] public int turnsRequired = 1;
     [Min(0)] public int cooldownTurns = 0;
