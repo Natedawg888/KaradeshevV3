@@ -91,6 +91,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
     public bool HasActiveTrader()                        => hasActiveTrader && currentTraderOffer != null;
     public TravelingTraderOffer GetCurrentTraderOffer()  => currentTraderOffer;
+    public Sprite GetCurrentTraderPortrait()             => HasActiveTrader() ? FindDefByName(currentTraderOffer.traderName)?.portrait : null;
 
     public TradeEvaluationResult SubmitPlayerOffer(TradeOffer playerOffer)
     {

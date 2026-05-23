@@ -56,6 +56,10 @@ public partial class BuildingPanelControl : MonoBehaviour
     public Button openCultureButton;
     public CultureBuildingPanelControl culturePanel;
 
+    [Header("Trade")]
+    public Button openTradeButton;
+    public TradePanelControl tradePanel;
+
     private void RefreshModeSpecificButtons()
     {
         if (!currentBuilding)
@@ -80,6 +84,7 @@ public partial class BuildingPanelControl : MonoBehaviour
         bool hasStorage = currentStorageControl != null && currentStorageControl.enabled;
         bool hasReligious = currentReligiousControl != null && currentReligiousControl.enabled;
         bool hasCulture = currentCultureControl != null && currentCultureControl.enabled;
+        bool hasTrade = currentTradeControl != null && currentTradeControl.enabled;
 
         if (openShelterButton)
         {
@@ -128,6 +133,14 @@ public partial class BuildingPanelControl : MonoBehaviour
             bool showCulture = !destroyed && hasCulture;
             openCultureButton.gameObject.SetActive(showCulture);
             openCultureButton.interactable = showCulture;
+        }
+
+        if (openTradeButton)
+        {
+            bool showTrade = !destroyed && active == BuildingType.Trade && hasTrade
+                             && currentTradeControl.HasActiveTrader();
+            openTradeButton.gameObject.SetActive(showTrade);
+            openTradeButton.interactable = showTrade;
         }
     }
 
@@ -316,5 +329,20 @@ public partial class BuildingPanelControl : MonoBehaviour
 
         SoftHideForChild();
         religiousPanel.OpenFor(currentBuilding, this, currentTile);
+    }
+
+    public void OnClickOpenTrade()
+    {
+        if (!currentBuilding) return;
+        if (!tradePanel) return;
+
+        var trade = currentTradeControl != null
+            ? currentTradeControl
+            : currentBuilding.GetComponent<TradeBuildingControl>();
+
+        if (trade == null) return;
+
+        SoftHideForChild();
+        tradePanel.Show(trade, this);
     }
 }

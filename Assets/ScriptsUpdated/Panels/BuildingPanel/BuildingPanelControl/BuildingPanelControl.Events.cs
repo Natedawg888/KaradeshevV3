@@ -21,6 +21,7 @@ public partial class BuildingPanelControl : MonoBehaviour
     private StorageBuildingControl currentStorageControl;
     private ReligiousBuildingControl currentReligiousControl;
     private CultureBuildingControl currentCultureControl;
+    private TradeBuildingControl currentTradeControl;
     private BuildingTechnology currentTechnology;
 
     public event Action OnClose;
@@ -281,6 +282,12 @@ public partial class BuildingPanelControl : MonoBehaviour
             openCultureButton.onClick.RemoveAllListeners();
             openCultureButton.onClick.AddListener(OnClickOpenCulture);
         }
+
+        if (openTradeButton)
+        {
+            openTradeButton.onClick.RemoveAllListeners();
+            openTradeButton.onClick.AddListener(OnClickOpenTrade);
+        }
     }
 
     private void OnEnable()
@@ -332,6 +339,7 @@ public partial class BuildingPanelControl : MonoBehaviour
         currentStorageControl = building.GetComponent<StorageBuildingControl>();
         currentReligiousControl = building.GetComponent<ReligiousBuildingControl>();
         currentCultureControl = building.GetComponent<CultureBuildingControl>();
+        currentTradeControl = building.GetComponent<TradeBuildingControl>();
         currentTechnology = building.GetComponent<BuildingTechnology>();
 
         if (currentBuilding != null)
@@ -426,6 +434,7 @@ public partial class BuildingPanelControl : MonoBehaviour
         currentKineticControl = null;
         currentStorageControl = null;
         currentReligiousControl = null;
+        currentTradeControl = null;
         currentTechnology = null;
     }
 
@@ -480,6 +489,7 @@ public partial class BuildingPanelControl : MonoBehaviour
             currentKineticControl = currentBuilding.GetComponent<KineticWarfareControl>();
             currentStorageControl = currentBuilding.GetComponent<StorageBuildingControl>();
             currentReligiousControl = currentBuilding.GetComponent<ReligiousBuildingControl>();
+            currentTradeControl = currentBuilding.GetComponent<TradeBuildingControl>();
             currentTechnology = currentBuilding.GetComponent<BuildingTechnology>();
         }
 
