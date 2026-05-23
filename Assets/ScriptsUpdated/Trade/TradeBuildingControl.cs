@@ -6,47 +6,12 @@ using UnityEngine;
 [RequireComponent(typeof(BuildingControl))]
 public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 {
-    private static readonly string[] DefaultTraderNames =
-    {
-        "River Walker", "Hill Clan Trader", "Forest Forager",
-        "Wandering Kin Group", "Stone Carrier", "Hide Trader"
-    };
-
-    [Header("Trade Timing")]
+    [Header("Trade Settings")]
     [SerializeField] private bool enableTrade = true;
+    [Tooltip("Roll for a trader once per season change. When false, uses per-def turn-based timing instead.")]
     [SerializeField] private bool traderArrivesOncePerSeason = true;
-    [SerializeField] private int minTurnsBetweenTraders = 0;
-    [SerializeField] private int maxTurnsBetweenTraders = 0;
-    [SerializeField, Range(0f, 1f)] private float traderArrivalChancePerSeason = 1f;
-    [SerializeField] private int traderAvailableTurns = 3;
-
-    [Header("Trader Offer Generation")]
-    [SerializeField] private List<ResourceAmount> possibleTraderResources = new List<ResourceAmount>();
-    [SerializeField] private Vector2Int traderResourceAmountRange = new Vector2Int(1, 5);
-    [SerializeField] private int minResourceTypesOffered = 1;
-    [SerializeField] private int maxResourceTypesOffered = 3;
-
-    [Header("Population Offered By Trader")]
-    [SerializeField] private bool traderCanOfferPopulation = false;
-    [SerializeField] private int minPopulationOffered = 0;
-    [SerializeField] private int maxPopulationOffered = 2;
-    [SerializeField] private bool canOfferChildren = false;
-    [SerializeField] private bool canOfferTeens = true;
-    [SerializeField] private bool canOfferAdults = true;
-    [SerializeField] private bool canOfferElders = false;
-
-    [Header("Trader Preferences")]
-    [SerializeField] private List<TradeResourcePreference> resourcePreferences = new List<TradeResourcePreference>();
-    [SerializeField] private bool acceptsPopulationFromPlayer = true;
-    [SerializeField] private float childValue = 1f;
-    [SerializeField] private float teenValue = 2f;
-    [SerializeField] private float adultValue = 4f;
-    [SerializeField] private float elderValue = 2f;
-    [SerializeField] private float baseGreedMultiplier = 1.15f;
-    [SerializeField] private float counterOfferTolerance = 0.75f;
 
     [Header("Trader Pool")]
-    [Tooltip("Optional. When populated, a random definition is picked each visit instead of the inline settings above.")]
     [SerializeField] private List<TraderDefinitionSO> traderPool = new List<TraderDefinitionSO>();
 
     [Header("State")]
@@ -119,8 +84,8 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
     // ──────────────────── Public API ────────────────────
 
-    public bool HasActiveTrader()               => hasActiveTrader && currentTraderOffer != null;
-    public TravelingTraderOffer GetCurrentTraderOffer() => currentTraderOffer;
+    public bool HasActiveTrader()                        => hasActiveTrader && currentTraderOffer != null;
+    public TravelingTraderOffer GetCurrentTraderOffer()  => currentTraderOffer;
 
     public TradeEvaluationResult SubmitPlayerOffer(TradeOffer playerOffer)
     {
@@ -132,9 +97,9 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         if (!ValidatePlayerCanAffordOffer(playerOffer, out string affordReason))
             return MakeResult(TradeResultType.Declined, "Cannot Afford", affordReason);
 
-        float traderValue  = ComputeTraderOfferValue(currentTraderOffer);
-        float playerValue  = ComputePlayerOfferValue(playerOffer);
-        float required     = traderValue * currentTraderOffer.greedMultiplier;
+        float traderValue = ComputeTraderOfferValue(currentTraderOffer);
+        float playerValue = ComputePlayerOfferValue(playerOffer);
+        float required    = traderValue * currentTraderOffer.greedMultiplier;
 
         var result = new TradeEvaluationResult
         {
@@ -149,10 +114,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             result.resultType = TradeResultType.Accepted;
             result.title      = "Trade Accepted";
             result.message    = $"{currentTraderOffer.traderName} accepts your offer.";
-
-            NotificationManager.Instance?.AddNotification(
-                NotificationType.TradeAccepted, result.title, result.message);
-
+            NotificationManager.Instance?.AddNotification(NotificationType.TradeAccepted, result.title, result.message);
             ClearTrader();
         }
         else if (playerValue >= traderValue * currentTraderOffer.counterOfferTolerance)
@@ -161,19 +123,14 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             result.title      = "Counter Offer";
             result.message    = $"{currentTraderOffer.traderName} is interested but wants more.";
             result.preferredResourceHints = BuildPreferenceHints();
-
-            NotificationManager.Instance?.AddNotification(
-                NotificationType.TradeCounterOffered, result.title, result.message);
+            NotificationManager.Instance?.AddNotification(NotificationType.TradeCounterOffered, result.title, result.message);
         }
         else
         {
             result.resultType = TradeResultType.Declined;
             result.title      = "Trade Declined";
             result.message    = $"{currentTraderOffer.traderName} shakes their head. Your offer isn't enough.";
-
-            NotificationManager.Instance?.AddNotification(
-                NotificationType.TradeDeclined, result.title, result.message);
-
+            NotificationManager.Instance?.AddNotification(NotificationType.TradeDeclined, result.title, result.message);
             ClearTrader();
         }
 
@@ -197,9 +154,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         }
 
         ApplyTrade(finalOffer);
-        NotificationManager.Instance?.AddNotification(
-            NotificationType.TradeAccepted, "Trade Accepted", "Goods exchanged successfully.");
-
+        NotificationManager.Instance?.AddNotification(NotificationType.TradeAccepted, "Trade Accepted", "Goods exchanged successfully.");
         ClearTrader();
         MarkDirty();
     }
@@ -207,30 +162,20 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     public void DeclineTrade()
     {
         if (!HasActiveTrader()) return;
-
-        NotificationManager.Instance?.AddNotification(
-            NotificationType.TradeDeclined, "Trade Declined", "You declined the trader's offer.");
-
+        NotificationManager.Instance?.AddNotification(NotificationType.TradeDeclined, "Trade Declined", "You declined the trader's offer.");
         ClearTrader();
         MarkDirty();
     }
 
     public void GenerateTrader()
     {
-        if (hasActiveTrader) return;
-
-        currentTraderOffer   = BuildTraderOffer();
-        hasActiveTrader      = true;
-        traderTurnsRemaining = traderAvailableTurns;
-
-        string buildingName = _buildingControl != null ? _buildingControl.buildingName : "your building";
-        NotificationManager.Instance?.AddNotification(
-            NotificationType.TraderArrived,
-            "Trader Arrived",
-            $"{currentTraderOffer.traderName} has arrived at {buildingName}.");
-
-        OnTraderArrived?.Invoke(currentTraderOffer);
-        MarkDirty();
+        TraderDefinitionSO def = PickTraderDefinition();
+        if (def == null)
+        {
+            Debug.LogWarning("[TradeBuildingControl] GenerateTrader: no valid trader definition available.");
+            return;
+        }
+        GenerateTraderFromDef(def);
     }
 
     public void ClearTrader()
@@ -257,16 +202,15 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             traderTurnsRemaining--;
             if (traderTurnsRemaining <= 0)
             {
-                string name = currentTraderOffer?.traderName ?? "The trader";
                 NotificationManager.Instance?.AddNotification(
                     NotificationType.TraderLeft, "Trader Departed",
-                    $"{name} has moved on.");
+                    $"{currentTraderOffer?.traderName ?? "The trader"} has moved on.");
                 ClearTrader();
             }
             return;
         }
 
-        // Fallback season detection via turn system (when SeasonManager event not subscribed)
+        // Fallback season detection when SeasonManager event not subscribed
         if (!_seasonSubscribed && SeasonManager.Instance != null)
         {
             string currentID = SeasonManager.Instance.CurrentSeason?.seasonID;
@@ -277,12 +221,8 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             }
         }
 
-        // Pure turn-based arrival (no SeasonManager or traderArrivesOncePerSeason = false)
-        if (!traderArrivesOncePerSeason && maxTurnsBetweenTraders > 0)
-        {
-            if (TurnSystem.GetCurrentTurn() >= _nextVisitTurn)
-                RollForTraderArrival();
-        }
+        if (!traderArrivesOncePerSeason && TurnSystem.GetCurrentTurn() >= _nextVisitTurn)
+            RollForTraderArrival();
     }
 
     private void HandleSeasonChanged(SeasonDefinition season)
@@ -297,25 +237,40 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
     private void RollForTraderArrival()
     {
-        if (UnityEngine.Random.value <= traderArrivalChancePerSeason)
-            GenerateTrader();
+        TraderDefinitionSO def = PickTraderDefinition();
+        if (def == null) return;
+
+        if (UnityEngine.Random.value <= def.arrivalChance)
+            GenerateTraderFromDef(def);
         else
-            ScheduleNextVisit();
+            ScheduleNextVisit(def);
     }
 
-    private void ScheduleNextVisit()
+    private void ScheduleNextVisit(TraderDefinitionSO hint = null)
     {
-        if (maxTurnsBetweenTraders <= 0) return;
-        int span = Mathf.Max(1, maxTurnsBetweenTraders - minTurnsBetweenTraders);
-        _nextVisitTurn = TurnSystem.GetCurrentTurn() + minTurnsBetweenTraders + UnityEngine.Random.Range(0, span + 1);
+        TraderDefinitionSO def = hint ?? PickTraderDefinition();
+        if (def == null || def.maxTurnsBetweenVisits <= 0) return;
+        int span = Mathf.Max(1, def.maxTurnsBetweenVisits - def.minTurnsBetweenVisits);
+        _nextVisitTurn = TurnSystem.GetCurrentTurn() + def.minTurnsBetweenVisits + UnityEngine.Random.Range(0, span + 1);
     }
 
     // ──────────────────── Offer Generation ────────────────────
 
-    private TravelingTraderOffer BuildTraderOffer()
+    private void GenerateTraderFromDef(TraderDefinitionSO def)
     {
-        TraderDefinitionSO def = PickTraderDefinition();
-        return def != null ? BuildOfferFromDefinition(def) : BuildOfferFromInlineSettings();
+        if (hasActiveTrader) return;
+
+        currentTraderOffer   = BuildOfferFromDefinition(def);
+        hasActiveTrader      = true;
+        traderTurnsRemaining = def.turnsAvailable;
+
+        string buildingName = _buildingControl != null ? _buildingControl.buildingName : "your building";
+        NotificationManager.Instance?.AddNotification(
+            NotificationType.TraderArrived, "Trader Arrived",
+            $"{currentTraderOffer.traderName} has arrived at {buildingName}.");
+
+        OnTraderArrived?.Invoke(currentTraderOffer);
+        MarkDirty();
     }
 
     private TraderDefinitionSO PickTraderDefinition()
@@ -336,19 +291,17 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     {
         var offer = new TravelingTraderOffer
         {
-            traderName                = string.IsNullOrWhiteSpace(def.traderName)
-                                        ? DefaultTraderNames[UnityEngine.Random.Range(0, DefaultTraderNames.Length)]
-                                        : def.traderName,
-            greedMultiplier           = def.greedMultiplier,
-            counterOfferTolerance     = def.counterOfferTolerance,
-            turnsRemaining            = traderAvailableTurns,
-            flavorDescription         = def.flavorDescription,
-            preferences               = new List<TradeResourcePreference>(def.resourcePreferences),
+            traderName                  = def.traderName,
+            greedMultiplier             = def.greedMultiplier,
+            counterOfferTolerance       = def.counterOfferTolerance,
+            turnsRemaining              = def.turnsAvailable,
+            flavorDescription           = def.flavorDescription,
+            preferences                 = new List<TradeResourcePreference>(def.resourcePreferences),
             acceptsPopulationFromPlayer = def.acceptsPopulationFromPlayer,
-            childValue                = def.childValue,
-            teenValue                 = def.teenValue,
-            adultValue                = def.adultValue,
-            elderValue                = def.elderValue,
+            childValue                  = def.childValue,
+            teenValue                   = def.teenValue,
+            adultValue                  = def.adultValue,
+            elderValue                  = def.elderValue,
         };
 
         FillResources(offer, def.possibleResources, def.resourceAmountRange, def.minResourceTypes, def.maxResourceTypes);
@@ -359,36 +312,6 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             if (total > 0)
                 offer.offeredPopulation = BuildRandomPopulation(
                     total, def.canOfferChildren, def.canOfferTeens, def.canOfferAdults, def.canOfferElders);
-        }
-
-        return offer;
-    }
-
-    private TravelingTraderOffer BuildOfferFromInlineSettings()
-    {
-        var offer = new TravelingTraderOffer
-        {
-            traderName                = DefaultTraderNames[UnityEngine.Random.Range(0, DefaultTraderNames.Length)],
-            greedMultiplier           = baseGreedMultiplier,
-            counterOfferTolerance     = counterOfferTolerance,
-            turnsRemaining            = traderAvailableTurns,
-            flavorDescription         = "A wandering trader arrives bearing goods.",
-            preferences               = new List<TradeResourcePreference>(resourcePreferences),
-            acceptsPopulationFromPlayer = acceptsPopulationFromPlayer,
-            childValue                = childValue,
-            teenValue                 = teenValue,
-            adultValue                = adultValue,
-            elderValue                = elderValue,
-        };
-
-        FillResources(offer, possibleTraderResources, traderResourceAmountRange, minResourceTypesOffered, maxResourceTypesOffered);
-
-        if (traderCanOfferPopulation && maxPopulationOffered > 0)
-        {
-            int total = UnityEngine.Random.Range(minPopulationOffered, maxPopulationOffered + 1);
-            if (total > 0)
-                offer.offeredPopulation = BuildRandomPopulation(
-                    total, canOfferChildren, canOfferTeens, canOfferAdults, canOfferElders);
         }
 
         return offer;
@@ -420,9 +343,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         if (teens)    slots.Add(1);
         if (adults)   slots.Add(2);
         if (elders)   slots.Add(3);
-
         if (slots.Count == 0) return pop;
-
         for (int i = 0; i < total; i++)
         {
             int slot = slots[UnityEngine.Random.Range(0, slots.Count)];
@@ -461,7 +382,6 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         if (offer.playerGivesResources != null)
             foreach (var r in offer.playerGivesResources)
                 if (r?.resource != null) total += r.amount * GetBaseValue(r.resource) * GetPreferenceMult(r.resource);
-
         if (currentTraderOffer != null && currentTraderOffer.acceptsPopulationFromPlayer)
             total += PopValue(offer.playerGivesPopulation);
         return total;
@@ -496,17 +416,12 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         if (inv == null) { reason = "Inventory manager unavailable."; return false; }
 
         if (offer.playerGivesResources != null)
-        {
             foreach (var r in offer.playerGivesResources)
             {
                 if (r?.resource == null) continue;
                 if (inv.GetAmount(r.resource) < r.amount)
-                {
-                    reason = $"Not enough {r.resource.resourceName} (need {r.amount}).";
-                    return false;
-                }
+                    { reason = $"Not enough {r.resource.resourceName} (need {r.amount})."; return false; }
             }
-        }
 
         if (!CanPlayerAffordPopulation(offer.playerGivesPopulation, out reason))
             return false;
@@ -528,14 +443,10 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         }
 
         // TODO: Replace with pop.GetAvailableByAgeGroup(AgeGroup) when that API is added.
-        if (amount.children > GetAvailableByAge(pop, AgeGroup.Child))
-            { reason = $"Not enough children available."; return false; }
-        if (amount.teens > GetAvailableByAge(pop, AgeGroup.Teen))
-            { reason = $"Not enough teens available."; return false; }
-        if (amount.adults > GetAvailableByAge(pop, AgeGroup.Adult))
-            { reason = $"Not enough adults available."; return false; }
-        if (amount.elders > GetAvailableByAge(pop, AgeGroup.Elder))
-            { reason = $"Not enough elders available."; return false; }
+        if (amount.children > GetAvailableByAge(pop, AgeGroup.Child))  { reason = "Not enough children available.";  return false; }
+        if (amount.teens    > GetAvailableByAge(pop, AgeGroup.Teen))    { reason = "Not enough teens available.";    return false; }
+        if (amount.adults   > GetAvailableByAge(pop, AgeGroup.Adult))   { reason = "Not enough adults available.";   return false; }
+        if (amount.elders   > GetAvailableByAge(pop, AgeGroup.Elder))   { reason = "Not enough elders available.";   return false; }
 
         return true;
     }
@@ -560,7 +471,6 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     {
         var inv = PlayerInventoryManager.Instance;
 
-        // Remove player resources first (validate already passed)
         if (inv != null && offer.playerGivesResources != null)
         {
             foreach (var r in offer.playerGivesResources)
@@ -575,7 +485,6 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
         RemovePopulationFromPlayer(offer.playerGivesPopulation);
 
-        // Add trader resources
         if (inv != null && offer.traderGivesResources != null)
         {
             foreach (var r in offer.traderGivesResources)
@@ -595,11 +504,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     {
         if (amount == null || amount.IsEmpty) return;
         var pop = PlayersPopulationManager.Instance;
-        if (pop == null)
-        {
-            Debug.LogWarning("[TradeBuildingControl] RemovePopulationFromPlayer: PlayersPopulationManager missing.");
-            return;
-        }
+        if (pop == null) { Debug.LogWarning("[TradeBuildingControl] RemovePopulationFromPlayer: PlayersPopulationManager missing."); return; }
         // TODO: Use pop.RemoveFromAgeGroup(AgeGroup, count) when that API is added.
         RemoveFromAge(pop, AgeGroup.Child,  amount.children);
         RemoveFromAge(pop, AgeGroup.Teen,   amount.teens);
@@ -613,11 +518,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     {
         if (amount == null || amount.IsEmpty) return;
         var pop = PlayersPopulationManager.Instance;
-        if (pop == null)
-        {
-            Debug.LogWarning("[TradeBuildingControl] AddPopulationToPlayer: PlayersPopulationManager missing.");
-            return;
-        }
+        if (pop == null) { Debug.LogWarning("[TradeBuildingControl] AddPopulationToPlayer: PlayersPopulationManager missing."); return; }
         // TODO: Use pop.AddToAgeGroup(AgeGroup, count) when that API is added.
         AddToAge(pop, AgeGroup.Child,  amount.children);
         AddToAge(pop, AgeGroup.Teen,   amount.teens);
@@ -638,8 +539,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             var g = groups[i];
             if (g == null || g.ageGroup != age) continue;
             int take = Mathf.Min(remaining, Mathf.Max(0, g.count - g.reservedCount));
-            g.count   -= take;
-            remaining -= take;
+            g.count -= take; remaining -= take;
         }
         if (remaining > 0)
             Debug.LogWarning($"[TradeBuildingControl] Could not remove all {age} population. {remaining} unresolved.");
@@ -689,6 +589,15 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     private void MarkDirty()
         => SaveSystem.MarkSectionDirty(SaveSectionKeys.WorldObjects);
 
+    private TraderDefinitionSO FindDefByName(string traderName)
+    {
+        if (traderPool == null || string.IsNullOrEmpty(traderName)) return null;
+        for (int i = 0; i < traderPool.Count; i++)
+            if (traderPool[i] != null && traderPool[i].traderName == traderName)
+                return traderPool[i];
+        return null;
+    }
+
     // ──────────────────── Save / Load ────────────────────
 
     public TradeBuildingSaveData CaptureRuntimeSaveData(string saveableID)
@@ -703,8 +612,8 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
         if (hasActiveTrader && currentTraderOffer != null)
         {
-            data.traderName             = currentTraderOffer.traderName;
-            data.traderGreedMultiplier  = currentTraderOffer.greedMultiplier;
+            data.traderName              = currentTraderOffer.traderName;
+            data.traderGreedMultiplier   = currentTraderOffer.greedMultiplier;
             data.traderFlavorDescription = currentTraderOffer.flavorDescription;
 
             if (currentTraderOffer.offeredResources != null)
@@ -740,19 +649,24 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             return;
         }
 
+        // Try to restore negotiation values from the original SO definition by name.
+        TraderDefinitionSO sourceDef = FindDefByName(data.traderName);
+
         var offer = new TravelingTraderOffer
         {
-            traderName                = data.traderName ?? "Trader",
-            greedMultiplier           = data.traderGreedMultiplier > 0 ? data.traderGreedMultiplier : baseGreedMultiplier,
-            counterOfferTolerance     = counterOfferTolerance,
-            turnsRemaining            = data.traderTurnsRemaining,
-            flavorDescription         = data.traderFlavorDescription,
-            preferences               = new List<TradeResourcePreference>(resourcePreferences),
-            acceptsPopulationFromPlayer = acceptsPopulationFromPlayer,
-            childValue                = childValue,
-            teenValue                 = teenValue,
-            adultValue                = adultValue,
-            elderValue                = elderValue,
+            traderName                  = data.traderName ?? "Trader",
+            greedMultiplier             = data.traderGreedMultiplier > 0 ? data.traderGreedMultiplier : 1.15f,
+            counterOfferTolerance       = sourceDef?.counterOfferTolerance ?? 0.75f,
+            turnsRemaining              = data.traderTurnsRemaining,
+            flavorDescription           = data.traderFlavorDescription,
+            preferences                 = sourceDef != null
+                                          ? new List<TradeResourcePreference>(sourceDef.resourcePreferences)
+                                          : new List<TradeResourcePreference>(),
+            acceptsPopulationFromPlayer = sourceDef?.acceptsPopulationFromPlayer ?? true,
+            childValue                  = sourceDef?.childValue ?? 1f,
+            teenValue                   = sourceDef?.teenValue  ?? 2f,
+            adultValue                  = sourceDef?.adultValue ?? 4f,
+            elderValue                  = sourceDef?.elderValue ?? 2f,
         };
 
         if (data.traderOfferedResources != null && resolveResource != null)

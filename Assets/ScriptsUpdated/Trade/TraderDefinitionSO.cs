@@ -36,6 +36,16 @@ public class TraderDefinitionSO : ScriptableObject
     [Range(1f, 3f)] public float greedMultiplier = 1.15f;
     [Range(0f, 1f)] public float counterOfferTolerance = 0.75f;
 
+    [Header("Arrival Timing")]
+    [Tooltip("Minimum turns between visits from this trader type. 0 = no minimum.")]
+    public int minTurnsBetweenVisits = 0;
+    [Tooltip("Maximum turns between visits. 0 = driven by season change only.")]
+    public int maxTurnsBetweenVisits = 0;
+    [Range(0f, 1f), Tooltip("Chance this trader actually arrives when a visit is rolled.")]
+    public float arrivalChance = 1f;
+    [Tooltip("How many turns this trader stays before moving on.")]
+    public int turnsAvailable = 3;
+
     [Header("Season Restrictions")]
     [Tooltip("If empty, this trader can appear in any season. Otherwise only in the listed seasons.")]
     public List<SeasonDefinition> allowedSeasons = new List<SeasonDefinition>();
