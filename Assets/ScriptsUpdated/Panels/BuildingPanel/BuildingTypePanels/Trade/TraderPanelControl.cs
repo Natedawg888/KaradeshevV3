@@ -14,6 +14,7 @@ public class TraderPanelControl : MonoBehaviour
     [Header("Offerings List")]
     [SerializeField] private Transform offeringsContent;
     [SerializeField] private GameObject offeringItemPrefab;
+    [SerializeField] private GameObject offeringPopulationItemPrefab;
 
     [Header("Navigation")]
     [SerializeField] private Button backButton;
@@ -62,18 +63,35 @@ public class TraderPanelControl : MonoBehaviour
     private void PopulateOfferings()
     {
         ClearOfferings();
-        if (_offer?.offeredResources == null || offeringsContent == null || offeringItemPrefab == null) return;
+        if (offeringsContent == null) return;
 
-        foreach (var resource in _offer.offeredResources)
+        if (_offer?.offeredResources != null && offeringItemPrefab != null)
         {
-            if (resource?.resource == null) continue;
+            foreach (var resource in _offer.offeredResources)
+            {
+                if (resource?.resource == null) continue;
 
-            var go = Instantiate(offeringItemPrefab, offeringsContent);
-            var item = go.GetComponent<OfferingItemUI>();
-            if (item == null) continue;
+                var go = Instantiate(offeringItemPrefab, offeringsContent);
+                var item = go.GetComponent<OfferingItemUI>();
+                if (item == null) continue;
 
-            var captured = resource;
-            item.Bind(resource, () => OpenOfferingPanel(captured));
+                var captured = resource;
+                item.Bind(resource, () => OpenOfferingPanel(captured));
+            }
+        }
+
+        if (_offer?.offeredPopulation?.entries != null && offeringPopulationItemPrefab != null)
+        {
+            foreach (var entry in _offer.offeredPopulation.entries)
+            {
+                if (entry == null || entry.count <= 0) continue;
+
+                var go = Instantiate(offeringPopulationItemPrefab, offeringsContent);
+                var item = go.GetComponent<OfferingPopulationItemUI>();
+                if (item == null) continue;
+
+                item.Bind(entry, () => { });
+            }
         }
     }
 
