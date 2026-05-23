@@ -85,7 +85,7 @@ public class OfferingPanelControl : MonoBehaviour
 
         RefreshTraderOfferingDisplay();
         RefreshPlayerOfferList();
-        RefreshAvailableList();
+        RefreshAllAvailableLists();
     }
 
     public void Show(TradePopulationEntry populationEntry, TravelingTraderOffer traderOffer, TradeBuildingControl building)
@@ -103,7 +103,7 @@ public class OfferingPanelControl : MonoBehaviour
 
         RefreshTraderOfferingDisplay();
         RefreshPlayerOfferList();
-        RefreshAvailablePopulationList();
+        RefreshAllAvailableLists();
     }
 
     public void Hide()
@@ -175,31 +175,26 @@ public class OfferingPanelControl : MonoBehaviour
     {
         ClearContent(playerOfferContent);
 
-        if (_traderPopulation != null)
+        _playerGiving.RemoveAll(e => e.amount <= 0);
+        if (playerOfferingItemPrefab != null && playerOfferContent != null)
         {
-            _playerGivingPopulation.RemoveAll(e => e.count <= 0);
-            if (playerOfferingPopulationItemPrefab == null || playerOfferContent == null) return;
-
-            foreach (var entry in _playerGivingPopulation)
-            {
-                var go = Instantiate(playerOfferingPopulationItemPrefab, playerOfferContent);
-                var item = go.GetComponent<PlayerOfferingPopulationItemUI>();
-                if (item == null) continue;
-
-                item.Bind(entry, () => RefreshPlayerOfferList());
-            }
-        }
-        else
-        {
-            _playerGiving.RemoveAll(e => e.amount <= 0);
-            if (playerOfferingItemPrefab == null || playerOfferContent == null) return;
-
             foreach (var entry in _playerGiving)
             {
                 var go = Instantiate(playerOfferingItemPrefab, playerOfferContent);
                 var item = go.GetComponent<PlayerOfferingItemUI>();
                 if (item == null) continue;
+                item.Bind(entry, () => RefreshPlayerOfferList());
+            }
+        }
 
+        _playerGivingPopulation.RemoveAll(e => e.count <= 0);
+        if (playerOfferingPopulationItemPrefab != null && playerOfferContent != null)
+        {
+            foreach (var entry in _playerGivingPopulation)
+            {
+                var go = Instantiate(playerOfferingPopulationItemPrefab, playerOfferContent);
+                var item = go.GetComponent<PlayerOfferingPopulationItemUI>();
+                if (item == null) continue;
                 item.Bind(entry, () => RefreshPlayerOfferList());
             }
         }
@@ -207,65 +202,91 @@ public class OfferingPanelControl : MonoBehaviour
         UpdateLiveFeedback();
     }
 
-    // ── Available resources ───────────────────────────────────────
+    // ── Available lists (always shows both resources and population) ──
 
-    private void RefreshAvailableList()
+    private void RefreshAllAvailableLists()
     {
         ClearContent(availableContent);
-        if (availableResourceItemPrefab == null || availableContent == null) return;
 
-        var inv = PlayerInventoryManager.Instance;
-        if (inv == null) return;
+        if (availableContent == null) return;
 
-        var allStacks = new List<InventoryStack>();
-        allStacks.AddRange(inv.GetStacks(ResourceType.Material));
-        allStacks.AddRange(inv.GetStacks(ResourceType.Food));
-        allStacks.AddRange(inv.GetStacks(ResourceType.Water));
-
-        foreach (var stack in allStacks)
+        // Resources
+        if (availableResourceItemPrefab != null)
         {
-            if (stack?.definition == null || stack.amount <= 0) continue;
+            var inv = PlayerInventoryManager.Instance;
+            if (inv != null)
+            {
+                var allStacks = new List<InventoryStack>();
+                allStacks.AddRange(inv.GetStacks(ResourceType.Material));
+                allStacks.AddRange(inv.GetStacks(ResourceType.Food));
+                allStacks.AddRange(inv.GetStacks(ResourceType.Water));
 
-            var go = Instantiate(availableResourceItemPrefab, availableContent);
-            var item = go.GetComponent<AvailableResourceItemUI>();
-            if (item == null) continue;
+                foreach (var stack in allStacks)
+                {
+                    if (stack?.definition == null || stack.amount <= 0) continue;
 
-            int currentOffered = 0;
-            foreach (var e in _playerGiving)
-                if (e.resource == stack.definition) { currentOffered = e.amount; break; }
+                    var go = Instantiate(availableResourceItemPrefab, availableContent);
+                    var item = go.GetComponent<AvailableResourceItemUI>();
+                    if (item == null) continue;
 
-            item.Bind(stack, currentOffered, OnResourceOfferConfirm);
+                    int currentOffered = 0;
+                    foreach (var e in _playerGiving)
+                        if (e.resource == stack.definition) { currentOffered = e.amount; break; }
+
+                    item.Bind(stack, currentOffered, OnResourceOfferConfirm);
+                }
+            }
+        }
+
+        // Population
+        if (availablePopulationItemPrefab != null)
+        {
+            var pop = PlayersPopulationManager.Instance;
+            if (pop != null)
+            {
+                foreach (var group in pop.AllPopulations)
+                {
+                    int available = group.AvailableForTask();
+                    if (available <= 0) continue;
+
+                    var go = Instantiate(availablePopulationItemPrefab, availableContent);
+                    var item = go.GetComponent<AvailablePopulationItemUI>();
+                    if (item == null) continue;
+
+                    int currentOffered = 0;
+                    foreach (var e in _playerGivingPopulation)
+                        if (e.ageGroup == group.ageGroup && e.gender == group.gender) { currentOffered = e.count; break; }
+
+                    var entry = new TradePopulationEntry
+                    {
+                        ageGroup = group.ageGroup,
+                        gender   = group.gender,
+                        count    = available
+                    };
+                    item.Bind(entry, currentOffered, OnPopulationOfferConfirm);
+                }
+            }
         }
     }
 
-    private void RefreshAvailablePopulationList()
+    private void OnResourceOfferConfirm(ResourceDefinition def, int amount)
     {
-        ClearContent(availableContent);
-        if (availablePopulationItemPrefab == null || availableContent == null) return;
+        if (def == null) return;
 
-        var pop = PlayersPopulationManager.Instance;
-        if (pop == null) return;
-
-        foreach (var group in pop.AllPopulations)
+        foreach (var entry in _playerGiving)
         {
-            int available = group.AvailableForTask();
-            if (available <= 0) continue;
+            if (entry.resource != def) continue;
+            int max = PlayerInventoryManager.Instance?.GetAmount(def) ?? 0;
+            entry.amount = Mathf.Clamp(amount, 0, max);
+            RefreshPlayerOfferList();
+            return;
+        }
 
-            var go = Instantiate(availablePopulationItemPrefab, availableContent);
-            var item = go.GetComponent<AvailablePopulationItemUI>();
-            if (item == null) continue;
-
-            int currentOffered = 0;
-            foreach (var e in _playerGivingPopulation)
-                if (e.ageGroup == group.ageGroup && e.gender == group.gender) { currentOffered = e.count; break; }
-
-            var entry = new TradePopulationEntry
-            {
-                ageGroup = group.ageGroup,
-                gender   = group.gender,
-                count    = available
-            };
-            item.Bind(entry, currentOffered, OnPopulationOfferConfirm);
+        if (amount > 0)
+        {
+            int max = PlayerInventoryManager.Instance?.GetAmount(def) ?? 0;
+            _playerGiving.Add(new ResourceAmount { resource = def, amount = Mathf.Min(amount, max) });
+            RefreshPlayerOfferList();
         }
     }
 
@@ -289,27 +310,6 @@ public class OfferingPanelControl : MonoBehaviour
                 gender   = source.gender,
                 count    = Mathf.Min(amount, source.count)
             });
-            RefreshPlayerOfferList();
-        }
-    }
-
-    private void OnResourceOfferConfirm(ResourceDefinition def, int amount)
-    {
-        if (def == null) return;
-
-        foreach (var entry in _playerGiving)
-        {
-            if (entry.resource != def) continue;
-            int max = PlayerInventoryManager.Instance?.GetAmount(def) ?? 0;
-            entry.amount = Mathf.Clamp(amount, 0, max);
-            RefreshPlayerOfferList();
-            return;
-        }
-
-        if (amount > 0)
-        {
-            int max = PlayerInventoryManager.Instance?.GetAmount(def) ?? 0;
-            _playerGiving.Add(new ResourceAmount { resource = def, amount = Mathf.Min(amount, max) });
             RefreshPlayerOfferList();
         }
     }
@@ -369,9 +369,7 @@ public class OfferingPanelControl : MonoBehaviour
     {
         if (_building == null) return;
 
-        bool offerEmpty = _traderPopulation != null
-            ? _playerGivingPopulation.Count == 0
-            : _playerGiving.Count == 0;
+        bool offerEmpty = _playerGiving.Count == 0 && _playerGivingPopulation.Count == 0;
 
         if (offerEmpty)
         {
@@ -399,17 +397,18 @@ public class OfferingPanelControl : MonoBehaviour
     private TradeOffer BuildCurrentOffer()
     {
         var offer = new TradeOffer();
-        if (_traderPopulation != null)
-        {
-            foreach (var e in _playerGivingPopulation)
-                offer.playerGivesPopulation.Add(e.ageGroup, e.gender, e.count);
-            offer.traderGivesPopulation.Add(_traderPopulation.ageGroup, _traderPopulation.gender, _desiredAmount);
-        }
-        else if (_traderResource?.resource != null)
-        {
-            offer.playerGivesResources.AddRange(_playerGiving);
+
+        // Player can give any combination of resources and population
+        offer.playerGivesResources.AddRange(_playerGiving);
+        foreach (var e in _playerGivingPopulation)
+            offer.playerGivesPopulation.Add(e.ageGroup, e.gender, e.count);
+
+        // Trader gives whatever was selected
+        if (_traderResource?.resource != null)
             offer.traderGivesResources.Add(new ResourceAmount { resource = _traderResource.resource, amount = _desiredAmount });
-        }
+        else if (_traderPopulation != null)
+            offer.traderGivesPopulation.Add(_traderPopulation.ageGroup, _traderPopulation.gender, _desiredAmount);
+
         return offer;
     }
 
