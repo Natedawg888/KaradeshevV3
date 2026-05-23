@@ -172,7 +172,7 @@ public partial class PlayerInventoryManager : MonoBehaviour
     public bool TryAdd(ResourceDefinition def, int amount)
     {
         if (def == null || amount <= 0) return false;
-        PlayerResourceKnowledgeManager.Instance?.Learn(def);
+        PlayerKnownResourcesManager.Instance?.Learn(def);
 
         var targetList = GetListFor(def.resourceType);
         if (targetList == null) return false;

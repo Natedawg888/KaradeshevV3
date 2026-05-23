@@ -79,7 +79,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     // ──────────────────── IBuildingTypeHandler ────────────────────
 
     public void OnTypeEnabled()  { }
-    public void OnTypeDisabled() { ClearTrader(); }
+    public void OnTypeDisabled() { }
 
     public void OnBuildingStateChanged(BuildingState state)
     {
@@ -213,8 +213,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     private void HandleEndOfTurn()
     {
         if (!enableTrade) return;
-        if (_buildingControl != null && _buildingControl.ActiveType != BuildingType.Trade) return;
-        if (_buildingStatus  != null && _buildingStatus.CurrentState == BuildingState.Destroyed) return;
+        if (_buildingStatus != null && _buildingStatus.CurrentState == BuildingState.Destroyed) return;
 
         if (hasActiveTrader)
         {

@@ -70,7 +70,7 @@ public class TraderPanelControl : MonoBehaviour
             foreach (var resource in _offer.offeredResources)
             {
                 if (resource?.resource == null) continue;
-                if (PlayerResourceKnowledgeManager.Instance == null || !PlayerResourceKnowledgeManager.Instance.IsKnown(resource.resource)) continue;
+                if (PlayerKnownResourcesManager.Instance == null || !PlayerKnownResourcesManager.Instance.IsKnown(resource.resource)) continue;
 
                 var go = Instantiate(offeringItemPrefab, offeringsContent);
                 var item = go.GetComponent<OfferingItemUI>();
