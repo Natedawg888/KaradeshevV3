@@ -186,11 +186,7 @@ public class OfferingPanelControl : MonoBehaviour
                 var item = go.GetComponent<PlayerOfferingPopulationItemUI>();
                 if (item == null) continue;
 
-                item.Bind(entry, () =>
-                {
-                    RefreshPlayerOfferList();
-                    SetFeedback(string.Empty);
-                });
+                item.Bind(entry, () => RefreshPlayerOfferList());
             }
         }
         else
@@ -204,13 +200,11 @@ public class OfferingPanelControl : MonoBehaviour
                 var item = go.GetComponent<PlayerOfferingItemUI>();
                 if (item == null) continue;
 
-                item.Bind(entry, () =>
-                {
-                    RefreshPlayerOfferList();
-                    SetFeedback(string.Empty);
-                });
+                item.Bind(entry, () => RefreshPlayerOfferList());
             }
         }
+
+        UpdateLiveFeedback();
     }
 
     // ── Available resources ───────────────────────────────────────
@@ -325,30 +319,9 @@ public class OfferingPanelControl : MonoBehaviour
     private void ConfirmTrade()
     {
         if (_building == null) return;
+        if (_traderResource == null && _traderPopulation == null) return;
 
-        var offer = new TradeOffer();
-
-        if (_traderResource?.resource != null)
-        {
-            offer.playerGivesResources.AddRange(_playerGiving);
-            offer.traderGivesResources.Add(new ResourceAmount
-            {
-                resource = _traderResource.resource,
-                amount   = _desiredAmount
-            });
-        }
-        else if (_traderPopulation != null)
-        {
-            foreach (var e in _playerGivingPopulation)
-                offer.playerGivesPopulation.Add(e.ageGroup, e.gender, e.count);
-
-            offer.traderGivesPopulation.Add(_traderPopulation.ageGroup, _traderPopulation.gender, _desiredAmount);
-        }
-        else
-        {
-            return;
-        }
-
+        var offer = BuildCurrentOffer();
         var result = _building.SubmitPlayerOffer(offer);
         SetFeedback(result.message);
 
@@ -390,6 +363,47 @@ public class OfferingPanelControl : MonoBehaviour
             case Gender.Female: return femaleSprite;
             default:            return maleSprite;
         }
+    }
+
+    private void UpdateLiveFeedback()
+    {
+        if (_building == null) return;
+
+        bool offerEmpty = _traderPopulation != null
+            ? _playerGivingPopulation.Count == 0
+            : _playerGiving.Count == 0;
+
+        if (offerEmpty) { SetFeedback(string.Empty); return; }
+
+        var offer = BuildCurrentOffer();
+        float ratio = _building.GetOfferRatio(offer);
+        var t = _building.GetCurrentTraderOfferData();
+
+        string msg;
+        if      (ratio < 0.75f) msg = !string.IsNullOrEmpty(t?.feedbackNeedMore)          ? t.feedbackNeedMore          : "More.";
+        else if (ratio < 1.00f) msg = !string.IsNullOrEmpty(t?.feedbackAlittleMore)        ? t.feedbackAlittleMore        : "A little more.";
+        else if (ratio < 1.25f) msg = !string.IsNullOrEmpty(t?.feedbackAcceptable)         ? t.feedbackAcceptable         : "Acceptable.";
+        else if (ratio < 1.75f) msg = !string.IsNullOrEmpty(t?.feedbackGenerous)           ? t.feedbackGenerous           : "Generous.";
+        else                    msg = !string.IsNullOrEmpty(t?.feedbackMassivelyGenerous)   ? t.feedbackMassivelyGenerous  : "Massively generous!";
+
+        SetFeedback(msg);
+    }
+
+    private TradeOffer BuildCurrentOffer()
+    {
+        var offer = new TradeOffer();
+        if (_traderPopulation != null)
+        {
+            foreach (var e in _playerGivingPopulation)
+                offer.playerGivesPopulation.Add(e.ageGroup, e.gender, e.count);
+            offer.traderGivesPopulation.Add(_traderPopulation.ageGroup, _traderPopulation.gender, _desiredAmount);
+        }
+        else if (_traderResource?.resource != null)
+        {
+            offer.playerGivesResources.AddRange(_playerGiving);
+            offer.traderGivesResources.Add(new ResourceAmount { resource = _traderResource.resource, amount = _desiredAmount });
+        }
+        return offer;
     }
 
     private void SetFeedback(string message)

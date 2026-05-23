@@ -145,6 +145,17 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         return result;
     }
 
+    public float GetOfferRatio(TradeOffer playerOffer)
+    {
+        if (!HasActiveTrader() || playerOffer == null) return 0f;
+        float traderValue = ComputeTraderOfferValue(currentTraderOffer);
+        float required    = traderValue * currentTraderOffer.greedMultiplier;
+        if (required <= 0f) return 0f;
+        return ComputePlayerOfferValue(playerOffer) / required;
+    }
+
+    public TravelingTraderOffer GetCurrentTraderOfferData() => currentTraderOffer;
+
     public void AcceptTrade(TradeOffer finalOffer)
     {
         if (!HasActiveTrader())
