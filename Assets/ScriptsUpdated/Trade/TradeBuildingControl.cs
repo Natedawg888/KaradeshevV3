@@ -321,9 +321,14 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     private TraderDefinitionSO PickTraderDefinition()
     {
         if (traderPool == null || traderPool.Count == 0) return null;
+        SeasonDefinition currentSeason = SeasonManager.Instance?.CurrentSeason;
         var valid = new List<TraderDefinitionSO>();
         for (int i = 0; i < traderPool.Count; i++)
-            if (traderPool[i] != null) valid.Add(traderPool[i]);
+        {
+            TraderDefinitionSO def = traderPool[i];
+            if (def != null && def.IsAvailableInSeason(currentSeason))
+                valid.Add(def);
+        }
         return valid.Count > 0 ? valid[UnityEngine.Random.Range(0, valid.Count)] : null;
     }
 

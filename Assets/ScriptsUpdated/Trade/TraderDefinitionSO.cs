@@ -35,4 +35,17 @@ public class TraderDefinitionSO : ScriptableObject
     [Header("Negotiation")]
     [Range(1f, 3f)] public float greedMultiplier = 1.15f;
     [Range(0f, 1f)] public float counterOfferTolerance = 0.75f;
+
+    [Header("Season Restrictions")]
+    [Tooltip("If empty, this trader can appear in any season. Otherwise only in the listed seasons.")]
+    public List<SeasonDefinition> allowedSeasons = new List<SeasonDefinition>();
+
+    public bool IsAvailableInSeason(SeasonDefinition season)
+    {
+        if (allowedSeasons == null || allowedSeasons.Count == 0) return true;
+        if (season == null) return true;
+        for (int i = 0; i < allowedSeasons.Count; i++)
+            if (allowedSeasons[i] == season) return true;
+        return false;
+    }
 }
