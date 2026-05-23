@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class OfferingPopulationItemUI : MonoBehaviour
+public class AvailablePopulationItemUI : MonoBehaviour
 {
     [Header("Age Group Icons")]
     [SerializeField] private Sprite childSprite;
@@ -22,9 +22,9 @@ public class OfferingPopulationItemUI : MonoBehaviour
     [SerializeField] private TMP_Text amountText;
 
     [Header("Actions")]
-    [SerializeField] private Button selectButton;
+    [SerializeField] private Button addButton;
 
-    public void Bind(TradePopulationEntry entry, Action onSelect)
+    public void Bind(TradePopulationEntry entry, Action<TradePopulationEntry> onAdd)
     {
         if (ageGroupIcon != null)
             ageGroupIcon.sprite = SpriteForAge(entry.ageGroup);
@@ -38,10 +38,10 @@ public class OfferingPopulationItemUI : MonoBehaviour
         if (amountText != null)
             amountText.text = entry.count.ToString();
 
-        if (selectButton != null)
+        if (addButton != null)
         {
-            selectButton.onClick.RemoveAllListeners();
-            selectButton.onClick.AddListener(() => onSelect?.Invoke());
+            addButton.onClick.RemoveAllListeners();
+            addButton.onClick.AddListener(() => onAdd?.Invoke(entry));
         }
     }
 

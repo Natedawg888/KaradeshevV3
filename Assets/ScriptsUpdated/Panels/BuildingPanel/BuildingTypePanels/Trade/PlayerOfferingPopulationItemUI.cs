@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class OfferingPopulationItemUI : MonoBehaviour
+public class PlayerOfferingPopulationItemUI : MonoBehaviour
 {
     [Header("Age Group Icons")]
     [SerializeField] private Sprite childSprite;
@@ -22,10 +22,17 @@ public class OfferingPopulationItemUI : MonoBehaviour
     [SerializeField] private TMP_Text amountText;
 
     [Header("Actions")]
-    [SerializeField] private Button selectButton;
+    [SerializeField] private Button increaseButton;
+    [SerializeField] private Button decreaseButton;
 
-    public void Bind(TradePopulationEntry entry, Action onSelect)
+    private TradePopulationEntry _entry;
+    private Action _onChanged;
+
+    public void Bind(TradePopulationEntry entry, int maxAvailable, Action onChanged)
     {
+        _entry = entry;
+        _onChanged = onChanged;
+
         if (ageGroupIcon != null)
             ageGroupIcon.sprite = SpriteForAge(entry.ageGroup);
 
@@ -35,14 +42,38 @@ public class OfferingPopulationItemUI : MonoBehaviour
         if (nameText != null)
             nameText.text = LabelForAge(entry.ageGroup);
 
-        if (amountText != null)
-            amountText.text = entry.count.ToString();
+        RefreshAmountText();
 
-        if (selectButton != null)
+        if (increaseButton != null)
         {
-            selectButton.onClick.RemoveAllListeners();
-            selectButton.onClick.AddListener(() => onSelect?.Invoke());
+            increaseButton.onClick.RemoveAllListeners();
+            increaseButton.onClick.AddListener(() =>
+            {
+                if (_entry.count < maxAvailable)
+                {
+                    _entry.count++;
+                    RefreshAmountText();
+                    _onChanged?.Invoke();
+                }
+            });
         }
+
+        if (decreaseButton != null)
+        {
+            decreaseButton.onClick.RemoveAllListeners();
+            decreaseButton.onClick.AddListener(() =>
+            {
+                _entry.count = Mathf.Max(0, _entry.count - 1);
+                RefreshAmountText();
+                _onChanged?.Invoke();
+            });
+        }
+    }
+
+    private void RefreshAmountText()
+    {
+        if (amountText != null && _entry != null)
+            amountText.text = _entry.count.ToString();
     }
 
     private string LabelForAge(AgeGroup age)

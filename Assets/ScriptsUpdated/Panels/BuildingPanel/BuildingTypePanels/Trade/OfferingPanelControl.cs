@@ -9,19 +9,35 @@ public class OfferingPanelControl : MonoBehaviour
     [SerializeField] private GameObject panelRoot;
 
     [Header("Trader Offering Display")]
+    [SerializeField] private GameObject resourceIconParent;
     [SerializeField] private Image traderOfferingIcon;
+    [SerializeField] private GameObject populationIconParent;
+    [SerializeField] private Image traderPopulationAgeIcon;
+    [SerializeField] private Image traderPopulationGenderIcon;
     [SerializeField] private TMP_Text traderOfferingNameText;
     [SerializeField] private TMP_Text traderOfferingAmountText;
     [SerializeField] private Button increaseDesiredButton;
     [SerializeField] private Button decreaseDesiredButton;
 
+    [Header("Population Age Sprites")]
+    [SerializeField] private Sprite childSprite;
+    [SerializeField] private Sprite teenSprite;
+    [SerializeField] private Sprite adultSprite;
+    [SerializeField] private Sprite elderSprite;
+
+    [Header("Population Gender Sprites")]
+    [SerializeField] private Sprite maleSprite;
+    [SerializeField] private Sprite femaleSprite;
+
     [Header("Player Offer List")]
     [SerializeField] private Transform playerOfferContent;
     [SerializeField] private GameObject playerOfferingItemPrefab;
+    [SerializeField] private GameObject playerOfferingPopulationItemPrefab;
 
     [Header("Available Resources")]
     [SerializeField] private Transform availableContent;
     [SerializeField] private GameObject availableResourceItemPrefab;
+    [SerializeField] private GameObject availablePopulationItemPrefab;
 
     [Header("Actions")]
     [SerializeField] private Button confirmButton;
@@ -31,11 +47,13 @@ public class OfferingPanelControl : MonoBehaviour
     [SerializeField] private TMP_Text feedbackText;
 
     private ResourceAmount _traderResource;
+    private TradePopulationEntry _traderPopulation;
     private TravelingTraderOffer _traderOffer;
     private TradeBuildingControl _building;
 
     private int _desiredAmount;
     private readonly List<ResourceAmount> _playerGiving = new List<ResourceAmount>();
+    private readonly List<TradePopulationEntry> _playerGivingPopulation = new List<TradePopulationEntry>();
 
     private void Awake()
     {
@@ -55,10 +73,12 @@ public class OfferingPanelControl : MonoBehaviour
     public void Show(ResourceAmount traderResource, TravelingTraderOffer traderOffer, TradeBuildingControl building)
     {
         _traderResource = traderResource;
+        _traderPopulation = null;
         _traderOffer = traderOffer;
         _building = building;
         _desiredAmount = traderResource.amount;
         _playerGiving.Clear();
+        _playerGivingPopulation.Clear();
 
         SetFeedback(string.Empty);
         panelRoot?.SetActive(true);
@@ -68,10 +88,30 @@ public class OfferingPanelControl : MonoBehaviour
         RefreshAvailableList();
     }
 
+    public void Show(TradePopulationEntry populationEntry, TravelingTraderOffer traderOffer, TradeBuildingControl building)
+    {
+        _traderPopulation = populationEntry;
+        _traderResource = null;
+        _traderOffer = traderOffer;
+        _building = building;
+        _desiredAmount = populationEntry.count;
+        _playerGiving.Clear();
+        _playerGivingPopulation.Clear();
+
+        SetFeedback(string.Empty);
+        panelRoot?.SetActive(true);
+
+        RefreshTraderOfferingDisplay();
+        RefreshPlayerOfferList();
+        RefreshAvailablePopulationList();
+    }
+
     public void Hide()
     {
         _playerGiving.Clear();
+        _playerGivingPopulation.Clear();
         _traderResource = null;
+        _traderPopulation = null;
         _traderOffer = null;
         _building = null;
         panelRoot?.SetActive(false);
@@ -81,8 +121,10 @@ public class OfferingPanelControl : MonoBehaviour
 
     private void IncreaseDesired()
     {
-        if (_traderResource == null) return;
-        _desiredAmount = Mathf.Min(_desiredAmount + 1, _traderResource.amount);
+        int max = _traderResource != null ? _traderResource.amount
+                : _traderPopulation != null ? _traderPopulation.count
+                : 1;
+        _desiredAmount = Mathf.Min(_desiredAmount + 1, max);
         RefreshTraderOfferingDisplay();
     }
 
@@ -94,38 +136,87 @@ public class OfferingPanelControl : MonoBehaviour
 
     private void RefreshTraderOfferingDisplay()
     {
-        if (_traderResource?.resource == null) return;
+        if (_traderResource != null)
+        {
+            resourceIconParent?.SetActive(true);
+            populationIconParent?.SetActive(false);
 
-        if (traderOfferingIcon != null)
-            traderOfferingIcon.sprite = _traderResource.resource.resourceIcon;
+            if (traderOfferingIcon != null)
+                traderOfferingIcon.sprite = _traderResource.resource?.resourceIcon;
 
-        if (traderOfferingNameText != null)
-            traderOfferingNameText.text = _traderResource.resource.resourceName;
+            if (traderOfferingNameText != null)
+                traderOfferingNameText.text = _traderResource.resource?.resourceName;
 
-        if (traderOfferingAmountText != null)
-            traderOfferingAmountText.text = _desiredAmount.ToString();
+            if (traderOfferingAmountText != null)
+                traderOfferingAmountText.text = _desiredAmount.ToString();
+        }
+        else if (_traderPopulation != null)
+        {
+            resourceIconParent?.SetActive(false);
+            populationIconParent?.SetActive(true);
+
+            if (traderPopulationAgeIcon != null)
+                traderPopulationAgeIcon.sprite = SpriteForAge(_traderPopulation.ageGroup);
+
+            if (traderPopulationGenderIcon != null)
+                traderPopulationGenderIcon.sprite = SpriteForGender(_traderPopulation.gender);
+
+            if (traderOfferingNameText != null)
+                traderOfferingNameText.text = LabelForAge(_traderPopulation.ageGroup);
+
+            if (traderOfferingAmountText != null)
+                traderOfferingAmountText.text = _desiredAmount.ToString();
+        }
     }
 
     // ── Player offer list ─────────────────────────────────────────
 
     private void RefreshPlayerOfferList()
     {
-        _playerGiving.RemoveAll(e => e.amount <= 0);
-
         ClearContent(playerOfferContent);
-        if (playerOfferingItemPrefab == null || playerOfferContent == null) return;
 
-        foreach (var entry in _playerGiving)
+        if (_traderPopulation != null)
         {
-            var go = Instantiate(playerOfferingItemPrefab, playerOfferContent);
-            var item = go.GetComponent<PlayerOfferingItemUI>();
-            if (item == null) continue;
+            _playerGivingPopulation.RemoveAll(e => e.count <= 0);
+            if (playerOfferingPopulationItemPrefab == null || playerOfferContent == null) return;
 
-            item.Bind(entry, () =>
+            var pop = PlayersPopulationManager.Instance;
+            foreach (var entry in _playerGivingPopulation)
             {
-                RefreshPlayerOfferList();
-                SetFeedback(string.Empty);
-            });
+                int maxAvailable = 0;
+                if (pop != null)
+                    foreach (var g in pop.AllPopulations)
+                        if (g.ageGroup == entry.ageGroup && g.gender == entry.gender)
+                            { maxAvailable = g.AvailableForTask(); break; }
+
+                var go = Instantiate(playerOfferingPopulationItemPrefab, playerOfferContent);
+                var item = go.GetComponent<PlayerOfferingPopulationItemUI>();
+                if (item == null) continue;
+
+                item.Bind(entry, maxAvailable, () =>
+                {
+                    RefreshPlayerOfferList();
+                    SetFeedback(string.Empty);
+                });
+            }
+        }
+        else
+        {
+            _playerGiving.RemoveAll(e => e.amount <= 0);
+            if (playerOfferingItemPrefab == null || playerOfferContent == null) return;
+
+            foreach (var entry in _playerGiving)
+            {
+                var go = Instantiate(playerOfferingItemPrefab, playerOfferContent);
+                var item = go.GetComponent<PlayerOfferingItemUI>();
+                if (item == null) continue;
+
+                item.Bind(entry, () =>
+                {
+                    RefreshPlayerOfferList();
+                    SetFeedback(string.Empty);
+                });
+            }
         }
     }
 
@@ -154,6 +245,65 @@ public class OfferingPanelControl : MonoBehaviour
 
             item.Bind(stack, AddResourceToOffer);
         }
+    }
+
+    private void RefreshAvailablePopulationList()
+    {
+        ClearContent(availableContent);
+        if (availablePopulationItemPrefab == null || availableContent == null) return;
+
+        var pop = PlayersPopulationManager.Instance;
+        if (pop == null) return;
+
+        foreach (var group in pop.AllPopulations)
+        {
+            int available = group.AvailableForTask();
+            if (available <= 0) continue;
+
+            var go = Instantiate(availablePopulationItemPrefab, availableContent);
+            var item = go.GetComponent<AvailablePopulationItemUI>();
+            if (item == null) continue;
+
+            var entry = new TradePopulationEntry
+            {
+                ageGroup = group.ageGroup,
+                gender   = group.gender,
+                count    = available
+            };
+            item.Bind(entry, AddPopulationToOffer);
+        }
+    }
+
+    private void AddPopulationToOffer(TradePopulationEntry source)
+    {
+        if (source == null) return;
+
+        foreach (var entry in _playerGivingPopulation)
+        {
+            if (entry.ageGroup != source.ageGroup || entry.gender != source.gender) continue;
+
+            var pop = PlayersPopulationManager.Instance;
+            int available = 0;
+            if (pop != null)
+                foreach (var g in pop.AllPopulations)
+                    if (g.ageGroup == source.ageGroup && g.gender == source.gender)
+                        { available = g.AvailableForTask(); break; }
+
+            if (entry.count < available)
+            {
+                entry.count++;
+                RefreshPlayerOfferList();
+            }
+            return;
+        }
+
+        _playerGivingPopulation.Add(new TradePopulationEntry
+        {
+            ageGroup = source.ageGroup,
+            gender   = source.gender,
+            count    = 1
+        });
+        RefreshPlayerOfferList();
     }
 
     private void AddResourceToOffer(ResourceDefinition def)
@@ -202,6 +352,40 @@ public class OfferingPanelControl : MonoBehaviour
     }
 
     // ── Helpers ───────────────────────────────────────────────────
+
+    private string LabelForAge(AgeGroup age)
+    {
+        switch (age)
+        {
+            case AgeGroup.Child: return "Child";
+            case AgeGroup.Teen:  return "Teen";
+            case AgeGroup.Adult: return "Adult";
+            case AgeGroup.Elder: return "Elder";
+            default:             return "Adult";
+        }
+    }
+
+    private Sprite SpriteForAge(AgeGroup age)
+    {
+        switch (age)
+        {
+            case AgeGroup.Child: return childSprite;
+            case AgeGroup.Teen:  return teenSprite;
+            case AgeGroup.Adult: return adultSprite;
+            case AgeGroup.Elder: return elderSprite;
+            default:             return adultSprite;
+        }
+    }
+
+    private Sprite SpriteForGender(Gender gender)
+    {
+        switch (gender)
+        {
+            case Gender.Male:   return maleSprite;
+            case Gender.Female: return femaleSprite;
+            default:            return maleSprite;
+        }
+    }
 
     private void SetFeedback(string message)
     {
