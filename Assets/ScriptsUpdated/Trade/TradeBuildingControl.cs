@@ -306,12 +306,11 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
         FillResources(offer, def.possibleResources, def.resourceAmountRange, def.minResourceTypes, def.maxResourceTypes);
 
-        if (def.canOfferPopulation && def.maxPopulationOffered > 0)
+        if (def.canOfferPopulation && def.maxPopulationOffered > 0 && def.offerablePopulation?.Count > 0)
         {
             int total = UnityEngine.Random.Range(def.minPopulationOffered, def.maxPopulationOffered + 1);
             if (total > 0)
-                offer.offeredPopulation = BuildRandomPopulation(
-                    total, def.canOfferChildren, def.canOfferTeens, def.canOfferAdults, def.canOfferElders);
+                offer.offeredPopulation = BuildRandomPopulation(total, def.offerablePopulation);
         }
 
         return offer;
@@ -335,24 +334,17 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         }
     }
 
-    private TradePopulationAmount BuildRandomPopulation(int total, bool children, bool teens, bool adults, bool elders)
+    private TradePopulationAmount BuildRandomPopulation(int total, List<TradePopulationSlot> slots)
     {
-        var pop   = new TradePopulationAmount();
-        var slots = new List<int>();
-        if (children) slots.Add(0);
-        if (teens)    slots.Add(1);
-        if (adults)   slots.Add(2);
-        if (elders)   slots.Add(3);
-        if (slots.Count == 0) return pop;
+        var result = new TradePopulationAmount();
+        if (slots == null || slots.Count == 0) return result;
         for (int i = 0; i < total; i++)
         {
-            int slot = slots[UnityEngine.Random.Range(0, slots.Count)];
-            if      (slot == 0) pop.children++;
-            else if (slot == 1) pop.teens++;
-            else if (slot == 2) pop.adults++;
-            else                pop.elders++;
+            var slot = slots[UnityEngine.Random.Range(0, slots.Count)];
+            if (slot != null)
+                result.Add(slot.ageGroup, slot.gender, 1);
         }
-        return pop;
+        return result;
     }
 
     private static void ShuffleList<T>(List<T> list)
@@ -390,10 +382,27 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     private float PopValue(TradePopulationAmount pop)
     {
         if (pop == null || currentTraderOffer == null) return 0f;
-        return pop.children * currentTraderOffer.childValue
-             + pop.teens    * currentTraderOffer.teenValue
-             + pop.adults   * currentTraderOffer.adultValue
-             + pop.elders   * currentTraderOffer.elderValue;
+        float total = 0f;
+        for (int i = 0; i < pop.entries.Count; i++)
+        {
+            var e = pop.entries[i];
+            if (e == null || e.count <= 0) continue;
+            total += e.count * GetAgeValue(e.ageGroup);
+        }
+        return total;
+    }
+
+    private float GetAgeValue(AgeGroup age)
+    {
+        if (currentTraderOffer == null) return 1f;
+        switch (age)
+        {
+            case AgeGroup.Child: return currentTraderOffer.childValue;
+            case AgeGroup.Teen:  return currentTraderOffer.teenValue;
+            case AgeGroup.Adult: return currentTraderOffer.adultValue;
+            case AgeGroup.Elder: return currentTraderOffer.elderValue;
+            default: return 1f;
+        }
     }
 
     // Extension point: read ResourceDefinition.tradeValue here when the field is added.
@@ -442,16 +451,23 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             return false;
         }
 
-        // TODO: Replace with pop.GetAvailableByAgeGroup(AgeGroup) when that API is added.
-        if (amount.children > GetAvailableByAge(pop, AgeGroup.Child))  { reason = "Not enough children available.";  return false; }
-        if (amount.teens    > GetAvailableByAge(pop, AgeGroup.Teen))    { reason = "Not enough teens available.";    return false; }
-        if (amount.adults   > GetAvailableByAge(pop, AgeGroup.Adult))   { reason = "Not enough adults available.";   return false; }
-        if (amount.elders   > GetAvailableByAge(pop, AgeGroup.Elder))   { reason = "Not enough elders available.";   return false; }
+        // TODO: Replace with pop.GetAvailableByAgeAndGender(AgeGroup, Gender) when that API is added.
+        for (int i = 0; i < amount.entries.Count; i++)
+        {
+            var e = amount.entries[i];
+            if (e == null || e.count <= 0) continue;
+            int available = GetAvailableByAgeAndGender(pop, e.ageGroup, e.gender);
+            if (e.count > available)
+            {
+                reason = $"Not enough {e.gender} {e.ageGroup} available (need {e.count}, have {available}).";
+                return false;
+            }
+        }
 
         return true;
     }
 
-    private int GetAvailableByAge(PlayersPopulationManager pop, AgeGroup age)
+    private int GetAvailableByAgeAndGender(PlayersPopulationManager pop, AgeGroup age, Gender gender)
     {
         int total = 0;
         var groups = pop.AllPopulations;
@@ -459,7 +475,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         for (int i = 0; i < groups.Count; i++)
         {
             var g = groups[i];
-            if (g != null && g.ageGroup == age)
+            if (g != null && g.ageGroup == age && g.gender == gender)
                 total += Mathf.Max(0, g.count - g.reservedCount);
         }
         return total;
@@ -505,11 +521,13 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         if (amount == null || amount.IsEmpty) return;
         var pop = PlayersPopulationManager.Instance;
         if (pop == null) { Debug.LogWarning("[TradeBuildingControl] RemovePopulationFromPlayer: PlayersPopulationManager missing."); return; }
-        // TODO: Use pop.RemoveFromAgeGroup(AgeGroup, count) when that API is added.
-        RemoveFromAge(pop, AgeGroup.Child,  amount.children);
-        RemoveFromAge(pop, AgeGroup.Teen,   amount.teens);
-        RemoveFromAge(pop, AgeGroup.Adult,  amount.adults);
-        RemoveFromAge(pop, AgeGroup.Elder,  amount.elders);
+        // TODO: Use pop.RemoveByAgeAndGender(AgeGroup, Gender, count) when that API is added.
+        for (int i = 0; i < amount.entries.Count; i++)
+        {
+            var e = amount.entries[i];
+            if (e == null || e.count <= 0) continue;
+            RemovePopEntry(pop, e.ageGroup, e.gender, e.count);
+        }
         pop.MarkUIDirty();
         SaveSystem.MarkSectionDirty(SaveSectionKeys.Population);
     }
@@ -519,16 +537,18 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         if (amount == null || amount.IsEmpty) return;
         var pop = PlayersPopulationManager.Instance;
         if (pop == null) { Debug.LogWarning("[TradeBuildingControl] AddPopulationToPlayer: PlayersPopulationManager missing."); return; }
-        // TODO: Use pop.AddToAgeGroup(AgeGroup, count) when that API is added.
-        AddToAge(pop, AgeGroup.Child,  amount.children);
-        AddToAge(pop, AgeGroup.Teen,   amount.teens);
-        AddToAge(pop, AgeGroup.Adult,  amount.adults);
-        AddToAge(pop, AgeGroup.Elder,  amount.elders);
+        // TODO: Use pop.AddByAgeAndGender(AgeGroup, Gender, count) when that API is added.
+        for (int i = 0; i < amount.entries.Count; i++)
+        {
+            var e = amount.entries[i];
+            if (e == null || e.count <= 0) continue;
+            AddPopEntry(pop, e.ageGroup, e.gender, e.count);
+        }
         pop.MarkUIDirty();
         SaveSystem.MarkSectionDirty(SaveSectionKeys.Population);
     }
 
-    private void RemoveFromAge(PlayersPopulationManager pop, AgeGroup age, int count)
+    private void RemovePopEntry(PlayersPopulationManager pop, AgeGroup age, Gender gender, int count)
     {
         if (count <= 0) return;
         int remaining = count;
@@ -537,15 +557,15 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         for (int i = 0; i < groups.Count && remaining > 0; i++)
         {
             var g = groups[i];
-            if (g == null || g.ageGroup != age) continue;
+            if (g == null || g.ageGroup != age || g.gender != gender) continue;
             int take = Mathf.Min(remaining, Mathf.Max(0, g.count - g.reservedCount));
             g.count -= take; remaining -= take;
         }
         if (remaining > 0)
-            Debug.LogWarning($"[TradeBuildingControl] Could not remove all {age} population. {remaining} unresolved.");
+            Debug.LogWarning($"[TradeBuildingControl] Could not remove all {gender} {age} population. {remaining} unresolved.");
     }
 
-    private void AddToAge(PlayersPopulationManager pop, AgeGroup age, int count)
+    private void AddPopEntry(PlayersPopulationManager pop, AgeGroup age, Gender gender, int count)
     {
         if (count <= 0) return;
         var groups = pop.AllPopulations;
@@ -553,11 +573,11 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         for (int i = 0; i < groups.Count; i++)
         {
             var g = groups[i];
-            if (g == null || g.ageGroup != age) continue;
+            if (g == null || g.ageGroup != age || g.gender != gender) continue;
             g.count += count;
             return;
         }
-        Debug.LogWarning($"[TradeBuildingControl] No {age} population group found to receive {count} people.");
+        Debug.LogWarning($"[TradeBuildingControl] No {gender} {age} population group found to receive {count} people.");
     }
 
     // ──────────────────── Preference Hints ────────────────────
@@ -623,13 +643,14 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
                             { resourceID = r.resource.resourceID, amount = r.amount });
 
             var pop = currentTraderOffer.offeredPopulation;
-            if (pop != null)
-            {
-                data.traderOfferedChildren = pop.children;
-                data.traderOfferedTeens    = pop.teens;
-                data.traderOfferedAdults   = pop.adults;
-                data.traderOfferedElders   = pop.elders;
-            }
+            if (pop?.entries != null)
+                for (int i = 0; i < pop.entries.Count; i++)
+                {
+                    var e = pop.entries[i];
+                    if (e == null || e.count <= 0) continue;
+                    data.traderOfferedPopulation.Add(new TradePopulationSaveEntry
+                        { ageGroup = e.ageGroup.ToString(), gender = e.gender.ToString(), count = e.count });
+                }
         }
 
         return data;
@@ -678,13 +699,15 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
                 offer.offeredResources.Add(new ResourceAmount { resource = def, amount = entry.amount });
             }
 
-        offer.offeredPopulation = new TradePopulationAmount
-        {
-            children = data.traderOfferedChildren,
-            teens    = data.traderOfferedTeens,
-            adults   = data.traderOfferedAdults,
-            elders   = data.traderOfferedElders
-        };
+        offer.offeredPopulation = new TradePopulationAmount();
+        if (data.traderOfferedPopulation != null)
+            for (int i = 0; i < data.traderOfferedPopulation.Count; i++)
+            {
+                var e = data.traderOfferedPopulation[i];
+                if (e == null || e.count <= 0) continue;
+                if (System.Enum.TryParse(e.ageGroup, out AgeGroup age) && System.Enum.TryParse(e.gender, out Gender gender))
+                    offer.offeredPopulation.Add(age, gender, e.count);
+            }
 
         currentTraderOffer   = offer;
         hasActiveTrader      = true;

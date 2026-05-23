@@ -19,10 +19,8 @@ public class TraderDefinitionSO : ScriptableObject
     public bool canOfferPopulation = false;
     public int minPopulationOffered = 0;
     public int maxPopulationOffered = 2;
-    public bool canOfferChildren = false;
-    public bool canOfferTeens = true;
-    public bool canOfferAdults = true;
-    public bool canOfferElders = false;
+    [UnityEngine.Tooltip("Which age+sex combinations this trader can bring. Each slot has equal probability of being picked.")]
+    public List<TradePopulationSlot> offerablePopulation = new List<TradePopulationSlot>();
 
     [Header("Preferences — What They Value From Player")]
     public List<TradeResourcePreference> resourcePreferences = new List<TradeResourcePreference>();

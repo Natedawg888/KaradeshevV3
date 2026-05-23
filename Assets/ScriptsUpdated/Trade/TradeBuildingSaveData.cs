@@ -9,6 +9,14 @@ public class TradeItemSaveEntry
 }
 
 [Serializable]
+public class TradePopulationSaveEntry
+{
+    public string ageGroup;
+    public string gender;
+    public int count;
+}
+
+[Serializable]
 public class TradeBuildingSaveData
 {
     public string buildingInstanceId;
@@ -19,10 +27,7 @@ public class TradeBuildingSaveData
     public float traderGreedMultiplier;
     public string traderFlavorDescription;
     public List<TradeItemSaveEntry> traderOfferedResources = new List<TradeItemSaveEntry>();
-    public int traderOfferedChildren;
-    public int traderOfferedTeens;
-    public int traderOfferedAdults;
-    public int traderOfferedElders;
+    public List<TradePopulationSaveEntry> traderOfferedPopulation = new List<TradePopulationSaveEntry>();
 }
 
 [Serializable]
