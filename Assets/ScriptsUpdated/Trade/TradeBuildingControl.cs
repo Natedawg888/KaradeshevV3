@@ -450,12 +450,12 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
     private float GetBaseValue(ResourceDefinition def)
     {
-        if (def == null) return 1f;
+        if (def == null) return 0f;
         var traderDef = FindDefByName(currentTraderOffer?.traderName);
-        if (traderDef?.possibleResources == null) return 1f;
-        foreach (var e in traderDef.possibleResources)
-            if (e?.resource == def) return Mathf.Max(0.01f, e.tradeValue);
-        return 1f;
+        if (traderDef?.possibleResources != null)
+            foreach (var e in traderDef.possibleResources)
+                if (e?.resource == def) return Mathf.Max(0.01f, e.tradeValue);
+        return ResourceValueManager.Instance?.GetValue(def) ?? 0f;
     }
 
     private float GetPreferenceMult(ResourceDefinition def)
