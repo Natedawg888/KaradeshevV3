@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -13,6 +14,12 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
     [Header("Trader Pool")]
     [SerializeField] private List<TraderDefinitionSO> traderPool = new List<TraderDefinitionSO>();
+
+    [Header("World Canvas Icon")]
+    [Tooltip("Root GameObject containing the trader icon. Hidden when no trader is present.")]
+    [SerializeField] private GameObject traderIconRoot;
+    [Tooltip("Optional. Displays turns remaining while a trader is present.")]
+    [SerializeField] private TMP_Text traderTurnsRemainingText;
 
     [Header("State")]
     [SerializeField] private bool hasActiveTrader;
@@ -38,6 +45,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     {
         _buildingControl = GetComponent<BuildingControl>();
         _buildingStatus  = GetComponent<BuildingStatus>();
+        RefreshWorldIcon();
     }
 
     private void OnEnable()
@@ -185,6 +193,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         traderTurnsRemaining = 0;
         currentTraderOffer   = null;
         ScheduleNextVisit();
+        RefreshWorldIcon();
         OnTraderLeft?.Invoke();
         MarkDirty();
     }
@@ -206,6 +215,10 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
                     NotificationType.TraderLeft, "Trader Departed",
                     $"{currentTraderOffer?.traderName ?? "The trader"} has moved on.");
                 ClearTrader();
+            }
+            else
+            {
+                RefreshWorldIcon();
             }
             return;
         }
@@ -269,6 +282,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             NotificationType.TraderArrived, "Trader Arrived",
             $"{currentTraderOffer.traderName} has arrived at {buildingName}.");
 
+        RefreshWorldIcon();
         OnTraderArrived?.Invoke(currentTraderOffer);
         MarkDirty();
     }
@@ -608,6 +622,15 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
     private void MarkDirty()
         => SaveSystem.MarkSectionDirty(SaveSectionKeys.WorldObjects);
+
+    private void RefreshWorldIcon()
+    {
+        if (traderIconRoot != null)
+            traderIconRoot.SetActive(hasActiveTrader);
+
+        if (traderTurnsRemainingText != null)
+            traderTurnsRemainingText.text = hasActiveTrader ? traderTurnsRemaining.ToString() : string.Empty;
+    }
 
     private TraderDefinitionSO FindDefByName(string traderName)
     {
