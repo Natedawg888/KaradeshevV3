@@ -180,20 +180,13 @@ public class OfferingPanelControl : MonoBehaviour
             _playerGivingPopulation.RemoveAll(e => e.count <= 0);
             if (playerOfferingPopulationItemPrefab == null || playerOfferContent == null) return;
 
-            var pop = PlayersPopulationManager.Instance;
             foreach (var entry in _playerGivingPopulation)
             {
-                int maxAvailable = 0;
-                if (pop != null)
-                    foreach (var g in pop.AllPopulations)
-                        if (g.ageGroup == entry.ageGroup && g.gender == entry.gender)
-                            { maxAvailable = g.AvailableForTask(); break; }
-
                 var go = Instantiate(playerOfferingPopulationItemPrefab, playerOfferContent);
                 var item = go.GetComponent<PlayerOfferingPopulationItemUI>();
                 if (item == null) continue;
 
-                item.Bind(entry, maxAvailable, () =>
+                item.Bind(entry, () =>
                 {
                     RefreshPlayerOfferList();
                     SetFeedback(string.Empty);
@@ -243,7 +236,11 @@ public class OfferingPanelControl : MonoBehaviour
             var item = go.GetComponent<AvailableResourceItemUI>();
             if (item == null) continue;
 
-            item.Bind(stack, AddResourceToOffer);
+            int currentOffered = 0;
+            foreach (var e in _playerGiving)
+                if (e.resource == stack.definition) { currentOffered = e.amount; break; }
+
+            item.Bind(stack, currentOffered, OnResourceOfferConfirm);
         }
     }
 
@@ -264,68 +261,61 @@ public class OfferingPanelControl : MonoBehaviour
             var item = go.GetComponent<AvailablePopulationItemUI>();
             if (item == null) continue;
 
+            int currentOffered = 0;
+            foreach (var e in _playerGivingPopulation)
+                if (e.ageGroup == group.ageGroup && e.gender == group.gender) { currentOffered = e.count; break; }
+
             var entry = new TradePopulationEntry
             {
                 ageGroup = group.ageGroup,
                 gender   = group.gender,
                 count    = available
             };
-            item.Bind(entry, AddPopulationToOffer);
+            item.Bind(entry, currentOffered, OnPopulationOfferConfirm);
         }
     }
 
-    private void AddPopulationToOffer(TradePopulationEntry source)
+    private void OnPopulationOfferConfirm(TradePopulationEntry source, int amount)
     {
         if (source == null) return;
 
         foreach (var entry in _playerGivingPopulation)
         {
             if (entry.ageGroup != source.ageGroup || entry.gender != source.gender) continue;
-
-            var pop = PlayersPopulationManager.Instance;
-            int available = 0;
-            if (pop != null)
-                foreach (var g in pop.AllPopulations)
-                    if (g.ageGroup == source.ageGroup && g.gender == source.gender)
-                        { available = g.AvailableForTask(); break; }
-
-            if (entry.count < available)
-            {
-                entry.count++;
-                RefreshPlayerOfferList();
-            }
+            entry.count = Mathf.Clamp(amount, 0, source.count);
+            RefreshPlayerOfferList();
             return;
         }
 
-        _playerGivingPopulation.Add(new TradePopulationEntry
+        if (amount > 0)
         {
-            ageGroup = source.ageGroup,
-            gender   = source.gender,
-            count    = 1
-        });
-        RefreshPlayerOfferList();
+            _playerGivingPopulation.Add(new TradePopulationEntry
+            {
+                ageGroup = source.ageGroup,
+                gender   = source.gender,
+                count    = Mathf.Min(amount, source.count)
+            });
+            RefreshPlayerOfferList();
+        }
     }
 
-    private void AddResourceToOffer(ResourceDefinition def)
+    private void OnResourceOfferConfirm(ResourceDefinition def, int amount)
     {
         if (def == null) return;
 
         foreach (var entry in _playerGiving)
         {
             if (entry.resource != def) continue;
-            int available = PlayerInventoryManager.Instance?.GetAmount(def) ?? 0;
-            if (entry.amount < available)
-            {
-                entry.amount++;
-                RefreshPlayerOfferList();
-            }
+            int max = PlayerInventoryManager.Instance?.GetAmount(def) ?? 0;
+            entry.amount = Mathf.Clamp(amount, 0, max);
+            RefreshPlayerOfferList();
             return;
         }
 
-        int avail = PlayerInventoryManager.Instance?.GetAmount(def) ?? 0;
-        if (avail > 0)
+        if (amount > 0)
         {
-            _playerGiving.Add(new ResourceAmount { resource = def, amount = 1 });
+            int max = PlayerInventoryManager.Instance?.GetAmount(def) ?? 0;
+            _playerGiving.Add(new ResourceAmount { resource = def, amount = Mathf.Min(amount, max) });
             RefreshPlayerOfferList();
         }
     }
@@ -334,15 +324,30 @@ public class OfferingPanelControl : MonoBehaviour
 
     private void ConfirmTrade()
     {
-        if (_building == null || _traderResource?.resource == null) return;
+        if (_building == null) return;
 
         var offer = new TradeOffer();
-        offer.playerGivesResources.AddRange(_playerGiving);
-        offer.traderGivesResources.Add(new ResourceAmount
+
+        if (_traderResource?.resource != null)
         {
-            resource = _traderResource.resource,
-            amount   = _desiredAmount
-        });
+            offer.playerGivesResources.AddRange(_playerGiving);
+            offer.traderGivesResources.Add(new ResourceAmount
+            {
+                resource = _traderResource.resource,
+                amount   = _desiredAmount
+            });
+        }
+        else if (_traderPopulation != null)
+        {
+            foreach (var e in _playerGivingPopulation)
+                offer.playerGivesPopulation.Add(e.ageGroup, e.gender, e.count);
+
+            offer.traderGivesPopulation.Add(_traderPopulation.ageGroup, _traderPopulation.gender, _desiredAmount);
+        }
+        else
+        {
+            return;
+        }
 
         var result = _building.SubmitPlayerOffer(offer);
         SetFeedback(result.message);

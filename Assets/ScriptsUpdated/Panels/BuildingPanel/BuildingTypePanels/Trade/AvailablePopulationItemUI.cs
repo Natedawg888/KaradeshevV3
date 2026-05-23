@@ -22,10 +22,22 @@ public class AvailablePopulationItemUI : MonoBehaviour
     [SerializeField] private TMP_Text amountText;
 
     [Header("Actions")]
-    [SerializeField] private Button addButton;
+    [SerializeField] private Button increaseButton;
+    [SerializeField] private Button decreaseButton;
+    [SerializeField] private Button confirmButton;
 
-    public void Bind(TradePopulationEntry entry, Action<TradePopulationEntry> onAdd)
+    private TradePopulationEntry _source;
+    private int _maxAmount;
+    private int _stagedAmount;
+    private Action<TradePopulationEntry, int> _onConfirm;
+
+    public void Bind(TradePopulationEntry entry, int currentOffered, Action<TradePopulationEntry, int> onConfirm)
     {
+        _source = entry;
+        _maxAmount = entry.count;
+        _stagedAmount = currentOffered;
+        _onConfirm = onConfirm;
+
         if (ageGroupIcon != null)
             ageGroupIcon.sprite = SpriteForAge(entry.ageGroup);
 
@@ -35,14 +47,47 @@ public class AvailablePopulationItemUI : MonoBehaviour
         if (nameText != null)
             nameText.text = LabelForAge(entry.ageGroup);
 
-        if (amountText != null)
-            amountText.text = entry.count.ToString();
+        RefreshDisplay();
 
-        if (addButton != null)
+        if (increaseButton != null)
         {
-            addButton.onClick.RemoveAllListeners();
-            addButton.onClick.AddListener(() => onAdd?.Invoke(entry));
+            increaseButton.onClick.RemoveAllListeners();
+            increaseButton.onClick.AddListener(Increase);
         }
+
+        if (decreaseButton != null)
+        {
+            decreaseButton.onClick.RemoveAllListeners();
+            decreaseButton.onClick.AddListener(Decrease);
+        }
+
+        if (confirmButton != null)
+        {
+            confirmButton.onClick.RemoveAllListeners();
+            confirmButton.onClick.AddListener(Confirm);
+        }
+    }
+
+    private void Increase()
+    {
+        if (_stagedAmount >= _maxAmount) return;
+        _stagedAmount++;
+        RefreshDisplay();
+    }
+
+    private void Decrease()
+    {
+        if (_stagedAmount <= 0) return;
+        _stagedAmount--;
+        RefreshDisplay();
+    }
+
+    private void Confirm() => _onConfirm?.Invoke(_source, _stagedAmount);
+
+    private void RefreshDisplay()
+    {
+        if (amountText != null)
+            amountText.text = $"{_stagedAmount} / {_maxAmount}";
     }
 
     private string LabelForAge(AgeGroup age)

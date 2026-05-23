@@ -11,8 +11,7 @@ public class PlayerOfferingItemUI : MonoBehaviour
     [SerializeField] private TMP_Text amountText;
 
     [Header("Actions")]
-    [SerializeField] private Button increaseButton;
-    [SerializeField] private Button decreaseButton;
+    [SerializeField] private Button takeBackButton;
 
     private ResourceAmount _entry;
     private Action _onChanged;
@@ -28,44 +27,20 @@ public class PlayerOfferingItemUI : MonoBehaviour
         if (nameText != null)
             nameText.text = entry.resource?.resourceName;
 
-        RefreshAmountText();
+        if (amountText != null)
+            amountText.text = entry.amount.ToString();
 
-        if (increaseButton != null)
+        if (takeBackButton != null)
         {
-            increaseButton.onClick.RemoveAllListeners();
-            increaseButton.onClick.AddListener(Increase);
-        }
-
-        if (decreaseButton != null)
-        {
-            decreaseButton.onClick.RemoveAllListeners();
-            decreaseButton.onClick.AddListener(Decrease);
+            takeBackButton.onClick.RemoveAllListeners();
+            takeBackButton.onClick.AddListener(TakeBack);
         }
     }
 
-    private void Increase()
-    {
-        if (_entry?.resource == null) return;
-        int available = PlayerInventoryManager.Instance?.GetAmount(_entry.resource) ?? 0;
-        if (_entry.amount < available)
-        {
-            _entry.amount++;
-            RefreshAmountText();
-            _onChanged?.Invoke();
-        }
-    }
-
-    private void Decrease()
+    private void TakeBack()
     {
         if (_entry == null) return;
-        _entry.amount = Mathf.Max(0, _entry.amount - 1);
-        RefreshAmountText();
+        _entry.amount = 0;
         _onChanged?.Invoke();
-    }
-
-    private void RefreshAmountText()
-    {
-        if (amountText != null && _entry != null)
-            amountText.text = _entry.amount.ToString();
     }
 }

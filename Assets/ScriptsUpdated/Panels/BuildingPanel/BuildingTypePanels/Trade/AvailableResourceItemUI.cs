@@ -11,25 +11,68 @@ public class AvailableResourceItemUI : MonoBehaviour
     [SerializeField] private TMP_Text amountText;
 
     [Header("Actions")]
-    [SerializeField] private Button addButton;
+    [SerializeField] private Button increaseButton;
+    [SerializeField] private Button decreaseButton;
+    [SerializeField] private Button confirmButton;
 
-    public void Bind(InventoryStack stack, Action<ResourceDefinition> onAdd)
+    private ResourceDefinition _def;
+    private int _maxAmount;
+    private int _stagedAmount;
+    private Action<ResourceDefinition, int> _onConfirm;
+
+    public void Bind(InventoryStack stack, int currentOffered, Action<ResourceDefinition, int> onConfirm)
     {
-        var def = stack.definition;
+        _def = stack.definition;
+        _maxAmount = stack.amount;
+        _stagedAmount = currentOffered;
+        _onConfirm = onConfirm;
 
         if (icon != null)
-            icon.sprite = def?.resourceIcon;
+            icon.sprite = _def?.resourceIcon;
 
         if (nameText != null)
-            nameText.text = def?.resourceName;
+            nameText.text = _def?.resourceName;
 
-        if (amountText != null)
-            amountText.text = stack.amount.ToString();
+        RefreshDisplay();
 
-        if (addButton != null)
+        if (increaseButton != null)
         {
-            addButton.onClick.RemoveAllListeners();
-            addButton.onClick.AddListener(() => onAdd?.Invoke(def));
+            increaseButton.onClick.RemoveAllListeners();
+            increaseButton.onClick.AddListener(Increase);
         }
+
+        if (decreaseButton != null)
+        {
+            decreaseButton.onClick.RemoveAllListeners();
+            decreaseButton.onClick.AddListener(Decrease);
+        }
+
+        if (confirmButton != null)
+        {
+            confirmButton.onClick.RemoveAllListeners();
+            confirmButton.onClick.AddListener(Confirm);
+        }
+    }
+
+    private void Increase()
+    {
+        if (_stagedAmount >= _maxAmount) return;
+        _stagedAmount++;
+        RefreshDisplay();
+    }
+
+    private void Decrease()
+    {
+        if (_stagedAmount <= 0) return;
+        _stagedAmount--;
+        RefreshDisplay();
+    }
+
+    private void Confirm() => _onConfirm?.Invoke(_def, _stagedAmount);
+
+    private void RefreshDisplay()
+    {
+        if (amountText != null)
+            amountText.text = $"{_stagedAmount} / {_maxAmount}";
     }
 }

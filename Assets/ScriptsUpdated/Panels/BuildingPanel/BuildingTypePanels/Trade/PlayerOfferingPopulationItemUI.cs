@@ -22,13 +22,12 @@ public class PlayerOfferingPopulationItemUI : MonoBehaviour
     [SerializeField] private TMP_Text amountText;
 
     [Header("Actions")]
-    [SerializeField] private Button increaseButton;
-    [SerializeField] private Button decreaseButton;
+    [SerializeField] private Button takeBackButton;
 
     private TradePopulationEntry _entry;
     private Action _onChanged;
 
-    public void Bind(TradePopulationEntry entry, int maxAvailable, Action onChanged)
+    public void Bind(TradePopulationEntry entry, Action onChanged)
     {
         _entry = entry;
         _onChanged = onChanged;
@@ -42,38 +41,21 @@ public class PlayerOfferingPopulationItemUI : MonoBehaviour
         if (nameText != null)
             nameText.text = LabelForAge(entry.ageGroup);
 
-        RefreshAmountText();
+        if (amountText != null)
+            amountText.text = entry.count.ToString();
 
-        if (increaseButton != null)
+        if (takeBackButton != null)
         {
-            increaseButton.onClick.RemoveAllListeners();
-            increaseButton.onClick.AddListener(() =>
-            {
-                if (_entry.count < maxAvailable)
-                {
-                    _entry.count++;
-                    RefreshAmountText();
-                    _onChanged?.Invoke();
-                }
-            });
-        }
-
-        if (decreaseButton != null)
-        {
-            decreaseButton.onClick.RemoveAllListeners();
-            decreaseButton.onClick.AddListener(() =>
-            {
-                _entry.count = Mathf.Max(0, _entry.count - 1);
-                RefreshAmountText();
-                _onChanged?.Invoke();
-            });
+            takeBackButton.onClick.RemoveAllListeners();
+            takeBackButton.onClick.AddListener(TakeBack);
         }
     }
 
-    private void RefreshAmountText()
+    private void TakeBack()
     {
-        if (amountText != null && _entry != null)
-            amountText.text = _entry.count.ToString();
+        if (_entry == null) return;
+        _entry.count = 0;
+        _onChanged?.Invoke();
     }
 
     private string LabelForAge(AgeGroup age)
