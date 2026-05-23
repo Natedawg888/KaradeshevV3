@@ -1,5 +1,15 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+
+[Serializable]
+public class TraderResourceEntry
+{
+    public ResourceDefinition resource;
+    public Vector2Int amountRange = new Vector2Int(1, 5);
+    [Tooltip("How much this resource is worth in this trader's economy.")]
+    public float tradeValue = 1f;
+}
 
 [CreateAssetMenu(menuName = "Trade/Trader Definition", fileName = "NewTraderDefinition")]
 public class TraderDefinitionSO : ScriptableObject
@@ -10,8 +20,7 @@ public class TraderDefinitionSO : ScriptableObject
     [TextArea] public string flavorDescription;
 
     [Header("Offer — Resources")]
-    public List<ResourceAmount> possibleResources = new List<ResourceAmount>();
-    public Vector2Int resourceAmountRange = new Vector2Int(1, 5);
+    public List<TraderResourceEntry> possibleResources = new List<TraderResourceEntry>();
     public int minResourceTypes = 1;
     public int maxResourceTypes = 3;
 
@@ -43,6 +52,14 @@ public class TraderDefinitionSO : ScriptableObject
     public float arrivalChance = 1f;
     [Tooltip("How many turns this trader stays before moving on.")]
     public int turnsAvailable = 3;
+
+    [Header("Offer Feedback Messages")]
+    [Tooltip("Leave blank to use defaults.")]
+    public string feedbackNeedMore          = "";
+    public string feedbackAlittleMore       = "";
+    public string feedbackAcceptable        = "";
+    public string feedbackGenerous          = "";
+    public string feedbackMassivelyGenerous = "";
 
     [Header("Season Restrictions")]
     [Tooltip("If empty, this trader can appear in any season. Otherwise only in the listed seasons.")]

@@ -17,12 +17,4 @@ public class TravelingTraderOffer
     public float elderValue = 2f;
     public int turnsRemaining;
     public string flavorDescription;
-
-    [Header("Offer Feedback Messages")]
-    [Tooltip("Leave blank to use defaults.")]
-    public string feedbackNeedMore          = "";
-    public string feedbackAlittleMore       = "";
-    public string feedbackAcceptable        = "";
-    public string feedbackGenerous          = "";
-    public string feedbackMassivelyGenerous = "";
 }

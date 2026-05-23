@@ -373,18 +373,25 @@ public class OfferingPanelControl : MonoBehaviour
             ? _playerGivingPopulation.Count == 0
             : _playerGiving.Count == 0;
 
-        if (offerEmpty) { SetFeedback(string.Empty); return; }
+        if (offerEmpty)
+        {
+            SetFeedback(string.Empty);
+            if (confirmButton != null) confirmButton.interactable = false;
+            return;
+        }
 
         var offer = BuildCurrentOffer();
         float ratio = _building.GetOfferRatio(offer);
-        var t = _building.GetCurrentTraderOfferData();
+        var def = _building.GetCurrentTraderDefinition();
+
+        if (confirmButton != null) confirmButton.interactable = ratio >= 1.00f;
 
         string msg;
-        if      (ratio < 0.75f) msg = !string.IsNullOrEmpty(t?.feedbackNeedMore)          ? t.feedbackNeedMore          : "More.";
-        else if (ratio < 1.00f) msg = !string.IsNullOrEmpty(t?.feedbackAlittleMore)        ? t.feedbackAlittleMore        : "A little more.";
-        else if (ratio < 1.25f) msg = !string.IsNullOrEmpty(t?.feedbackAcceptable)         ? t.feedbackAcceptable         : "Acceptable.";
-        else if (ratio < 1.75f) msg = !string.IsNullOrEmpty(t?.feedbackGenerous)           ? t.feedbackGenerous           : "Generous.";
-        else                    msg = !string.IsNullOrEmpty(t?.feedbackMassivelyGenerous)   ? t.feedbackMassivelyGenerous  : "Massively generous!";
+        if      (ratio < 0.75f) msg = !string.IsNullOrEmpty(def?.feedbackNeedMore)          ? def.feedbackNeedMore          : "More.";
+        else if (ratio < 1.00f) msg = !string.IsNullOrEmpty(def?.feedbackAlittleMore)        ? def.feedbackAlittleMore        : "A little more.";
+        else if (ratio < 1.25f) msg = !string.IsNullOrEmpty(def?.feedbackAcceptable)         ? def.feedbackAcceptable         : "Acceptable.";
+        else if (ratio < 1.75f) msg = !string.IsNullOrEmpty(def?.feedbackGenerous)           ? def.feedbackGenerous           : "Generous.";
+        else                    msg = !string.IsNullOrEmpty(def?.feedbackMassivelyGenerous)   ? def.feedbackMassivelyGenerous  : "Massively generous!";
 
         SetFeedback(msg);
     }

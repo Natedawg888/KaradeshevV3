@@ -155,6 +155,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     }
 
     public TravelingTraderOffer GetCurrentTraderOfferData() => currentTraderOffer;
+    public TraderDefinitionSO GetCurrentTraderDefinition() => HasActiveTrader() ? FindDefByName(currentTraderOffer.traderName) : null;
 
     public void AcceptTrade(TradeOffer finalOffer)
     {
@@ -327,7 +328,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             elderValue                  = def.elderValue,
         };
 
-        FillResources(offer, def.possibleResources, def.resourceAmountRange, def.minResourceTypes, def.maxResourceTypes);
+        FillResources(offer, def.possibleResources, def.minResourceTypes, def.maxResourceTypes);
 
         if (def.canOfferPopulation && def.maxPopulationOffered > 0 && def.offerablePopulation?.Count > 0)
         {
@@ -339,11 +340,11 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         return offer;
     }
 
-    private void FillResources(TravelingTraderOffer offer, List<ResourceAmount> pool, Vector2Int amountRange, int minTypes, int maxTypes)
+    private void FillResources(TravelingTraderOffer offer, List<TraderResourceEntry> pool, int minTypes, int maxTypes)
     {
         if (pool == null || pool.Count == 0) return;
         int typeCount = Mathf.Clamp(UnityEngine.Random.Range(minTypes, maxTypes + 1), 1, pool.Count);
-        var shuffled = new List<ResourceAmount>(pool);
+        var shuffled = new List<TraderResourceEntry>(pool);
         ShuffleList(shuffled);
         for (int i = 0; i < typeCount; i++)
         {
@@ -352,7 +353,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             offer.offeredResources.Add(new ResourceAmount
             {
                 resource = entry.resource,
-                amount   = UnityEngine.Random.Range(Mathf.Max(1, amountRange.x), Mathf.Max(1, amountRange.y) + 1)
+                amount   = UnityEngine.Random.Range(Mathf.Max(1, entry.amountRange.x), Mathf.Max(1, entry.amountRange.y) + 1)
             });
         }
     }
@@ -428,8 +429,15 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         }
     }
 
-    // Extension point: read ResourceDefinition.tradeValue here when the field is added.
-    private float GetBaseValue(ResourceDefinition def) => 1f;
+    private float GetBaseValue(ResourceDefinition def)
+    {
+        if (def == null) return 1f;
+        var traderDef = FindDefByName(currentTraderOffer?.traderName);
+        if (traderDef?.possibleResources == null) return 1f;
+        foreach (var e in traderDef.possibleResources)
+            if (e?.resource == def) return Mathf.Max(0.01f, e.tradeValue);
+        return 1f;
+    }
 
     private float GetPreferenceMult(ResourceDefinition def)
     {
