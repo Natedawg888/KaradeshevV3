@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -18,8 +17,6 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     [Header("World Canvas Icon")]
     [Tooltip("Root GameObject containing the trader icon. Hidden when no trader is present.")]
     [SerializeField] private GameObject traderIconRoot;
-    [Tooltip("Optional. Displays turns remaining while a trader is present.")]
-    [SerializeField] private TMP_Text traderTurnsRemainingText;
 
     [Header("State")]
     [SerializeField] private bool hasActiveTrader;
@@ -627,9 +624,6 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     {
         if (traderIconRoot != null)
             traderIconRoot.SetActive(hasActiveTrader);
-
-        if (traderTurnsRemainingText != null)
-            traderTurnsRemainingText.text = hasActiveTrader ? traderTurnsRemaining.ToString() : string.Empty;
     }
 
     private TraderDefinitionSO FindDefByName(string traderName)
