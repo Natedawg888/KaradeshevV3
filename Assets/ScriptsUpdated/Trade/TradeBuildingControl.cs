@@ -569,12 +569,16 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         var pop = PlayersPopulationManager.Instance;
         if (pop == null) { Debug.LogWarning("[TradeBuildingControl] AddPopulationToPlayer: PlayersPopulationManager missing."); return; }
         // TODO: Use pop.AddByAgeAndGender(AgeGroup, Gender, count) when that API is added.
+        int totalAdded = 0;
         for (int i = 0; i < amount.entries.Count; i++)
         {
             var e = amount.entries[i];
             if (e == null || e.count <= 0) continue;
             AddPopEntry(pop, e.ageGroup, e.gender, e.count);
+            totalAdded += e.count;
         }
+        if (totalAdded > 0)
+            PlayerReligionManager.Instance?.NotifyPopulationAdded(totalAdded);
         pop.MarkUIDirty();
         SaveSystem.MarkSectionDirty(SaveSectionKeys.Population);
     }

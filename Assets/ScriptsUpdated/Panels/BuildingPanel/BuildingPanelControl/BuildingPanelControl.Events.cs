@@ -434,6 +434,7 @@ public partial class BuildingPanelControl : MonoBehaviour
         currentKineticControl = null;
         currentStorageControl = null;
         currentReligiousControl = null;
+        currentCultureControl = null;
         currentTradeControl = null;
         currentTechnology = null;
     }
@@ -489,6 +490,7 @@ public partial class BuildingPanelControl : MonoBehaviour
             currentKineticControl = currentBuilding.GetComponent<KineticWarfareControl>();
             currentStorageControl = currentBuilding.GetComponent<StorageBuildingControl>();
             currentReligiousControl = currentBuilding.GetComponent<ReligiousBuildingControl>();
+            currentCultureControl = currentBuilding.GetComponent<CultureBuildingControl>();
             currentTradeControl = currentBuilding.GetComponent<TradeBuildingControl>();
             currentTechnology = currentBuilding.GetComponent<BuildingTechnology>();
         }

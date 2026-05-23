@@ -16,6 +16,9 @@ public class PlayerReligionManager : MonoBehaviour
     public int likedSpiritCoexistenceBonus = 5;
     public int dislikedSpiritConflictPenalty = 15;
 
+    [Tooltip("Favor lost per new person added to the population (births, immigrants, trade). Applied to all accepted spirits.")]
+    public int favorPenaltyPerNewPopulation = 2;
+
     [Header("Startup")]
     public List<SpiritDefinitionSO> startingAcceptedSpirits = new List<SpiritDefinitionSO>();
 
@@ -1137,6 +1140,35 @@ public class PlayerReligionManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    public void NotifyPopulationAdded(int count)
+    {
+        if (count <= 0 || favorPenaltyPerNewPopulation <= 0) return;
+
+        int totalPenalty = favorPenaltyPerNewPopulation * count;
+        bool changed = false;
+
+        for (int i = 0; i < activeSpirits.Count; i++)
+        {
+            SpiritRuntimeState state = activeSpirits[i];
+            if (state == null || !state.accepted || state.definition == null) continue;
+
+            SpiritMoodState previousMood = state.definition.GetMoodForFavor(state.favor);
+            int next = state.definition.ClampFavor(state.favor - totalPenalty);
+            if (next != state.favor)
+            {
+                state.favor = next;
+                CheckAndNotifyMoodChange(state, previousMood);
+                changed = true;
+            }
+        }
+
+        if (changed)
+        {
+            MarkKnowledgeDirty();
+            NotifyReligionChanged();
+        }
     }
 
     public void NotifyResourcesSpoiled(Dictionary<ResourceDefinition, int> spoiledAmounts)

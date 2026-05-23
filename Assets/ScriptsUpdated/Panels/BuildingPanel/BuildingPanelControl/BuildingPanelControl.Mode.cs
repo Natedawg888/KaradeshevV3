@@ -130,17 +130,16 @@ public partial class BuildingPanelControl : MonoBehaviour
 
         if (openCultureButton)
         {
-            bool showCulture = !destroyed && hasCulture;
+            bool showCulture = !destroyed && active == BuildingType.Culture && hasCulture;
             openCultureButton.gameObject.SetActive(showCulture);
             openCultureButton.interactable = showCulture;
         }
 
         if (openTradeButton)
         {
-            bool showTrade = !destroyed && active == BuildingType.Trade && hasTrade
-                             && currentTradeControl.HasActiveTrader();
+            bool showTrade = !destroyed && active == BuildingType.Trade && hasTrade;
             openTradeButton.gameObject.SetActive(showTrade);
-            openTradeButton.interactable = showTrade;
+            openTradeButton.interactable = showTrade && currentTradeControl.HasActiveTrader();
         }
     }
 
@@ -201,17 +200,17 @@ public partial class BuildingPanelControl : MonoBehaviour
             return;
 
         bool destroyed = currentStatus && currentStatus.CurrentState == BuildingState.Destroyed;
-        bool hasAvailable = false;
+        bool hasResearch = !destroyed && currentTechnology != null;
 
-        if (!destroyed && currentTechnology != null)
+        bool hasAvailable = false;
+        if (hasResearch)
         {
             var byLevel = currentTechnology.GetAvailableAtPlayerLevel();
             hasAvailable = byLevel != null && byLevel.Count > 0;
         }
 
-        bool show = !destroyed && hasAvailable;
-        openResearchButton.gameObject.SetActive(show);
-        openResearchButton.interactable = show;
+        openResearchButton.gameObject.SetActive(hasResearch);
+        openResearchButton.interactable = hasResearch && hasAvailable;
     }
 
     private void RefreshDestroyButton()

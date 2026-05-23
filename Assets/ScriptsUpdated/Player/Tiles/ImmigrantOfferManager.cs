@@ -171,6 +171,9 @@ public class ImmigrantOfferManager : MonoBehaviour
             //Debug.Log($"[Immigrants] Accepted individuals (+{addedTotal}).");
         }
 
+        if (addedTotal > 0)
+            PlayerReligionManager.Instance?.NotifyPopulationAdded(addedTotal);
+
         PlayersPopulationManager.Instance?.ForceSyncUI();
     }
 }

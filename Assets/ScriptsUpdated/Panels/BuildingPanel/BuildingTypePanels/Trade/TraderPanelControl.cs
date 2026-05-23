@@ -91,7 +91,8 @@ public class TraderPanelControl : MonoBehaviour
                 var item = go.GetComponent<OfferingPopulationItemUI>();
                 if (item == null) continue;
 
-                item.Bind(entry, () => { });
+                var capturedEntry = entry;
+                item.Bind(entry, () => OpenOfferingPanel(capturedEntry));
             }
         }
     }
@@ -100,6 +101,12 @@ public class TraderPanelControl : MonoBehaviour
     {
         if (offeringPanel == null) return;
         offeringPanel.Show(resource, _offer, _building);
+    }
+
+    private void OpenOfferingPanel(TradePopulationEntry entry)
+    {
+        if (offeringPanel == null) return;
+        offeringPanel.Show(entry, _offer, _building);
     }
 
     private void ClearOfferings()

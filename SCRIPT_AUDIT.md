@@ -2200,8 +2200,67 @@ New Inspector fields:
 
 ---
 
+### May 24, 2026 — Trade Panel UI System
+
+Full traveling-trader interaction UI built out across multiple commits. All files live in `ScriptsUpdated/Panels/BuildingPanel/BuildingTypePanels/Trade/` unless noted.
+
+---
+
+#### Files created
+
+| File | Purpose |
+|------|---------|
+| `TradePanelControl.cs` | Root panel; lists active traders at a building; entry point from BuildingPanel |
+| `TraderPanelControl.cs` | Per-trader panel; shows trader portrait, name, and their offered items |
+| `OfferingPanelControl.cs` | Per-offering negotiation panel; player assembles counter-offer and confirms |
+| `OfferingItemUI.cs` | Row UI for a single resource offering from the trader |
+| `OfferingPopulationItemUI.cs` | Row UI for a population offering (age group + gender icons + name label) |
+| `AvailableResourceItemUI.cs` | Row for a player-holdable resource; +/− staging buttons, confirm button |
+| `AvailablePopulationItemUI.cs` | Row for an available population slot; age/gender icons, +/− staging, confirm |
+| `PlayerOfferingItemUI.cs` | Row showing a resource the player has staged; single "Take Back" button |
+| `PlayerOfferingPopulationItemUI.cs` | Row showing staged population; age/gender icons, "Take Back" button |
+| `PlayerResourceKnowledgeManager.cs` | New singleton (`ScriptsUpdated/Player/Inventory/`); tracks discovered resource IDs |
+
+---
+
+#### Files modified
+
+| File | Changes |
+|------|---------|
+| `TraderDefinitionSO.cs` | Added `TraderResourceEntry` class (`resource`, `amountRange`, `tradeValue`); changed `possibleResources` from `List<ResourceAmount>` → `List<TraderResourceEntry>`; removed global `resourceAmountRange`; added five feedback message string fields (`feedbackNeedMore` … `feedbackMassivelyGenerous`) |
+| `TravelingTraderOffer.cs` | Removed feedback message fields (moved to SO); removed `using UnityEngine` |
+| `TradeBuildingControl.cs` | `GetBaseValue` now looks up matching `TraderResourceEntry.tradeValue` from the trader SO instead of returning hardcoded `1f`; `FillResources` signature updated to accept `List<TraderResourceEntry>`; added `GetOfferRatio(TradeOffer)`, `GetCurrentTraderDefinition()`, `GetCurrentTraderOfferData()` public helpers |
+| `TraderPanelControl.cs` | `PopulateOfferings()` skips resources not known to `PlayerResourceKnowledgeManager` — if the singleton is absent, all resources are treated as unknown and filtered out |
+| `OfferingPanelControl.cs` | Confirm button disabled when offer ratio < 1.0 (`greedMultiplier`-adjusted); feedback text reads from `TraderDefinitionSO` message fields (five tiers: <0.75 → More, <1.0 → A little more, <1.25 → Acceptable, <1.75 → Generous, ≥1.75 → Massively generous); `resourceIconParent` / `populationIconParent` toggle based on offer type; `AvailableResourceItemUI` / `AvailablePopulationItemUI` lists wired; player staging lists wired; shared `BuildCurrentOffer()` used by both feedback refresh and final confirm |
+| `PlayerInventoryManager.cs` | `TryAdd()` calls `PlayerResourceKnowledgeManager.Instance?.Learn(def)` so resources are auto-discovered on first pickup |
+
+---
+
+#### Key design notes
+
+**Offer ratio:** `playerValue / (traderValue × greedMultiplier)`. Computed in `TradeBuildingControl.GetOfferRatio()`. Confirm is locked until ratio ≥ 1.0.
+
+**Knowledge filter:** `PlayerResourceKnowledgeManager` is a singleton MonoBehaviour (needs to be placed in the PlayerSetup scene). Resources are discovered automatically whenever `PlayerInventoryManager.TryAdd` succeeds. Unknown resources are invisible to the player in the trader list.
+
+**Staging model:** Available items show `staged / max` in a single text label. The +/− buttons adjust a local `_stagedAmount`; pressing Confirm calls `onConfirm(def, stagedAmount)` which updates `OfferingPanelControl`'s internal offer state and refreshes both the player offering list and the feedback text. Take-Back sets the staged amount to 0 and triggers the same refresh.
+
+**Population trading:** `TradePopulationEntry` (age group + count + gender) is used throughout the offering lists. `PlayersPopulationManager.AllPopulations` → `group.AvailableForTask()` (`count − reservedCount`) determines the available pool for population offers.
+
+---
+
+#### Inspector setup required
+
+1. Add `PlayerResourceKnowledgeManager` MonoBehaviour to a GameObject in the PlayerSetup scene.
+2. Wire all `Trade/` prefabs in the BuildingPanel hierarchy: `TradePanelControl` → `TraderPanelControl` → `OfferingPanelControl`.
+3. Assign `offeringItemPrefab`, `offeringPopulationItemPrefab`, `availableResourceItemPrefab`, `availablePopulationItemPrefab`, `playerOfferingItemPrefab`, `playerOfferingPopulationItemPrefab` on `OfferingPanelControl`.
+4. Assign age/gender sprites on `OfferingPanelControl`, `AvailablePopulationItemUI`, `PlayerOfferingPopulationItemUI`.
+5. Assign feedback message strings on each `TraderDefinitionSO` (leave blank to use default generic copy).
+6. Set `tradeValue` per resource entry on each `TraderDefinitionSO.possibleResources`.
+
+---
+
 **End of Report**
 
 *Status: Ready for Ruflo Integration*  
-*Last Updated: May 18, 2026 (ScoreManager system, scoreboard UI, save-on-exit improvements, TikTok button)*  
+*Last Updated: May 24, 2026 (Trade panel UI, TraderResourceEntry value system, PlayerResourceKnowledgeManager, SO-based feedback messages)*  
 *Audit Confidence: High (comprehensive read-only scan)*

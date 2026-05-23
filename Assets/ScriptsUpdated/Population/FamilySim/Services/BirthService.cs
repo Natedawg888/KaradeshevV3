@@ -191,6 +191,8 @@ public class BirthService : IBirthService
         var g = _pop.AddBirthAndReturnGroup(sex);
         if (g == null) return false;
 
+        PlayerReligionManager.Instance?.NotifyPopulationAdded(1);
+
         int fatherGen = father != null ? father.Generation : mother.Generation;
         int childGen  = Mathf.Max(mother.Generation, fatherGen) + 1;
         string surname = GetFamilyName(familyId);
