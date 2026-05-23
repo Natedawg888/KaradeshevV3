@@ -103,7 +103,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         if (!ValidatePlayerCanAffordOffer(playerOffer, out string affordReason))
             return MakeResult(TradeResultType.Declined, "Cannot Afford", affordReason);
 
-        float traderValue = ComputeTraderOfferValue(currentTraderOffer);
+        float traderValue = ComputeTraderSideValue(playerOffer);
         float playerValue = ComputePlayerOfferValue(playerOffer);
         float required    = traderValue * currentTraderOffer.greedMultiplier;
 
@@ -148,7 +148,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     public float GetOfferRatio(TradeOffer playerOffer)
     {
         if (!HasActiveTrader() || playerOffer == null) return 0f;
-        float traderValue = ComputeTraderOfferValue(currentTraderOffer);
+        float traderValue = ComputeTraderSideValue(playerOffer);
         float required    = traderValue * currentTraderOffer.greedMultiplier;
         if (required <= 0f) return 0f;
         return ComputePlayerOfferValue(playerOffer) / required;
@@ -325,6 +325,8 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             teenValue                   = def.teenValue,
             adultValue                  = def.adultValue,
             elderValue                  = def.elderValue,
+            maleValue                   = def.maleValue,
+            femaleValue                 = def.femaleValue,
         };
 
         FillResources(offer, def.possibleResources, def.minResourceTypes, def.maxResourceTypes);
@@ -381,6 +383,16 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
     // ──────────────────── Value Computation ────────────────────
 
+    private float ComputeTraderSideValue(TradeOffer offer)
+    {
+        float total = 0f;
+        if (offer.traderGivesResources != null)
+            foreach (var r in offer.traderGivesResources)
+                if (r?.resource != null) total += r.amount * GetBaseValue(r.resource);
+        total += PopValue(offer.traderGivesPopulation);
+        return total;
+    }
+
     private float ComputeTraderOfferValue(TravelingTraderOffer offer)
     {
         float total = 0f;
@@ -397,8 +409,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         if (offer.playerGivesResources != null)
             foreach (var r in offer.playerGivesResources)
                 if (r?.resource != null) total += r.amount * GetBaseValue(r.resource) * GetPreferenceMult(r.resource);
-        if (currentTraderOffer != null && currentTraderOffer.acceptsPopulationFromPlayer)
-            total += PopValue(offer.playerGivesPopulation);
+        total += PopValue(offer.playerGivesPopulation);
         return total;
     }
 
@@ -410,7 +421,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         {
             var e = pop.entries[i];
             if (e == null || e.count <= 0) continue;
-            total += e.count * GetAgeValue(e.ageGroup);
+            total += e.count * GetPopValue(e.ageGroup, e.gender);
         }
         return total;
     }
@@ -426,6 +437,15 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             case AgeGroup.Elder: return currentTraderOffer.elderValue;
             default: return 1f;
         }
+    }
+
+    private float GetPopValue(AgeGroup age, Gender gender)
+    {
+        float ageVal    = GetAgeValue(age);
+        float genderMult = (currentTraderOffer != null && gender == Gender.Female)
+            ? currentTraderOffer.femaleValue
+            : currentTraderOffer?.maleValue ?? 1f;
+        return ageVal * genderMult;
     }
 
     private float GetBaseValue(ResourceDefinition def)

@@ -15,6 +15,8 @@ public class TravelingTraderOffer
     public float teenValue = 2f;
     public float adultValue = 4f;
     public float elderValue = 2f;
+    public float maleValue = 1f;
+    public float femaleValue = 1f;
     public int turnsRemaining;
     public string flavorDescription;
 }

@@ -38,6 +38,8 @@ public class TraderDefinitionSO : ScriptableObject
     public float teenValue = 2f;
     public float adultValue = 4f;
     public float elderValue = 2f;
+    public float maleValue = 1f;
+    public float femaleValue = 1f;
 
     [Header("Negotiation")]
     [Range(1f, 3f)] public float greedMultiplier = 1.15f;
