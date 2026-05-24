@@ -109,6 +109,7 @@ public class PlayerGatheringManager : MonoBehaviour
         SaveSystem.MarkSectionDirty(SaveSectionKeys.WorldObjects);
     }
 
+#if UNITY_EDITOR
     private void LateUpdate()
     {
         allEnvironmentsInspector.Clear();
@@ -129,6 +130,7 @@ public class PlayerGatheringManager : MonoBehaviour
             });
         }
     }
+#endif
 
     // -------- Registration / Queries --------
 
@@ -743,7 +745,9 @@ public class PlayerGatheringManager : MonoBehaviour
             env.RebuildRuntimeUIState();
         }
 
+#if UNITY_EDITOR
         LateUpdate();
+#endif
         MarkJobsDirty();
     }
 

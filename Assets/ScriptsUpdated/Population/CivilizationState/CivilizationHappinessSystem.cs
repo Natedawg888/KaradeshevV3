@@ -117,6 +117,13 @@ public class CivilizationHappinessSystem : MonoBehaviour
     private float _prevAvgHunger = -1f; // unset sentinel
     private float _prevAvgThirst = -1f;
 
+    // reusable buffers — avoids per-turn allocation
+    private readonly Dictionary<string, int> _familyLevelBuffer = new Dictionary<string, int>();
+    private readonly List<int> _tmpGradeBuffer = new List<int>();
+
+    // -1f = dirty/needs recompute; recomputed on OnKnownChanged
+    private float _cachedExpectedFoodGrade = -1f;
+
     private void Awake()
     {
         if (Instance && Instance != this) { Destroy(gameObject); return; }
@@ -124,7 +131,12 @@ public class CivilizationHappinessSystem : MonoBehaviour
     }
 
     private void OnEnable()  { TurnSystem.SubscribeToEndOfTurn(OnEndTurn); }
-    private void OnDisable() { TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn); }
+    private void OnDisable()
+    {
+        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+        var knownMgr = PlayerKnownResourcesManager.Instance;
+        if (knownMgr != null) knownMgr.OnKnownChanged -= InvalidateFoodGradeCache;
+    }
 
     private void Start()
     {
@@ -132,7 +144,12 @@ public class CivilizationHappinessSystem : MonoBehaviour
         pop = PlayersPopulationManager.Instance;
         fam = PlayerFamilySimulationManager.Instance;
         SnapshotNeeds();
+
+        var knownMgr = PlayerKnownResourcesManager.Instance;
+        if (knownMgr != null) knownMgr.OnKnownChanged += InvalidateFoodGradeCache;
     }
+
+    private void InvalidateFoodGradeCache() => _cachedExpectedFoodGrade = -1f;
 
     private void OnEndTurn()
     {
@@ -159,8 +176,8 @@ public class CivilizationHappinessSystem : MonoBehaviour
         int totalFamilies   = Mathf.Max(0, fam.GetFamilies()?.Count ?? 0);
         int totalIndividuals = CountTotalLivingIndividuals();
 
-        int shelterFamSlots = CountShelterFamilyCapacity();
-        int shelterIndSlots = CountShelterIndividualCapacity();
+        // Single pass: gathers family/individual capacity AND applies shelter-level mismatch penalties
+        GatherShelterData(out int shelterFamSlots, out int shelterIndSlots);
 
         float famShortfallFrac = 0f;
         if (totalFamilies > 0 && shelterFamSlots < totalFamilies)
@@ -175,7 +192,6 @@ public class CivilizationHappinessSystem : MonoBehaviour
         if (fractionUnhousedOrUnaccommodated > 0f)
             civ.AdjustHappiness(-unhousedPenaltyPerFraction * fractionUnhousedOrUnaccommodated);
 
-        EvaluateShelterLevelMismatches();
         EvaluateFoodVarietyHappiness();
 
     }
@@ -209,40 +225,61 @@ public class CivilizationHappinessSystem : MonoBehaviour
         avgThirst = Mathf.Clamp01(tSum / total);
     }
 
-    private int CountShelterFamilyCapacity()
+    // Single pass replacing CountShelterFamilyCapacity, CountShelterIndividualCapacity,
+    // and EvaluateShelterLevelMismatches — one GetAll() + one GetComponent per building.
+    private void GatherShelterData(out int famSlots, out int indSlots)
     {
-        int slots = 0;
+        famSlots = 0;
+        indSlots = 0;
+
         var bldMgr = PlayerBuildingManager.Instance;
-        if (bldMgr == null) return 0;
+        if (civ == null || bldMgr == null) return;
 
         var all = bldMgr.GetAll();
+        if (all == null || all.Count == 0) return;
+
+        _familyLevelBuffer.Clear();
+        int maxShelterLevel = 0;
+
         for (int i = 0; i < all.Count; i++)
         {
             var rec = all[i];
             if (rec == null || rec.instance == null) continue;
+
             var shelter = rec.instance.GetComponent<ShelterControl>();
-            if (shelter && shelter.isActiveAndEnabled)
-                slots += Mathf.Max(0, shelter.familyCapacity);
+            if (shelter == null || !shelter.isActiveAndEnabled) continue;
+
+            famSlots += Mathf.Max(0, shelter.familyCapacity);
+            indSlots += Mathf.Max(0, shelter.individualCapacity);
+
+            int lvl = Mathf.Max(1, shelter.shelterLevel);
+            if (lvl > maxShelterLevel) maxShelterLevel = lvl;
+
+            var housed = shelter.HousedFamilyIds;
+            if (housed == null || housed.Count == 0) continue;
+
+            for (int j = 0; j < housed.Count; j++)
+            {
+                var fid = housed[j];
+                if (string.IsNullOrEmpty(fid)) continue;
+
+                if (_familyLevelBuffer.TryGetValue(fid, out var existing))
+                    _familyLevelBuffer[fid] = Mathf.Max(existing, lvl);
+                else
+                    _familyLevelBuffer[fid] = lvl;
+            }
         }
-        return slots;
-    }
 
-    private int CountShelterIndividualCapacity()
-    {
-        int slots = 0;
-        var bldMgr = PlayerBuildingManager.Instance;
-        if (bldMgr == null) return 0;
-
-        var all = bldMgr.GetAll();
-        for (int i = 0; i < all.Count; i++)
+        // Apply shelter-level mismatch penalties (was EvaluateShelterLevelMismatches)
+        if (maxShelterLevel > 1 && _familyLevelBuffer.Count > 0)
         {
-            var rec = all[i];
-            if (rec == null || rec.instance == null) continue;
-            var shelter = rec.instance.GetComponent<ShelterControl>();
-            if (shelter && shelter.isActiveAndEnabled)
-                slots += Mathf.Max(0, shelter.individualCapacity);
+            foreach (var kv in _familyLevelBuffer)
+            {
+                int delta = maxShelterLevel - Mathf.Max(1, kv.Value);
+                if (delta > 0)
+                    NotifyShelterLevelMismatch(delta);
+            }
         }
-        return slots;
     }
 
     private int CountTotalLivingIndividuals()
@@ -276,57 +313,6 @@ public class CivilizationHappinessSystem : MonoBehaviour
     {
         if (civ == null || levelDelta <= 0) return;
         civ.AdjustHappiness(-shelterLevelMismatchPenaltyPerLevel * levelDelta);
-    }
-
-    /// Family “level” below shelter level → penalty per level gap.
-    private void EvaluateShelterLevelMismatches()
-    {
-        var bld = PlayerBuildingManager.Instance;
-        if (civ == null || bld == null) return;
-
-        var all = bld.GetAll();
-        if (all == null || all.Count == 0) return;
-
-        int maxShelterLevel = 0;
-
-        // familyId -> their best (highest) shelter level (in case a family is assigned to multiple shelters)
-        var familyLevel = new Dictionary<string, int>();
-
-        for (int i = 0; i < all.Count; i++)
-        {
-            var rec = all[i];
-            if (rec == null || rec.instance == null) continue;
-
-            var shelter = rec.instance.GetComponent<ShelterControl>();
-            if (shelter == null || !shelter.isActiveAndEnabled) continue;
-
-            int lvl = Mathf.Max(1, shelter.shelterLevel);
-            if (lvl > maxShelterLevel) maxShelterLevel = lvl;
-
-            var housed = shelter.HousedFamilyIds;
-            if (housed == null || housed.Count == 0) continue;
-
-            for (int j = 0; j < housed.Count; j++)
-            {
-                var fid = housed[j];
-                if (string.IsNullOrEmpty(fid)) continue;
-
-                if (familyLevel.TryGetValue(fid, out var existing))
-                    familyLevel[fid] = Mathf.Max(existing, lvl);
-                else
-                    familyLevel[fid] = lvl;
-            }
-        }
-
-        if (maxShelterLevel <= 1 || familyLevel.Count == 0)
-            return; // nothing to compare or no housed families
-
-        foreach (var kv in familyLevel)
-        {
-            int delta = maxShelterLevel - Mathf.Max(1, kv.Value);
-            if (delta > 0)
-                NotifyShelterLevelMismatch(delta);
-        }
     }
 
     public void NotifyPregnancyFailure(bool motherDied)
@@ -469,10 +455,13 @@ public class CivilizationHappinessSystem : MonoBehaviour
 
     private float GetExpectedKnownFoodGradeTopK()
     {
-        var knownMgr = PlayerKnownResourcesManager.Instance;
-        if (knownMgr == null) return 0f;
+        if (_cachedExpectedFoodGrade >= 0f)
+            return _cachedExpectedFoodGrade;
 
-        List<int> grades = new List<int>();
+        var knownMgr = PlayerKnownResourcesManager.Instance;
+        if (knownMgr == null) { _cachedExpectedFoodGrade = 0f; return 0f; }
+
+        _tmpGradeBuffer.Clear();
 
         foreach (var def in knownMgr.GetAllKnown())
         {
@@ -486,16 +475,17 @@ public class CivilizationHappinessSystem : MonoBehaviour
 
             if (def.GetNutritionPerUnit() <= 0f) continue;
 
-            grades.Add(def.GetFoodGradeValue());
+            _tmpGradeBuffer.Add(def.GetFoodGradeValue());
         }
 
-        if (grades.Count == 0) return 0f;
+        if (_tmpGradeBuffer.Count == 0) { _cachedExpectedFoodGrade = 0f; return 0f; }
 
-        grades.Sort((a, b) => b.CompareTo(a)); // desc
+        _tmpGradeBuffer.Sort((a, b) => b.CompareTo(a)); // desc
 
-        int k = Mathf.Clamp(gradeExpectationTopK, 1, grades.Count);
+        int k = Mathf.Clamp(gradeExpectationTopK, 1, _tmpGradeBuffer.Count);
         float sum = 0f;
-        for (int i = 0; i < k; i++) sum += grades[i];
-        return sum / k;
+        for (int i = 0; i < k; i++) sum += _tmpGradeBuffer[i];
+        _cachedExpectedFoodGrade = sum / k;
+        return _cachedExpectedFoodGrade;
     }
 }

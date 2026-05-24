@@ -354,13 +354,13 @@ public partial class PlayerInventoryManager : MonoBehaviour
     {
         if (list == null || list.Count == 0) return;
 
-        var toRemove = new List<InventoryStack>();
         int spoiledUnitsToAdd = 0;
 
         spoilageMultiplier = Mathf.Max(0f, spoilageMultiplier);
 
-        foreach (var s in list.ToArray())
+        for (int i = list.Count - 1; i >= 0; i--)
         {
+            var s = list[i];
             var def = s.definition;
             if (def == null) continue;
             if (def.nonPerishable) continue;
@@ -429,13 +429,7 @@ public partial class PlayerInventoryManager : MonoBehaviour
             }
 
             if (s.amount <= 0)
-                toRemove.Add(s);
-        }
-
-        if (toRemove.Count > 0)
-        {
-            foreach (var dead in toRemove)
-                list.Remove(dead);
+                list.RemoveAt(i);
         }
 
         if (spoilToSpoiledFood && spoiledUnitsToAdd > 0)
