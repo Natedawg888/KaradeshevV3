@@ -10,6 +10,7 @@ public class ScoreboardData
 [Serializable]
 public class ScoreboardEntry
 {
+    public string gameId;
     public int score;
     public string playerName;
     public string civilizationName;

@@ -49,6 +49,7 @@ public class CoreSystemsSectionSaveData
     public PlayerProfileSaveData playerProfileData;
     public CivilizationStateSaveData civilizationStateData;
     public int currentScore;
+    public string gameId;
 }
 
 [Serializable]

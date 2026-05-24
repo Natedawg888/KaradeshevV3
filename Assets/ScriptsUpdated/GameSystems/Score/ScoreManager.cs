@@ -35,6 +35,7 @@ public class ScoreManager : MonoBehaviour
     public event Action<int> OnScoreChanged;
 
     private bool _gameStarted;
+    private string _gameId = string.Empty;
     private string _leaderboardPath;
 
     private const string LeaderboardFileName = "scoreboard.json";
@@ -55,6 +56,11 @@ public class ScoreManager : MonoBehaviour
 
     public void OnGameStarted()
     {
+        // Generate a new ID only for genuinely new games; loaded games will have had
+        // their ID restored via LoadGameId() before this is called.
+        if (string.IsNullOrEmpty(_gameId))
+            _gameId = Guid.NewGuid().ToString("N");
+
         _gameStarted = true;
         OnScoreChanged?.Invoke(CurrentScore);
     }
@@ -104,12 +110,18 @@ public class ScoreManager : MonoBehaviour
     public static void NotifyLevelUp()            => Instance?.AddScore(Instance.levelUpPoints);
 
     // Save / Load (integrated with CoreSystems save section)
-    public int SaveState() => CurrentScore;
+    public int    SaveState()  => CurrentScore;
+    public string GetGameId()  => _gameId;
 
     public void LoadState(int score)
     {
         CurrentScore = score;
         OnScoreChanged?.Invoke(CurrentScore);
+    }
+
+    public void LoadGameId(string gameId)
+    {
+        _gameId = gameId ?? string.Empty;
     }
 
     // Leaderboard (persists across game sessions in a separate file)
@@ -120,13 +132,39 @@ public class ScoreManager : MonoBehaviour
 
         ScoreboardData data = LoadLeaderboardFromDisk() ?? new ScoreboardData();
 
-        data.entries.Add(new ScoreboardEntry
+        // Find an existing entry for this game session so the same game never
+        // occupies two ranks (e.g. save → quit → reload → commit again).
+        ScoreboardEntry existing = null;
+        if (!string.IsNullOrEmpty(_gameId))
         {
-            score            = CurrentScore,
-            playerName       = playerName       ?? string.Empty,
-            civilizationName = civName          ?? string.Empty,
-            avatarName       = avatarName       ?? string.Empty
-        });
+            for (int i = 0; i < data.entries.Count; i++)
+            {
+                if (data.entries[i].gameId == _gameId)
+                {
+                    existing = data.entries[i];
+                    break;
+                }
+            }
+        }
+
+        if (existing != null)
+        {
+            existing.score            = CurrentScore;
+            existing.playerName       = playerName       ?? string.Empty;
+            existing.civilizationName = civName          ?? string.Empty;
+            existing.avatarName       = avatarName       ?? string.Empty;
+        }
+        else
+        {
+            data.entries.Add(new ScoreboardEntry
+            {
+                gameId           = _gameId,
+                score            = CurrentScore,
+                playerName       = playerName       ?? string.Empty,
+                civilizationName = civName          ?? string.Empty,
+                avatarName       = avatarName       ?? string.Empty
+            });
+        }
 
         data.entries.Sort((a, b) => b.score.CompareTo(a.score));
 
