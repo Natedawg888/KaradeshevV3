@@ -33,12 +33,20 @@ public class TraderDefinitionSO : ScriptableObject
 
     [Header("Preferences — What They Value From Player")]
     public List<TradeResourcePreference> resourcePreferences = new List<TradeResourcePreference>();
+    [Tooltip("Resources the trader will never accept from the player. They count as zero value regardless of other settings.")]
+    public List<ResourceDefinition> rejectedResources = new List<ResourceDefinition>();
     public bool acceptsPopulationFromPlayer = true;
+    [Tooltip("Multiplier on the PopulationValueManager base value. 1 = neutral, 2 = this trader values children twice as much.")]
     public float childValue = 1f;
-    public float teenValue = 2f;
-    public float adultValue = 4f;
-    public float elderValue = 2f;
+    [Tooltip("Multiplier on the PopulationValueManager base value.")]
+    public float teenValue = 1f;
+    [Tooltip("Multiplier on the PopulationValueManager base value.")]
+    public float adultValue = 1f;
+    [Tooltip("Multiplier on the PopulationValueManager base value.")]
+    public float elderValue = 1f;
+    [Tooltip("Multiplier on the PopulationValueManager base value.")]
     public float maleValue = 1f;
+    [Tooltip("Multiplier on the PopulationValueManager base value.")]
     public float femaleValue = 1f;
 
     [Header("Negotiation")]
@@ -64,15 +72,15 @@ public class TraderDefinitionSO : ScriptableObject
     public string feedbackMassivelyGenerous = "";
 
     [Header("Season Restrictions")]
-    [Tooltip("If empty, this trader can appear in any season. Otherwise only in the listed seasons.")]
-    public List<SeasonDefinition> allowedSeasons = new List<SeasonDefinition>();
+    [Tooltip("If empty, this trader can appear in any season. Otherwise only in the listed season IDs.")]
+    public List<string> allowedSeasonIDs = new List<string>();
 
     public bool IsAvailableInSeason(SeasonDefinition season)
     {
-        if (allowedSeasons == null || allowedSeasons.Count == 0) return true;
+        if (allowedSeasonIDs == null || allowedSeasonIDs.Count == 0) return true;
         if (season == null) return true;
-        for (int i = 0; i < allowedSeasons.Count; i++)
-            if (allowedSeasons[i] == season) return true;
+        for (int i = 0; i < allowedSeasonIDs.Count; i++)
+            if (allowedSeasonIDs[i] == season.seasonID) return true;
         return false;
     }
 }

@@ -8,6 +8,6 @@ public class TradeResourcePreference
     public ResourceDefinition resource;
 
     [Tooltip("Multiplier applied when evaluating player offers containing this resource. >1 means trader values it more.")]
-    [Range(0.1f, 5f)]
+    [Range(0.01f, 100f)]
     public float valueMultiplier = 1f;
 }

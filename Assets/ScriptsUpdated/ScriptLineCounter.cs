@@ -26,6 +26,6 @@ public class ScriptLineCounter : MonoBehaviour
             //Debug.Log($"[ScriptLineCounter] {Path.GetFileName(script)}: {lineCount} lines");
         }
 
-        //Debug.Log($"[ScriptLineCounter] 🔹 Total Lines of Code in Project: {totalLines}");
+        Debug.Log($"[ScriptLineCounter] 🔹 Total Lines of Code in Project: {totalLines}");
     }
 }

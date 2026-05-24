@@ -4,7 +4,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(BuildingControl))]
-public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
+public class TradeBuildingControl : MonoBehaviour
 {
     [Header("Trade Settings")]
     [SerializeField] private bool enableTrade = true;
@@ -30,8 +30,6 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     private string _lastSeasonID;
     private int _nextVisitTurn;
 
-    public BuildingType HandledType => BuildingType.Trade;
-
     public event Action<TravelingTraderOffer> OnTraderArrived;
     public event Action<TradeEvaluationResult> OnNegotiationResolved;
     public event Action OnTraderLeft;
@@ -42,7 +40,21 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
     {
         _buildingControl = GetComponent<BuildingControl>();
         _buildingStatus  = GetComponent<BuildingStatus>();
+        if (_buildingStatus != null)
+            _buildingStatus.OnStateChanged += OnBuildingStateChanged;
         RefreshWorldIcon();
+    }
+
+    private void OnDestroy()
+    {
+        if (_buildingStatus != null)
+            _buildingStatus.OnStateChanged -= OnBuildingStateChanged;
+    }
+
+    private void OnBuildingStateChanged(BuildingState state)
+    {
+        if (state == BuildingState.Destroyed)
+            ClearTrader();
     }
 
     private void OnEnable()
@@ -74,17 +86,6 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             SeasonManager.Instance.OnSeasonChanged -= HandleSeasonChanged;
             _seasonSubscribed = false;
         }
-    }
-
-    // ──────────────────── IBuildingTypeHandler ────────────────────
-
-    public void OnTypeEnabled()  { }
-    public void OnTypeDisabled() { }
-
-    public void OnBuildingStateChanged(BuildingState state)
-    {
-        if (state == BuildingState.Destroyed)
-            ClearTrader();
     }
 
     // ──────────────────── Public API ────────────────────
@@ -320,6 +321,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
             turnsRemaining              = def.turnsAvailable,
             flavorDescription           = def.flavorDescription,
             preferences                 = new List<TradeResourcePreference>(def.resourcePreferences),
+            rejectedResources           = new List<ResourceDefinition>(def.rejectedResources),
             acceptsPopulationFromPlayer = def.acceptsPopulationFromPlayer,
             childValue                  = def.childValue,
             teenValue                   = def.teenValue,
@@ -403,12 +405,22 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
         return total;
     }
 
+    private bool IsRejected(ResourceDefinition def)
+    {
+        var rejected = currentTraderOffer?.rejectedResources;
+        if (rejected == null || rejected.Count == 0) return false;
+        for (int i = 0; i < rejected.Count; i++)
+            if (rejected[i] == def) return true;
+        return false;
+    }
+
     private float ComputePlayerOfferValue(TradeOffer offer)
     {
         float total = 0f;
         if (offer.playerGivesResources != null)
             foreach (var r in offer.playerGivesResources)
-                if (r?.resource != null) total += r.amount * GetBaseValue(r.resource) * GetPreferenceMult(r.resource);
+                if (r?.resource != null && !IsRejected(r.resource))
+                    total += r.amount * GetBaseValue(r.resource) * GetPreferenceMult(r.resource);
         total += PopValue(offer.playerGivesPopulation);
         return total;
     }
@@ -441,11 +453,12 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
     private float GetPopValue(AgeGroup age, Gender gender)
     {
-        float ageVal    = GetAgeValue(age);
+        float baseVal    = PopulationValueManager.Instance?.GetValue(age, gender) ?? 0f;
+        float ageMult    = GetAgeValue(age);
         float genderMult = (currentTraderOffer != null && gender == Gender.Female)
             ? currentTraderOffer.femaleValue
             : currentTraderOffer?.maleValue ?? 1f;
-        return ageVal * genderMult;
+        return baseVal * ageMult * genderMult;
     }
 
     private float GetBaseValue(ResourceDefinition def)
