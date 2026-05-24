@@ -22,7 +22,11 @@ public class TurnSystem : MonoBehaviour
     public Light directionalLight;
 
     public static event Action OnStartOfTurn;
-    public static event Action onTurnEnd;
+
+    // Sorted end-of-turn invocation list (lower priority number fires first)
+    private static readonly List<(int priority, Action handler)> _endOfTurnHandlers = new List<(int, Action)>();
+    private static bool _endOfTurnNeedsSort;
+    private static readonly List<Action> _endOfTurnFireBuffer = new List<Action>();
 
     [Header("Day-Night Cycle Settings")]
     public LightSettings daySettings;
@@ -205,17 +209,34 @@ public class TurnSystem : MonoBehaviour
     public void EndOfTurn()
     {
         IncrementTurnCount();
-        onTurnEnd?.Invoke();
+        if (_endOfTurnNeedsSort)
+        {
+            _endOfTurnHandlers.Sort((a, b) => a.priority.CompareTo(b.priority));
+            _endOfTurnNeedsSort = false;
+        }
+        _endOfTurnFireBuffer.Clear();
+        for (int i = 0; i < _endOfTurnHandlers.Count; i++)
+            _endOfTurnFireBuffer.Add(_endOfTurnHandlers[i].handler);
+        for (int i = 0; i < _endOfTurnFireBuffer.Count; i++)
+            _endOfTurnFireBuffer[i]?.Invoke();
     }
 
-    public static void SubscribeToEndOfTurn(Action handler)
+    public static void SubscribeToEndOfTurn(Action handler, int priority = 0)
     {
-        onTurnEnd += handler;
+        _endOfTurnHandlers.Add((priority, handler));
+        _endOfTurnNeedsSort = true;
     }
 
     public static void UnsubscribeFromEndOfTurn(Action handler)
     {
-        onTurnEnd -= handler;
+        for (int i = _endOfTurnHandlers.Count - 1; i >= 0; i--)
+        {
+            if (_endOfTurnHandlers[i].handler == handler)
+            {
+                _endOfTurnHandlers.RemoveAt(i);
+                break;
+            }
+        }
     }
 
     public void UpdatePhaseTimer()

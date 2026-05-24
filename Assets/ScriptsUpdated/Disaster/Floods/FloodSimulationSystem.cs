@@ -30,7 +30,6 @@ public class FloodSimulationSystem : MonoBehaviour
     public bool enableFlooding = true;
     public bool enableRainFlooding = true;
     public bool enableTsunamiFlooding = true;
-    public bool floodUpdateOnEndTurn = true;
 
     [Header("Limits")]
     [Min(1)] public int maxActiveFloodCells = 2500;

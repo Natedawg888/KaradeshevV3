@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -59,6 +60,13 @@ public class DiseaseManager : MonoBehaviour
     [Header("Turns")]
     public bool processOnEndOfTurn = true;
 
+    [Header("Turn Processing")]
+    [Tooltip("Max disease states processed per frame. Spread load across multiple frames.")]
+    [Min(1)] public int diseasesPerFrame = 50;
+
+    private bool _isProcessingDiseaseTurn;
+    private Coroutine _diseaseCo;
+
     [Header("Debug")]
     public bool enableDebugLogs = true;
     public bool debugConsumedResourceDiseaseRisk = true;
@@ -108,13 +116,13 @@ public class DiseaseManager : MonoBehaviour
     private void OnEnable()
     {
         if (processOnEndOfTurn)
-            TurnSystem.SubscribeToEndOfTurn(ProcessDiseaseTurn);
+            TurnSystem.SubscribeToEndOfTurn(OnEndTurn);
     }
 
     private void OnDisable()
     {
         if (processOnEndOfTurn)
-            TurnSystem.UnsubscribeFromEndOfTurn(ProcessDiseaseTurn);
+            TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
     }
 
     private void OnValidate()
@@ -567,90 +575,101 @@ public class DiseaseManager : MonoBehaviour
         }
     }
 
+    // Kept public so external code (e.g. tests, debug commands) can still trigger a full synchronous run.
     public void ProcessDiseaseTurn()
     {
+        if (_diseaseCo != null) StopCoroutine(_diseaseCo);
+        _diseaseCo = StartCoroutine(ProcessDiseaseTurnCoroutine());
+    }
+
+    private void OnEndTurn()
+    {
+        if (_isProcessingDiseaseTurn && _diseaseCo != null)
+            StopCoroutine(_diseaseCo);
+        _diseaseCo = StartCoroutine(ProcessDiseaseTurnCoroutine());
+    }
+
+    private IEnumerator ProcessDiseaseTurnCoroutine()
+    {
+        _isProcessingDiseaseTurn = true;
         TickImmunity();
 
-        if (activeIndividualDiseases.Count == 0)
-            return;
-
-        for (int i = activeIndividualDiseases.Count - 1; i >= 0; i--)
+        if (activeIndividualDiseases.Count > 0)
         {
-            IndividualDiseaseState state = activeIndividualDiseases[i];
-
-            if (state == null)
+            int batchCount = 0;
+            for (int i = activeIndividualDiseases.Count - 1; i >= 0; i--)
             {
-                RemoveStateAt(i);
-                continue;
-            }
+                IndividualDiseaseState state = activeIndividualDiseases[i];
 
-            DiseaseDefinitionSO disease = GetDiseaseDefinition(state.diseaseId);
-            if (disease == null)
-            {
-                RemoveStateAt(i);
-                continue;
-            }
-
-            Individual person = FindIndividualById(state.targetId);
-            if (person == null || !person.IsAlive)
-            {
-                RemoveStateAt(i);
-                continue;
-            }
-
-            IndividualDiseaseTarget target = new IndividualDiseaseTarget(person);
-
-            float beforeHealth01 = person.Health01;
-
-            target.ApplyDiseaseEffects(disease, state);
-
-            float afterHealth01 = person.Health01;
-            float healthDelta01 = afterHealth01 - beforeHealth01;
-
-            // NEW: individual disease damage must also affect the backing population group average.
-            ApplyIndividualHealthDeltaToPopulationGroup(person, healthDelta01, disease, state);
-
-            state.turnsInfected++;
-            state.turnsRemaining--;
-
-            bool diedFromHealth = person.Health01 <= 0f;
-            bool diedFromRoll = Roll(GetScaledDeathChance(disease, state, person));
-
-            if (diedFromHealth || diedFromRoll)
-            {
-                KillIndividualFromDisease(person, disease, state);
-                RemoveStateAt(i);
-                continue;
-            }
-
-            bool recovered = state.turnsRemaining <= 0 || Roll(GetScaledRecoveryChance(disease, state, person));
-
-            if (recovered)
-            {
-                target.RecoverDisease(disease, state);
-                GrantImmunityIfNeeded(person.Id, disease);
-                RemoveStateAt(i);
-
-                if (debugRecovery)
-                    Log($"[DiseaseManager] Recovered. Individual={person.Id}, Disease={disease.displayName}");
-
-                continue;
-            }
-
-            if (disease.contagious && state.isContagious)
-            {
-                if (disease.causeType == PathogenCauseType.Virus && disease.useContextSpreadForVirus)
+                if (state == null)
                 {
-                    TryMutateVirusState(person, disease, state);
+                    RemoveStateAt(i);
                 }
                 else
                 {
-                    TrySpreadFromIndividual(person, disease, state);
+                    DiseaseDefinitionSO disease = GetDiseaseDefinition(state.diseaseId);
+                    if (disease == null)
+                    {
+                        RemoveStateAt(i);
+                    }
+                    else
+                    {
+                        Individual person = FindIndividualById(state.targetId);
+                        if (person == null || !person.IsAlive)
+                        {
+                            RemoveStateAt(i);
+                        }
+                        else
+                        {
+                            IndividualDiseaseTarget target = new IndividualDiseaseTarget(person);
+                            float beforeHealth01 = person.Health01;
+                            target.ApplyDiseaseEffects(disease, state);
+                            float healthDelta01 = person.Health01 - beforeHealth01;
+                            ApplyIndividualHealthDeltaToPopulationGroup(person, healthDelta01, disease, state);
+                            state.turnsInfected++;
+                            state.turnsRemaining--;
+                            bool diedFromHealth = person.Health01 <= 0f;
+                            bool diedFromRoll = Roll(GetScaledDeathChance(disease, state, person));
+                            if (diedFromHealth || diedFromRoll)
+                            {
+                                KillIndividualFromDisease(person, disease, state);
+                                RemoveStateAt(i);
+                            }
+                            else
+                            {
+                                bool recovered = state.turnsRemaining <= 0 || Roll(GetScaledRecoveryChance(disease, state, person));
+                                if (recovered)
+                                {
+                                    target.RecoverDisease(disease, state);
+                                    GrantImmunityIfNeeded(person.Id, disease);
+                                    RemoveStateAt(i);
+                                    if (debugRecovery)
+                                        Log($"[DiseaseManager] Recovered. Individual={person.Id}, Disease={disease.displayName}");
+                                }
+                                else if (disease.contagious && state.isContagious)
+                                {
+                                    if (disease.causeType == PathogenCauseType.Virus && disease.useContextSpreadForVirus)
+                                        TryMutateVirusState(person, disease, state);
+                                    else
+                                        TrySpreadFromIndividual(person, disease, state);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                batchCount++;
+                if (batchCount >= diseasesPerFrame && i > 0)
+                {
+                    batchCount = 0;
+                    yield return null;
                 }
             }
         }
 
         MarkDiseaseSaveDirty();
+        _isProcessingDiseaseTurn = false;
+        _diseaseCo = null;
     }
 
     private void ApplyIndividualHealthDeltaToPopulationGroup(
