@@ -25,6 +25,10 @@ public class CivilizationDiversitySystem : MonoBehaviour
     public int rowsPerBatch = 200;
     public int framesBetweenBatches = 2;
 
+    [Header("Turn Stagger")]
+    [Tooltip("Frames to wait after onTurnEnd before processing first batch. Set to different values per system to spread frame load.")]
+    [SerializeField] private int coroutineStartDelay = 0;
+
     // runtime state
     private Coroutine _geneticsCo;
     private struct GeneticsState
@@ -105,6 +109,9 @@ public class CivilizationDiversitySystem : MonoBehaviour
 
     private System.Collections.IEnumerator ProcessGeneticsBatches()
     {
+        for (int d = 0; d < coroutineStartDelay; d++)
+            yield return null;
+
         var genes = _gstate.genes;
         if (genes == null || genes.Count <= 1)
         {

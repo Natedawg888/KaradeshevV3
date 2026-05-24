@@ -850,18 +850,8 @@ public class DiseaseManager : MonoBehaviour
         if (family == null)
             return null;
 
-        IReadOnlyList<Individual> people = family.GetIndividuals();
-        if (people == null)
-            return null;
-
-        for (int i = 0; i < people.Count; i++)
-        {
-            Individual person = people[i];
-            if (person != null && person.Id == individualId)
-                return person;
-        }
-
-        return null;
+        family.TryGetIndividual(individualId, out Individual person);
+        return person;
     }
 
     private IndividualDiseaseState FindState(string targetKey, string diseaseId)

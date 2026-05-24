@@ -30,11 +30,6 @@ public class FamilyCardUI : MonoBehaviour
     // PartnerB is female in your setup
     private string _motherId;
 
-    private void OnEnable()  => TurnSystem.SubscribeToEndOfTurn(OnEndTurn);
-    private void OnDisable() => TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
-
-    private void OnEndTurn() => UpdateFemaleCooldownUI();
-
     public void Bind(Family fam,
                      PlayerFamilySimulationManager famMgr,
                      System.Action onRequestMove,
@@ -89,7 +84,7 @@ public class FamilyCardUI : MonoBehaviour
         UpdateFemaleCooldownUI(); // initial paint
     }
 
-    private void UpdateFemaleCooldownUI()
+    public void UpdateFemaleCooldownUI()
     {
         // Determine whether to show
         bool canShow = !string.IsNullOrEmpty(_motherId) && _famMgr != null;

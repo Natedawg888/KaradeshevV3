@@ -39,6 +39,7 @@ public class ShelterPanelControl : MonoBehaviour
     private PlayerFamilySimulationManager _fam;
 
     private CanvasGroup _cg;
+    private readonly List<FamilyCardUI> _activeCards = new();
 
     // If true, don't show the Building panel on Hide() (used by Move flow)
     private bool _suppressReopenOnHide = false;
@@ -74,6 +75,15 @@ public class ShelterPanelControl : MonoBehaviour
         }
     }
 
+    private void OnEndTurn()
+    {
+        for (int i = 0; i < _activeCards.Count; i++)
+        {
+            if (_activeCards[i] != null)
+                _activeCards[i].UpdateFemaleCooldownUI();
+        }
+    }
+
     public void OpenFor(BuildingControl building, BuildingPanelControl parent, TileControl tile)
     {
         _parentPanel = parent != null ? parent : defaultParentPanel;
@@ -87,6 +97,9 @@ public class ShelterPanelControl : MonoBehaviour
             //Debug.LogError("[ShelterPanel] Building has no ShelterControl.");
             return;
         }
+
+        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+        TurnSystem.SubscribeToEndOfTurn(OnEndTurn);
 
         if (titleText != null)
         {
@@ -121,6 +134,9 @@ public class ShelterPanelControl : MonoBehaviour
     // We DO NOT reopen via Show(); we simply soft-show the existing Building panel instantly.
     public void Hide()
     {
+        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+        _activeCards.Clear();
+
         if (_cg != null)
         {
             _cg.alpha = 0f;
@@ -196,6 +212,7 @@ public class ShelterPanelControl : MonoBehaviour
             return;
         }
 
+        _activeCards.Clear();
         for (int i = contentRoot.childCount - 1; i >= 0; i--)
             Destroy(contentRoot.GetChild(i).gameObject);
 
@@ -245,6 +262,7 @@ public class ShelterPanelControl : MonoBehaviour
                 onRequestMove: () => StartMoveFlow(fid),
                 onRequestRename: null
             );
+            _activeCards.Add(card);
         }
 
         RefreshCapacityTexts();

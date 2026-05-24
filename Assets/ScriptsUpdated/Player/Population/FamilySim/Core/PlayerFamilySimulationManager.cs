@@ -573,6 +573,12 @@ public class PlayerFamilySimulationManager : MonoBehaviour
     public IReadOnlyList<Family> GetFamilies() => _famRepo.All;
     public Family GetFamilyById(string familyId) => _famRepo.GetById(familyId);
 
+    public bool TryGetIndividual(string id, out Individual ind)
+    {
+        ind = _indRepo?.FindById(id);
+        return ind != null;
+    }
+
     public void AddIndividualForSystems(Individual i)
     {
         _indRepo.TryAdd(i);
