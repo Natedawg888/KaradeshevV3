@@ -151,6 +151,8 @@ public class GameSceneManager : MonoBehaviour
     {
         float totalStart = Time.realtimeSinceStartup;
 
+        TurnSystem.SetCurrentTurn(0);
+
         ShowLoadScreen(loopingTimerTurns, loopingTimerTurns);
         yield return null;
 
