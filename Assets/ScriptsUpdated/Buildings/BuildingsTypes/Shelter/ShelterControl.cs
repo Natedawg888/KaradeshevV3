@@ -328,6 +328,18 @@ public class ShelterControl : MonoBehaviour
             case BuildingState.Destroyed:
                 RevokeCapIfApplied();
                 _canCreateOrders = false;
+                if (_pregSvc != null)
+                {
+                    var motherIds = new List<string>(activeOrders.Count);
+                    for (int i = 0; i < activeOrders.Count; i++)
+                    {
+                        var o = activeOrders[i];
+                        if (o != null && !string.IsNullOrEmpty(o.MotherId))
+                            motherIds.Add(o.MotherId);
+                    }
+                    for (int i = 0; i < motherIds.Count; i++)
+                        _pregSvc.FailPregnancy(motherIds[i]);
+                }
                 FailAllOrders("Shelter destroyed");
                 EjectAllFamilies();
                 break;

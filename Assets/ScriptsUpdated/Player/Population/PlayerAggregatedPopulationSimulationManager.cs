@@ -173,7 +173,7 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
             fam.AdvanceFamilies(isCycleTick);
         }
 
-        if (deathsByGroup.Count > 0)
+        if (deathsByGroup.Count > 0 || ageUpCounts.Count > 0)
             playerPop.MarkUIDirty();
     }
 

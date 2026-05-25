@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 public class PlayerProductionManager : MonoBehaviour
@@ -408,38 +407,6 @@ public class PlayerProductionManager : MonoBehaviour
         if (inv == null || resource == null || amount <= 0)
             return false;
 
-        Type t = inv.GetType();
-
-        string[] candidateMethodNames =
-        {
-            "CanAdd",
-            "HasSpaceFor",
-            "CanAccept",
-            "CanFit"
-        };
-
-        for (int i = 0; i < candidateMethodNames.Length; i++)
-        {
-            MethodInfo mi = t.GetMethod(candidateMethodNames[i], BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (mi == null)
-                continue;
-
-            ParameterInfo[] ps = mi.GetParameters();
-            if (ps.Length == 2 &&
-                ps[0].ParameterType == typeof(ResourceDefinition) &&
-                ps[1].ParameterType == typeof(int) &&
-                mi.ReturnType == typeof(bool))
-            {
-                try
-                {
-                    object result = mi.Invoke(inv, new object[] { resource, amount });
-                    if (result is bool b)
-                        return b;
-                }
-                catch { }
-            }
-        }
-
-        return true;
+        return inv.CanAdd(resource, amount);
     }
 }

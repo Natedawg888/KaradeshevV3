@@ -169,6 +169,14 @@ public partial class PlayerInventoryManager : MonoBehaviour
         return (_materials.Count == 0 && _food.Count == 0 && _water.Count == 0);
     }
 
+    public bool CanAdd(ResourceDefinition def, int amount)
+    {
+        if (def == null || amount <= 0) return false;
+        var targetList = GetListFor(def.resourceType);
+        if (targetList == null) return false;
+        return HasSpaceFor(def, SpaceFor(def, amount));
+    }
+
     public bool TryAdd(ResourceDefinition def, int amount)
     {
         if (def == null || amount <= 0) return false;

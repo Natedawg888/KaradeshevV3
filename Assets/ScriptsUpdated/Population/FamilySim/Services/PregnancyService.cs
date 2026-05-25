@@ -362,6 +362,25 @@ public class PregnancyService : IPregnancyService
         _pregnancies.Remove(motherId);
     }
 
+    // Full failure path: cleans up state, applies cooldowns, posts notification,
+    // fires score penalty, and raises OnPregnancyFailed so listeners (shelter UI etc.) update.
+    public void FailPregnancy(string motherId)
+    {
+        if (string.IsNullOrEmpty(motherId)) return;
+        if (!_pregnancies.TryGetValue(motherId, out var rec)) return;
+
+        var mother = GetIndividualOrNull(motherId);
+        var father = GetIndividualOrNull(rec.FatherId);
+
+        ApplyCooldowns(mother, father);
+        AbortPregnancy(motherId);
+
+        CivilizationHappinessSystem.Instance?.NotifyPregnancyFailure(false);
+        ScoreManager.NotifyBirthFailure();
+        PostBirthNotification(NotificationType.BirthFailed, mother, 0, false);
+        OnPregnancyFailed?.Invoke(motherId);
+    }
+
     public int ResolveBirthAndReturnChildrenCount(Individual mother, Individual father)
     {
         if (mother == null || !mother.IsAlive) return 0;
