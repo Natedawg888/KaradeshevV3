@@ -333,7 +333,10 @@ public class PlayerProductionManager : MonoBehaviour
             return baseOutputs;
 
         float religionMultiplier = GetReligionProductionOutputMultiplier();
-        float finalMultiplier = religionMultiplier * Mathf.Max(0f, buildingOutputMultiplier);
+        float techMultiplier = TechnologyManager.Instance != null
+            ? TechnologyManager.Instance.GetProductionPlanOutputMultiplier(plan.productionID)
+            : 1f;
+        float finalMultiplier = religionMultiplier * techMultiplier * Mathf.Max(0f, buildingOutputMultiplier);
 
         if (Mathf.Approximately(finalMultiplier, 1f))
             return baseOutputs;

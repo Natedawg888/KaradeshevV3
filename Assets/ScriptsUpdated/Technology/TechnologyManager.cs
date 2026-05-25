@@ -55,4 +55,46 @@ public class TechnologyManager : MonoBehaviour
     }
 
     public IReadOnlyList<Technology> GetAll() => allTechnologies;
+
+    public float GetProductionPlanOutputMultiplier(string planID)
+    {
+        if (string.IsNullOrWhiteSpace(planID)) return 1f;
+        var research = PlayerResearchManager.Instance;
+        if (research == null) return 1f;
+        float result = 1f;
+        for (int i = 0; i < allTechnologies.Count; i++)
+        {
+            var tech = allTechnologies[i];
+            if (tech == null || !research.IsResearched(tech.techID)) continue;
+            for (int j = 0; j < tech.effectSOs.Count; j++)
+            {
+                if (tech.effectSOs[j] is BuildingTechEffectSO effect &&
+                    effect.productionPlanIDs != null &&
+                    effect.productionPlanIDs.Contains(planID))
+                    result *= Mathf.Max(1f, effect.outputMultiplier);
+            }
+        }
+        return result;
+    }
+
+    public float GetCraftingRecipeOutputMultiplier(string recipeID)
+    {
+        if (string.IsNullOrWhiteSpace(recipeID)) return 1f;
+        var research = PlayerResearchManager.Instance;
+        if (research == null) return 1f;
+        float result = 1f;
+        for (int i = 0; i < allTechnologies.Count; i++)
+        {
+            var tech = allTechnologies[i];
+            if (tech == null || !research.IsResearched(tech.techID)) continue;
+            for (int j = 0; j < tech.effectSOs.Count; j++)
+            {
+                if (tech.effectSOs[j] is BuildingTechEffectSO effect &&
+                    effect.craftingRecipeIDs != null &&
+                    effect.craftingRecipeIDs.Contains(recipeID))
+                    result *= Mathf.Max(1f, effect.outputMultiplier);
+            }
+        }
+        return result;
+    }
 }

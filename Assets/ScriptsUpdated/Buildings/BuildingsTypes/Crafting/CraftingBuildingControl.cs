@@ -253,6 +253,19 @@ public class CraftingBuildingControl : MonoBehaviour
         var costs = recipe.GetCostsFor(multiplier);
         var output = recipe.GetRolledOutputFor(multiplier);
 
+        float craftingTechMultiplier = TechnologyManager.Instance != null
+            ? TechnologyManager.Instance.GetCraftingRecipeOutputMultiplier(recipe.craftingID)
+            : 1f;
+        if (craftingTechMultiplier > 1.0001f && output != null)
+        {
+            for (int k = 0; k < output.Count; k++)
+            {
+                var o = output[k];
+                if (o == null || o.resource == null) continue;
+                o.amount = Mathf.Max(o.amount, Mathf.RoundToInt(o.amount * craftingTechMultiplier));
+            }
+        }
+
         var ppm = PlayersPopulationManager.Instance;
         string reservationId = null;
 
