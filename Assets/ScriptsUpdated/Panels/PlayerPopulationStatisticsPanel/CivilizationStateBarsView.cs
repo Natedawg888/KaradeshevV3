@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -42,8 +43,13 @@ public class CivilizationStateBarsView : MonoBehaviour
     [Tooltip("Padding so markers never overflow the root.")]
     public float clampPadding = 4f;
 
+    [Header("Genetic Diversity Sampling")]
+    [Tooltip("Max individuals sampled per refresh. Higher = more accurate, slightly more CPU.")]
+    public int diversitySampleSize = 20;
+
     private CivilizationStateManager civ;
     private PlayersPopulationManager pop;
+    private readonly List<string> _geneBuffer = new();
 
     private void Awake()
     {
@@ -59,13 +65,15 @@ public class CivilizationStateBarsView : MonoBehaviour
         if (!pop) pop = PlayersPopulationManager.Instance;
 
         float happiness     = civ ? Mathf.Clamp01(civ.happiness01)   : 0f;
-        float diversity     = civ ? Mathf.Clamp01(civ.diversity01)   : 0f;
+        float diversity     = ComputeGeneticDiversity01();
         float integration   = civ ? Mathf.Clamp01(civ.integration01) : 0f;
         float overallHealth = ComputeOverallHealth01();
         float order         = civ ? Mathf.Clamp01(civ.order01)       : 0f;
         float discovery     = civ ? Mathf.Clamp01(civ.discovery01)   : 0f;
         float knowledge     = civ ? Mathf.Clamp01(civ.knowledge01)   : 0f;
         float faith         = civ ? Mathf.Clamp01(civ.faith01)       : 0f;
+
+        if (civ) civ.SetDiversity01(diversity);
 
         Canvas.ForceUpdateCanvases();
 
@@ -96,6 +104,53 @@ public class CivilizationStateBarsView : MonoBehaviour
         }
         if (sumCount <= 0) return 0f;
         return Mathf.Clamp01(sumHealth / sumCount);
+    }
+
+    // Genetic diversity: average pairwise Hamming dissimilarity across a random sample.
+    // 0 = completely inbred (all genes identical), 1 = maximum diversity.
+    private float ComputeGeneticDiversity01()
+    {
+        var famSim = PlayerFamilySimulationManager.Instance;
+        if (famSim == null) return civ ? Mathf.Clamp01(civ.diversity01) : 0f;
+
+        var individuals = famSim.GetIndividuals();
+
+        _geneBuffer.Clear();
+        for (int i = 0; i < individuals.Count; i++)
+        {
+            var ind = individuals[i];
+            if (ind == null || !ind.IsAlive || string.IsNullOrEmpty(ind.LineageId))
+                continue;
+            _geneBuffer.Add(ind.LineageId);
+        }
+
+        int n = _geneBuffer.Count;
+        if (n < 2) return 0f;
+
+        // Sample up to diversitySampleSize genes; compare all pairs within the sample.
+        int sampleN = Mathf.Min(Mathf.Max(2, diversitySampleSize), n);
+        // Reservoir sample: pick sampleN from the buffer without allocating a new list.
+        // Swap chosen indices to the front so we only look at [0..sampleN).
+        var rng = new System.Random();
+        for (int i = 0; i < sampleN; i++)
+        {
+            int j = i + rng.Next(n - i);
+            (_geneBuffer[i], _geneBuffer[j]) = (_geneBuffer[j], _geneBuffer[i]);
+        }
+
+        double sumDissimilarity = 0.0;
+        int pairCount = 0;
+        for (int a = 0; a < sampleN - 1; a++)
+        {
+            for (int b = a + 1; b < sampleN; b++)
+            {
+                sumDissimilarity += 1.0 - LineageUtils.HammingSimilarity(_geneBuffer[a], _geneBuffer[b]);
+                pairCount++;
+            }
+        }
+
+        if (pairCount == 0) return 0f;
+        return Mathf.Clamp01((float)(sumDissimilarity / pairCount));
     }
 
     private void SetBarAndMarker01(RectTransform bar, RectTransform marker, float ratio01, TMP_Text label)

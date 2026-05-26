@@ -24,6 +24,10 @@ public class Individual
 
     public string LineageId;
 
+    // Fraction of genetic similarity between parents at birth (0=fully unrelated, 1=identical genes).
+    // Stored for UI / debugging; health penalty is already baked into Health01 at birth.
+    public float InbreedingCoefficient;
+
     public Individual(
         Gender gender,
         int ageInTurns,

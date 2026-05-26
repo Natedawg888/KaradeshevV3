@@ -21,11 +21,10 @@ public class CivilizationStateManager : MonoBehaviour
         Instance = this;
     }
 
-    public void SetHappiness01(float v) => happiness01 = Mathf.Clamp01(v);
-
-    public void SetOrder01(float v) => order01 = Mathf.Clamp01(v);
-
-    public void SetDiscovery01(float v) => discovery01 = Mathf.Clamp01(v);
+    public void SetHappiness01(float v)  => happiness01  = Mathf.Clamp01(v);
+    public void SetDiversity01(float v)  => diversity01  = Mathf.Clamp01(v);
+    public void SetOrder01(float v)      => order01      = Mathf.Clamp01(v);
+    public void SetDiscovery01(float v)  => discovery01  = Mathf.Clamp01(v);
     
     public void SetKnowledge01(float v)   => knowledge01   = Mathf.Clamp01(v);
     public void SetFaith01(float v)       => faith01       = Mathf.Clamp01(v);

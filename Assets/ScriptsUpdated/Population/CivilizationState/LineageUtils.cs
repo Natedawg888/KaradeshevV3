@@ -81,6 +81,15 @@ public static class LineageUtils
         return (double)same / L;
     }
 
+    // Returns true when two individuals share enough genetic similarity to block pairing.
+    // threshold=0 disables the check entirely; threshold=0.5 blocks siblings/close relatives.
+    public static bool IsTooSimilarForPairing(string a, string b, double threshold)
+    {
+        if (threshold <= 0.0) return false;
+        if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b)) return false;
+        return HammingSimilarity(a, b) >= threshold;
+    }
+
     private static int SafeLen(string s) => string.IsNullOrEmpty(s) ? 0 : s.Length;
 
     private static string PadOrRepeat(string s, int L, Random rng)

@@ -213,7 +213,13 @@ public class BirthService : IBirthService
         var rng = new System.Random();
         string mGene = !string.IsNullOrEmpty(mother.LineageId) ? mother.LineageId : LineageUtils.NewGene(32, rng);
         string fGene = (father != null && !string.IsNullOrEmpty(father.LineageId)) ? father.LineageId : LineageUtils.NewGene(32, rng);
+        float parentSimilarity = (float)LineageUtils.HammingSimilarity(mGene, fGene);
+        nb.InbreedingCoefficient = parentSimilarity;
         nb.LineageId = LineageUtils.MergeForChild(mGene, fGene, sex, rng);
+
+        var cfg = Config;
+        if (cfg != null && cfg.inbreedingBlockThreshold > 0f && parentSimilarity >= cfg.inbreedingBlockThreshold)
+            nb.Health01 = Mathf.Clamp01(nb.Health01 - cfg.inbreedingHealthPenalty);
 
         _pop.MarkUIDirty();
         baby = nb; groupOut = g;

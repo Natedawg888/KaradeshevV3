@@ -194,6 +194,12 @@ public class PairingService : IPairingService
         return true;
     }
 
+    private bool IsGeneticallyTooSimilar(Individual mother, Individual candidate)
+    {
+        float threshold = _config != null ? _config.inbreedingBlockThreshold : 0.5f;
+        return LineageUtils.IsTooSimilarForPairing(mother.LineageId, candidate.LineageId, threshold);
+    }
+
     private Individual FindBestMaleCandidateForMother(
     Individual mother,
     List<Individual> malePool,
@@ -204,25 +210,28 @@ public class PairingService : IPairingService
             return null;
 
         // 1) If she already has a valid committed partner, she keeps that commitment.
-        //    If he is only temporarily unavailable (busy / reserved / cooldown / pregnant gate failure),
-        //    she does NOT recommit to someone else.
+        //    Genetic similarity is a permanent block — fall through to seek an unrelated male.
+        //    Other unavailability (cooldown, busy) is temporary — keep commitment and skip this turn.
         var committed = GetCommittedPartnerForMother(mother, pruneInvalid: true);
+        bool committedGeneticallyBlocked = false;
         if (committed != null)
         {
-            if (PassesFamilyConstraint(mother, committed, requireDifferentFamily, requireSameFamily) &&
-                _pregnancy.CanStartPregnancy(mother, committed))
-            {
-                return committed;
-            }
+            bool passesFamily  = PassesFamilyConstraint(mother, committed, requireDifferentFamily, requireSameFamily);
+            bool notTooSimilar = !IsGeneticallyTooSimilar(mother, committed);
+            bool canBreed      = _pregnancy.CanStartPregnancy(mother, committed);
 
-            // Valid commitment still exists, so do not fall back to another male.
-            // Recommit only happens once the committed male becomes invalid
-            // through CleanupInvalidPairs / GetCommittedPartnerForMother pruning,
-            // eg death or aging out.
-            return null;
+            if (passesFamily && notTooSimilar && canBreed)
+                return committed;
+
+            // Genetic block is permanent — fall through to seek an unrelated male this turn.
+            // Any other block (cooldown, busy) is temporary — honour the commitment and wait.
+            if (passesFamily && !notTooSimilar)
+                committedGeneticallyBlocked = true;
+            else
+                return null;
         }
 
-        // 2) No valid commitment exists anymore, so she may seek a new male.
+        // 2) No valid commitment (or committed partner is genetically blocked): seek a new male.
         // Prefer an uncommitted male first.
         if (PreferUncommittedMaleFirst)
         {
@@ -233,6 +242,8 @@ public class PairingService : IPairingService
                 if (!PassesFamilyConstraint(mother, cand, requireDifferentFamily, requireSameFamily))
                     continue;
                 if (IsMaleCommittedToAnotherMother(cand.Id, mother.Id))
+                    continue;
+                if (IsGeneticallyTooSimilar(mother, cand))
                     continue;
                 if (!_pregnancy.CanStartPregnancy(mother, cand))
                     continue;
@@ -250,6 +261,8 @@ public class PairingService : IPairingService
                 if (cand == null) continue;
                 if (!PassesFamilyConstraint(mother, cand, requireDifferentFamily, requireSameFamily))
                     continue;
+                if (IsGeneticallyTooSimilar(mother, cand))
+                    continue;
                 if (!_pregnancy.CanStartPregnancy(mother, cand))
                     continue;
 
@@ -266,6 +279,8 @@ public class PairingService : IPairingService
                     continue;
                 if (IsMaleCommittedToAnotherMother(cand.Id, mother.Id))
                     continue;
+                if (IsGeneticallyTooSimilar(mother, cand))
+                    continue;
                 if (!_pregnancy.CanStartPregnancy(mother, cand))
                     continue;
 
@@ -273,7 +288,32 @@ public class PairingService : IPairingService
             }
         }
 
-        return null;
+        // 4) Last resort: no genetically-acceptable partner exists.
+        //    Allow inbreeding — pick the least-similar available male so the population survives.
+        //    Prefer the committed partner if he was only blocked by genetics.
+        if (committedGeneticallyBlocked && _pregnancy.CanStartPregnancy(mother, committed))
+            return committed;
+
+        Individual bestFallback = null;
+        double lowestSimilarity = double.MaxValue;
+        for (int i = 0; i < malePool.Count; i++)
+        {
+            var cand = malePool[i];
+            if (cand == null) continue;
+            if (!PassesFamilyConstraint(mother, cand, requireDifferentFamily, requireSameFamily))
+                continue;
+            if (!_pregnancy.CanStartPregnancy(mother, cand))
+                continue;
+
+            double sim = LineageUtils.HammingSimilarity(mother.LineageId, cand.LineageId);
+            if (sim < lowestSimilarity)
+            {
+                lowestSimilarity = sim;
+                bestFallback = cand;
+            }
+        }
+
+        return bestFallback;
     }
 
     // ---------------------------------------------------------------------

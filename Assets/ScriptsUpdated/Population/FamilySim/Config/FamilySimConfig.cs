@@ -25,6 +25,12 @@ public class FamilySimConfig : ScriptableObject
     public bool allowSameFamilyIfBothFounders = true;
     [Range(0f, 1f)] public float lowDiversityThreshold = 0.25f;
 
+    [Header("Inbreeding")]
+    [Tooltip("Pairs whose LineageId Hamming similarity >= this value cannot reproduce. Set to 0 to disable.")]
+    [Range(0f, 1f)] public float inbreedingBlockThreshold = 0.5f;
+    [Tooltip("Health penalty subtracted from a newborn when parents meet or exceed the block threshold.")]
+    [Range(0f, 1f)] public float inbreedingHealthPenalty = 0.3f;
+
     [Header("Limits")]
     public int maxIndividuals = 5000;
 
@@ -111,6 +117,9 @@ public class FamilySimConfig : ScriptableObject
 
         allowSameFamilyIfBothFounders = other.allowSameFamilyIfBothFounders;
         lowDiversityThreshold         = other.lowDiversityThreshold;
+
+        inbreedingBlockThreshold = other.inbreedingBlockThreshold;
+        inbreedingHealthPenalty  = other.inbreedingHealthPenalty;
 
         maxIndividuals = other.maxIndividuals;
 
