@@ -742,13 +742,6 @@ public class PlayerFamilySimulationManager : MonoBehaviour
                 ? PlayerHealthRulebook.Instance.GetAgeGroupForTotalAge(p.AgeInTurns)
                 : gen.GetAgeGroupForTotalAge(p.AgeInTurns);
 
-            // Floor at group's ageGroup: aggregate groups age by average, individuals by actual turns — keep them in sync.
-            if (pop != null && pop.TryGetGroupAgeGroup(p.AggregatedGroupGuid, out AgeGroup groupFloor)
-                && groupFloor > newGroup)
-            {
-                newGroup = groupFloor;
-            }
-
             if (newGroup != oldGroup)
             {
                 _indRepo.SetAggregatedAgeGroup(p, newGroup);
