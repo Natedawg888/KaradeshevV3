@@ -665,10 +665,22 @@ public class PlayerFamilySimulationManager : MonoBehaviour
         _indRepo.Shuffle(_tmpDeathCandidates);
 
         int kill = Mathf.Min(deaths, _tmpDeathCandidates.Count);
+        var pop = PlayerPop;
         for (int i = 0; i < kill; i++)
-            _indRepo.Kill(_tmpDeathCandidates[i]);
+        {
+            var person = _tmpDeathCandidates[i];
+            if (pop != null)
+                pop.TryDetachIndividualFromExistingReservations(person.Id, out _);
+            _indRepo.Kill(person);
+        }
 
         _tmpDeathCandidates.Clear();
+    }
+
+    public void KillIndividualInRepo(Individual person)
+    {
+        if (person != null)
+            _indRepo.Kill(person);
     }
 
     public bool TryPickParentsForFamilies(
@@ -1410,6 +1422,7 @@ public class PlayerFamilySimulationManager : MonoBehaviour
 
         Dictionary<Guid, int> deathsByGroup = new Dictionary<Guid, int>();
 
+        var pop = PlayerPop;
         for (int i = 0; i < _tmpKillIds.Count; i++)
         {
             string id = _tmpKillIds[i];
@@ -1419,6 +1432,9 @@ public class PlayerFamilySimulationManager : MonoBehaviour
                 continue;
 
             Guid groupId = person.AggregatedGroupGuid;
+
+            if (pop != null)
+                pop.TryDetachIndividualFromExistingReservations(person.Id, out _);
 
             _indRepo.Kill(person);
             killedCount++;

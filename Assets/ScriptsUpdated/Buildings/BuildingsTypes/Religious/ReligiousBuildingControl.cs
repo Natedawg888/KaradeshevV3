@@ -986,17 +986,6 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler
             return false;
         }
 
-        // Keep aggregate population groups in sync immediately.
-        for (int i = 0; i < affectedGroups.Count; i++)
-        {
-            PopulationGroup group = FindPopulationGroupByGuid(affectedGroups[i]);
-            if (group == null)
-                continue;
-
-            if (group.count > 0)
-                group.count -= 1;
-        }
-
         pop.MarkUIDirty();
         return true;
     }

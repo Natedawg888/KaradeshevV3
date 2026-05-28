@@ -780,7 +780,12 @@ public class DiseaseManager : MonoBehaviour
             pop.TryDetachIndividualFromExistingReservations(person.Id, out _);
 
         person.Health01 = 0f;
-        person.IsAlive = false;
+
+        var familySim = PlayerFamilySimulationManager.Instance;
+        if (familySim != null)
+            familySim.KillIndividualInRepo(person);
+        else
+            person.IsAlive = false;
 
         if (pop != null)
         {
