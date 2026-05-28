@@ -15,7 +15,7 @@ public class PopStatsTextsView : PopStatsSubviewBase
         int total = populationManager.GetTotalPopulation();
         int max   = populationManager.maxPopulation;
         int avail = populationManager.GetAvailableTaskPopulation();
-        int used  = populationManager.GetTotalReservedForTasks();
+        int used  = populationManager.GetUsedTaskPopulation();
 
         if (currentPopulationText) currentPopulationText.text = $"Current: {total}";
         if (maxPopulationText)     maxPopulationText.text     = $"Max: {max}";

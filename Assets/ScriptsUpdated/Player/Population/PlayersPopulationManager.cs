@@ -513,6 +513,14 @@ public class PlayersPopulationManager : MonoBehaviour
         return group;
     }
 
+    public bool TryGetGroupAgeGroup(Guid groupId, out AgeGroup ageGroup)
+    {
+        var grp = FindPopulationGroupById(groupId);
+        if (grp == null) { ageGroup = AgeGroup.Child; return false; }
+        ageGroup = grp.ageGroup;
+        return true;
+    }
+
     private bool IsActuallyAvailableTaskWorker(Individual person, string excludeReservationId = null)
     {
         if (person == null || !person.IsAlive)
