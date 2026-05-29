@@ -62,6 +62,10 @@ public class TileInteraction : MonoBehaviour
     // Building status subscription (live-route building panels)
     private BuildingStatus _subscribedStatus;
 
+    // Queue for collected-goods panels triggered by environment changes
+    private readonly Queue<EnvironmentControl> _lootQueue = new();
+    private readonly HashSet<EnvironmentControl> _lootQueued = new();
+
     private bool _suppressAutoDeselect = false;
 
     // NonAlloc buffers
@@ -117,11 +121,13 @@ public class TileInteraction : MonoBehaviour
     {
         WorldCanvasMode.OnChanged += HandleWorldCanvasModeChanged;
         HandleWorldCanvasModeChanged(WorldCanvasMode.UnitsOnly);
+        TileLifecycleEvents.OnTileEnvironmentChanged += HandleTileEnvironmentChanged;
     }
 
     private void OnDisable()
     {
         WorldCanvasMode.OnChanged -= HandleWorldCanvasModeChanged;
+        TileLifecycleEvents.OnTileEnvironmentChanged -= HandleTileEnvironmentChanged;
     }
 
     private void Start()
@@ -628,12 +634,49 @@ public class TileInteraction : MonoBehaviour
         if (taskFailedPanel != null) taskFailedPanel.OnClose -= HandleTaskFailedClosed;
     }
 
-    private void HandleCollectedClosed() { _collectedOpen = false; TryFinishSelectionWhenAllClosed(); }
+    private void HandleCollectedClosed()
+    {
+        _collectedOpen = false;
+        if (TryShowNextQueuedLoot()) return;
+        TryFinishSelectionWhenAllClosed();
+    }
     private void HandleDiscoveredClosed() { _discoveredOpen = false; TryFinishSelectionWhenAllClosed(); }
     private void HandleUndiscoveredClosed() { _undiscoveredOpen = false; TryFinishSelectionWhenAllClosed(); }
     private void HandleBuildingClosed() { _buildingOpen = false; TryFinishSelectionWhenAllClosed(); }
     private void HandleBuildingDamagedClosed() { _buildingDamagedOpen = false; TryFinishSelectionWhenAllClosed(); }
     private void HandleBuildingDestroyedClosed() { _buildingDestroyedOpen = false; TryFinishSelectionWhenAllClosed(); }
+
+    // -------------------------
+    // Environment-change loot queue
+    // -------------------------
+
+    private void HandleTileEnvironmentChanged(TileScript tile)
+    {
+        if (tile == null) return;
+        var env = tile.GetComponentInChildren<EnvironmentControl>(true);
+        if (env == null || !env.HasLootReady) return;
+        if (!_lootQueued.Add(env)) return; // already queued
+
+        _lootQueue.Enqueue(env);
+
+        if (!_collectedOpen)
+            TryShowNextQueuedLoot();
+    }
+
+    private bool TryShowNextQueuedLoot()
+    {
+        while (_lootQueue.Count > 0)
+        {
+            var env = _lootQueue.Dequeue();
+            _lootQueued.Remove(env);
+
+            if (env == null || !env.HasLootReady) continue;
+
+            OpenCollectedGoods(env);
+            return true;
+        }
+        return false;
+    }
 
     // -------------------------
     // Building state routing
