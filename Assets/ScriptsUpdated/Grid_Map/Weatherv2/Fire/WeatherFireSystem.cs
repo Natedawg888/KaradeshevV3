@@ -166,6 +166,7 @@ public class WeatherFireSystem : MonoBehaviour
         RebindLightningEvents();
 
         TurnSystem.SubscribeToStartOfTurn(HandleStartOfTurn);
+        TurnSystem.SubscribeToEndOfTurn(HandleEndOfTurn);
 
         if (_lateBindRoutine == null)
             _lateBindRoutine = StartCoroutine(LateBindRoutine());
@@ -174,6 +175,7 @@ public class WeatherFireSystem : MonoBehaviour
     private void OnDisable()
     {
         TurnSystem.UnsubscribeFromStartOfTurn(HandleStartOfTurn);
+        TurnSystem.UnsubscribeFromEndOfTurn(HandleEndOfTurn);
         UnbindLightningEvents();
 
         if (_lateBindRoutine != null)
@@ -285,6 +287,25 @@ public class WeatherFireSystem : MonoBehaviour
             return;
 
         ProcessFireStep();
+    }
+
+    private void HandleEndOfTurn()
+    {
+        for (int i = _burningBuildings.Count - 1; i >= 0; i--)
+        {
+            var entry = _burningBuildings[i];
+            if (entry.buildingRoot == null || entry.state == null) continue;
+            if (entry.state.IsFighting)
+                entry.state.TickFight();
+        }
+
+        for (int i = _burningEnvironments.Count - 1; i >= 0; i--)
+        {
+            var entry = _burningEnvironments[i];
+            if (entry.environment == null || entry.state == null) continue;
+            if (entry.state.IsFighting)
+                entry.state.TickFight();
+        }
     }
 
     private void HandleLightningStrikeResolved(LightningStrikePayload payload)

@@ -69,7 +69,6 @@ public class EnvironmentFireState : MonoBehaviour
     private void OnDestroy()
     {
         ReleasePopulationReservation();
-        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn_FightFire);
     }
 
     private void OnValidate()
@@ -226,7 +225,6 @@ public class EnvironmentFireState : MonoBehaviour
         CasualtiesSoFar       = 0;
         CurrentCasualtyChance = baseCasualtyChance;
 
-        TurnSystem.SubscribeToEndOfTurn(OnEndTurn_FightFire);
         return true;
     }
 
@@ -245,7 +243,7 @@ public class EnvironmentFireState : MonoBehaviour
         return pop != null && pop.GetAvailableTaskPopulation() >= populationRequired;
     }
 
-    private void OnEndTurn_FightFire()
+    public void TickFight()
     {
         if (!IsOnFire || !IsFighting) { StopFighting(); return; }
 
@@ -320,7 +318,6 @@ public class EnvironmentFireState : MonoBehaviour
     {
         if (!IsFighting) return;
         IsFighting = false;
-        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn_FightFire);
         ReleasePopulationReservation();
     }
 

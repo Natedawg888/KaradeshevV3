@@ -79,7 +79,6 @@ public class BuildingFireState : MonoBehaviour
     private void OnDestroy()
     {
         ReleasePopulationReservation();
-        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn_FightFire);
     }
 
     // ------------------------------------------------------------------
@@ -196,7 +195,6 @@ public class BuildingFireState : MonoBehaviour
         CasualtiesSoFar       = 0;
         CurrentCasualtyChance = baseCasualtyChance;
 
-        TurnSystem.SubscribeToEndOfTurn(OnEndTurn_FightFire);
         return true;
     }
 
@@ -206,7 +204,7 @@ public class BuildingFireState : MonoBehaviour
         StopFighting();
     }
 
-    private void OnEndTurn_FightFire()
+    public void TickFight()
     {
         if (!IsOnFire || !IsFighting) { StopFighting(); return; }
 
@@ -258,7 +256,6 @@ public class BuildingFireState : MonoBehaviour
             return;
 
         IsFighting = false;
-        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn_FightFire);
         ReleasePopulationReservation();
     }
 
