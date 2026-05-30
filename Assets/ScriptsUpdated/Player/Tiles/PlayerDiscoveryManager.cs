@@ -328,6 +328,14 @@ public class PlayerDiscoveryManager : MonoBehaviour
                 if (env == null || !env.isBeingDiscovered)
                     continue;
 
+                if (!string.IsNullOrEmpty(info.reservationId) &&
+                    !populationManager.IsReservationStillValid(info.reservationId, info.requiredPopulation))
+                {
+                    CancelDiscovery(env);
+                    toRemove.Add(env);
+                    continue;
+                }
+
                 var status = env.GetComponent<EnvironmentStatus>();
                 if (status != null)
                 {

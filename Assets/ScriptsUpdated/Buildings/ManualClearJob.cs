@@ -75,4 +75,15 @@ public class ManualClearJob : MonoBehaviour
         // clear environment
         status?.TryClearToBaseTile();
     }
+
+    public void Cancel()
+    {
+        active = false;
+
+        if (timerUI) timerUI.gameObject.SetActive(false);
+
+        if (status && savedAutoClearTurns >= 0)
+            status.autoClearAfterTurns = savedAutoClearTurns;
+        savedAutoClearTurns = -1;
+    }
 }

@@ -8,6 +8,7 @@ public enum NotificationType
     DiscoveryCompleted,
     DiscoveryFailed,
     BuildingCompleted,
+    ConstructionCancelled,
     BuildingOnFire,
     BuildingDamaged,
     BuildingDestroyed,

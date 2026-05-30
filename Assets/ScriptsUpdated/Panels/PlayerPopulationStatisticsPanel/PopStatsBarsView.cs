@@ -34,20 +34,42 @@ public class PopStatsBarsView : PopStatsSubviewBase
 
         Canvas.ForceUpdateCanvases(); // make sure sizes are current
 
-        var groups = populationManager.AllPopulations;
         int cChild = 0, cTeen = 0, cAdult = 0, cElder = 0;
-        for (int i = 0; i < groups.Count; i++)
+
+        var sim = PlayerFamilySimulationManager.Instance;
+        if (sim != null)
         {
-            var g = groups[i];
-            if (g == null) continue;
-            switch (g.ageGroup)
+            var individuals = sim.GetIndividuals();
+            for (int i = 0; i < individuals.Count; i++)
             {
-                case AgeGroup.Child: cChild += g.count; break;
-                case AgeGroup.Teen:  cTeen  += g.count; break;
-                case AgeGroup.Adult: cAdult += g.count; break;
-                case AgeGroup.Elder: cElder += g.count; break;
+                var p = individuals[i];
+                if (p == null || !p.IsAlive) continue;
+                switch (p.AggregatedAgeGroup)
+                {
+                    case AgeGroup.Child: cChild++; break;
+                    case AgeGroup.Teen:  cTeen++;  break;
+                    case AgeGroup.Adult: cAdult++; break;
+                    case AgeGroup.Elder: cElder++; break;
+                }
             }
         }
+        else
+        {
+            var groups = populationManager.AllPopulations;
+            for (int i = 0; i < groups.Count; i++)
+            {
+                var g = groups[i];
+                if (g == null) continue;
+                switch (g.ageGroup)
+                {
+                    case AgeGroup.Child: cChild += g.count; break;
+                    case AgeGroup.Teen:  cTeen  += g.count; break;
+                    case AgeGroup.Adult: cAdult += g.count; break;
+                    case AgeGroup.Elder: cElder += g.count; break;
+                }
+            }
+        }
+
         int total = Mathf.Max(0, cChild + cTeen + cAdult + cElder);
 
         SetBarAndMarker(barChild, markerChildContainer, cChild, total);

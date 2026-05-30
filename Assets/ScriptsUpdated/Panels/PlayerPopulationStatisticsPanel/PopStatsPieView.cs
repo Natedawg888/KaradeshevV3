@@ -17,7 +17,19 @@ public class PopStatsPieView : PopStatsSubviewBase
 
         // --- counts drive the pie (accurate split) ---
         int maleCount = 0, femaleCount = 0;
-        if (populationManager && populationManager.AllPopulations != null)
+        var sim = PlayerFamilySimulationManager.Instance;
+        if (sim != null)
+        {
+            var individuals = sim.GetIndividuals();
+            for (int i = 0; i < individuals.Count; i++)
+            {
+                var p = individuals[i];
+                if (p == null || !p.IsAlive) continue;
+                if      (p.Gender == Gender.Male)   maleCount++;
+                else if (p.Gender == Gender.Female) femaleCount++;
+            }
+        }
+        else if (populationManager && populationManager.AllPopulations != null)
         {
             var pops = populationManager.AllPopulations;
             for (int i = 0; i < pops.Count; i++)

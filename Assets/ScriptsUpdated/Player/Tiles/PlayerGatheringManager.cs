@@ -327,6 +327,14 @@ public class PlayerGatheringManager : MonoBehaviour
                 var env = info.env;
                 if (!env.isGathering) continue;
 
+                if (!string.IsNullOrEmpty(info.reservationId) &&
+                    !populationManager.IsReservationStillValid(info.reservationId, info.requiredPopulation))
+                {
+                    CancelGathering(env);
+                    toRemove.Add(env);
+                    continue;
+                }
+
                 // progress
                 info.turnsCompleted++;
                 env.gatheringTurnsLeft = Mathf.Max(0, env.gatheringTurnsLeft - 1);

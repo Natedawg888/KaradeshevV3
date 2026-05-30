@@ -48,6 +48,7 @@ public class PlayerSurveyManager : MonoBehaviour
         public EnvironmentControl env;
         public int turnsCompleted;
         public string reservationId;
+        public int requiredPopulation;
     }
 
     [Header("Debug (Read Only)")]
@@ -166,7 +167,8 @@ public class PlayerSurveyManager : MonoBehaviour
         {
             env = env,
             turnsCompleted = 0,
-            reservationId = resId
+            reservationId = resId,
+            requiredPopulation = requiredPop
         };
 
         MarkJobsDirty();
@@ -244,6 +246,14 @@ public class PlayerSurveyManager : MonoBehaviour
 
                 if (env == null || !env.isSurveying)
                     continue;
+
+                if (!string.IsNullOrEmpty(info.reservationId) &&
+                    !populationManager.IsReservationStillValid(info.reservationId, info.requiredPopulation))
+                {
+                    CancelSurvey(env);
+                    toRemove.Add(env);
+                    continue;
+                }
 
                 info.turnsCompleted++;
                 env.AdvanceSurveyTurn();

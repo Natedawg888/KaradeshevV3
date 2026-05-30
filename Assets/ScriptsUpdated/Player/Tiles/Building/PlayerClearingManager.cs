@@ -17,6 +17,7 @@ public class PlayerClearingManager : MonoBehaviour
     private readonly HashSet<ManualClearJob> active = new();
     private readonly Dictionary<ManualClearJob, string> reservationByJob = new();
     private readonly Dictionary<ManualClearJob, List<ResourceAmount>> rewardsByJob = new();
+    private readonly Dictionary<ManualClearJob, int> requiredPopByJob = new();
 
     private Coroutine processingCoroutine;
     private bool _subscribedToTurnEnd;
@@ -170,6 +171,7 @@ public class PlayerClearingManager : MonoBehaviour
         if (!string.IsNullOrEmpty(reservationId))
         {
             reservationByJob[job] = reservationId;
+            requiredPopByJob[job] = needPop;
             TagClearingReservation(job, reservationId);
         }
 
@@ -206,6 +208,22 @@ public class PlayerClearingManager : MonoBehaviour
                     continue;
                 }
 
+                if (reservationByJob.TryGetValue(job, out string checkResId) &&
+                    !string.IsNullOrEmpty(checkResId) &&
+                    requiredPopByJob.TryGetValue(job, out int reqPop) && reqPop > 0 &&
+                    !populationManager.IsReservationStillValid(checkResId, reqPop))
+                {
+                    populationManager?.ReleaseReservation(checkResId);
+                    reservationByJob.Remove(job);
+                    requiredPopByJob.Remove(job);
+                    rewardsByJob.Remove(job);
+                    job.Cancel();
+                    active.Remove(job);
+                    toRemove.Add(job);
+                    PlayersPopulationManager.Instance?.ForceSyncUI();
+                    continue;
+                }
+
                 bool completed = job.AdvanceOneTurn();
                 if (completed)
                 {
@@ -213,6 +231,7 @@ public class PlayerClearingManager : MonoBehaviour
                         populationManager?.ReleaseReservation(resId);
 
                     reservationByJob.Remove(job);
+                    requiredPopByJob.Remove(job);
 
                     GrantRewards(rewardsByJob.TryGetValue(job, out List<ResourceAmount> rw) ? rw : null);
                     rewardsByJob.Remove(job);

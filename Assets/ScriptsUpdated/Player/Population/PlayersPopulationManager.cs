@@ -708,6 +708,33 @@ public class PlayersPopulationManager : MonoBehaviour
         return Mathf.Max(0, GetTotalTaskPool() - GetAvailableTaskPopulation());
     }
 
+    // Returns true if the reservation still has at least requiredCount alive Teen/Adult workers.
+    public bool IsReservationStillValid(string reservationId, int requiredCount)
+    {
+        if (string.IsNullOrEmpty(reservationId))
+            return requiredCount <= 0;
+
+        if (requiredCount <= 0)
+            return true;
+
+        var sim = GetFamilySim();
+        if (sim != null)
+            return sim.IsProductionReservationStillValid(reservationId, requiredCount);
+
+        // Aggregate fallback: sum all task-capable group allocations
+        if (!reservations.TryGetValue(reservationId, out var allocation))
+            return false;
+
+        int total = 0;
+        foreach (var kv in allocation)
+        {
+            if (kv.Key != null && IsTaskCapableGroup(kv.Key))
+                total += Mathf.Max(0, kv.Value);
+        }
+
+        return total >= requiredCount;
+    }
+
     // -------------------------------------------------
     // Reservation metadata API
     // -------------------------------------------------
@@ -1104,10 +1131,18 @@ public class PlayersPopulationManager : MonoBehaviour
 
             var group = FindPopulationGroupById(ind.AggregatedGroupGuid);
             if (group == null)
-                return false;
-
-            if (!allocation.TryAdd(group, 1))
-                allocation[group] += 1;
+            {
+                // Aggregate group was pruned (common after aging: individual keeps old group GUID).
+                // In the family-sim path the actual tracking is via busyByReservation / _reservationByIndividualId,
+                // so skip aggregate tracking rather than blocking a valid worker.
+                if (GetFamilySim() == null)
+                    return false;
+            }
+            else
+            {
+                if (!allocation.TryAdd(group, 1))
+                    allocation[group] += 1;
+            }
         }
 
         foreach (var kv in allocation)
@@ -1492,6 +1527,9 @@ public class PlayersPopulationManager : MonoBehaviour
                     if (person == null || person.AggregatedGroupGuid == group.GroupID)
                     {
                         RemoveIndividualFromReservationIndex(reservationId, id);
+                        // Clear busy flag so this individual doesn't become permanently locked out.
+                        if (person != null && person.IsAlive && sim != null)
+                            sim.SetIndividualBusy(person.Id, false);
                         ids.RemoveAt(i);
                     }
                 }

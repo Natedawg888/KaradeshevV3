@@ -217,6 +217,21 @@ public class PlayerConstructionManager : MonoBehaviour
                     continue;
                 }
 
+                if (!string.IsNullOrEmpty(bc.ReservationId) &&
+                    !populationManager.IsReservationStillValid(bc.ReservationId, bc.ReservedPopulation))
+                {
+                    populationManager?.ReleaseReservation(bc.ReservationId);
+                    PlayersPopulationManager.Instance?.ForceSyncUI();
+                    active.Remove(bc);
+                    Destroy(bc.gameObject);
+                    toRemove.Add(bc);
+                    NotificationManager.Instance?.AddNotification(
+                        NotificationType.ConstructionCancelled,
+                        "Construction Halted",
+                        "A construction project was halted because workers died or aged out.");
+                    continue;
+                }
+
                 bool completed = bc.AdvanceOneTurn();
                 if (completed)
                 {
