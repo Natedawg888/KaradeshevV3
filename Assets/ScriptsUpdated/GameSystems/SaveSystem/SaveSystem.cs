@@ -1245,10 +1245,20 @@ public class SaveSystem : MonoBehaviour
     {
         if (data == null) return;
 
+        // Suppress UI refresh until all population data is loaded so
+        // GetAvailableTaskPopulation() reads from the fully-restored family sim.
+        PlayersPopulationManager.Instance?.BeginBatch();
+
         PlayersPopulationManager.Instance?.LoadState(data.playersPopulationData);
         PlayerFamilySimulationManager.Instance?.LoadState(data.playerFamilySimulationData);
         contextPopulationStatSafe(data.playerPopulationStatisticData);
         DiseaseManager.Instance?.LoadState(data.playerDiseaseData);
+
+        // Re-sync IsBusy flags on individuals from the authoritative reservation state,
+        // then force a UI update now that both PPM and PFSM are fully loaded.
+        PlayersPopulationManager.Instance?.ReapplyBusyFlagsFromReservations();
+        PlayersPopulationManager.Instance?.EndBatch();
+        PlayersPopulationManager.Instance?.ForceSyncUI();
     }
 
     private void LoadWorldSimSection(WorldSimSectionSaveData data)

@@ -2321,6 +2321,16 @@ public class PlayersPopulationManager : MonoBehaviour
             return;
         }
 
+        // Clear all busy flags first so stale saved flags don't persist.
+        var allInds = sim.GetIndividuals();
+        for (int i = 0; i < allInds.Count; i++)
+        {
+            var p = allInds[i];
+            if (p != null && p.IsAlive && p.IsBusy)
+                sim.SetIndividualBusy(p.Id, false);
+        }
+
+        // Re-apply busy=true only for individuals in actively-busy reservations.
         foreach (var kv in busyByReservation)
         {
             if (!activelyBusyReservations.Contains(kv.Key))
