@@ -4,7 +4,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(BuildingControl))]
-public class TradeBuildingControl : MonoBehaviour
+public class TradeBuildingControl : MonoBehaviour, IBuildingTurnTickable
 {
     [Header("Trade Settings")]
     [SerializeField] private bool enableTrade = true;
@@ -25,7 +25,6 @@ public class TradeBuildingControl : MonoBehaviour
 
     private BuildingControl _buildingControl;
     private BuildingStatus _buildingStatus;
-    private bool _turnSubscribed;
     private bool _seasonSubscribed;
     private string _lastSeasonID;
     private int _nextVisitTurn;
@@ -59,11 +58,7 @@ public class TradeBuildingControl : MonoBehaviour
 
     private void OnEnable()
     {
-        if (!_turnSubscribed)
-        {
-            TurnSystem.SubscribeToEndOfTurn(HandleEndOfTurn);
-            _turnSubscribed = true;
-        }
+        BuildingTickManager.Instance?.Register(this);
 
         if (!_seasonSubscribed && SeasonManager.Instance != null)
         {
@@ -75,11 +70,7 @@ public class TradeBuildingControl : MonoBehaviour
 
     private void OnDisable()
     {
-        if (_turnSubscribed)
-        {
-            TurnSystem.UnsubscribeFromEndOfTurn(HandleEndOfTurn);
-            _turnSubscribed = false;
-        }
+        BuildingTickManager.Instance?.Unregister(this);
 
         if (_seasonSubscribed && SeasonManager.Instance != null)
         {
@@ -211,7 +202,7 @@ public class TradeBuildingControl : MonoBehaviour
 
     // ──────────────────── Turn / Season Handling ────────────────────
 
-    private void HandleEndOfTurn()
+    public void TurnTick()
     {
         if (!enableTrade) return;
         if (_buildingStatus != null && _buildingStatus.CurrentState == BuildingState.Destroyed) return;

@@ -4,7 +4,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(BuildingControl))]
-public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler
+public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler, IBuildingTurnTickable
 {
     [Serializable]
     private class RitualCooldownState
@@ -91,7 +91,7 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
     private void OnEnable()
     {
-        TurnSystem.SubscribeToEndOfTurn(HandleEndTurn);
+        BuildingTickManager.Instance?.Register(this);
 
         if (PlayerReligionManager.Instance != null)
             PlayerReligionManager.Instance.ReligionChanged += HandleReligionChanged;
@@ -102,7 +102,7 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler
 
     private void OnDisable()
     {
-        TurnSystem.UnsubscribeFromEndOfTurn(HandleEndTurn);
+        BuildingTickManager.Instance?.Unregister(this);
 
         if (PlayerReligionManager.Instance != null)
             PlayerReligionManager.Instance.ReligionChanged -= HandleReligionChanged;
@@ -195,7 +195,7 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler
         NotifyChanged();
     }
 
-    private void HandleEndTurn()
+    public void TurnTick()
     {
         if (_buildingControl == null || _buildingControl.ActiveType != BuildingType.Religious)
             return;

@@ -8,7 +8,7 @@ public enum BuildingState
     Destroyed
 }
 
-public class BuildingStatus : MonoBehaviour
+public class BuildingStatus : MonoBehaviour, IBuildingTurnTickable
 {
     [Header("State Prefabs (optional)")]
     [Tooltip("If set, this object will be turned on/off for the Normal state. If null, falls back to MeshRenderer/SkinnedMeshRenderer on this GameObject.")]
@@ -77,13 +77,11 @@ public class BuildingStatus : MonoBehaviour
 
         // Start in Normal state visually
         SetState(BuildingState.Normal);
-
-        TurnSystem.SubscribeToEndOfTurn(OnEndTurn);
     }
 
     private void OnDestroy()
     {
-        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+        BuildingTickManager.Instance?.Unregister(this);
     }
 
     private void Start()
@@ -91,6 +89,8 @@ public class BuildingStatus : MonoBehaviour
         // Pull per-building config once everything is spawned.
         if (readAutoClearFromDefinition)
             ApplyAutoClearFromDefinition();
+
+        BuildingTickManager.Instance?.Register(this);
     }
 
     private void ApplyAutoClearFromDefinition()
@@ -106,7 +106,7 @@ public class BuildingStatus : MonoBehaviour
         // Debug.Log($"[BuildingStatus] autoClearAfterTurns set from def '{id}' = {autoClearAfterTurns}");
     }
 
-    private void OnEndTurn()
+    public void TurnTick()
     {
         if (CurrentState == BuildingState.Destroyed && autoClearAfterTurns > 0)
         {

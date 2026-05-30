@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(BuildingStatus))]
-public class BuildingHealth : MonoBehaviour
+public class BuildingHealth : MonoBehaviour, IBuildingTurnTickable
 {
     [Header("Health (per-instance, can be overridden by manager defaults)")]
     [Min(1)] public int maxHealth = 100;
@@ -40,9 +40,6 @@ public class BuildingHealth : MonoBehaviour
     {
         _status = GetComponent<BuildingStatus>();
 
-        // Always subscribe so degeneration fires even if manager is late.
-        TurnSystem.SubscribeToEndOfTurn(OnEndTurn);
-
         if (useManagerDefaults)
             LoadDefaultsFromManager();
 
@@ -64,6 +61,8 @@ public class BuildingHealth : MonoBehaviour
 
             InitFromManager(id);
         }
+
+        BuildingTickManager.Instance?.Register(this);
     }
 
     private void InitFromManager(string id)
@@ -83,7 +82,7 @@ public class BuildingHealth : MonoBehaviour
 
     private void OnDestroy()
     {
-        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+        BuildingTickManager.Instance?.Unregister(this);
     }
 
     private void LoadDefaultsFromManager()
@@ -142,10 +141,10 @@ public class BuildingHealth : MonoBehaviour
         useManagerDefaults = prevUse;
     }
 
-    private void OnEndTurn()
+    public void TurnTick()
     {
         if (_status.CurrentState == BuildingState.Destroyed) return;
-        if (IsDegenerationPaused) return; // <<< NEW: paused while repairing
+        if (IsDegenerationPaused) return;
 
         _turnsSinceDegenerate++;
         if (_turnsSinceDegenerate >= degenerationIntervalTurns)

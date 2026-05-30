@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuildingRepair : MonoBehaviour
+public class BuildingRepair : MonoBehaviour, IBuildingTurnTickable
 {
     [Header("Policy")]
     [Tooltip("If false, Destroyed buildings cannot be repaired via this component.")]
@@ -44,19 +44,22 @@ public class BuildingRepair : MonoBehaviour
         _health  = GetComponent<BuildingHealth>();
         _status  = GetComponent<BuildingStatus>();
 
-        TurnSystem.SubscribeToEndOfTurn(OnEndTurn);
-
         if (repairIconRoot) repairIconRoot.SetActive(false);
+    }
+
+    private void Start()
+    {
+        BuildingTickManager.Instance?.Register(this);
     }
 
     private void OnDestroy()
     {
-        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+        BuildingTickManager.Instance?.Unregister(this);
         TryReleaseReservation();
         if (_isRepairing) _health?.SetDegenerationPaused(false);
     }
 
-    private void OnEndTurn()
+    public void TurnTick()
     {
         if (!_isRepairing) return;
 

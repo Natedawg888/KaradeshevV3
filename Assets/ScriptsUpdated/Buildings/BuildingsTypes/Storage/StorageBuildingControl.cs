@@ -26,7 +26,7 @@ public class StorageItem
     }
 }
 
-public class StorageBuildingControl : MonoBehaviour
+public class StorageBuildingControl : MonoBehaviour, IBuildingTurnTickable
 {
     [Header("Storage Settings")]
     public int maxStorageCapacity = 100;
@@ -87,18 +87,17 @@ public class StorageBuildingControl : MonoBehaviour
 
     private void OnEnable()
     {
-        TurnSystem.SubscribeToEndOfTurn(OnTurnEnded);
+        BuildingTickManager.Instance?.Register(this);
         ApplyInventoryCapacityBonus();
     }
 
     private void OnDisable()
     {
-        TurnSystem.UnsubscribeFromEndOfTurn(OnTurnEnded);
+        BuildingTickManager.Instance?.Unregister(this);
         RemoveInventoryCapacityBonus();
     }
 
-
-    private void OnTurnEnded()
+    public void TurnTick()
     {
         HandleSpoilageTick();
         RecalculateTotalStoredAmount();
