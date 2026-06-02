@@ -6,8 +6,7 @@ using System.Text;
 
 public static class EncryptionHelper
 {
-    // Replace before shipping.
-    private const string MasterSecret = "REPLACE_WITH_YOUR_OWN_LONG_RANDOM_SECRET_64_PLUS_CHARS";
+    private const string MasterSecret = "rcBskQPNNLJJGvIbYmL8GO3Vf/1ccGG0Io6LDdzdb6sVq6+FmdcxFAa9d88VCBbq";
 
     private static readonly byte[] Magic = Encoding.ASCII.GetBytes("KSG2");
 
