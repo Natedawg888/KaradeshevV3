@@ -128,9 +128,9 @@ public class RainSimulationSystem : MonoBehaviour
     [Header("Rain Particle Intensity")]
     [SerializeField] private bool driveParticleSettingsFromIntensity = true;
 
-    [Min(0f)][SerializeField] private float lightRainEmissionRate = 15f;
-    [Min(0f)][SerializeField] private float normalRainEmissionRate = 45f;
-    [Min(0f)][SerializeField] private float heavyRainEmissionRate = 95f;
+    [Min(0f)][SerializeField] private float lightRainEmissionRate = 8f;
+    [Min(0f)][SerializeField] private float normalRainEmissionRate = 25f;
+    [Min(0f)][SerializeField] private float heavyRainEmissionRate = 50f;
 
     [Min(0f)][SerializeField] private float lightRainStartSpeed = 4f;
     [Min(0f)][SerializeField] private float normalRainStartSpeed = 7f;
@@ -150,12 +150,12 @@ public class RainSimulationSystem : MonoBehaviour
 
     [Header("Pool Warmup")]
     [SerializeField] private bool prewarmPoolOnInitialize = true;
-    [Min(0)][SerializeField] private int prewarmRainCount = 24;
-    [Min(1)][SerializeField] private int maxCreatesPerPrewarmCall = 24;
+    [Min(0)][SerializeField] private int prewarmRainCount = 12;
+    [Min(1)][SerializeField] private int maxCreatesPerPrewarmCall = 12;
 
     [Header("Rain Visual Performance")]
     [SerializeField] private bool enableQueuedRainVisualRefresh = true;
-    [Min(1)][SerializeField] private int rainVisualRefreshesPerFrame = 6;
+    [Min(1)][SerializeField] private int rainVisualRefreshesPerFrame = 3;
     [Min(0f)][SerializeField] private float rainVisualRefreshIntervalSeconds = 0f;
 
     private readonly Queue<Vector2Int> _pendingRainVisualRefreshes = new Queue<Vector2Int>();
@@ -1199,19 +1199,6 @@ public class RainSimulationSystem : MonoBehaviour
                   : RainIntensityLevel.Light;
         }
 
-        ParticleSystem[] particleSystems =
-            rainInstance.GetComponentsInChildren<ParticleSystem>(true);
-
-        for (int i = 0; i < particleSystems.Length; i++)
-        {
-            ParticleSystem ps = particleSystems[i];
-
-            if (ps == null)
-                continue;
-
-            ApplyRainParticleIntensity(ps, intensity01, level);
-        }
-
         RainVisualShapeCache cache = rainInstance.GetComponent<RainVisualShapeCache>();
         if (cache == null)
             cache = rainInstance.AddComponent<RainVisualShapeCache>();
@@ -1222,6 +1209,7 @@ public class RainSimulationSystem : MonoBehaviour
         float finalShapeHeight = GetRainShapeHeightForIntensity(level, intensity01);
 
         bool unchanged =
+            cache.lastIntensityLevel == level &&
             Mathf.Abs(cache.lastCellSize - cellSize) <= 0.0001f &&
             Mathf.Abs(cache.lastCoverage - finalCoverage) <= 0.0001f &&
             Mathf.Abs(cache.lastShapeHeight - finalShapeHeight) <= 0.0001f;
@@ -1229,12 +1217,20 @@ public class RainSimulationSystem : MonoBehaviour
         if (unchanged)
             return;
 
+        // Use cached component references from pool — avoids GetComponentsInChildren allocation each call.
+        RainVisualPoolCache poolCache = rainInstance.GetComponent<RainVisualPoolCache>();
+        ParticleSystem[] particleSystems = poolCache != null && poolCache.IsInitialized
+            ? poolCache.ParticleSystems
+            : rainInstance.GetComponentsInChildren<ParticleSystem>(true);
+
         for (int i = 0; i < particleSystems.Length; i++)
         {
             ParticleSystem ps = particleSystems[i];
 
             if (ps == null)
                 continue;
+
+            ApplyRainParticleIntensity(ps, intensity01, level);
 
             var shape = ps.shape;
             shape.enabled = true;
@@ -1246,6 +1242,7 @@ public class RainSimulationSystem : MonoBehaviour
                 cellSize * finalCoverage);
         }
 
+        cache.lastIntensityLevel = level;
         cache.lastCellSize = cellSize;
         cache.lastCoverage = finalCoverage;
         cache.lastShapeHeight = finalShapeHeight;
