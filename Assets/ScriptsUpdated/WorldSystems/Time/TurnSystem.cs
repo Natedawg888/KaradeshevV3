@@ -94,16 +94,48 @@ public class TurnSystem : MonoBehaviour
 
     private bool isAdvancingTurn = false;
 
+    // Turn-advance blocking: systems doing multi-frame work call Block/Unblock.
+    // The turn queues at timer=0 until all blockers release.
+    private static int _turnBlockers = 0;
+    private bool _pendingTurnAdvance = false;
+
+    public static void BlockTurnAdvance()
+    {
+        _turnBlockers++;
+    }
+
+    public static void UnblockTurnAdvance()
+    {
+        if (_turnBlockers > 0)
+            _turnBlockers--;
+    }
+
     void Update()
     {
         if (isPaused || isAdvancingTurn)
             return;
 
+        if (_pendingTurnAdvance)
+        {
+            if (_turnBlockers <= 0)
+            {
+                _pendingTurnAdvance = false;
+                StartCoroutine(AdvanceTurnRoutine());
+            }
+            return;
+        }
+
         phaseTimer -= Time.deltaTime * currentSpeedMultiplier;
 
         if (phaseTimer <= 0f)
         {
-            StartCoroutine(AdvanceTurnRoutine());
+            phaseTimer = 0f;
+            UpdatePhaseTimer();
+
+            if (_turnBlockers > 0)
+                _pendingTurnAdvance = true;
+            else
+                StartCoroutine(AdvanceTurnRoutine());
             return;
         }
 
@@ -113,6 +145,7 @@ public class TurnSystem : MonoBehaviour
     private IEnumerator AdvanceTurnRoutine()
     {
         isAdvancingTurn = true;
+        _pendingTurnAdvance = false;
 
         // Clamp visually to zero first
         phaseTimer = 0f;
