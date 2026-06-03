@@ -31,6 +31,7 @@ public class CivilizationDiversitySystem : MonoBehaviour
 
     // runtime state
     private Coroutine _geneticsCo;
+    private bool _isBlockingTurn = false;
     private struct GeneticsState
     {
         public List<string> genes;   // selected, shuffled, capped
@@ -54,6 +55,7 @@ public class CivilizationDiversitySystem : MonoBehaviour
     private void OnDisable()
     {
         TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private void Start()
@@ -67,6 +69,7 @@ public class CivilizationDiversitySystem : MonoBehaviour
         if (civ == null || fam == null) return;
 
         // (Re)start genetics-only computation each turn
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
         if (_geneticsCo != null) StopCoroutine(_geneticsCo);
         PrepareGeneticsSnapshot();           // snapshot & shuffle genes (<= maxIndividualsOverall)
         _geneticsCo = StartCoroutine(ProcessGeneticsBatches());
@@ -112,10 +115,15 @@ public class CivilizationDiversitySystem : MonoBehaviour
         for (int d = 0; d < coroutineStartDelay; d++)
             yield return null;
 
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
+
         var genes = _gstate.genes;
         if (genes == null || genes.Count <= 1)
         {
             _lastGeneticDiversity01 = 0f;
+            _isBlockingTurn = false;
+            TurnSystem.UnblockTurnAdvance();
             _geneticsCo = null;
             yield break;
         }
@@ -185,6 +193,8 @@ public class CivilizationDiversitySystem : MonoBehaviour
             }
         }
 
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         _geneticsCo = null;
     }
 }
