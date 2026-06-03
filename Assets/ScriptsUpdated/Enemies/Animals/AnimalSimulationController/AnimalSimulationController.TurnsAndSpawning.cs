@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public partial class AnimalSimulationController : MonoBehaviour
@@ -74,9 +73,27 @@ public partial class AnimalSimulationController : MonoBehaviour
 
     private void HandleTurnEnded()
     {
-        RefreshPlayerBuildingTiles();
-        RefreshHumanUnitGroups();
-        RefreshStorageTiles();
+        if (_buildingsDirty)
+        {
+            RefreshPlayerBuildingTiles();
+            _buildingsDirty = false;
+        }
+        else
+        {
+            ResetBuildingAttackIcons();
+        }
+
+        if (_humanUnitsDirty)
+        {
+            RefreshHumanUnitGroups();
+            _humanUnitsDirty = false;
+        }
+
+        if (_storageDirty)
+        {
+            RefreshStorageTiles();
+            _storageDirty = false;
+        }
 
         _attackingBuildingByGroup.Clear();
         _buildingAttackCounts.Clear();
@@ -86,8 +103,13 @@ public partial class AnimalSimulationController : MonoBehaviour
 
         _currentTurnBeingTicked = TurnSystem.GetCurrentTurn();
 
+        AnimalDroppingHandler.TickAll();
+        SmallAnimalVisitorSystem.Instance?.Tick();
+
         _simulation.BeginTurnTick(_currentTurnBeingTicked);
         _isTickingTurn = true;
+        _isBlockingTurnForTick = true;
+        TurnSystem.BlockTurnAdvance();
         MarkWorldSimSaveCacheDirty();
     }
 
@@ -95,6 +117,9 @@ public partial class AnimalSimulationController : MonoBehaviour
     {
         BuildTileUiLookup();
         _spawnerNodeCacheBuilt = false; // force rebuild on next event
+        _buildingsDirty = true;
+        _humanUnitsDirty = true;
+        _storageDirty = true;
 
         var presetManager = EnvironmentPresetManager.Instance;
         if (presetManager == null)

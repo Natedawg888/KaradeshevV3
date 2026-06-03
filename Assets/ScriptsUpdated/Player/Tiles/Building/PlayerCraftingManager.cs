@@ -13,6 +13,7 @@ public class PlayerCraftingManager : MonoBehaviour
 
     private readonly Queue<CraftingBuildingControl.CraftingCompletion> _pending = new();
     private Coroutine _processCo;
+    private bool _isBlockingTurn = false;
 
     private static Dictionary<string, ResourceDefinition> _resourceById;
 
@@ -35,6 +36,7 @@ public class PlayerCraftingManager : MonoBehaviour
     private void OnDisable()
     {
         TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private void MarkJobsDirty()
@@ -127,6 +129,9 @@ public class PlayerCraftingManager : MonoBehaviour
 
     private IEnumerator ProcessCompletions()
     {
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
+
         var inv = PlayerInventoryManager.Instance;
         var pop = PlayersPopulationManager.Instance;
         var level = PlayerLevel.Instance;
@@ -177,6 +182,8 @@ public class PlayerCraftingManager : MonoBehaviour
         }
 
         MarkJobsDirty();
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         _processCo = null;
     }
 
@@ -279,6 +286,7 @@ public class PlayerCraftingManager : MonoBehaviour
     {
         if (_processCo != null)
         {
+            if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
             StopCoroutine(_processCo);
             _processCo = null;
         }

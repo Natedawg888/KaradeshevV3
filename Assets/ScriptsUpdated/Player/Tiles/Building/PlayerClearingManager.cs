@@ -21,6 +21,7 @@ public class PlayerClearingManager : MonoBehaviour
 
     private Coroutine processingCoroutine;
     private bool _subscribedToTurnEnd;
+    private bool _isBlockingTurn = false;
 
     private void Awake()
     {
@@ -51,6 +52,7 @@ public class PlayerClearingManager : MonoBehaviour
 
         TurnSystem.UnsubscribeFromEndOfTurn(OnTurnEnded);
         _subscribedToTurnEnd = false;
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private void OnDestroy()
@@ -63,6 +65,7 @@ public class PlayerClearingManager : MonoBehaviour
             TurnSystem.UnsubscribeFromEndOfTurn(OnTurnEnded);
             _subscribedToTurnEnd = false;
         }
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private string GetReservationOwnerId(ManualClearJob job)
@@ -184,6 +187,7 @@ public class PlayerClearingManager : MonoBehaviour
         foreach (ManualClearJob job in active)
             snapshot.Add(job);
 
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
         if (processingCoroutine != null)
             StopCoroutine(processingCoroutine);
 
@@ -192,6 +196,9 @@ public class PlayerClearingManager : MonoBehaviour
 
     private IEnumerator ProcessClears(List<ManualClearJob> pending)
     {
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
+
         int idx = 0;
         List<ManualClearJob> toRemove = new List<ManualClearJob>();
 
@@ -250,6 +257,8 @@ public class PlayerClearingManager : MonoBehaviour
         for (int i = 0; i < toRemove.Count; i++)
             active.Remove(toRemove[i]);
 
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         processingCoroutine = null;
     }
 
@@ -386,6 +395,7 @@ public class PlayerClearingManager : MonoBehaviour
     {
         if (processingCoroutine != null)
         {
+            if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
             StopCoroutine(processingCoroutine);
             processingCoroutine = null;
         }

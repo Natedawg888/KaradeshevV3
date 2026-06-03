@@ -64,6 +64,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
     }
 
     private Coroutine discoveryProcessingCoroutine;
+    private bool _isBlockingTurn = false;
 
     private void Awake()
     {
@@ -84,6 +85,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
     private void OnDisable()
     {
         TurnSystem.UnsubscribeFromEndOfTurn(OnTurnEnded);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private void LateUpdate()
@@ -306,6 +308,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
                 _turnSnapshot.Add(kv.Value);
         }
 
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
         if (discoveryProcessingCoroutine != null)
             StopCoroutine(discoveryProcessingCoroutine);
 
@@ -315,6 +318,9 @@ public class PlayerDiscoveryManager : MonoBehaviour
 
     private IEnumerator ProcessDiscoveryUpdates(List<DiscoveryInfo> pendingInfos)
     {
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
+
         var toRemove = new List<EnvironmentControl>();
 
         int idx = 0;
@@ -452,6 +458,8 @@ public class PlayerDiscoveryManager : MonoBehaviour
             yield return null;
         }
 
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         discoveryProcessingCoroutine = null;
     }
 
@@ -543,6 +551,7 @@ public class PlayerDiscoveryManager : MonoBehaviour
     {
         if (discoveryProcessingCoroutine != null)
         {
+            if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
             StopCoroutine(discoveryProcessingCoroutine);
             discoveryProcessingCoroutine = null;
         }

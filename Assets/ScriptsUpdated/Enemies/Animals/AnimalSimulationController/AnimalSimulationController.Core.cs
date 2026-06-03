@@ -81,6 +81,7 @@ public partial class AnimalSimulationController : MonoBehaviour
     public AnimalSimulation Simulation => _simulation;
 
     private bool _isTickingTurn = false;
+    private bool _isBlockingTurnForTick = false;
     private int _currentTurnBeingTicked = -1;
 
     private Coroutine _spawnRoutine;
@@ -214,6 +215,7 @@ public partial class AnimalSimulationController : MonoBehaviour
     private void OnDestroy()
     {
         TurnSystem.UnsubscribeFromEndOfTurn(HandleTurnEnded);
+        if (_isBlockingTurnForTick) { _isBlockingTurnForTick = false; TurnSystem.UnblockTurnAdvance(); }
 
         if (SeasonManager.Instance != null)
             SeasonManager.Instance.OnSeasonChanged -= HandleSeasonChanged;
@@ -282,6 +284,7 @@ public partial class AnimalSimulationController : MonoBehaviour
             if (done)
             {
                 _isTickingTurn = false;
+                if (_isBlockingTurnForTick) { _isBlockingTurnForTick = false; TurnSystem.UnblockTurnAdvance(); }
                 CommitUnitUnderAttackIconsAfterTurn();
                 MarkWorldSimSaveCacheDirty();
             }
@@ -369,6 +372,7 @@ public partial class AnimalSimulationController : MonoBehaviour
             return;
 
         _isTickingTurn = false;
+        if (_isBlockingTurnForTick) { _isBlockingTurnForTick = false; TurnSystem.UnblockTurnAdvance(); }
         _currentTurnBeingTicked = -1;
 
         if (_spawnRoutine != null)

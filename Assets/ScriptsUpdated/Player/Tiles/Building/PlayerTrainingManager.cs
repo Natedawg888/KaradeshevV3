@@ -13,6 +13,7 @@ public class PlayerTrainingManager : MonoBehaviour
 
     private readonly Queue<KineticWarfareControl.TrainingCompletion> _pending = new();
     private Coroutine _processCo;
+    private bool _isBlockingTurn = false;
 
     private static Dictionary<string, MilitiaUnit> _unitById;
 
@@ -34,6 +35,7 @@ public class PlayerTrainingManager : MonoBehaviour
     private void OnDisable()
     {
         TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private string GetTrainingReservationOwnerId(KineticWarfareControl source, string fallbackOwnerId = null)
@@ -134,6 +136,9 @@ public class PlayerTrainingManager : MonoBehaviour
 
     private IEnumerator ProcessCompletions()
     {
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
+
         while (_pending.Count > 0)
         {
             int toDo = Mathf.Min(completionsPerFrame, _pending.Count);
@@ -187,6 +192,8 @@ public class PlayerTrainingManager : MonoBehaviour
             yield return null;
         }
 
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         _processCo = null;
     }
 
@@ -250,6 +257,7 @@ public class PlayerTrainingManager : MonoBehaviour
     {
         if (_processCo != null)
         {
+            if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
             StopCoroutine(_processCo);
             _processCo = null;
         }

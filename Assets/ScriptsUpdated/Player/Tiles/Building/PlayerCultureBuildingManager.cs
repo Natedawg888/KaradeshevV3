@@ -10,6 +10,7 @@ public class PlayerCultureBuildingManager : MonoBehaviour
     [Min(1)] public int buildingsPerFrame = 4;
 
     private Coroutine _processCo;
+    private bool _isBlockingTurn = false;
     private bool _isProcessing;
 
     private readonly List<CultureBuildingControl> _buffer = new List<CultureBuildingControl>();
@@ -28,13 +29,18 @@ public class PlayerCultureBuildingManager : MonoBehaviour
     }
 
     private void OnEnable()  { TurnSystem.SubscribeToEndOfTurn(HandleEndTurn); }
-    private void OnDisable() { TurnSystem.UnsubscribeFromEndOfTurn(HandleEndTurn); }
+    private void OnDisable()
+    {
+        TurnSystem.UnsubscribeFromEndOfTurn(HandleEndTurn);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
+    }
 
     private void HandleEndTurn()
     {
         if (!isActiveAndEnabled)
             return;
 
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
         if (_processCo != null)
             StopCoroutine(_processCo);
 
@@ -43,6 +49,8 @@ public class PlayerCultureBuildingManager : MonoBehaviour
 
     private IEnumerator ProcessCultureBuildingsCo()
     {
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
         _isProcessing = true;
 
         _buffer.Clear();
@@ -72,6 +80,8 @@ public class PlayerCultureBuildingManager : MonoBehaviour
         }
 
         _isProcessing = false;
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         _processCo = null;
 
         SaveSystem.MarkSectionDirty(SaveSectionKeys.CoreSystems);

@@ -56,6 +56,7 @@ public class PlayerSurveyManager : MonoBehaviour
     [SerializeField] private List<EnvironmentControl> surveyedInspector = new();
 
     private Coroutine surveyCoroutine;
+    private bool _isBlockingTurn = false;
 
     private void Awake()
     {
@@ -81,6 +82,7 @@ public class PlayerSurveyManager : MonoBehaviour
     private void OnDisable()
     {
         TurnSystem.UnsubscribeFromEndOfTurn(OnTurnEnded);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private void LateUpdate()
@@ -223,6 +225,7 @@ public class PlayerSurveyManager : MonoBehaviour
                 _tmpSurveySnapshot.Add(kv.Value);
         }
 
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
         if (surveyCoroutine != null)
             StopCoroutine(surveyCoroutine);
 
@@ -232,6 +235,9 @@ public class PlayerSurveyManager : MonoBehaviour
 
     private IEnumerator ProcessSurveys(List<SurveyInfo> pending)
     {
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
+
         var toRemove = new List<EnvironmentControl>();
         int idx = 0;
 
@@ -288,6 +294,8 @@ public class PlayerSurveyManager : MonoBehaviour
             yield return null;
         }
 
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         surveyCoroutine = null;
     }
 
@@ -370,6 +378,7 @@ public class PlayerSurveyManager : MonoBehaviour
     {
         if (surveyCoroutine != null)
         {
+            if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
             StopCoroutine(surveyCoroutine);
             surveyCoroutine = null;
         }

@@ -83,6 +83,7 @@ public class PlayerGatheringManager : MonoBehaviour
     }
 
     private Coroutine processingCoroutine;
+    private bool _isBlockingTurn = false;
     private readonly List<GatheringInfo> _gatheringSnapshot = new();
 
     private void Awake()
@@ -101,6 +102,7 @@ public class PlayerGatheringManager : MonoBehaviour
     private void OnDisable()
     {
         TurnSystem.UnsubscribeFromEndOfTurn(OnTurnEnded);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private void MarkJobsDirty()
@@ -307,6 +309,7 @@ public class PlayerGatheringManager : MonoBehaviour
         _gatheringSnapshot.Clear();
         foreach (var v in inProgress.Values) _gatheringSnapshot.Add(v);
         var snapshot = _gatheringSnapshot;
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
         if (processingCoroutine != null)
             StopCoroutine(processingCoroutine);
         processingCoroutine = StartCoroutine(ProcessGatheringUpdates(snapshot));
@@ -315,6 +318,9 @@ public class PlayerGatheringManager : MonoBehaviour
 
     private IEnumerator ProcessGatheringUpdates(List<GatheringInfo> pending)
     {
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
+
         var toRemove = new List<EnvironmentControl>();
 
         int idx = 0;
@@ -470,6 +476,8 @@ public class PlayerGatheringManager : MonoBehaviour
             yield return null;
         }
 
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         processingCoroutine = null;
     }
 
@@ -685,6 +693,7 @@ public class PlayerGatheringManager : MonoBehaviour
     {
         if (processingCoroutine != null)
         {
+            if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
             StopCoroutine(processingCoroutine);
             processingCoroutine = null;
         }

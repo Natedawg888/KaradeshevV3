@@ -32,6 +32,7 @@ public class PlayerEnvironmentClearingManager : MonoBehaviour
     private readonly List<EnvironmentClearingTask> _activeTasks = new();
 
     private Coroutine _processingCoroutine;
+    private bool _isBlockingTurn = false;
 
     private void Awake()
     {
@@ -54,6 +55,7 @@ public class PlayerEnvironmentClearingManager : MonoBehaviour
     private void OnDisable()
     {
         TurnSystem.UnsubscribeFromEndOfTurn(OnTurnEnded);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     public bool StartClearing(EnvironmentControl env)
@@ -146,6 +148,7 @@ public class PlayerEnvironmentClearingManager : MonoBehaviour
         if (_activeTasks.Count == 0) return;
 
         var snapshot = new List<EnvironmentClearingTask>(_activeTasks);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
         if (_processingCoroutine != null)
             StopCoroutine(_processingCoroutine);
 
@@ -154,6 +157,9 @@ public class PlayerEnvironmentClearingManager : MonoBehaviour
 
     private IEnumerator ProcessClearingUpdates(List<EnvironmentClearingTask> pending)
     {
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
+
         int idx = 0;
 
         while (idx < pending.Count)
@@ -174,6 +180,8 @@ public class PlayerEnvironmentClearingManager : MonoBehaviour
             yield return null; // spread workload over multiple frames
         }
 
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         _processingCoroutine = null;
     }
 }

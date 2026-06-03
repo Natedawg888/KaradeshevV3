@@ -18,6 +18,7 @@ public class PlayerConstructionManager : MonoBehaviour
 
     private readonly HashSet<BuildingConstruction> active = new();
     private Coroutine processingCoroutine;
+    private bool _isBlockingTurn = false;
     private bool _subscribedToTurnEnd;
 
     private void Awake()
@@ -52,6 +53,7 @@ public class PlayerConstructionManager : MonoBehaviour
 
         TurnSystem.UnsubscribeFromEndOfTurn(OnTurnEnded);
         _subscribedToTurnEnd = false;
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private void OnDestroy()
@@ -64,6 +66,7 @@ public class PlayerConstructionManager : MonoBehaviour
             TurnSystem.UnsubscribeFromEndOfTurn(OnTurnEnded);
             _subscribedToTurnEnd = false;
         }
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private string GetReservationOwnerId(GameObject constructionGO)
@@ -193,6 +196,7 @@ public class PlayerConstructionManager : MonoBehaviour
         foreach (BuildingConstruction bc in active)
             snapshot.Add(bc);
 
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
         if (processingCoroutine != null)
             StopCoroutine(processingCoroutine);
 
@@ -201,6 +205,9 @@ public class PlayerConstructionManager : MonoBehaviour
 
     private IEnumerator ProcessConstructions(List<BuildingConstruction> pending)
     {
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
+
         int idx = 0;
         List<BuildingConstruction> toRemove = new List<BuildingConstruction>();
 
@@ -270,6 +277,8 @@ public class PlayerConstructionManager : MonoBehaviour
         for (int i = 0; i < toRemove.Count; i++)
             active.Remove(toRemove[i]);
 
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         processingCoroutine = null;
     }
 
@@ -277,6 +286,7 @@ public class PlayerConstructionManager : MonoBehaviour
     {
         if (processingCoroutine != null)
         {
+            if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
             StopCoroutine(processingCoroutine);
             processingCoroutine = null;
         }

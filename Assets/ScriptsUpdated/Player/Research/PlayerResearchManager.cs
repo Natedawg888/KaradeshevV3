@@ -53,6 +53,7 @@ public class PlayerResearchManager : MonoBehaviour
     [SerializeField] private List<string> debugStartWithResearchedPreview = new();
 
     private Coroutine _tickCoroutine;
+    private bool _isBlockingTurn = false;
 
     private class ActiveResearch
     {
@@ -95,6 +96,7 @@ public class PlayerResearchManager : MonoBehaviour
     private void OnDestroy()
     {
         TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
 
         if (PlayerLevel.Instance != null)
             PlayerLevel.Instance.OnLevelUp -= HandlePlayerLevelUp;
@@ -317,12 +319,16 @@ public class PlayerResearchManager : MonoBehaviour
     private void OnEndTurn()
     {
         var snapshot = _active.ToList();
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
         if (_tickCoroutine != null) StopCoroutine(_tickCoroutine);
         _tickCoroutine = StartCoroutine(ProcessResearches(snapshot));
     }
 
     private IEnumerator ProcessResearches(List<ActiveResearch> pending)
     {
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
+
         int idx = 0;
         var toRemove = new List<ActiveResearch>();
 
@@ -395,6 +401,8 @@ public class PlayerResearchManager : MonoBehaviour
             _active.Remove(toRemove[i]);
 
         MarkKnowledgeDirty();
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         _tickCoroutine = null;
     }
 
@@ -1078,6 +1086,7 @@ public class PlayerResearchManager : MonoBehaviour
 
         if (_tickCoroutine != null)
         {
+            if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
             StopCoroutine(_tickCoroutine);
             _tickCoroutine = null;
         }

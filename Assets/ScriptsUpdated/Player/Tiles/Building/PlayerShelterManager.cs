@@ -13,6 +13,7 @@ public class PlayerShelterManager : MonoBehaviour
     public bool useTwoPhaseProcessing = true;
 
     private Coroutine _processCo;
+    private bool _isBlockingTurn = false;
     private bool _isProcessing;
 
     // Pre-allocated buffer and comparer — avoids LINQ allocation every turn
@@ -50,6 +51,7 @@ public class PlayerShelterManager : MonoBehaviour
     private void OnDisable()
     {
         TurnSystem.UnsubscribeFromEndOfTurn(HandleEndTurn);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private void MarkJobsDirty()
@@ -63,6 +65,7 @@ public class PlayerShelterManager : MonoBehaviour
         if (!isActiveAndEnabled)
             return;
 
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
         if (_processCo != null)
             StopCoroutine(_processCo);
 
@@ -72,6 +75,8 @@ public class PlayerShelterManager : MonoBehaviour
 
     private IEnumerator ProcessSheltersEndTurnCo()
     {
+        _isBlockingTurn = true;
+        TurnSystem.BlockTurnAdvance();
         _isProcessing = true;
 
         // Build sorted shelter list without LINQ allocation
@@ -139,6 +144,8 @@ public class PlayerShelterManager : MonoBehaviour
         }
 
         _isProcessing = false;
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         _processCo = null;
         MarkJobsDirty();
     }

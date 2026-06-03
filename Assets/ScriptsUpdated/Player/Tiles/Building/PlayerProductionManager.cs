@@ -20,6 +20,7 @@ public class PlayerProductionManager : MonoBehaviour
     private readonly Queue<List<ProductionBuildingControl>> _pendingTurnTickBatches = new();
 
     private Coroutine _turnTickCoroutine;
+    private bool _isBlockingTurn = false;
 
     public bool IsProcessingTurnTick =>
         _turnTickCoroutine != null || _pendingTurnTickBatches.Count > 0;
@@ -42,6 +43,7 @@ public class PlayerProductionManager : MonoBehaviour
     {
         if (Instance == this)
             TurnSystem.UnsubscribeFromEndOfTurn(OnTurnEnded);
+        if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
     }
 
     private void MarkJobsDirty()
@@ -104,7 +106,11 @@ public class PlayerProductionManager : MonoBehaviour
         _pendingTurnTickBatches.Enqueue(buildings);
 
         if (_turnTickCoroutine == null)
+        {
+            _isBlockingTurn = true;
+            TurnSystem.BlockTurnAdvance();
             _turnTickCoroutine = StartCoroutine(ProcessQueuedTurnTicks());
+        }
     }
 
     private IEnumerator ProcessQueuedTurnTicks()
@@ -159,6 +165,8 @@ public class PlayerProductionManager : MonoBehaviour
                 yield return null;
         }
 
+        _isBlockingTurn = false;
+        TurnSystem.UnblockTurnAdvance();
         _turnTickCoroutine = null;
     }
 
