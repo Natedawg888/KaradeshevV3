@@ -40,6 +40,13 @@ public class BootstrapLoader : MonoBehaviour
     private FinalSetupInstaller _finalInstaller;
     private TutorialSetupInstaller _tutorialInstaller;
 
+    private void Awake()
+    {
+        Application.targetFrameRate = 30;
+        QualitySettings.vSyncCount = 0;
+        Time.fixedDeltaTime = 0.04f;
+    }
+
     private IEnumerator Start()
     {
         if (gameSceneManager == null)

@@ -29,8 +29,8 @@ public partial class AnimalSimulationController : MonoBehaviour
 
     [Header("Batching")]
     [SerializeField] private int tilesProcessedPerFrame = 16;
-    [SerializeField] private int groupsTickedPerFrame = 32;
-    [SerializeField] private int newGroupsPerFrame = 8;
+    [SerializeField] private int groupsTickedPerFrame = 12;
+    [SerializeField] private int newGroupsPerFrame = 4;
 
     [Header("Human Hunter Rules")]
     [SerializeField] private bool humanHuntersAvoidPlayerBuildingsAtStart = true;
@@ -49,8 +49,8 @@ public partial class AnimalSimulationController : MonoBehaviour
     [Header("Player Targeting (Animal Markers)")]
     [SerializeField] private bool refreshPlayerAnimalTargetIconsRealtime = true;
 
-    [SerializeField, Min(0.05f)] private float playerAnimalTargetRefreshInterval = 0.15f;
-    [SerializeField, Min(0.25f)] private float unitControlsCacheRescanInterval = 1.0f;
+    [SerializeField, Min(0.05f)] private float playerAnimalTargetRefreshInterval = 0.5f;
+    [SerializeField, Min(0.25f)] private float unitControlsCacheRescanInterval = 2.0f;
 
     [Header("Animal vs Unit Hit Chance")]
     [SerializeField, Range(0f, 1f)] private float baseAnimalHitChance = 0.85f;
@@ -95,6 +95,10 @@ public partial class AnimalSimulationController : MonoBehaviour
     private readonly List<int> _tmpIntBuffer = new(32);
 
     private bool _worldSimSaveCacheDirty = true;
+
+    private bool _buildingsDirty = true;
+    private bool _humanUnitsDirty = true;
+    private bool _storageDirty = true;
 
     private bool _hasCompletedInitialAnimalSpawn = false;
 
@@ -169,6 +173,14 @@ public partial class AnimalSimulationController : MonoBehaviour
         AnimalRepellerRegistry.OnChanged += RefreshRepelledTiles;
         RefreshRepelledTiles();
 
+        if (BuildingManager.Instance != null)
+        {
+            BuildingManager.Instance.OnBuildingControlRegistered += OnBuildingRegistered;
+            BuildingManager.Instance.OnBuildingControlUnregistered += OnBuildingUnregistered;
+        }
+
+        TileUnitGroupControl.OnAnyUnitGroupChanged += OnUnitGroupChanged;
+
         BuildTileUiLookup();
     }
 
@@ -210,6 +222,14 @@ public partial class AnimalSimulationController : MonoBehaviour
             tileActivator.OnTilesActivated -= HandleTilesActivated;
 
         AnimalRepellerRegistry.OnChanged -= RefreshRepelledTiles;
+
+        if (BuildingManager.Instance != null)
+        {
+            BuildingManager.Instance.OnBuildingControlRegistered -= OnBuildingRegistered;
+            BuildingManager.Instance.OnBuildingControlUnregistered -= OnBuildingUnregistered;
+        }
+
+        TileUnitGroupControl.OnAnyUnitGroupChanged -= OnUnitGroupChanged;
 
         if (_spawnRoutine != null)
             StopCoroutine(_spawnRoutine);
@@ -337,6 +357,11 @@ public partial class AnimalSimulationController : MonoBehaviour
         _worldSimSaveCacheDirty = true;
         SaveSystem.MarkSectionDirty(SaveSectionKeys.WorldSim);
     }
+
+    private void OnBuildingRegistered(BuildingControl _) { _buildingsDirty = true; _storageDirty = true; }
+    private void OnBuildingUnregistered(BuildingControl _) { _buildingsDirty = true; _storageDirty = true; }
+    private void OnUnitGroupChanged() => _humanUnitsDirty = true;
+    public void MarkStorageDirty() => _storageDirty = true;
 
     public void LoadState(AnimalSimulationSaveData data)
     {
