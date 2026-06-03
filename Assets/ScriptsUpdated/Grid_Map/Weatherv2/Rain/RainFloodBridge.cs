@@ -94,6 +94,11 @@ public class RainFloodBridge : MonoBehaviour
         TryAutoAssignReferences();
     }
 
+    private void Start()
+    {
+        TryAutoAssignReferences();
+    }
+
     private void OnEnable()
     {
         TryAutoAssignReferences();
@@ -157,8 +162,6 @@ public class RainFloodBridge : MonoBehaviour
     {
         if (!enableBridge)
             return;
-
-        TryAutoAssignReferences();
 
         if (floodSimulation == null)
         {
@@ -367,8 +370,6 @@ public class RainFloodBridge : MonoBehaviour
         if (!enableBridge)
             return;
 
-        TryAutoAssignReferences();
-
         if (floodSimulation == null)
             return;
 
@@ -379,8 +380,6 @@ public class RainFloodBridge : MonoBehaviour
     {
         if (!enableBridge || coords == null)
             return;
-
-        TryAutoAssignReferences();
 
         if (floodSimulation == null)
             return;

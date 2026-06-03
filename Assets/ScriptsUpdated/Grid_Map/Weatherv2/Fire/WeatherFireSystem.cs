@@ -717,6 +717,7 @@ public class WeatherFireSystem : MonoBehaviour
                     ? Mathf.Clamp01((float)entry.state.BurnTurnsRemaining / entry.state.BaseBurnTurns)
                     : 1f;
 
+                Vector2 windDir = GetWindDirForCell(entry.cell);
                 int queued = 0;
 
                 queued += TryQueueSpreadOffsets(
@@ -725,7 +726,8 @@ public class WeatherFireSystem : MonoBehaviour
                     fireSpreadChanceOrthogonal,
                     entry.state.CurrentDryness01,
                     sourceHeat01,
-                    remainingSpreadBudget - queued);
+                    remainingSpreadBudget - queued,
+                    windDir);
 
                 if (fireSpreadIncludesDiagonals && queued < remainingSpreadBudget)
                 {
@@ -735,7 +737,8 @@ public class WeatherFireSystem : MonoBehaviour
                         fireSpreadChanceDiagonal,
                         entry.state.CurrentDryness01,
                         sourceHeat01,
-                        remainingSpreadBudget - queued);
+                        remainingSpreadBudget - queued,
+                        windDir);
                 }
 
                 remainingSpreadBudget -= queued;
@@ -788,6 +791,7 @@ public class WeatherFireSystem : MonoBehaviour
                     ? Mathf.Clamp01((float)entry.state.BurnTurnsRemaining / entry.state.BaseBurnTurns)
                     : 1f;
 
+                Vector2 windDir = GetWindDirForCell(entry.cell);
                 int queued = 0;
 
                 queued += TryQueueSpreadOffsets(
@@ -796,7 +800,8 @@ public class WeatherFireSystem : MonoBehaviour
                     fireSpreadChanceOrthogonal,
                     sourceDryness01,
                     sourceHeat01,
-                    remainingSpreadBudget - queued);
+                    remainingSpreadBudget - queued,
+                    windDir);
 
                 if (fireSpreadIncludesDiagonals && queued < remainingSpreadBudget)
                 {
@@ -806,7 +811,8 @@ public class WeatherFireSystem : MonoBehaviour
                         fireSpreadChanceDiagonal,
                         sourceDryness01,
                         sourceHeat01,
-                        remainingSpreadBudget - queued);
+                        remainingSpreadBudget - queued,
+                        windDir);
                 }
 
                 remainingSpreadBudget -= queued;
@@ -820,7 +826,8 @@ public class WeatherFireSystem : MonoBehaviour
         float baseChance01,
         float sourceDryness01,
         float sourceHeat01,
-        int remainingBudget)
+        int remainingBudget,
+        Vector2 windDir)
     {
         if (offsets == null || remainingBudget <= 0 || baseChance01 <= 0f)
             return 0;
@@ -858,7 +865,7 @@ public class WeatherFireSystem : MonoBehaviour
 
             float targetRain01 = GetRainIntensity01AtCell(nx, ny);
             float rainPenalty = Mathf.Lerp(1f, 1f - fireSpreadRainPenaltyStrength, targetRain01);
-            float windMultiplier = GetFireSpreadWindMultiplier(sourceCell, offset);
+            float windMultiplier = GetFireSpreadWindMultiplier(offset, windDir);
 
             float spreadChance01 =
                 baseChance01 *
@@ -882,20 +889,27 @@ public class WeatherFireSystem : MonoBehaviour
         return queued;
     }
 
-    private float GetFireSpreadWindMultiplier(Vector2Int sourceCell, Vector2Int spreadOffset)
+    // Returns the normalized wind direction for sourceCell, or Vector2.zero when wind is absent.
+    private Vector2 GetWindDirForCell(Vector2Int sourceCell)
     {
         if (cloudSimulationSystem == null)
-            return 1f;
+            return Vector2.zero;
 
         Vector2Int windTarget = cloudSimulationSystem.GetWindTargetForCell(sourceCell.x, sourceCell.y);
         Vector2Int windOffset = windTarget - sourceCell;
 
         if (windOffset == Vector2Int.zero)
+            return Vector2.zero;
+
+        return new Vector2(windOffset.x, windOffset.y).normalized;
+    }
+
+    private float GetFireSpreadWindMultiplier(Vector2Int spreadOffset, Vector2 windDir)
+    {
+        if (windDir == Vector2.zero)
             return 1f;
 
         Vector2 spreadDir = new Vector2(spreadOffset.x, spreadOffset.y).normalized;
-        Vector2 windDir = new Vector2(windOffset.x, windOffset.y).normalized;
-
         float alignment = Vector2.Dot(spreadDir, windDir);
         float multiplier = 1f + alignment * fireSpreadWindBiasStrength;
 

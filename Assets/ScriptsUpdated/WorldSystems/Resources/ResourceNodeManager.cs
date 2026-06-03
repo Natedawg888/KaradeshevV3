@@ -6,15 +6,6 @@ public class ResourceNodeManager : MonoBehaviour
 {
     public static ResourceNodeManager Instance { get; private set; }
 
-    [Header("Lifecycle Tick Batching (per turn)")]
-    [Min(1)]
-    [Tooltip("How many resource nodes to tick per frame when processing their lifecycle each turn.")]
-    public int nodesPerFrameLifecycle = 64;
-
-    [Range(0f, 0.05f)]
-    [Tooltip("Optional wait between lifecycle batches to smooth things.")]
-    public float lifecycleBatchWaitSeconds = 0f;
-
     [Header("Initial Generation Batching")]
     [Min(1)]
     [Tooltip("How many nodes to call GenerateResources() on per frame when doing a world-wide initial spawn.")]
@@ -28,7 +19,6 @@ public class ResourceNodeManager : MonoBehaviour
     [SerializeField, Tooltip("All tracked resource nodes in the scene (auto-managed).")]
     private List<EnvironmentResourceNode> _nodes = new();
 
-    private Coroutine _lifecycleRoutine;
     private Coroutine _generationRoutine;
 
     // ---------- LIFECYCLE ----------
@@ -43,22 +33,8 @@ public class ResourceNodeManager : MonoBehaviour
         Instance = this;
     }
 
-    private void OnEnable()
-    {
-        // Only the manager subscribes to turns – nodes won't.
-        TurnSystem.SubscribeToStartOfTurn(HandleStartOfTurn);
-    }
-
     private void OnDisable()
     {
-        TurnSystem.UnsubscribeFromStartOfTurn(HandleStartOfTurn);
-
-        if (_lifecycleRoutine != null)
-        {
-            StopCoroutine(_lifecycleRoutine);
-            _lifecycleRoutine = null;
-        }
-
         if (_generationRoutine != null)
         {
             StopCoroutine(_generationRoutine);
@@ -134,48 +110,4 @@ public class ResourceNodeManager : MonoBehaviour
         _generationRoutine = null;
     }
 
-    // ---------- PER-TURN LIFECYCLE TICK (batched) ----------
-
-    private void HandleStartOfTurn()
-    {
-        if (_nodes == null || _nodes.Count == 0)
-            return;
-
-        if (_lifecycleRoutine != null)
-            StopCoroutine(_lifecycleRoutine);
-
-        _lifecycleRoutine = StartCoroutine(TickNodesLifecycleCoroutine());
-    }
-
-    private IEnumerator TickNodesLifecycleCoroutine()
-    {
-        if (_nodes == null || _nodes.Count == 0)
-        {
-            _lifecycleRoutine = null;
-            yield break;
-        }
-
-        int processed    = 0;
-        int perFrame     = Mathf.Max(1, nodesPerFrameLifecycle);
-        float wait       = lifecycleBatchWaitSeconds;
-
-        for (int i = 0; i < _nodes.Count; i++)
-        {
-            var node = _nodes[i];
-            if (node == null) continue;
-
-            node.TickResourceLifecycle();
-
-            processed++;
-            if (processed % perFrame == 0)
-            {
-                if (wait > 0f)
-                    yield return new WaitForSeconds(wait);
-                else
-                    yield return null;
-            }
-        }
-
-        _lifecycleRoutine = null;
-    }
 }

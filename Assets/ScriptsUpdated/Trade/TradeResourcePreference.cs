@@ -11,3 +11,4 @@ public class TradeResourcePreference
     [Range(0.01f, 100f)]
     public float valueMultiplier = 1f;
 }
+

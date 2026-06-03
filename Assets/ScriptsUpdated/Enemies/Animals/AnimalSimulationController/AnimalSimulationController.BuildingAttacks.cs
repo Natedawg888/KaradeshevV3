@@ -123,6 +123,17 @@ public partial class AnimalSimulationController : MonoBehaviour
 
     // -------- Habitat helpers --------
 
+    private void ResetBuildingAttackIcons()
+    {
+        foreach (var kvp in _attackIconsByTile)
+        {
+            var icons = kvp.Value;
+            if (icons == null) continue;
+            for (int i = 0; i < icons.Length; i++)
+                if (icons[i] != null) icons[i].SetUnderAttack(false);
+        }
+    }
+
     private void RefreshPlayerBuildingTiles()
     {
         if (_grid == null)

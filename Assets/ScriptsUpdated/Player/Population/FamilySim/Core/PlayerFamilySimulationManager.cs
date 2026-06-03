@@ -39,6 +39,8 @@ public class PlayerFamilySimulationManager : MonoBehaviour
 
     public bool IsAdvanceFamiliesInProgress => _advanceTurnInProgress;
 
+    public static event Action OnFamiliesAdvanced;
+
     // RNG (for repo bootstrapping etc.)
     private System.Random _rng;
 
@@ -387,8 +389,8 @@ public class PlayerFamilySimulationManager : MonoBehaviour
                 continue;
 
             var fam = _famRepo.CreateFamily(
-                p.Gender == Gender.Female ? p.Id : null,
                 p.Gender == Gender.Male ? p.Id : null,
+                p.Gender == Gender.Female ? p.Id : null,
                 GenerateUniqueFamilyName());
 
             _indRepo.SetFamily(p, fam.FamilyId, fam.FamilyName);
@@ -566,6 +568,8 @@ public class PlayerFamilySimulationManager : MonoBehaviour
         _advanceFamilyOrder.Clear();
         _advanceMembersByFamily.Clear();
         _advanceUnassignedMembers.Clear();
+
+        OnFamiliesAdvanced?.Invoke();
     }
 
     // -------- Public API --------
@@ -998,7 +1002,10 @@ public class PlayerFamilySimulationManager : MonoBehaviour
         }
 
         var fam = _famRepo.CreateFamily(partnerAId, partnerBId, famName);
-        createdFamilyId = fam != null ? fam.FamilyId : null;
+        if (fam == null)
+            return false;
+
+        createdFamilyId = fam.FamilyId;
 
         if (adultA != null)
             _indRepo.SetFamily(adultA, fam.FamilyId, fam.FamilyName);

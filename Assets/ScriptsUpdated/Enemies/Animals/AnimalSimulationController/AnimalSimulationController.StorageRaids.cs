@@ -136,6 +136,7 @@ public partial class AnimalSimulationController : MonoBehaviour
 
         // Refresh cache so the simulation knows food levels changed
         RefreshStorageTiles();
+        _storageDirty = false;
 
         PostStorageRaidedNotification(animal, species, storage, totalStolen);
     }

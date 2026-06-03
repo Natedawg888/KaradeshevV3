@@ -261,27 +261,12 @@ public class PlayerUnitManager : MonoBehaviour
             for (int c = 0; c < costs.Count; c++)
             {
                 var cost = costs[c];
+                if (cost == null) continue;
 
-                var defField = cost.GetType().GetField("resource")
-                              ?? cost.GetType().GetField("definition")
-                              ?? cost.GetType().GetField("resourceDef");
-
-                var amountField = cost.GetType().GetField("amount")
-                                 ?? cost.GetType().GetField("value")
-                                 ?? cost.GetType().GetField("count");
-
-                if (defField == null || amountField == null)
-                {
-                    //Debug.LogWarning("[PlayerUnitManager] Could not reflect ResourceCost fields; skipping upkeep entry.");
-                    continue;
-                }
-
-                var defObj = defField.GetValue(cost) as ResourceDefinition;
+                var defObj = cost.resource;
                 if (defObj == null) continue;
 
-                object amtObj = amountField.GetValue(cost);
-                int amountPerBatch = (amtObj is int iAmt) ? iAmt :
-                                     (amtObj is float fAmt) ? Mathf.RoundToInt(fAmt) : 0;
+                int amountPerBatch = cost.amount;
                 if (amountPerBatch <= 0) continue;
 
                 int totalForGroup = amountPerBatch * batches;

@@ -157,7 +157,7 @@ public class CivilizationHappinessSystem : MonoBehaviour
 
         // 1) Needs delta → happiness
         float curAvgHunger, curAvgThirst;
-        ComputeWeightedNeeds(out curAvgHunger, out curAvgThirst);
+        ComputeWeightedNeeds(out curAvgHunger, out curAvgThirst, out int totalIndividuals);
 
         if (_prevAvgHunger >= 0f && _prevAvgThirst >= 0f)
         {
@@ -173,8 +173,7 @@ public class CivilizationHappinessSystem : MonoBehaviour
         _prevAvgThirst = curAvgThirst;
 
         // 2) Housing penalty (consider BOTH family and individual shortfalls)
-        int totalFamilies   = Mathf.Max(0, fam.GetFamilies()?.Count ?? 0);
-        int totalIndividuals = CountTotalLivingIndividuals();
+        int totalFamilies = Mathf.Max(0, fam.GetFamilies()?.Count ?? 0);
 
         // Single pass: gathers family/individual capacity AND applies shelter-level mismatch penalties
         GatherShelterData(out int shelterFamSlots, out int shelterIndSlots);
@@ -199,30 +198,28 @@ public class CivilizationHappinessSystem : MonoBehaviour
     private void SnapshotNeeds()
     {
         if (pop == null) { _prevAvgHunger = _prevAvgThirst = -1f; return; }
-        ComputeWeightedNeeds(out _prevAvgHunger, out _prevAvgThirst);
+        ComputeWeightedNeeds(out _prevAvgHunger, out _prevAvgThirst, out _);
     }
 
-    private void ComputeWeightedNeeds(out float avgHunger, out float avgThirst)
+    private void ComputeWeightedNeeds(out float avgHunger, out float avgThirst, out int totalCount)
     {
-        avgHunger = 0f; avgThirst = 0f;
+        avgHunger = 0f; avgThirst = 0f; totalCount = 0;
         if (pop == null) return;
 
         var groups = pop.AllPopulations;
-        int total = 0;
-        for (int i = 0; i < groups.Count; i++)
-            total += Mathf.Max(0, groups[i]?.count ?? 0);
-        if (total <= 0) return;
-
         float hSum = 0f, tSum = 0f;
         for (int i = 0; i < groups.Count; i++)
         {
             var g = groups[i];
             if (g == null || g.count <= 0) continue;
-            hSum += g.hungerLevel * g.count;
-            tSum += g.thirstLevel * g.count;
+            int cnt = Mathf.Max(0, g.count);
+            totalCount += cnt;
+            hSum += g.hungerLevel * cnt;
+            tSum += g.thirstLevel * cnt;
         }
-        avgHunger = Mathf.Clamp01(hSum / total);
-        avgThirst = Mathf.Clamp01(tSum / total);
+        if (totalCount <= 0) return;
+        avgHunger = Mathf.Clamp01(hSum / totalCount);
+        avgThirst = Mathf.Clamp01(tSum / totalCount);
     }
 
     // Single pass replacing CountShelterFamilyCapacity, CountShelterIndividualCapacity,
@@ -280,20 +277,6 @@ public class CivilizationHappinessSystem : MonoBehaviour
                     NotifyShelterLevelMismatch(delta);
             }
         }
-    }
-
-    private int CountTotalLivingIndividuals()
-    {
-        var inds = fam?.GetIndividuals();
-        if (inds == null || inds.Count == 0) return 0;
-
-        int living = 0;
-        for (int i = 0; i < inds.Count; i++)
-        {
-            var p = inds[i];
-            if (p != null && p.IsAlive) living++;
-        }
-        return living;
     }
 
     // ─────────────── External hooks for other systems ───────────────

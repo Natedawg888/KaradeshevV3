@@ -94,6 +94,8 @@ public class WeatherGridManager : MonoBehaviour
     private WeatherCellState[,] _cellStates;
     private EnvironmentControl[,] _environmentByCell;
     private WorldBuildingManager.Record[,] _buildingByCell;
+    private float[,] _cloudTempOffset;
+    private float[,] _cloudHumidityOffset;
 
     private readonly Dictionary<EnvironmentControl, EnvironmentCoverage> _environmentCoverageByEnv =
         new Dictionary<EnvironmentControl, EnvironmentCoverage>();
@@ -278,6 +280,8 @@ public class WeatherGridManager : MonoBehaviour
             _cellStates = new WeatherCellState[_cols, _rows];
             _environmentByCell = new EnvironmentControl[_cols, _rows];
             _buildingByCell = new WorldBuildingManager.Record[_cols, _rows];
+            _cloudTempOffset = new float[_cols, _rows];
+            _cloudHumidityOffset = new float[_cols, _rows];
         }
         else
         {
@@ -452,6 +456,55 @@ public class WeatherGridManager : MonoBehaviour
         OnBuildingCoverageRebuilt?.Invoke();
     }
 
+    public void SetCloudTemperatureOffset(int x, int y, float offsetC)
+    {
+        if (_cloudTempOffset == null || !IsInBounds(x, y))
+            return;
+
+        _cloudTempOffset[x, y] = offsetC;
+    }
+
+    public void ClearAllCloudTemperatureOffsets()
+    {
+        if (_cloudTempOffset == null)
+            return;
+
+        Array.Clear(_cloudTempOffset, 0, _cloudTempOffset.Length);
+    }
+
+    public void AddCloudHumidityOffset(int x, int y, float delta)
+    {
+        if (_cloudHumidityOffset == null || !IsInBounds(x, y))
+            return;
+
+        _cloudHumidityOffset[x, y] = Mathf.Clamp01(_cloudHumidityOffset[x, y] + delta);
+    }
+
+    public void DecayAllCloudHumidityOffsets(float retentionFactor)
+    {
+        if (_cloudHumidityOffset == null)
+            return;
+
+        float retention = Mathf.Clamp01(retentionFactor);
+
+        for (int x = 0; x < _cols; x++)
+        {
+            for (int y = 0; y < _rows; y++)
+            {
+                if (_cloudHumidityOffset[x, y] <= 0.001f)
+                {
+                    _cloudHumidityOffset[x, y] = 0f;
+                    continue;
+                }
+
+                _cloudHumidityOffset[x, y] *= retention;
+
+                if (_cloudHumidityOffset[x, y] < 0.001f)
+                    _cloudHumidityOffset[x, y] = 0f;
+            }
+        }
+    }
+
     public void RefreshEnvironmentCoverage(TileCoord primaryCoord, EnvironmentControl env)
     {
         if (!EnsureInitialized())
@@ -490,6 +543,13 @@ public class WeatherGridManager : MonoBehaviour
             return false;
 
         state = _cellStates[x, y];
+
+        if (state.isValid && _cloudTempOffset != null)
+            state.temperatureC += _cloudTempOffset[x, y];
+
+        if (state.isValid && _cloudHumidityOffset != null)
+            state.humidity01 = Mathf.Clamp01(state.humidity01 + _cloudHumidityOffset[x, y]);
+
         return state.isValid;
     }
 
@@ -966,11 +1026,7 @@ public class WeatherGridManager : MonoBehaviour
         for (int i = 0; i < coords.Count; i++)
         {
             TileCoord coord = coords[i];
-            if (!IsInBounds(coord.x, coord.y))
-                continue;
-
-            WeatherCellState state = _cellStates[coord.x, coord.y];
-            if (!state.isValid)
+            if (!TryGetCellState(coord.x, coord.y, out WeatherCellState state))
                 continue;
 
             tempSum += state.temperatureC;

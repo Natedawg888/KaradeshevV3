@@ -132,8 +132,6 @@ public class TechCraftingDetailPanel : MonoBehaviour
         ClearEntries();
         if (_recipe == null) return;
 
-        if (contentModeText) contentModeText.text = _showOutputs ? "Outputs" : "Costs";
-
         bool showCostSets = !_showOutputs && _recipe.HasAlternateCostSets;
         if (costSetGroup) costSetGroup.SetActive(showCostSets);
 

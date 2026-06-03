@@ -58,6 +58,13 @@ public class CloudSimulationSystem : MonoBehaviour
     [Range(0f, 1f)][SerializeField] private float dryDissipationChanceMultiplier = 0.35f;
     [Range(0f, 1f)][SerializeField] private float humidGrowthChanceMultiplier = 0.15f;
 
+    [Header("Dissipation -> Humidity")]
+    [SerializeField] private bool enableDissipationHumidity = true;
+    [Range(0f, 0.5f)][SerializeField] private float dissipationHumidityLow  = 0.03f;
+    [Range(0f, 0.5f)][SerializeField] private float dissipationHumidityMid  = 0.06f;
+    [Range(0f, 0.5f)][SerializeField] private float dissipationHumidityHigh = 0.10f;
+    [Range(0f, 1f)][SerializeField]  private float dissipationHumidityRetentionPerStep = 0.70f;
+
     [Header("Wind")]
     [SerializeField] private WindDirection8 windDirection = WindDirection8.East;
     [Min(0)][SerializeField] private int windSpeedTilesPerStep = 1;
@@ -76,6 +83,19 @@ public class CloudSimulationSystem : MonoBehaviour
     [Header("Cloud Shading")]
     [SerializeField] private Color cloudBrightColor = new Color(1f, 1f, 1f, 1f);
     [SerializeField] private Color cloudDarkColor = new Color(0.55f, 0.55f, 0.6f, 1f);
+
+    [Header("Cloud Temperature Effects")]
+    [SerializeField] private bool enableCloudTemperatureEffects = true;
+    [Tooltip("Degrees C subtracted from grid cells under low-density cloud cover.")]
+    [SerializeField] private float lowCloudCoolingC = 1f;
+    [Tooltip("Degrees C subtracted from grid cells under mid-density cloud cover.")]
+    [SerializeField] private float midCloudCoolingC = 2.5f;
+    [Tooltip("Degrees C subtracted from grid cells under high-density cloud cover.")]
+    [SerializeField] private float highCloudCoolingC = 4f;
+    [Tooltip("Maximum degrees C added to grid cells at full soot coverage (overrides cooling).")]
+    [SerializeField] private float maxSootHeatingC = 6f;
+    [Tooltip("Soot amount (0-1) below which no heating is applied.")]
+    [Range(0f, 0.5f)][SerializeField] private float sootHeatingThreshold = 0.05f;
 
     [Header("Volcanic Clouds")]
     [SerializeField] private bool enableVolcanicSootInput = true;
@@ -187,6 +207,7 @@ public class CloudSimulationSystem : MonoBehaviour
         RebindWeatherGridEvents();
 
         TurnSystem.SubscribeToStartOfTurn(HandleStartOfTurn);
+        OnCloudStateChanged += PushTemperatureOffsetsToWeatherGrid;
         BeginWaitingForWeatherReady();
     }
 
@@ -199,6 +220,7 @@ public class CloudSimulationSystem : MonoBehaviour
     private void OnDisable()
     {
         TurnSystem.UnsubscribeFromStartOfTurn(HandleStartOfTurn);
+        OnCloudStateChanged -= PushTemperatureOffsetsToWeatherGrid;
         UnbindWeatherGridEvents();
         StopVisualRefreshRoutine();
 
@@ -1611,6 +1633,54 @@ public class CloudSimulationSystem : MonoBehaviour
 
         _pendingVisualRefreshes.Enqueue(new Vector2Int(x, y));
         EnsureVisualRefreshRoutine();
+    }
+
+    private void NotifyHumidityFromDissipation(int x, int y, CloudDensity dissipatedDensity)
+    {
+        if (!enableDissipationHumidity || weatherGridManager == null)
+            return;
+
+        float delta;
+        switch (dissipatedDensity)
+        {
+            case CloudDensity.Low:  delta = dissipationHumidityLow;  break;
+            case CloudDensity.Mid:  delta = dissipationHumidityMid;  break;
+            case CloudDensity.High: delta = dissipationHumidityHigh; break;
+            default: return;
+        }
+
+        weatherGridManager.AddCloudHumidityOffset(x, y, delta);
+    }
+
+    private void PushTemperatureOffsetsToWeatherGrid()
+    {
+        if (!enableCloudTemperatureEffects || !_isInitialized || weatherGridManager == null)
+            return;
+
+        for (int x = 0; x < _cols; x++)
+        {
+            for (int y = 0; y < _rows; y++)
+            {
+                float offset = 0f;
+                float soot = GetVolcanicSoot01AtCell(x, y);
+
+                if (soot >= sootHeatingThreshold)
+                {
+                    offset = soot * maxSootHeatingC;
+                }
+                else
+                {
+                    switch (_cloudGrid[x, y])
+                    {
+                        case CloudDensity.Low:  offset = -lowCloudCoolingC;  break;
+                        case CloudDensity.Mid:  offset = -midCloudCoolingC;  break;
+                        case CloudDensity.High: offset = -highCloudCoolingC; break;
+                    }
+                }
+
+                weatherGridManager.SetCloudTemperatureOffset(x, y, offset);
+            }
+        }
     }
 
     public bool AddVolcanicSootPlume(int originX, int originY, float amount, int plumeLength)

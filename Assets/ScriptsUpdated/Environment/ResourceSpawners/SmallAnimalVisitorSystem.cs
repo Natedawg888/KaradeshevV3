@@ -36,20 +36,23 @@ public class SmallAnimalVisitorSystem : MonoBehaviour
     [Header("Visitors")]
     public List<VisitorEntry> visitors = new();
 
+    public static SmallAnimalVisitorSystem Instance { get; private set; }
+
     [Header("Debug")]
     [SerializeField] private bool debugLogging;
 
-    private void OnEnable()
+    private void Awake()
     {
-        TurnSystem.SubscribeToEndOfTurn(HandleTurnEnded);
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
-        TurnSystem.UnsubscribeFromEndOfTurn(HandleTurnEnded);
+        if (Instance == this) Instance = null;
     }
 
-    private void HandleTurnEnded()
+    internal void Tick()
     {
         var nodes = EnvironmentResourceUpdater.AllNodes;
         for (int i = 0; i < nodes.Count; i++)

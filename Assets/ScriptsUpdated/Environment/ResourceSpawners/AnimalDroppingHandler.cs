@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 // Attach alongside EnvironmentResourceNode.
@@ -34,6 +35,14 @@ public class AnimalDroppingHandler : MonoBehaviour
     public static Action<AnimalTileRequest> OnAnimalEnteredTile;
     public static Action<AnimalTileRequest> OnAnimalLeftTile;
 
+    private static readonly List<AnimalDroppingHandler> _registry = new();
+
+    internal static void TickAll()
+    {
+        for (int i = 0; i < _registry.Count; i++)
+            _registry[i].HandleTurnEnd();
+    }
+
     private EnvironmentResourceNode node;
     private int activeAnimalCount      = 0;
     private int turnsSinceLastDeposit  = -1; // -1 = no drying pending
@@ -51,14 +60,14 @@ public class AnimalDroppingHandler : MonoBehaviour
     {
         OnAnimalEnteredTile += HandleAnimalEntered;
         OnAnimalLeftTile    += HandleAnimalLeft;
-        TurnSystem.SubscribeToEndOfTurn(HandleTurnEnd);
+        _registry.Add(this);
     }
 
     private void OnDisable()
     {
         OnAnimalEnteredTile -= HandleAnimalEntered;
         OnAnimalLeftTile    -= HandleAnimalLeft;
-        TurnSystem.UnsubscribeFromEndOfTurn(HandleTurnEnd);
+        _registry.Remove(this);
     }
 
     // ── Event handlers ────────────────────────────────────────────────────────

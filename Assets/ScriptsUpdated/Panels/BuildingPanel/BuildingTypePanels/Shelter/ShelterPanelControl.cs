@@ -75,7 +75,7 @@ public class ShelterPanelControl : MonoBehaviour
         }
     }
 
-    private void OnEndTurn()
+    private void OnFamiliesAdvanced()
     {
         for (int i = 0; i < _activeCards.Count; i++)
         {
@@ -98,8 +98,8 @@ public class ShelterPanelControl : MonoBehaviour
             return;
         }
 
-        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
-        TurnSystem.SubscribeToEndOfTurn(OnEndTurn);
+        PlayerFamilySimulationManager.OnFamiliesAdvanced -= OnFamiliesAdvanced;
+        PlayerFamilySimulationManager.OnFamiliesAdvanced += OnFamiliesAdvanced;
 
         if (titleText != null)
         {
@@ -134,7 +134,7 @@ public class ShelterPanelControl : MonoBehaviour
     // We DO NOT reopen via Show(); we simply soft-show the existing Building panel instantly.
     public void Hide()
     {
-        TurnSystem.UnsubscribeFromEndOfTurn(OnEndTurn);
+        PlayerFamilySimulationManager.OnFamiliesAdvanced -= OnFamiliesAdvanced;
         _activeCards.Clear();
 
         if (_cg != null)

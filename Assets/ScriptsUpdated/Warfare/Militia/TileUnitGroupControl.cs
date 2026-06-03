@@ -46,6 +46,8 @@ public class TileUnitGroupControl : MonoBehaviour
 
     public bool HasAnyGroups => _groups.Count > 0;
 
+    public static event Action OnAnyUnitGroupChanged;
+
     private void Awake()
     {
         if (tileUI == null)
@@ -134,6 +136,7 @@ public class TileUnitGroupControl : MonoBehaviour
         }
 
         _groups.Add(group);
+        OnAnyUnitGroupChanged?.Invoke();
 
         PlayerUnitManager.Instance?.RegisterGroup(group, this);
         SpawnMarker(group);
@@ -248,6 +251,7 @@ public class TileUnitGroupControl : MonoBehaviour
 
         PlayerUnitManager.Instance?.UnregisterGroup(group);
         _groups.RemoveAt(index);
+        OnAnyUnitGroupChanged?.Invoke();
 
         RemoveMarkerAndTrackingForGroup(group.groupId);
 

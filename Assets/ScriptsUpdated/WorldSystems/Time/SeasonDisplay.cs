@@ -27,7 +27,6 @@ public class SeasonDisplay : MonoBehaviour
         EnsureProgressFillSetup();
 
         seasonManager.OnSeasonChanged += HandleSeasonChanged;
-        TurnSystem.SubscribeToEndOfTurn(UpdateCountdown);
 
         HandleSeasonChanged(seasonManager.CurrentSeason);
         UpdateCountdown();
@@ -37,8 +36,6 @@ public class SeasonDisplay : MonoBehaviour
     {
         if (seasonManager != null)
             seasonManager.OnSeasonChanged -= HandleSeasonChanged;
-
-        TurnSystem.UnsubscribeFromEndOfTurn(UpdateCountdown);
     }
 
     private void HandleSeasonChanged(SeasonDefinition season)
