@@ -15,12 +15,16 @@ public class SaveSystem : MonoBehaviour
     private enum SaveSlot
     {
         CloseSave,
-        TurnAutoSave
+        TurnAutoSave,
+        Backup1,
+        Backup2
     }
 
     [Header("Save Files")]
     [SerializeField] private string closeSaveFileName = "environment_save.json";
     [SerializeField] private string turnAutoSaveFileName = "environment_turn_autosave.json";
+    [SerializeField] private string backup1FileName = "environment_save_backup1.json";
+    [SerializeField] private string backup2FileName = "environment_save_backup2.json";
 
     [Header("Save Capture")]
     [SerializeField, Min(1)] private int saveObjectsPerFrame = 8;
@@ -42,6 +46,8 @@ public class SaveSystem : MonoBehaviour
 
     private string _closeSaveFilePath;
     private string _turnAutoSaveFilePath;
+    private string _backup1FilePath;
+    private string _backup2FilePath;
 
     private SaveSlot _queuedSaveSlot = SaveSlot.TurnAutoSave;
 
@@ -98,6 +104,8 @@ public class SaveSystem : MonoBehaviour
 
         _closeSaveFilePath = Path.Combine(Application.persistentDataPath, closeSaveFileName);
         _turnAutoSaveFilePath = Path.Combine(Application.persistentDataPath, turnAutoSaveFileName);
+        _backup1FilePath = Path.Combine(Application.persistentDataPath, backup1FileName);
+        _backup2FilePath = Path.Combine(Application.persistentDataPath, backup2FileName);
 
         EncryptionHelper.WarmUpKeys();
         RegisterSections();
@@ -236,6 +244,8 @@ public class SaveSystem : MonoBehaviour
         {
             Instance.DeleteSaveForRoot(Instance._closeSaveFilePath);
             Instance.DeleteSaveForRoot(Instance._turnAutoSaveFilePath);
+            Instance.DeleteSaveForRoot(Instance._backup1FilePath);
+            Instance.DeleteSaveForRoot(Instance._backup2FilePath);
         }
         catch (Exception ex)
         {
@@ -394,12 +404,18 @@ public class SaveSystem : MonoBehaviour
         _backgroundSaveError = null;
 
         string rootPath = GetRootPath(slot);
+        bool doBackupRotation = slot == SaveSlot.CloseSave;
+        string b1 = _backup1FilePath;
+        string b2 = _backup2FilePath;
 
         _backgroundWriteTask = Task.Run(() =>
         {
             try
             {
                 WriteSnapshotToDisk(snapshot, rootPath);
+
+                if (doBackupRotation)
+                    RotateBackupsOnDisk(rootPath, b1, b2);
             }
             catch (Exception ex)
             {
@@ -496,7 +512,13 @@ public class SaveSystem : MonoBehaviour
 
     private string GetRootPath(SaveSlot slot)
     {
-        return slot == SaveSlot.CloseSave ? _closeSaveFilePath : _turnAutoSaveFilePath;
+        switch (slot)
+        {
+            case SaveSlot.CloseSave: return _closeSaveFilePath;
+            case SaveSlot.Backup1:   return _backup1FilePath;
+            case SaveSlot.Backup2:   return _backup2FilePath;
+            default:                 return _turnAutoSaveFilePath;
+        }
     }
 
     private string GetSavePartPath(string rootPath, string suffix)
@@ -526,6 +548,43 @@ public class SaveSystem : MonoBehaviour
         }
 
         File.Move(tempPath, finalPath);
+    }
+
+    private static void RotateBackupsOnDisk(string closeSavePath, string backup1Path, string backup2Path)
+    {
+        try
+        {
+            string dir = Path.GetDirectoryName(closeSavePath);
+            if (string.IsNullOrWhiteSpace(dir) || !Directory.Exists(dir))
+                return;
+
+            CopySaveSlotFiles(backup1Path, backup2Path, dir);
+            CopySaveSlotFiles(closeSavePath, backup1Path, dir);
+        }
+        catch { /* Rotation failure is non-fatal — main save succeeded */ }
+    }
+
+    private static void CopySaveSlotFiles(string srcRoot, string dstRoot, string dir)
+    {
+        if (string.IsNullOrWhiteSpace(srcRoot) || !File.Exists(srcRoot))
+            return;
+
+        string srcStem = Path.GetFileNameWithoutExtension(srcRoot);
+        string dstStem = Path.GetFileNameWithoutExtension(dstRoot);
+
+        string[] dstFiles = Directory.GetFiles(dir, dstStem + "*");
+        for (int i = 0; i < dstFiles.Length; i++)
+            File.Delete(dstFiles[i]);
+
+        string[] srcFiles = Directory.GetFiles(dir, srcStem + "*");
+        for (int i = 0; i < srcFiles.Length; i++)
+        {
+            string filename = Path.GetFileName(srcFiles[i]);
+            if (filename.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase))
+                continue;
+            string dstFile = Path.Combine(dir, dstStem + filename.Substring(srcStem.Length));
+            File.Copy(srcFiles[i], dstFile, true);
+        }
     }
 
     private bool SaveFileExistsOrBackup(string path)
@@ -584,6 +643,22 @@ public class SaveSystem : MonoBehaviour
             rootPath = _turnAutoSaveFilePath;
             meta = ReadJsonFile<EnvironmentSaveMeta>(rootPath);
             //Debug.LogWarning("[SaveSystem] Close save invalid or incomplete. Falling back to turn autosave.");
+            return true;
+        }
+
+        if (IsUsableSaveSet(_backup1FilePath))
+        {
+            rootPath = _backup1FilePath;
+            meta = ReadJsonFile<EnvironmentSaveMeta>(rootPath);
+            //Debug.LogWarning("[SaveSystem] Falling back to backup 1.");
+            return true;
+        }
+
+        if (IsUsableSaveSet(_backup2FilePath))
+        {
+            rootPath = _backup2FilePath;
+            meta = ReadJsonFile<EnvironmentSaveMeta>(rootPath);
+            //Debug.LogWarning("[SaveSystem] Falling back to backup 2.");
             return true;
         }
 
