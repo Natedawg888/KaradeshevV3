@@ -112,6 +112,8 @@ public class TileInteraction : MonoBehaviour
     private void OnDestroy()
     {
         UnsubscribePanelEvents();
+        _lootQueue.Clear();
+        _lootQueued.Clear();
 
         if (Instance == this)
             Instance = null;

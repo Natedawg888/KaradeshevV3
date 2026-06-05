@@ -70,6 +70,15 @@ public class GameSceneManager : MonoBehaviour
         Application.wantsToQuit -= HandleWantsToQuit;
     }
 
+    private void OnDestroy()
+    {
+        if (_startupRoutine != null)
+        {
+            StopCoroutine(_startupRoutine);
+            _startupRoutine = null;
+        }
+    }
+
     private IEnumerator RunStartupRoutine()
     {
         //Debug.Log($"[GameSceneManager] Start entered: {Time.realtimeSinceStartup:0.000}s");

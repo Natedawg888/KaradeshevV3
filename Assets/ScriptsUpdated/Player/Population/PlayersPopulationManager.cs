@@ -109,6 +109,12 @@ public class PlayersPopulationManager : MonoBehaviour
         TurnSystem.UnsubscribeFromEndOfTurn(EndTurnBatch);
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     private void BeginTurnBatch() => BeginBatch();
     private void EndTurnBatch() => EndBatch();
 

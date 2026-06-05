@@ -7,6 +7,10 @@ using UnityEngine;
 /// </summary>
 public class TornadoVisualPool : MonoBehaviour
 {
+    [Header("Pool Settings")]
+    [SerializeField, Min(0), Tooltip("Max inactive instances kept per prefab. 0 = unlimited.")]
+    private int maxPooledPerPrefab = 0;
+
     [Header("Debug")]
     [SerializeField] private bool debugLogging = false;
 
@@ -103,6 +107,14 @@ public class TornadoVisualPool : MonoBehaviour
         }
 
         PoolBucket bucket = GetOrCreateBucket(resolvedPrefab);
+
+        if (maxPooledPerPrefab > 0 && bucket.available.Count >= maxPooledPerPrefab)
+        {
+            _instanceToPrefab.Remove(instance);
+            bucket.all.Remove(instance);
+            Destroy(instance);
+            return;
+        }
 
         if (stopPooledEffects)
             StopPooledEffects(instance);

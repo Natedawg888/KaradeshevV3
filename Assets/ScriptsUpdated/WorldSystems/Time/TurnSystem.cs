@@ -479,6 +479,14 @@ public class TurnSystem : MonoBehaviour
 
         if (_speedButton != null)
             _speedButton.onClick.RemoveListener(ToggleSpeedUp);
+
+        if (Instance == this)
+        {
+            Instance = null;
+            _endOfTurnHandlers.Clear();
+            _endOfTurnFireBuffer.Clear();
+            _turnBlockers = 0;
+        }
     }
 
     public IEnumerator RunGhostPhaseAdvance(Action onGhostTick = null)

@@ -265,6 +265,11 @@ public class BuildingFireOverlayControl : MonoBehaviour
     // Helpers
     // ------------------------------------------------------------------
 
+    private void OnDestroy()
+    {
+        Unsubscribe();
+    }
+
     private void Unsubscribe()
     {
         if (_fireState == null) return;

@@ -145,6 +145,18 @@ public class SaveSystem : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (_saveCoroutine != null)
+        {
+            StopCoroutine(_saveCoroutine);
+            _saveCoroutine = null;
+        }
+
+        if (Instance == this)
+            Instance = null;
+    }
+
     private void RegisterSections()
     {
         _sections.Clear();
