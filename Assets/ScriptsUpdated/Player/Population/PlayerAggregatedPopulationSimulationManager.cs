@@ -3,9 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+public readonly struct ConsumedEntry
+{
+    public readonly ResourceDefinition Definition;
+    public readonly int AmountConsumed;
+    public ConsumedEntry(ResourceDefinition def, int amount) { Definition = def; AmountConsumed = amount; }
+}
+
+public struct ConsumptionCycleResult
+{
+    public float FoodNeededPts;
+    public float FoodProvidedPts;
+    public float WaterNeededPts;
+    public float WaterProvidedPts;
+    public bool HungerSatisfied;
+    public bool ThirstSatisfied;
+    public List<ConsumedEntry> Consumed;
+}
+
 public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
 {
     public static PlayerAggregatedPopulationSimulationManager Instance { get; private set; }
+
+    public static event Action<ConsumptionCycleResult> OnConsumptionCycle;
 
     private GeneralPopulationManager general;
     private PlayersPopulationManager playerPop;
@@ -47,6 +67,18 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
 
         var inv = PlayerInventoryManager.Instance;
 
+        Dictionary<string, int> preSnap = null;
+        Dictionary<string, ResourceDefinition> defMap = null;
+        float totalFoodNeeded = 0f, totalFoodProvided = 0f;
+        float totalWaterNeeded = 0f, totalWaterProvided = 0f;
+        float ppp = general.pointsPerPersonScale > 0f ? general.pointsPerPersonScale : 100f;
+
+        if (isCycleTick && inv != null)
+        {
+            defMap  = new Dictionary<string, ResourceDefinition>(StringComparer.OrdinalIgnoreCase);
+            preSnap = SnapshotInventory(inv, defMap);
+        }
+
         var deathsByGroup  = new Dictionary<Guid, int>();
         var ageUpCounts    = new Dictionary<AgeGroup, int>();
         int lifespanDeaths = 0;
@@ -70,10 +102,17 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
             }
 
             if (isCycleTick)
+            {
                 IncreaseNeeds_Player(group);
+                float preH = group.hungerLevel, preT = group.thirstLevel;
+                totalFoodNeeded  += preH * ppp * group.count;
+                totalWaterNeeded += preT * ppp * group.count;
 
-            if (isCycleTick)
                 group.SatisfyNeedsFromInventory(inv);
+
+                totalFoodProvided  += (preH - group.hungerLevel) * ppp * group.count;
+                totalWaterProvided += (preT - group.thirstLevel) * ppp * group.count;
+            }
 
             int beforeHealthCount = group.count;
             float beforeHealth = group.averageHealth;
@@ -151,6 +190,29 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
                     group.averageAgeInTurns
                 );
             }
+        }
+
+        if (isCycleTick && preSnap != null && inv != null)
+        {
+            var postSnap = SnapshotInventory(inv, null);
+            var consumed = new List<ConsumedEntry>();
+            foreach (var kv in preSnap)
+            {
+                postSnap.TryGetValue(kv.Key, out int after);
+                int delta = kv.Value - after;
+                if (delta > 0 && defMap.TryGetValue(kv.Key, out var def))
+                    consumed.Add(new ConsumedEntry(def, delta));
+            }
+            OnConsumptionCycle?.Invoke(new ConsumptionCycleResult
+            {
+                FoodNeededPts    = totalFoodNeeded,
+                FoodProvidedPts  = totalFoodProvided,
+                WaterNeededPts   = totalWaterNeeded,
+                WaterProvidedPts = totalWaterProvided,
+                HungerSatisfied  = totalFoodNeeded  < 1f || totalFoodProvided  >= totalFoodNeeded  - 1f,
+                ThirstSatisfied  = totalWaterNeeded < 1f || totalWaterProvided >= totalWaterNeeded - 1f,
+                Consumed         = consumed,
+            });
         }
 
         foreach (var kv in ageUpCounts)
@@ -267,6 +329,31 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
         return (rules != null)
             ? g.ApplyMortalityThisTurn(rules)                         // player tech-adjusted
             : g.ApplyMortalityThisTurn(GeneralPopulationManager.Instance); // fallback to general
+    }
+
+    private static Dictionary<string, int> SnapshotInventory(
+        PlayerInventoryManager inv,
+        Dictionary<string, ResourceDefinition> defMap)
+    {
+        var snap = new Dictionary<string, int>(StringComparer.Ordinal);
+        AddToSnapshot(inv.GetStacks(ResourceType.Food),  snap, defMap);
+        AddToSnapshot(inv.GetStacks(ResourceType.Water), snap, defMap);
+        return snap;
+    }
+
+    private static void AddToSnapshot(
+        IReadOnlyList<InventoryStack> stacks,
+        Dictionary<string, int> snap,
+        Dictionary<string, ResourceDefinition> defMap)
+    {
+        for (int i = 0; i < stacks.Count; i++)
+        {
+            var s = stacks[i];
+            if (s?.definition == null || string.IsNullOrEmpty(s.definition.resourceID)) continue;
+            string id = s.definition.resourceID;
+            if (!snap.TryAdd(id, s.amount)) snap[id] += s.amount;
+            defMap?.TryAdd(id, s.definition);
+        }
     }
 
     private void PostAgingNotification(AgeGroup newGroup, int count)

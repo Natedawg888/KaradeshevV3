@@ -73,6 +73,8 @@ public partial class AnimalSimulationController : MonoBehaviour
 
     private void HandleTurnEnded()
     {
+        if (_isBlockingTurnForTick) { _isBlockingTurnForTick = false; TurnSystem.UnblockTurnAdvance(); }
+
         if (_buildingsDirty)
         {
             RefreshPlayerBuildingTiles();

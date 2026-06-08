@@ -151,23 +151,28 @@ public class TurnSystem : MonoBehaviour
         phaseTimer = 0f;
         UpdatePhaseTimer();
 
-        // Frame 1: end-of-turn work
-        EndOfTurn();
-        yield return null;
+        try
+        {
+            // Frame 1: end-of-turn work
+            EndOfTurn();
+            yield return null;
 
-        // Frame 2: phase change / lighting / icon / text update
-        NextPhase();
-        yield return null;
+            // Frame 2: phase change / lighting / icon / text update
+            NextPhase();
+            yield return null;
 
-        // Frame 3: reset timer for the new phase
-        phaseTimer = phaseDuration;
-        UpdatePhaseTimer();
-        yield return null;
+            // Frame 3: reset timer for the new phase
+            phaseTimer = phaseDuration;
+            UpdatePhaseTimer();
+            yield return null;
 
-        // Frame 4: start-of-turn work
-        StartOfTurn();
-
-        isAdvancingTurn = false;
+            // Frame 4: start-of-turn work
+            StartOfTurn();
+        }
+        finally
+        {
+            isAdvancingTurn = false;
+        }
     }
 
     void NextPhase()
