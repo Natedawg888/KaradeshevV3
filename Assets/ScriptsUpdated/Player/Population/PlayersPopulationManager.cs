@@ -51,6 +51,9 @@ public class PlayersPopulationManager : MonoBehaviour
     [Tooltip("If <= 0, this will be computed as startingPopulation / 3 (min 1).")]
     public int startingFamilyCount = 0;
 
+    [Tooltip("How many age-spread buckets to split the initial population into per gender/age-group (reduces same-turn mass aging events).")]
+    public int initialAgeSpreadBuckets = 4;
+
     [Header("Age Group Population")]
     [SerializeField] private List<PopulationGroup> allPopulations = new List<PopulationGroup>();
     public List<PopulationGroup> AllPopulations => allPopulations;
@@ -341,36 +344,47 @@ public class PlayersPopulationManager : MonoBehaviour
         int childMale = childCount / 2;
         int childFemale = childCount - childMale;
 
+        var rulebook = PlayerHealthRulebook.Instance;
+        int childToTeen  = rulebook ? rulebook.childToTeenAge
+            : (generalPopulationManager != null ? generalPopulationManager.childToTeenAge : 25);
+        int teenToAdult  = rulebook ? rulebook.teenToAdultAge
+            : (generalPopulationManager != null ? generalPopulationManager.teenToAdultAge : 50);
+        int adultToElder = rulebook ? rulebook.adultToElderAge
+            : (generalPopulationManager != null ? generalPopulationManager.adultToElderAge : 135);
+
         if (childMale > 0)
-            AddPopulationGroup(AgeGroup.Child, childMale, currentTurn, Gender.Male, 0, ignoreMaxDuringInitialization);
+            AddSpreadPopulationGroups(AgeGroup.Child, childMale, currentTurn, Gender.Male, 0, childToTeen - 1);
 
         if (childFemale > 0)
-            AddPopulationGroup(AgeGroup.Child, childFemale, currentTurn, Gender.Female, 0, ignoreMaxDuringInitialization);
+            AddSpreadPopulationGroups(AgeGroup.Child, childFemale, currentTurn, Gender.Female, 0, childToTeen - 1);
 
         if (adultMale > 0)
-        {
-            int adultStartAge = 0;
-            if (generalPopulationManager != null)
-            {
-                adultStartAge = PlayerHealthRulebook.Instance
-                    ? PlayerHealthRulebook.Instance.teenToAdultAge
-                    : generalPopulationManager.teenToAdultAge;
-            }
-
-            AddPopulationGroup(AgeGroup.Adult, adultMale, currentTurn, Gender.Male, adultStartAge, ignoreMaxDuringInitialization);
-        }
+            AddSpreadPopulationGroups(AgeGroup.Adult, adultMale, currentTurn, Gender.Male, teenToAdult, adultToElder - 1);
 
         if (adultFemale > 0)
-        {
-            int adultStartAge = 0;
-            if (generalPopulationManager != null)
-            {
-                adultStartAge = PlayerHealthRulebook.Instance
-                    ? PlayerHealthRulebook.Instance.teenToAdultAge
-                    : generalPopulationManager.teenToAdultAge;
-            }
+            AddSpreadPopulationGroups(AgeGroup.Adult, adultFemale, currentTurn, Gender.Female, teenToAdult, adultToElder - 1);
+    }
 
-            AddPopulationGroup(AgeGroup.Adult, adultFemale, currentTurn, Gender.Female, adultStartAge, ignoreMaxDuringInitialization);
+    private void AddSpreadPopulationGroups(
+        AgeGroup ageGroup,
+        int totalCount,
+        int currentTurn,
+        Gender gender,
+        int ageMin,
+        int ageMax)
+    {
+        int ageRange = Mathf.Max(1, ageMax - ageMin + 1);
+        int buckets  = Mathf.Clamp(initialAgeSpreadBuckets, 1, ageRange);
+        int step     = ageRange / buckets;
+        int baseCount = totalCount / buckets;
+        int extra     = totalCount % buckets;
+
+        for (int i = 0; i < buckets; i++)
+        {
+            int count = baseCount + (i < extra ? 1 : 0);
+            if (count <= 0) continue;
+            int age = ageMin + i * step;
+            AddPopulationGroup(ageGroup, count, currentTurn, gender, age, ignoreMaxDuringInitialization);
         }
     }
 
