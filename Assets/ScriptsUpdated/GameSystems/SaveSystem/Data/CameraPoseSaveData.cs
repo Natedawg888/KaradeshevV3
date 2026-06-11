@@ -10,4 +10,6 @@ public class CameraPoseSaveData
     public bool hasSeparateMainCameraTransform;
     public Vector3 mainCameraLocalPosition;
     public Quaternion mainCameraLocalRotation;
+
+    public bool cloudsVisible = true;
 }

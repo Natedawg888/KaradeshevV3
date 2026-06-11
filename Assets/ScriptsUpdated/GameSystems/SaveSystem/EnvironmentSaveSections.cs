@@ -50,6 +50,9 @@ public class CoreSystemsSectionSaveData
     public CivilizationStateSaveData civilizationStateData;
     public int currentScore;
     public string gameId;
+
+    public bool musicMuted;
+    public float masterVolume = 1f;
 }
 
 [Serializable]

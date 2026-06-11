@@ -124,6 +124,17 @@ public class SoundPanelControl : MonoBehaviour
             closeSoundButton.gameObject.SetActive(false);
     }
 
+    public bool MusicMuted => _musicMuted;
+
+    public void LoadSavedState(bool muted, float volume)
+    {
+        _musicMuted = muted;
+        AudioListener.volume = Mathf.Clamp01(volume);
+        ApplyMusicMute();
+        SaveSettings();
+        RefreshUI();
+    }
+
     public void ToggleMusic()
     {
         // If the slider is at 0 and the player taps the toggle,

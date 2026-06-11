@@ -1243,6 +1243,7 @@ public class SaveSystem : MonoBehaviour
                 CivilizationStateManager.Instance?.LoadState(core.civilizationStateData);
                 ScoreManager.Instance?.LoadState(core.currentScore);
                 ScoreManager.Instance?.LoadGameId(core.gameId);
+                SoundPanelControl.Instance?.LoadSavedState(core.musicMuted, core.masterVolume);
             }
         }
         ReportLoadProgress(6);

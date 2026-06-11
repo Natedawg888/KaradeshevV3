@@ -564,7 +564,8 @@ public class CameraControl : MonoBehaviour
         {
             rigPosition = transform.position,
             rigRotation = transform.rotation,
-            hasSeparateMainCameraTransform = mainCamera != null && mainCamera.transform != transform
+            hasSeparateMainCameraTransform = mainCamera != null && mainCamera.transform != transform,
+            cloudsVisible = _cloudsVisible
         };
 
         if (data.hasSeparateMainCameraTransform)
@@ -599,6 +600,8 @@ public class CameraControl : MonoBehaviour
         }
 
         minimapNeedsUpdate = true;
+
+        SetCloudLayerVisible(data.cloudsVisible);
 
         if (isActiveAndEnabled)
             StartCoroutine(DeferredCapture());

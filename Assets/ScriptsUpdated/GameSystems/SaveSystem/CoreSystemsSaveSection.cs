@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEngine;
 
 public sealed class CoreSystemsSaveSection : SaveSectionBase
 {
@@ -23,7 +24,10 @@ public sealed class CoreSystemsSaveSection : SaveSectionBase
             playerProfileData = ProfilePanelControl.Instance != null ? ProfilePanelControl.Instance.SaveState() : null,
             civilizationStateData = CivilizationStateManager.Instance != null ? CivilizationStateManager.Instance.SaveState() : null,
             currentScore = ScoreManager.Instance != null ? ScoreManager.Instance.SaveState() : 0,
-            gameId       = ScoreManager.Instance != null ? ScoreManager.Instance.GetGameId()  : string.Empty
+            gameId       = ScoreManager.Instance != null ? ScoreManager.Instance.GetGameId()  : string.Empty,
+
+            musicMuted   = SoundPanelControl.Instance != null && SoundPanelControl.Instance.MusicMuted,
+            masterVolume = AudioListener.volume
         };
 
         ClearDirty();
