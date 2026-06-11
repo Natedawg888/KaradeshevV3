@@ -87,6 +87,23 @@ public class WeatherFireSystem : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float minFloodDepthToExtinguishFire = 0.01f;
 
+    [Header("Random Sparks")]
+    [SerializeField] private bool randomSparksEnabled = true;
+    [Tooltip("Base chance per sampled cell that a random spark starts a wildfire this turn.")]
+    [Range(0f, 0.05f)][SerializeField] private float baseSparkChancePerCell = 0.002f;
+    [Tooltip("Number of random cells sampled each turn as spark candidates.")]
+    [Min(1)][SerializeField] private int sparkCandidateSampleCount = 8;
+    [Tooltip("Temperature (°C) at which sparks start becoming more likely.")]
+    [SerializeField] private float sparkTemperatureThresholdC = 30f;
+    [Tooltip("Temperature range (°C) above threshold over which heat bonus scales to maximum.")]
+    [SerializeField] private float sparkTemperatureRangeC = 20f;
+    [Tooltip("At peak temperature, spark chance is multiplied by 1 + this value.")]
+    [Range(0f, 5f)][SerializeField] private float sparkTemperatureScaleFactor = 3f;
+    [Tooltip("At maximum dryness, spark chance is multiplied by 1 + this value.")]
+    [Range(0f, 5f)][SerializeField] private float sparkDrynessScaleFactor = 2f;
+    [Tooltip("Minimum dryness (0–1) required before a cell is considered for a random spark.")]
+    [Range(0f, 1f)][SerializeField] private float sparkMinDryness01 = 0.25f;
+
     [Header("Performance")]
     [Min(0)][SerializeField] private int maxFireSpreadIgnitionsPerTurn = 24;
 
@@ -606,6 +623,9 @@ public class WeatherFireSystem : MonoBehaviour
         int remainingSpreadBudget = Mathf.Max(0, maxFireSpreadIgnitionsPerTurn);
 
         _pendingFireIgnitions.Clear();
+
+        if (randomSparksEnabled)
+            TrySpawnRandomSparks();
 
         ProcessBurningBuildingsStep(ref remainingSpreadBudget);
         ProcessBurningEnvironmentsStep(ref remainingSpreadBudget);
@@ -1643,6 +1663,79 @@ public class WeatherFireSystem : MonoBehaviour
         OnFireCellIgnited?.Invoke(new TileCoord(saved.x, saved.y));
 
         return true;
+    }
+
+    private void TrySpawnRandomSparks()
+    {
+        if (weatherGridManager == null || !weatherGridManager.IsInitialized)
+            return;
+
+        int cols = weatherGridManager.Columns;
+        int rows = weatherGridManager.Rows;
+
+        if (cols <= 0 || rows <= 0)
+            return;
+
+        int samplesToCheck = Mathf.Max(1, sparkCandidateSampleCount);
+
+        for (int i = 0; i < samplesToCheck; i++)
+        {
+            int x = UnityEngine.Random.Range(0, cols);
+            int y = UnityEngine.Random.Range(0, rows);
+
+            if (!CanAnythingIgniteAtCell(x, y))
+                continue;
+
+            if (IsAnythingOnFireAtCell(x, y))
+                continue;
+
+            float dryness01 = GetSparkDryness01AtCell(x, y);
+
+            if (dryness01 < sparkMinDryness01)
+                continue;
+
+            float temperatureC = 0f;
+            if (weatherGridManager.TryGetCellState(x, y, out WeatherCellState cellState))
+                temperatureC = cellState.temperatureC;
+
+            float rain01 = GetRainIntensity01AtCell(x, y);
+            float rainPenalty = Mathf.Lerp(1f, minIgnitionMultiplierAtFullRain, rain01);
+
+            float tempFactor01 = sparkTemperatureRangeC > 0f
+                ? Mathf.Clamp01((temperatureC - sparkTemperatureThresholdC) / sparkTemperatureRangeC)
+                : 0f;
+
+            float sparkChance = Mathf.Clamp01(
+                baseSparkChancePerCell *
+                rainPenalty *
+                (1f + tempFactor01 * sparkTemperatureScaleFactor) *
+                (1f + dryness01 * sparkDrynessScaleFactor));
+
+            if (sparkChance <= 0f || UnityEngine.Random.value > sparkChance)
+                continue;
+
+            TryIgniteFireAtCell(x, y, 1f, dryness01, tempFactor01, ignitionEvent: false);
+
+            if (debugLogging) {}
+                //Debug.Log(
+                    //$"[WeatherFireSystem] Random spark ignited at ({x},{y}). " +
+                    //$"Temp={temperatureC:0.0}°C Dryness={dryness01:0.00} Chance={sparkChance:0.000}");
+        }
+    }
+
+    private float GetSparkDryness01AtCell(int x, int y)
+    {
+        if (TryGetEnvironmentAtIgnitionCell(x, y, out EnvironmentControl env) && env != null)
+        {
+            EnvironmentFireState fireState = GetEnvironmentFireState(env, createIfMissing: false);
+            if (fireState != null)
+                return fireState.CurrentDryness01;
+        }
+
+        if (weatherGridManager != null && weatherGridManager.TryGetCellState(x, y, out WeatherCellState cellState))
+            return Mathf.Clamp01(1f - cellState.humidity01);
+
+        return 0f;
     }
 
     private void MarkFireSaveDirty()
