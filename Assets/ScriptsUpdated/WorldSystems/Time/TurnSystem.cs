@@ -70,6 +70,15 @@ public class TurnSystem : MonoBehaviour
     private bool isPaused = false;
     private bool isSpeedingUp = false;
     private float currentSpeedMultiplier = 1f;
+    public bool IsSpeedingUp => isSpeedingUp;
+
+    private float _brightnessMultiplier = 1f;
+
+    public void SetBrightnessMultiplier(float multiplier)
+    {
+        _brightnessMultiplier = Mathf.Max(0f, multiplier);
+        UpdateLighting(currentPhase);
+    }
 
     void Awake()
     {
@@ -205,7 +214,7 @@ public class TurnSystem : MonoBehaviour
     void ApplyLightSettings(LightSettings settings)
     {
         directionalLight.color = settings.lightColor;
-        directionalLight.intensity = settings.lightIntensity;
+        directionalLight.intensity = settings.lightIntensity * _brightnessMultiplier;
     }
 
     public void UpdatePhaseImage(DayPhase phase)

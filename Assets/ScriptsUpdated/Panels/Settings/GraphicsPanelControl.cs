@@ -18,6 +18,7 @@ public class GraphicsPanelControl : MonoBehaviour
 
     private const string BrightnessKey = "Brightness";
     private const float DefaultBrightness = 0.5f;
+    private const float MaxOverlayAlpha = 0.85f;
 
     private float _currentBrightness = DefaultBrightness;
     private bool _isUpdatingSlider;
@@ -94,18 +95,23 @@ public class GraphicsPanelControl : MonoBehaviour
     private void ApplyBrightness(float value)
     {
         _currentBrightness = value;
-        if (brightnessOverlay == null) return;
 
-        if (value < 0.5f)
+        if (brightnessOverlay != null)
         {
-            float alpha = (0.5f - value) * 2f;
-            brightnessOverlay.color = new Color(0f, 0f, 0f, alpha);
+            if (value < 0.5f)
+            {
+                float alpha = Mathf.Min((0.5f - value) * 2f, MaxOverlayAlpha);
+                brightnessOverlay.color = new Color(0f, 0f, 0f, alpha);
+            }
+            else
+            {
+                float alpha = Mathf.Min((value - 0.5f) * 2f, MaxOverlayAlpha);
+                brightnessOverlay.color = new Color(1f, 1f, 1f, alpha);
+            }
         }
-        else
-        {
-            float alpha = (value - 0.5f) * 2f;
-            brightnessOverlay.color = new Color(1f, 1f, 1f, alpha);
-        }
+
+        // value 0→0x, 0.5→1x, 1→2x intensity
+        TurnSystem.Instance?.SetBrightnessMultiplier(value * 2f);
     }
 
     private void LoadSettings()
