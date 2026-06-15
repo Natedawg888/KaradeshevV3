@@ -157,7 +157,7 @@ public class GraphicsPanelControl : MonoBehaviour
 
     private void ApplyQuality(int level)
     {
-        QualitySettings.masterTextureLimit = MipmapLimits[level];
+        QualitySettings.globalTextureMipmapLimit = MipmapLimits[level];
     }
 
     private void LoadSettings()
