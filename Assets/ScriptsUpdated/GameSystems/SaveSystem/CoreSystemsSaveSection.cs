@@ -29,8 +29,7 @@ public sealed class CoreSystemsSaveSection : SaveSectionBase
             musicMuted   = SoundPanelControl.Instance != null && SoundPanelControl.Instance.MusicMuted,
             masterVolume = AudioListener.volume,
 
-            brightness      = GraphicsPanelControl.Instance != null ? GraphicsPanelControl.Instance.CurrentBrightness : 0.5f,
-            graphicsQuality = GraphicsPanelControl.Instance != null ? GraphicsPanelControl.Instance.CurrentQuality     : 2
+            brightness = GraphicsPanelControl.Instance != null ? GraphicsPanelControl.Instance.CurrentBrightness : 0.5f
         };
 
         ClearDirty();

@@ -116,7 +116,12 @@ public class MainMenuNewGameSetupPanel : MonoBehaviour
             tutorialToggle.onValueChanged.AddListener(OnTutorialToggleChanged);
 
             if (!_initialized)
-                tutorialToggle.isOn = defaultTutorialEnabled;
+            {
+                bool saved = PlayerPrefs.HasKey(TutorialPrefKey)
+                    ? PlayerPrefs.GetInt(TutorialPrefKey) == 1
+                    : defaultTutorialEnabled;
+                tutorialToggle.isOn = saved;
+            }
         }
 
         BuildPresetDropdown();
@@ -172,8 +177,12 @@ public class MainMenuNewGameSetupPanel : MonoBehaviour
         UpdateConfirmButtonState();
     }
 
+    private const string TutorialPrefKey = "tutorial_enabled";
+
     private void OnTutorialToggleChanged(bool isOn)
     {
+        PlayerPrefs.SetInt(TutorialPrefKey, isOn ? 1 : 0);
+        PlayerPrefs.Save();
         RefreshTutorialToggleVisuals(isOn);
     }
 
