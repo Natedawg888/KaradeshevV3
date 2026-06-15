@@ -1244,6 +1244,7 @@ public class SaveSystem : MonoBehaviour
                 ScoreManager.Instance?.LoadState(core.currentScore);
                 ScoreManager.Instance?.LoadGameId(core.gameId);
                 SoundPanelControl.Instance?.LoadSavedState(core.musicMuted, core.masterVolume);
+                GraphicsPanelControl.Instance?.LoadSavedState(core.brightness, core.graphicsQuality);
             }
         }
         ReportLoadProgress(6);

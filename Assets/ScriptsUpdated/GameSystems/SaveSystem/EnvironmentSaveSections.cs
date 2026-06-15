@@ -53,6 +53,9 @@ public class CoreSystemsSectionSaveData
 
     public bool musicMuted;
     public float masterVolume = 1f;
+
+    public float brightness = 0.5f;
+    public int graphicsQuality = 2; // 0=Low, 1=Med, 2=High
 }
 
 [Serializable]

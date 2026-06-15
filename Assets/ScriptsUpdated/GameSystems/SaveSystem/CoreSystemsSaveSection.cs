@@ -27,7 +27,10 @@ public sealed class CoreSystemsSaveSection : SaveSectionBase
             gameId       = ScoreManager.Instance != null ? ScoreManager.Instance.GetGameId()  : string.Empty,
 
             musicMuted   = SoundPanelControl.Instance != null && SoundPanelControl.Instance.MusicMuted,
-            masterVolume = AudioListener.volume
+            masterVolume = AudioListener.volume,
+
+            brightness      = GraphicsPanelControl.Instance != null ? GraphicsPanelControl.Instance.CurrentBrightness : 0.5f,
+            graphicsQuality = GraphicsPanelControl.Instance != null ? GraphicsPanelControl.Instance.CurrentQuality     : 2
         };
 
         ClearDirty();
