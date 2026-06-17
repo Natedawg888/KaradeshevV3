@@ -17,6 +17,8 @@ public class EnvironmentSaveMeta
     public bool hasWorldSim;
     public bool hasJobs;
     public bool hasNotifications;
+
+    public long savedAtUtcTicks;
 }
 
 [Serializable]

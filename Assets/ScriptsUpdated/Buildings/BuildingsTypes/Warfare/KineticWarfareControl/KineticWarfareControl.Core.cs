@@ -198,6 +198,9 @@ public partial class KineticWarfareControl : MonoBehaviour
         {
             if (u == null) continue;
 
+            // Units that require advancing from another type cannot be trained directly
+            if (u.requiresAdvancementFrom != null) continue;
+
             // Player must know the unit
             if (knownMgr != null && !knownMgr.IsKnown(u)) continue;
 
@@ -240,6 +243,12 @@ public partial class KineticWarfareControl : MonoBehaviour
         if (trainableUnits == null || !trainableUnits.Contains(unit))
         {
             failReason = "This building cannot train that unit type.";
+            return false;
+        }
+
+        if (unit.requiresAdvancementFrom != null)
+        {
+            failReason = $"{unit.unitName} can only be obtained by advancing from {unit.requiresAdvancementFrom.unitName}.";
             return false;
         }
 

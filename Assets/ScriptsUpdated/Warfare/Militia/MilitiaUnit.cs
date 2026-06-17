@@ -117,6 +117,8 @@ public class MilitiaUnit : ScriptableObject
     public bool canTrainStealth  = true;
 
     [Header("Advancement")]
+    [Tooltip("If set, this unit cannot be trained directly — it is only obtainable by advancing from the specified unit type.")]
+    public MilitiaUnit requiresAdvancementFrom;
     public List<MilitiaUnitAdvancementOption> advancementOptions = new();
 
     [Header("Terrain Movement Rules")]

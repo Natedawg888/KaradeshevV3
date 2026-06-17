@@ -642,35 +642,45 @@ public class SaveSystem : MonoBehaviour
 
     private bool TryGetBestLoadRoot(out string rootPath, out EnvironmentSaveMeta meta)
     {
-        if (IsUsableSaveSet(_closeSaveFilePath))
+        // Candidates in priority order — used as tiebreaker when savedAtUtcTicks is absent (old saves).
+        string[] candidates = new[]
         {
-            rootPath = _closeSaveFilePath;
-            meta = ReadJsonFile<EnvironmentSaveMeta>(rootPath);
-            //Debug.Log("[SaveSystem] Loading close save.");
-            return true;
+            _closeSaveFilePath,
+            _turnAutoSaveFilePath,
+            _backup1FilePath,
+            _backup2FilePath
+        };
+
+        string bestPath = null;
+        EnvironmentSaveMeta bestMeta = null;
+        long bestTicks = long.MinValue;
+
+        for (int i = 0; i < candidates.Length; i++)
+        {
+            if (!IsUsableSaveSet(candidates[i]))
+                continue;
+
+            EnvironmentSaveMeta candidateMeta = ReadJsonFile<EnvironmentSaveMeta>(candidates[i]);
+            if (candidateMeta == null)
+                continue;
+
+            // For saves without a timestamp (old format), preserve original priority order via fallback ticks.
+            long ticks = candidateMeta.savedAtUtcTicks > 0
+                ? candidateMeta.savedAtUtcTicks
+                : long.MinValue + (candidates.Length - i);
+
+            if (ticks > bestTicks)
+            {
+                bestTicks = ticks;
+                bestPath = candidates[i];
+                bestMeta = candidateMeta;
+            }
         }
 
-        if (IsUsableSaveSet(_turnAutoSaveFilePath))
+        if (bestPath != null)
         {
-            rootPath = _turnAutoSaveFilePath;
-            meta = ReadJsonFile<EnvironmentSaveMeta>(rootPath);
-            //Debug.LogWarning("[SaveSystem] Close save invalid or incomplete. Falling back to turn autosave.");
-            return true;
-        }
-
-        if (IsUsableSaveSet(_backup1FilePath))
-        {
-            rootPath = _backup1FilePath;
-            meta = ReadJsonFile<EnvironmentSaveMeta>(rootPath);
-            //Debug.LogWarning("[SaveSystem] Falling back to backup 1.");
-            return true;
-        }
-
-        if (IsUsableSaveSet(_backup2FilePath))
-        {
-            rootPath = _backup2FilePath;
-            meta = ReadJsonFile<EnvironmentSaveMeta>(rootPath);
-            //Debug.LogWarning("[SaveSystem] Falling back to backup 2.");
+            rootPath = bestPath;
+            meta = bestMeta;
             return true;
         }
 
@@ -1557,7 +1567,8 @@ public class SaveSystem : MonoBehaviour
             hasPopulation = meta.hasPopulation,
             hasWorldSim = meta.hasWorldSim,
             hasJobs = meta.hasJobs,
-            hasNotifications = meta.hasNotifications
+            hasNotifications = meta.hasNotifications,
+            savedAtUtcTicks = meta.savedAtUtcTicks
         };
     }
 
@@ -1575,7 +1586,8 @@ public class SaveSystem : MonoBehaviour
             hasPopulation = snapshot.population != null,
             hasWorldSim = snapshot.worldSim != null,
             hasJobs = snapshot.jobs != null,
-            hasNotifications = snapshot.notifications != null
+            hasNotifications = snapshot.notifications != null,
+            savedAtUtcTicks = DateTime.UtcNow.Ticks
         };
     }
 

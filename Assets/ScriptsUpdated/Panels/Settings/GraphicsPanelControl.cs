@@ -17,8 +17,8 @@ public class GraphicsPanelControl : MonoBehaviour
     public Image brightnessOverlay;
 
     private const string BrightnessKey = "Brightness";
-    private const float DefaultBrightness = 0.5f;
-    private const float MaxOverlayAlpha = 0.85f;
+    private const float DefaultBrightness = 0.0f;
+    private const float MaxOverlayAlpha = 0.08f;
 
     private float _currentBrightness = DefaultBrightness;
     private bool _isUpdatingSlider;

@@ -32,6 +32,7 @@ public class CivilizationDiversitySystem : MonoBehaviour
     // runtime state
     private Coroutine _geneticsCo;
     private bool _isBlockingTurn = false;
+    private bool _speedUpSkipFlag = false;
     private struct GeneticsState
     {
         public List<string> genes;   // selected, shuffled, capped
@@ -67,6 +68,18 @@ public class CivilizationDiversitySystem : MonoBehaviour
     private void OnEndTurn()
     {
         if (civ == null || fam == null) return;
+
+        // In speed-up mode skip every other turn: genetics takes longer than the compressed timer
+        bool speedingUp = TurnSystem.Instance != null && TurnSystem.Instance.IsSpeedingUp;
+        if (speedingUp)
+        {
+            _speedUpSkipFlag = !_speedUpSkipFlag;
+            if (_speedUpSkipFlag) return;
+        }
+        else
+        {
+            _speedUpSkipFlag = false;
+        }
 
         // (Re)start genetics-only computation each turn
         if (_isBlockingTurn) { _isBlockingTurn = false; TurnSystem.UnblockTurnAdvance(); }
@@ -129,6 +142,9 @@ public class CivilizationDiversitySystem : MonoBehaviour
         }
 
         int N = genes.Count;
+        // Yield less aggressively in speed-up mode so the coroutine finishes faster
+        bool speedingUp = TurnSystem.Instance != null && TurnSystem.Instance.IsSpeedingUp;
+        int effectiveFramesBetween = speedingUp ? Mathf.Max(0, framesBetweenBatches - 1) : framesBetweenBatches;
 
         // Process row-by-row; each row i computes pairs (0..i-1)
         while (_gstate.iRow < N)
@@ -149,7 +165,7 @@ public class CivilizationDiversitySystem : MonoBehaviour
             if (_gstate.pairs > 0)
                 _lastGeneticDiversity01 = (float)(_gstate.sum / _gstate.pairs);
 
-            for (int f = 0; f < Mathf.Max(0, framesBetweenBatches); f++)
+            for (int f = 0; f < effectiveFramesBetween; f++)
                 yield return null;
         }
 
