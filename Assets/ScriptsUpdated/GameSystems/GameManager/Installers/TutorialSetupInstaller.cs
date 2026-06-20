@@ -46,6 +46,8 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForResumeOrSpeed;
     private bool _waitingForTurnComplete;
     private UndiscoveredTilePanelControl _undiscoveredPanel;
+    private EnvironmentControl _trackedDiscoveryEnv;
+    private Coroutine _fastForwardRoutine;
 
     private bool _waitingForDiscoveryDetails;
     private bool _waitingForDiscoveryDetailsClose;
@@ -416,15 +418,14 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (!_waitingForTurnComplete) return;
         _waitingForTurnComplete = false;
         TurnSystem.OnStartOfTurn -= OnTurnCompletedForFastForward;
-        StartCoroutine(FastForwardDiscoveryCoroutine());
+        TurnSystem.Instance?.PauseTurnTimer();
+        if (_fastForwardRoutine != null) StopCoroutine(_fastForwardRoutine);
+        _fastForwardRoutine = StartCoroutine(FastForwardDiscoveryCoroutine());
     }
 
     private IEnumerator FastForwardDiscoveryCoroutine()
     {
-        if (_undiscoveredPanel == null)
-            _undiscoveredPanel = FindFirstObjectByType<UndiscoveredTilePanelControl>(FindObjectsInactive.Include);
-
-        EnvironmentControl env = _undiscoveredPanel?.CurrentEnvironment;
+        EnvironmentControl env = _trackedDiscoveryEnv;
         if (env == null) { ShowPart(_currentPart + 1); yield break; }
 
         while (env.discoveryTurnsLeft > 0)
@@ -464,7 +465,10 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (!_waitingForDiscoverButton) return;
         _waitingForDiscoverButton = false;
         if (_undiscoveredPanel != null)
+        {
+            _trackedDiscoveryEnv = _undiscoveredPanel.CurrentEnvironment;
             _undiscoveredPanel.OnDiscoverPressed -= OnDiscoverButtonClicked;
+        }
         ShowPart(_currentPart + 1);
     }
 
@@ -585,6 +589,12 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             TurnSystem.OnStartOfTurn -= OnTurnCompletedForFastForward;
             _waitingForTurnComplete = false;
+        }
+
+        if (_fastForwardRoutine != null)
+        {
+            StopCoroutine(_fastForwardRoutine);
+            _fastForwardRoutine = null;
         }
 
         if (_waitingForResumeOrSpeed && TurnSystem.Instance != null)
