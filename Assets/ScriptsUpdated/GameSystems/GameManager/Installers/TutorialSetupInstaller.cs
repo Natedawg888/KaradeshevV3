@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -5,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -43,6 +44,7 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForUndiscoveredPanel;
     private bool _waitingForDiscoverButton;
     private bool _waitingForResumeOrSpeed;
+    private bool _waitingForTurnComplete;
     private UndiscoveredTilePanelControl _undiscoveredPanel;
 
     private bool _waitingForDiscoveryDetails;
@@ -294,6 +296,11 @@ public class TutorialSetupInstaller : MonoBehaviour
                 }
                 break;
 
+            case PartType.FastForwardDiscovery:
+                TurnSystem.OnStartOfTurn += OnTurnCompletedForFastForward;
+                _waitingForTurnComplete = true;
+                break;
+
             case PartType.ClickDiscoverButton:
                 if (_undiscoveredPanel == null)
                     _undiscoveredPanel = FindFirstObjectByType<UndiscoveredTilePanelControl>(FindObjectsInactive.Include);
@@ -402,6 +409,42 @@ public class TutorialSetupInstaller : MonoBehaviour
         Destroy(toDestroy);
 
         _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
+    }
+
+    private void OnTurnCompletedForFastForward()
+    {
+        if (!_waitingForTurnComplete) return;
+        _waitingForTurnComplete = false;
+        TurnSystem.OnStartOfTurn -= OnTurnCompletedForFastForward;
+        StartCoroutine(FastForwardDiscoveryCoroutine());
+    }
+
+    private IEnumerator FastForwardDiscoveryCoroutine()
+    {
+        if (_undiscoveredPanel == null)
+            _undiscoveredPanel = FindFirstObjectByType<UndiscoveredTilePanelControl>(FindObjectsInactive.Include);
+
+        EnvironmentControl env = _undiscoveredPanel?.CurrentEnvironment;
+        if (env == null) { ShowPart(_currentPart + 1); yield break; }
+
+        while (env.discoveryTurnsLeft > 0)
+        {
+            if (TurnSystem.Instance != null)
+            {
+                yield return TurnSystem.Instance.StartCoroutine(
+                    TurnSystem.Instance.RunGhostPhaseAdvance(() => env.ApplyTutorialDiscoveryGhostTick())
+                );
+            }
+            else
+            {
+                env.ApplyTutorialDiscoveryGhostTick();
+                yield return null;
+            }
+        }
+
+        env.CompleteTutorialDiscoveryNow();
+        yield return null;
+        ShowPart(_currentPart + 1);
     }
 
     private void OnTurnResumedOrSpeeded()
@@ -536,6 +579,12 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _cameraControl.RestoreCameraPose();
             _shouldRestoreCameraPose = false;
+        }
+
+        if (_waitingForTurnComplete)
+        {
+            TurnSystem.OnStartOfTurn -= OnTurnCompletedForFastForward;
+            _waitingForTurnComplete = false;
         }
 
         if (_waitingForResumeOrSpeed && TurnSystem.Instance != null)
