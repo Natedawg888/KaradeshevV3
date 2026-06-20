@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -41,6 +41,8 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _shouldRestoreCameraPose;
 
     private bool _waitingForUndiscoveredPanel;
+    private bool _waitingForDiscoverButton;
+    private bool _waitingForResumeOrSpeed;
     private UndiscoveredTilePanelControl _undiscoveredPanel;
 
     private bool _waitingForDiscoveryDetails;
@@ -265,6 +267,43 @@ public class TutorialSetupInstaller : MonoBehaviour
                 }
                 break;
 
+            case PartType.ResumeOrSpeedUp:
+                if (_cameraControl != null)
+                {
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+
+                    if (_undiscoveredPanel == null)
+                        _undiscoveredPanel = FindFirstObjectByType<UndiscoveredTilePanelControl>(FindObjectsInactive.Include);
+
+                    EnvironmentControl discoveredEnv = _undiscoveredPanel != null
+                        ? _undiscoveredPanel.CurrentEnvironment
+                        : null;
+
+                    if (discoveredEnv != null)
+                        _cameraControl.FocusOnPoint(discoveredEnv.transform.position, discoveredEnv.transform.forward, 6f);
+                }
+                if (TurnSystem.Instance != null)
+                {
+                    TurnSystem.Instance.OnResumed += OnTurnResumedOrSpeeded;
+                    TurnSystem.Instance.OnSpeedToggled += OnTurnResumedOrSpeeded;
+                    _waitingForResumeOrSpeed = true;
+                }
+                break;
+
+            case PartType.ClickDiscoverButton:
+                if (_undiscoveredPanel == null)
+                    _undiscoveredPanel = FindFirstObjectByType<UndiscoveredTilePanelControl>(FindObjectsInactive.Include);
+                if (_undiscoveredPanel != null)
+                {
+                    _undiscoveredPanel.OnDiscoverPressed += OnDiscoverButtonClicked;
+                    _waitingForDiscoverButton = true;
+                }
+                break;
+
             case PartType.OpenDiscoveryDetails:
                 if (_discoveryDetailsPanel == null)
                     _discoveryDetailsPanel = FindFirstObjectByType<DiscoveryDetailsPanelControl>(FindObjectsInactive.Include);
@@ -363,6 +402,27 @@ public class TutorialSetupInstaller : MonoBehaviour
         Destroy(toDestroy);
 
         _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
+    }
+
+    private void OnTurnResumedOrSpeeded()
+    {
+        if (!_waitingForResumeOrSpeed) return;
+        _waitingForResumeOrSpeed = false;
+        if (TurnSystem.Instance != null)
+        {
+            TurnSystem.Instance.OnResumed -= OnTurnResumedOrSpeeded;
+            TurnSystem.Instance.OnSpeedToggled -= OnTurnResumedOrSpeeded;
+        }
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnDiscoverButtonClicked()
+    {
+        if (!_waitingForDiscoverButton) return;
+        _waitingForDiscoverButton = false;
+        if (_undiscoveredPanel != null)
+            _undiscoveredPanel.OnDiscoverPressed -= OnDiscoverButtonClicked;
+        ShowPart(_currentPart + 1);
     }
 
     private void OnUndiscoveredPanelOpened()
@@ -476,6 +536,19 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _cameraControl.RestoreCameraPose();
             _shouldRestoreCameraPose = false;
+        }
+
+        if (_waitingForResumeOrSpeed && TurnSystem.Instance != null)
+        {
+            TurnSystem.Instance.OnResumed -= OnTurnResumedOrSpeeded;
+            TurnSystem.Instance.OnSpeedToggled -= OnTurnResumedOrSpeeded;
+            _waitingForResumeOrSpeed = false;
+        }
+
+        if (_waitingForDiscoverButton && _undiscoveredPanel != null)
+        {
+            _undiscoveredPanel.OnDiscoverPressed -= OnDiscoverButtonClicked;
+            _waitingForDiscoverButton = false;
         }
 
         if (_waitingForUndiscoveredPanel && _undiscoveredPanel != null)

@@ -22,6 +22,8 @@ public class TurnSystem : MonoBehaviour
     public Light directionalLight;
 
     public static event Action OnStartOfTurn;
+    public event Action OnResumed;
+    public event Action OnSpeedToggled;
 
     // Sorted end-of-turn invocation list (lower priority number fires first)
     private static readonly List<(int priority, Action handler)> _endOfTurnHandlers = new List<(int, Action)>();
@@ -329,6 +331,10 @@ public class TurnSystem : MonoBehaviour
             isSpeedingUp = false;
             currentSpeedMultiplier = normalSpeedMultiplier;
         }
+        else
+        {
+            OnResumed?.Invoke();
+        }
 
         UpdateButtonIcons();
     }
@@ -342,6 +348,8 @@ public class TurnSystem : MonoBehaviour
 
         isSpeedingUp = !isSpeedingUp;
         currentSpeedMultiplier = isSpeedingUp ? fastSpeedMultiplier : normalSpeedMultiplier;
+
+        OnSpeedToggled?.Invoke();
 
         UpdateButtonIcons();
     }

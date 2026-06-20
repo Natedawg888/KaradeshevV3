@@ -37,6 +37,7 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
 
     public event Action OnClose;
     public event Action OnOpen;
+    public event Action OnDiscoverPressed;
 
     public CameraControl cameraControl;
 
@@ -205,6 +206,8 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
     private void OnDiscoverClicked()
     {
         if (currentEnv == null) return;
+
+        OnDiscoverPressed?.Invoke();
 
         if (TutorialDiscoverOverride != null && TutorialDiscoverOverride.Invoke(currentEnv))
             return;
