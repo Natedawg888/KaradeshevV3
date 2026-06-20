@@ -53,6 +53,8 @@ public class TileActivator : MonoBehaviour
         BeginActivation(timerOverride, manageLoadingScreenInternally, true);
     }
 
+    public void DisableCaveGuarantee() => _ensureCaveOnComplete = false;
+
     public void BeginActivation(TimerUI timerOverride, bool manageLoadingScreenInternally, bool ensureCaveOnComplete)
     {
         _runtimeTimerOverride = timerOverride;

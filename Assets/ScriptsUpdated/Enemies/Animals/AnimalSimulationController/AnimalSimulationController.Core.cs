@@ -102,6 +102,7 @@ public partial class AnimalSimulationController : MonoBehaviour
     private bool _storageDirty = true;
 
     private bool _hasCompletedInitialAnimalSpawn = false;
+    private bool _initialSpawnBlocked = false;
 
     private readonly Dictionary<string, UnitGroupMarker> _unitMarkerByGroupId =
         new Dictionary<string, UnitGroupMarker>(System.StringComparer.Ordinal);
@@ -407,6 +408,8 @@ public partial class AnimalSimulationController : MonoBehaviour
 
         RefreshPlayerTargetedAnimalIcons();
     }
+
+    public void BlockInitialAnimalSpawn() => _initialSpawnBlocked = true;
 
     public void InstallRuntimeRefs(
     TurnSystem newTurnSystem = null,

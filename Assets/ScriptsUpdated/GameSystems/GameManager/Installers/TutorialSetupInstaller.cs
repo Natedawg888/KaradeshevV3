@@ -1,247 +1,289 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    [Header("Tutorial Scene References")]
-    [SerializeField] private CameraIntroTutorial cameraIntroTutorial;
-    [SerializeField] private EnvironmentTileTutorial environmentTileTutorial;
-    [SerializeField] private PopulationTutorial populationTutorial;
-    [SerializeField] private DiscoveryTutorial discoveryTutorial;
-    [SerializeField] private GatheringTutorial gatheringTutorial;
-    [SerializeField] private InventoryTutorial inventoryTutorial;
-    [SerializeField] private PopulationStatisticsTutorial populationStatisticsTutorial;
-    [SerializeField] private ExtraUITutorial extraUITutorial;
-    [SerializeField] private ProfileTutorial profileTutorial;
-    [SerializeField] private BuildingTutorial buildingTutorial;
-    [SerializeField] private BuildingTutorialPart2 buildingTutorialPart2;
-    [SerializeField] private CraftingTutorial craftingTutorial;
-    [SerializeField] private ProductionTutorial productionTutorial;
-    [SerializeField] private ProductionRunningTutorial productionRunningTutorial;
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate }
+
+    [Header("Tutorial Parts (shown in order)")]
+    [SerializeField] private GameObject[] tutorialParts;
+    [SerializeField] private PartType[] partTypes;
+
+    [Header("Button Lookup")]
+    [SerializeField] private string nextButtonName = "NextButton";
+
+    [Header("Interaction Thresholds")]
+    [SerializeField] private float pinchDeltaThreshold = 20f;
+    [SerializeField] private float minimapRotateYawThreshold = 20f;
+
+    private CameraControl _cameraControl;
+    private TileActivator _tileActivator;
+    private int _currentPart = -1;
+    private Button _activeNextButton;
+
+    private bool _waitingForDrag;
+    private bool _waitingForDragRelease;
+    private bool _waitingForZoom;
+    private bool _waitingForRotate;
+    private bool _zoomedIn;
+    private bool _zoomedOut;
+    private bool _startedMinimapRotate;
+    private float _minimapRotateStartYaw;
 
     public Scene LoadedScene => gameObject.scene;
-    public CameraIntroTutorial CameraIntroTutorial => cameraIntroTutorial;
-    public EnvironmentTileTutorial EnvironmentTileTutorial => environmentTileTutorial;
-    public PopulationTutorial PopulationTutorial => populationTutorial;
-    public DiscoveryTutorial DiscoveryTutorial => discoveryTutorial;
-    public GatheringTutorial GatheringTutorial => gatheringTutorial;
-    public InventoryTutorial InventoryTutorial => inventoryTutorial;
-    public PopulationStatisticsTutorial PopulationStatisticsTutorial => populationStatisticsTutorial;
-    public ExtraUITutorial ExtraUITutorial => extraUITutorial;
-    public ProfileTutorial ProfileTutorial => profileTutorial;
-    public BuildingTutorial BuildingTutorial => buildingTutorial;
-    public BuildingTutorialPart2 BuildingTutorialPart2 => buildingTutorialPart2;
-    public CraftingTutorial CraftingTutorial => craftingTutorial;
-    public ProductionTutorial ProductionTutorial => productionTutorial;
-    public ProductionRunningTutorial ProductionRunningTutorial => productionRunningTutorial;
 
-    private void Awake()
+    public void InstallRefs(CameraControl cameraControl, TileActivator tileActivator)
     {
-        if (cameraIntroTutorial == null)
-            cameraIntroTutorial = GetComponentInChildren<CameraIntroTutorial>(true);
+        _cameraControl = cameraControl;
 
-        if (environmentTileTutorial == null)
-            environmentTileTutorial = GetComponentInChildren<EnvironmentTileTutorial>(true);
+        if (_tileActivator != null)
+            _tileActivator.OnTilesActivated -= OnWorldSpawned;
 
-        if (populationTutorial == null)
-            populationTutorial = GetComponentInChildren<PopulationTutorial>(true);
+        _tileActivator = tileActivator;
 
-        if (discoveryTutorial == null)
-            discoveryTutorial = GetComponentInChildren<DiscoveryTutorial>(true);
-
-        if (gatheringTutorial == null)
-            gatheringTutorial = GetComponentInChildren<GatheringTutorial>(true);
-
-        if (inventoryTutorial == null)
-            inventoryTutorial = GetComponentInChildren<InventoryTutorial>(true);
-
-        if (populationStatisticsTutorial == null)
-            populationStatisticsTutorial = GetComponentInChildren<PopulationStatisticsTutorial>(true);
-
-        if (extraUITutorial == null)
-            extraUITutorial = GetComponentInChildren<ExtraUITutorial>(true);
-
-        if (profileTutorial == null)
-            profileTutorial = GetComponentInChildren<ProfileTutorial>(true);
-
-        if (buildingTutorial == null)
-            buildingTutorial = GetComponentInChildren<BuildingTutorial>(true);
-
-        if (buildingTutorialPart2 == null)
-            buildingTutorialPart2 = GetComponentInChildren<BuildingTutorialPart2>(true);
-
-        if (craftingTutorial == null)
-            craftingTutorial = GetComponentInChildren<CraftingTutorial>(true);
-
-        if (productionTutorial == null)
-            productionTutorial = GetComponentInChildren<ProductionTutorial>(true);
-
-        if (productionRunningTutorial == null)
-            productionRunningTutorial = GetComponentInChildren<ProductionRunningTutorial>(true);
-
-        if (cameraIntroTutorial == null) {}
-            //Debug.LogWarning("[TutorialSetupInstaller] CameraIntroTutorial not found in TutorialSetup scene.");
-
-        if (environmentTileTutorial == null) {}
-            //Debug.LogWarning("[TutorialSetupInstaller] EnvironmentTileTutorial not found in TutorialSetup scene.");
-
-        if (populationTutorial == null) {}
-            //Debug.LogWarning("[TutorialSetupInstaller] PopulationTutorial not found in TutorialSetup scene.");
-
-        if (discoveryTutorial == null) {}
-            //Debug.LogWarning("[TutorialSetupInstaller] DiscoveryTutorial not found in TutorialSetup scene.");
-
-        if (gatheringTutorial == null) {}
-            //Debug.LogWarning("[TutorialSetupInstaller] GatheringTutorial not found in TutorialSetup scene.");
-
-        if (inventoryTutorial == null) {}
-            //Debug.LogWarning("[TutorialSetupInstaller] InventoryTutorial not found in TutorialSetup scene.");
-
-        if (populationStatisticsTutorial == null) {}
-            //Debug.LogWarning("[TutorialSetupInstaller] PopulationStatisticsTutorial not found in TutorialSetup scene.");
-
-        if (extraUITutorial == null) {}
-            //Debug.LogWarning("[TutorialSetupInstaller] ExtraUITutorial not found in TutorialSetup scene.");
-
-        if (profileTutorial == null) {}
-            //Debug.LogWarning("[TutorialSetupInstaller] ProfileTutorial not found in TutorialSetup scene.");
-
-        if (buildingTutorial == null) {}
-            //Debug.LogWarning("[TutorialSetupInstaller] BuildingTutorial not found in TutorialSetup scene.");
-
-        if (buildingTutorialPart2 == null) {}
-            //Debug.LogWarning("[TutorialSetupInstaller] BuildingTutorialPart2 not found in TutorialSetup scene.");
+        if (_tileActivator != null)
+            _tileActivator.OnTilesActivated += OnWorldSpawned;
     }
 
-    public void InstallBootstrapReferences(
-        CameraControl cameraControl,
-        GridManager gridManager,
-        MonoEnvironmentDataSource environmentDataSource,
-        UndiscoveredTilePanelControl undiscoveredTilePanelControl,
-        DiscoveredTilePanelControl discoveredTilePanelControl,
-        CollectedGoodsPanelControl collectedGoodsPanelControl,
-        InventoryPanelControl inventoryPanelControl,
-        PlayerPopulationStatisticsPanelRoot playerPopulationStatisticsPanelRoot,
-        ProfilePanelControl profilePanelControl,
-        BuildingPanelControl buildingPanelControl,
-        BuildingDestroyedPanelControl buildingDestroyedPanelControl,
-        BuildingCatalogPanelControl buildingCatalogPanelControl,
-        ProductionRunningPanelControl productionRunningPanelControl,
-        TileInteraction tileInteraction)
+    private void OnDestroy()
     {
-        if (cameraIntroTutorial != null)
-            cameraIntroTutorial.InstallRuntimeRefs(cameraControl, environmentTileTutorial);
+        if (_tileActivator != null)
+            _tileActivator.OnTilesActivated -= OnWorldSpawned;
 
-        if (environmentTileTutorial != null)
-            environmentTileTutorial.InstallRuntimeRefs(
-                cameraControl,
-                gridManager,
-                environmentDataSource
-            );
+        UnbindActiveNextButton();
+    }
 
-        if (populationTutorial != null)
-            populationTutorial.InstallRuntimeRefs(discoveryTutorial);
-
-        if (discoveryTutorial != null)
+    private void Update()
+    {
+        if (_waitingForDrag)
         {
-            discoveryTutorial.InstallRuntimeRefs(
-                undiscoveredTilePanelControl,
-                cameraControl,
-                tileInteraction,
-                gatheringTutorial
-            );
+            if (_cameraControl != null && _cameraControl.IsDragging())
+            {
+                _waitingForDrag = false;
+                _waitingForDragRelease = true;
+            }
+            return;
         }
 
-        if (gatheringTutorial != null)
+        if (_waitingForDragRelease)
         {
-            gatheringTutorial.InstallRuntimeRefs(
-                discoveredTilePanelControl,
-                discoveredTilePanelControl != null ? discoveredTilePanelControl.surveyPanel : null,
-                collectedGoodsPanelControl,
-                inventoryTutorial
-            );
+            if (_cameraControl != null && !_cameraControl.IsDragging()
+                && !Input.GetMouseButton(0) && Input.touchCount == 0)
+            {
+                _waitingForDragRelease = false;
+                ShowPart(_currentPart + 1);
+            }
+            return;
         }
 
-        if (inventoryTutorial != null)
+        if (_waitingForZoom)
         {
-            inventoryTutorial.InstallRuntimeRefs(
-                inventoryPanelControl,
-                cameraControl,
-                tileInteraction,
-                populationStatisticsTutorial
-            );
+            int dir = GetZoomDirectionThisFrame();
+            if (dir > 0) _zoomedIn = true;
+            else if (dir < 0) _zoomedOut = true;
+
+            if (_zoomedIn && _zoomedOut)
+            {
+                _waitingForZoom = false;
+                ShowPart(_currentPart + 1);
+            }
+            return;
         }
 
-        if (populationStatisticsTutorial != null)
+        if (_waitingForRotate)
         {
-            populationStatisticsTutorial.InstallRuntimeRefs(
-                playerPopulationStatisticsPanelRoot,
-                cameraControl,
-                tileInteraction,
-                extraUITutorial
-            );
+            if (_cameraControl == null) return;
+
+            if (_cameraControl.IsRotatingFromMinimap())
+            {
+                float currentYaw = _cameraControl.GetCurrentYaw();
+
+                if (!_startedMinimapRotate)
+                {
+                    _startedMinimapRotate = true;
+                    _minimapRotateStartYaw = currentYaw;
+                }
+
+                float yawDelta = Mathf.Abs(Mathf.DeltaAngle(_minimapRotateStartYaw, currentYaw));
+                if (yawDelta >= minimapRotateYawThreshold)
+                {
+                    _waitingForRotate = false;
+                    ShowPart(_currentPart + 1);
+                }
+            }
+            return;
+        }
+    }
+
+    private void OnWorldSpawned()
+    {
+        TurnSystem.Instance?.PauseTurnTimer();
+
+        if (_cameraControl != null)
+        {
+            _cameraControl.SetTutorialInputRestrictions(
+                restrictInput: true,
+                allowWorldDrag: false,
+                allowZoom: false,
+                allowMinimapRotation: false);
+
+            CenterCameraOnMap();
         }
 
-        if (extraUITutorial != null)
+        ShowPart(0);
+    }
+
+    private void CenterCameraOnMap()
+    {
+        GridManager gm = GridManager.Instance;
+        if (gm == null || _cameraControl == null)
+            return;
+
+        float centerX = (gm.columns / 2f) * gm.cellSize;
+        float centerZ = (gm.rows / 2f) * gm.cellSize;
+        Transform camT = _cameraControl.transform;
+        camT.position = new Vector3(centerX, camT.position.y, centerZ);
+    }
+
+    private void OnNextPressed()
+    {
+        ShowPart(_currentPart + 1);
+    }
+
+    private void ShowPart(int index)
+    {
+        if (tutorialParts == null || tutorialParts.Length == 0)
+            return;
+
+        if (_currentPart >= 0 && _currentPart < tutorialParts.Length && tutorialParts[_currentPart] != null)
+            tutorialParts[_currentPart].SetActive(false);
+
+        UnbindActiveNextButton();
+        ClearInteractiveState();
+
+        _currentPart = index;
+
+        if (_currentPart >= tutorialParts.Length || tutorialParts[_currentPart] == null)
+            return;
+
+        tutorialParts[_currentPart].SetActive(true);
+
+        switch (GetPartType(_currentPart))
         {
-            extraUITutorial.InstallRuntimeRefs(
-                profilePanelControl,
-                cameraControl,
-                tileInteraction,
-                profileTutorial
-            );
+            case PartType.Static:
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
+
+            case PartType.CameraDrag:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: true,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                _waitingForDrag = true;
+                break;
+
+            case PartType.CameraZoom:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: true,
+                        allowMinimapRotation: false);
+                _waitingForZoom = true;
+                _zoomedIn = false;
+                _zoomedOut = false;
+                break;
+
+            case PartType.MinimapRotate:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: true);
+                _waitingForRotate = true;
+                _startedMinimapRotate = false;
+                _minimapRotateStartYaw = 0f;
+                break;
+        }
+    }
+
+    private Button FindNextButton(GameObject part)
+    {
+        if (part == null)
+            return null;
+
+        Button[] buttons = part.GetComponentsInChildren<Button>(true);
+
+        if (buttons.Length == 0)
+            return null;
+
+        if (!string.IsNullOrEmpty(nextButtonName))
+        {
+            foreach (Button btn in buttons)
+            {
+                if (btn.gameObject.name == nextButtonName)
+                    return btn;
+            }
         }
 
-        if (profileTutorial != null)
+        return buttons[0];
+    }
+
+    private PartType GetPartType(int index)
+    {
+        if (partTypes != null && index < partTypes.Length)
+            return partTypes[index];
+        return PartType.Static;
+    }
+
+    private void ClearInteractiveState()
+    {
+        _waitingForDrag = false;
+        _waitingForDragRelease = false;
+        _waitingForZoom = false;
+        _waitingForRotate = false;
+        _zoomedIn = false;
+        _zoomedOut = false;
+        _startedMinimapRotate = false;
+        _minimapRotateStartYaw = 0f;
+    }
+
+    private void UnbindActiveNextButton()
+    {
+        if (_activeNextButton != null)
         {
-            profileTutorial.InstallRuntimeRefs(profilePanelControl);
+            _activeNextButton.onClick.RemoveListener(OnNextPressed);
+            _activeNextButton = null;
+        }
+    }
+
+    private int GetZoomDirectionThisFrame()
+    {
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll > 0.0001f) return 1;
+        if (scroll < -0.0001f) return -1;
+
+        if (Input.touchCount == 2)
+        {
+            Touch a = Input.GetTouch(0);
+            Touch b = Input.GetTouch(1);
+            Vector2 aPrev = a.position - a.deltaPosition;
+            Vector2 bPrev = b.position - b.deltaPosition;
+            float delta = Vector2.Distance(a.position, b.position) - Vector2.Distance(aPrev, bPrev);
+            if (delta >= pinchDeltaThreshold) return 1;
+            if (delta <= -pinchDeltaThreshold) return -1;
         }
 
-        if (buildingTutorialPart2 != null)
-        {
-            buildingTutorialPart2.InstallRuntimeRefs(
-                buildingPanelControl,
-                buildingPanelControl != null ? buildingPanelControl.shelterPanel : null,
-                buildingPanelControl != null ? buildingPanelControl.storagePanel : null,
-                cameraControl,
-                tileInteraction
-            );
-        }
-
-        if (buildingTutorial != null)
-        {
-            buildingTutorial.InstallRuntimeRefs(
-                buildingPanelControl,
-                buildingDestroyedPanelControl,
-                discoveredTilePanelControl,
-                buildingCatalogPanelControl,
-                cameraControl,
-                tileInteraction,
-                buildingTutorialPart2
-            );
-        }
-
-        if (buildingPanelControl != null && buildingPanelControl.craftingPanel != null)
-        {
-            buildingPanelControl.craftingPanel.InstallRuntimeRefs(
-                newCraftingTutorial: craftingTutorial,
-                refreshIfOpen: false
-            );
-        }
-
-        if (buildingPanelControl != null && buildingPanelControl.productionPanel != null)
-        {
-            buildingPanelControl.productionPanel.InstallRuntimeRefs(
-                newProductionTutorial: productionTutorial,
-                refreshIfOpen: false
-            );
-        }
-
-        if (productionRunningPanelControl != null)
-        {
-            productionRunningPanelControl.InstallRuntimeRefs(
-                productionRunningTutorial
-            );
-        }
+        return 0;
     }
 }

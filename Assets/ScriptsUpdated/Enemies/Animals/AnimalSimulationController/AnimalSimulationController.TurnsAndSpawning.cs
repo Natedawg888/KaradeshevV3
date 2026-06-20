@@ -123,6 +123,9 @@ public partial class AnimalSimulationController : MonoBehaviour
         _humanUnitsDirty = true;
         _storageDirty = true;
 
+        if (_initialSpawnBlocked)
+            return;
+
         var presetManager = EnvironmentPresetManager.Instance;
         if (presetManager == null)
             return;

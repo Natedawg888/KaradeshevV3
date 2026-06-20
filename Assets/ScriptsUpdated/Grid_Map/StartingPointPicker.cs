@@ -24,6 +24,7 @@ public class StartingPointPicker : MonoBehaviour
     [SerializeField] private MapTilePlacer mapTilePlacer;
 
     private bool _isRegeneratingMap = false;
+    private bool _blockedForTutorial = false;
 
     private class StarterCandidate
     {
@@ -167,6 +168,8 @@ public class StartingPointPicker : MonoBehaviour
         _subscribedToTileActivator = false;
     }
 
+    public void BlockForTutorial() => _blockedForTutorial = true;
+
     private void HandleTilesActivated()
     {
         if (ShouldBlockForLoadedGame())
@@ -176,6 +179,9 @@ public class StartingPointPicker : MonoBehaviour
 
             return;
         }
+
+        if (_blockedForTutorial)
+            return;
 
         BeginSelection();
     }

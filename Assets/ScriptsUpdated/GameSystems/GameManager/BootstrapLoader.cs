@@ -120,6 +120,14 @@ public class BootstrapLoader : MonoBehaviour
             {
                 _worldInstaller.EnvironmentPresetManager.ApplyPreset(setup.selectedPresetID);
             }
+
+            if (setup != null && setup.includeTutorial && _worldInstaller.GridManager != null)
+            {
+                _worldInstaller.GridManager.columns = 12;
+                _worldInstaller.GridManager.rows = 12;
+                _worldInstaller.GridManager.InitializeGrid();
+                _worldInstaller.TileActivator?.DisableCaveGuarantee();
+            }
         }
 
         InstallWorldReferencesIntoBootSystems();
@@ -265,29 +273,8 @@ public class BootstrapLoader : MonoBehaviour
                     Log("LoadTutorialSetup_DONE", Time.realtimeSinceStartup - tutorialStart);
 
                     _tutorialInstaller = FindFirstObjectByType<TutorialSetupInstaller>(FindObjectsInactive.Include);
-                    if (_tutorialInstaller == null)
-                    {
+                    if (_tutorialInstaller == null) {}
                         //Debug.LogWarning("[BootstrapLoader] TutorialSetupInstaller not found after TutorialSetup loaded. Continuing without tutorials.");
-                    }
-                    else
-                    {
-                        _tutorialInstaller.InstallBootstrapReferences(
-                            bootstrapCameraControl,
-                            _worldInstaller != null ? _worldInstaller.GridManager : null,
-                            _worldInstaller != null ? _worldInstaller.EnvDataSource : null,
-                            uiInstaller != null ? uiInstaller.UndiscoveredTilePanelControl : null,
-                            uiInstaller != null ? uiInstaller.DiscoveredTilePanelControl : null,
-                            uiInstaller != null ? uiInstaller.CollectedGoodsPanelControl : null,
-                            uiInstaller != null ? uiInstaller.InventoryPanelControl : null,
-                            uiInstaller != null ? uiInstaller.PlayerPopulationStatisticsPanelRoot : null,
-                            uiInstaller != null ? uiInstaller.ProfilePanelControl : null,
-                            uiInstaller != null ? uiInstaller.BuildingPanelControl : null,
-                            uiInstaller != null ? uiInstaller.BuildingDestroyedPanelControl : null,
-                            uiInstaller != null ? uiInstaller.BuildingCatalogPanelControl : null,
-                            uiInstaller != null ? uiInstaller.ProductionRunningPanelControl : null,
-                            _playerInstaller != null ? _playerInstaller.TileInteraction : null
-                        );
-                    }
                 }
             }
         }
@@ -603,19 +590,11 @@ public class BootstrapLoader : MonoBehaviour
             );
         }
 
-        CameraIntroTutorial cameraTutorial = tutorialInstaller != null
-            ? tutorialInstaller.CameraIntroTutorial
-            : null;
-
-        EnvironmentTileTutorial environmentTutorial = tutorialInstaller != null
-            ? tutorialInstaller.EnvironmentTileTutorial
-            : null;
-
         finalInstaller.InstallBootstrapReferences(
             bootstrapCameraControl,
             _worldInstaller != null ? _worldInstaller.TileActivator : null,
-            cameraTutorial,
-            environmentTutorial
+            null,
+            null
         );
 
         if (finalInstaller.AnimalSimulationController != null)
@@ -625,6 +604,20 @@ public class BootstrapLoader : MonoBehaviour
                 newEnvDataSource: _worldInstaller != null ? _worldInstaller.EnvDataSource : null,
                 newTileActivator: _worldInstaller != null ? _worldInstaller.TileActivator : null
             );
+        }
+
+        if (tutorialInstaller != null)
+        {
+            tutorialInstaller.InstallRefs(
+                bootstrapCameraControl,
+                _worldInstaller != null ? _worldInstaller.TileActivator : null
+            );
+
+            if (finalInstaller.AnimalSimulationController != null)
+                finalInstaller.AnimalSimulationController.BlockInitialAnimalSpawn();
+
+            if (finalInstaller.StartingPointPicker != null)
+                finalInstaller.StartingPointPicker.BlockForTutorial();
         }
 
         InstallAnimalSimulationIntoTsunamiSystems();
