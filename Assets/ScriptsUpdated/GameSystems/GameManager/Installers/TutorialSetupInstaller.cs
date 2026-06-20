@@ -428,6 +428,10 @@ public class TutorialSetupInstaller : MonoBehaviour
         EnvironmentControl env = _trackedDiscoveryEnv;
         if (env == null) { ShowPart(_currentPart + 1); yield break; }
 
+        // Force tutorial simulation mode so ApplyTutorialDiscoveryGhostTick won't early-return
+        if (env.discoveryTurnsLeft > 0)
+            env.BeginTutorialDiscoverySimulation(env.discoveryTurnsLeft);
+
         while (env.discoveryTurnsLeft > 0)
         {
             if (TurnSystem.Instance != null)
