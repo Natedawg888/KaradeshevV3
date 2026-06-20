@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -34,6 +34,14 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _zoomedOut;
     private bool _startedMinimapRotate;
     private float _minimapRotateStartYaw;
+
+    private Vector2Int _placedShelterGridPos;
+    private Vector3 _placedShelterWorldPos;
+    private readonly List<TileControl> _highlightedTileControls = new List<TileControl>();
+    private bool _shouldRestoreCameraPose;
+
+    private bool _waitingForUndiscoveredPanel;
+    private UndiscoveredTilePanelControl _undiscoveredPanel;
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -235,6 +243,45 @@ public class TutorialSetupInstaller : MonoBehaviour
                     _activeNextButton.onClick.AddListener(OnNextPressed);
                 }
                 break;
+
+            case PartType.OpenUndiscoveredTile:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: true,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                TileInteraction.SetSelectionEnabled(true);
+                if (_undiscoveredPanel == null)
+                    _undiscoveredPanel = FindFirstObjectByType<UndiscoveredTilePanelControl>(FindObjectsInactive.Include);
+                if (_undiscoveredPanel != null)
+                {
+                    _undiscoveredPanel.OnOpen += OnUndiscoveredPanelOpened;
+                    _waitingForUndiscoveredPanel = true;
+                }
+                break;
+
+            case PartType.HighlightAdjacent:
+                if (_cameraControl != null)
+                {
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                    _cameraControl.SaveCameraPose();
+                    _shouldRestoreCameraPose = true;
+                    _cameraControl.FocusTopDownOnPoint(_placedShelterWorldPos, float.MaxValue);
+                }
+                HighlightTilesAroundShelter();
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
         }
     }
 
@@ -273,6 +320,10 @@ public class TutorialSetupInstaller : MonoBehaviour
         Vector3 worldPos = target.transform.position;
         Vector3 envForward = target.transform.forward;
 
+        _placedShelterWorldPos = worldPos;
+        if (GridManager.Instance != null)
+            _placedShelterGridPos = GridManager.Instance.GetGridPosition(worldPos);
+
         GameObject prefab = buildingDef.finalBuildingPrefab != null
             ? buildingDef.finalBuildingPrefab
             : buildingDef.buildingPrefab;
@@ -288,6 +339,51 @@ public class TutorialSetupInstaller : MonoBehaviour
         Destroy(toDestroy);
 
         _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
+    }
+
+    private void OnUndiscoveredPanelOpened()
+    {
+        if (!_waitingForUndiscoveredPanel) return;
+        _waitingForUndiscoveredPanel = false;
+        if (_undiscoveredPanel != null)
+            _undiscoveredPanel.OnOpen -= OnUndiscoveredPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void HighlightTilesAroundShelter()
+    {
+        GridManager gm = GridManager.Instance;
+        if (gm == null) return;
+
+        float half = gm.cellSize * 0.4f;
+
+        for (int dx = -1; dx <= 1; dx++)
+        {
+            for (int dz = -1; dz <= 1; dz++)
+            {
+                if (dx == 0 && dz == 0) continue;
+
+                int nx = _placedShelterGridPos.x + dx;
+                int nz = _placedShelterGridPos.y + dz;
+
+                if (nx < 0 || nx >= gm.columns || nz < 0 || nz >= gm.rows)
+                    continue;
+
+                Vector3 neighborPos = gm.GetWorldPosition(nx, nz);
+                Collider[] hits = Physics.OverlapBox(neighborPos, new Vector3(half, 2f, half));
+
+                foreach (Collider col in hits)
+                {
+                    TileControl tc = col.GetComponentInParent<TileControl>();
+                    if (tc == null) tc = col.GetComponent<TileControl>();
+                    if (tc != null && !_highlightedTileControls.Contains(tc))
+                    {
+                        tc.SelectTile();
+                        _highlightedTileControls.Add(tc);
+                    }
+                }
+            }
+        }
     }
 
     private Button FindNextButton(GameObject part)
@@ -329,6 +425,22 @@ public class TutorialSetupInstaller : MonoBehaviour
         _zoomedOut = false;
         _startedMinimapRotate = false;
         _minimapRotateStartYaw = 0f;
+
+        foreach (TileControl tc in _highlightedTileControls)
+            if (tc != null) tc.DeselectTile();
+        _highlightedTileControls.Clear();
+
+        if (_shouldRestoreCameraPose && _cameraControl != null)
+        {
+            _cameraControl.RestoreCameraPose();
+            _shouldRestoreCameraPose = false;
+        }
+
+        if (_waitingForUndiscoveredPanel && _undiscoveredPanel != null)
+        {
+            _undiscoveredPanel.OnOpen -= OnUndiscoveredPanelOpened;
+            _waitingForUndiscoveredPanel = false;
+        }
     }
 
     private void UnbindActiveNextButton()

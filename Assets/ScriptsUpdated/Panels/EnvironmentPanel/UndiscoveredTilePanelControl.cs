@@ -36,6 +36,7 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
     private EnvironmentFireState currentFireState;
 
     public event Action OnClose;
+    public event Action OnOpen;
 
     public CameraControl cameraControl;
 
@@ -89,6 +90,8 @@ public class UndiscoveredTilePanelControl : MonoBehaviour
 
         if (root != null) root.SetActive(true);
         else gameObject.SetActive(true);
+
+        OnOpen?.Invoke();
 
         TileInteraction.SetSelectionEnabled(false);
 
