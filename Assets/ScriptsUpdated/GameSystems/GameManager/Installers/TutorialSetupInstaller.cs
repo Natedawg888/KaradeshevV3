@@ -1,10 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -16,6 +17,9 @@ public class TutorialSetupInstaller : MonoBehaviour
     [Header("Interaction Thresholds")]
     [SerializeField] private float pinchDeltaThreshold = 20f;
     [SerializeField] private float minimapRotateYawThreshold = 20f;
+
+    [Header("Shelter Placement Part")]
+    [SerializeField] private string shelterBuildingID = "";
 
     private CameraControl _cameraControl;
     private TileActivator _tileActivator;
@@ -214,7 +218,76 @@ public class TutorialSetupInstaller : MonoBehaviour
                 _startedMinimapRotate = false;
                 _minimapRotateStartYaw = 0f;
                 break;
+
+            case PartType.ShelterPlacement:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                PlaceShelterOnMap();
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
         }
+    }
+
+    private void PlaceShelterOnMap()
+    {
+        if (string.IsNullOrEmpty(shelterBuildingID) || BuildingManager.Instance == null)
+            return;
+
+        Building buildingDef = BuildingManager.Instance.GetBuildingByID(shelterBuildingID);
+        if (buildingDef == null)
+            return;
+
+        EnvironmentControl[] allEnvs = FindObjectsByType<EnvironmentControl>(FindObjectsSortMode.None);
+        List<EnvironmentControl> candidates = new List<EnvironmentControl>();
+
+        foreach (EnvironmentControl env in allEnvs)
+        {
+            bool typeOk = buildingDef.requiredEnvironmentTypes == null
+                || buildingDef.requiredEnvironmentTypes.Count == 0
+                || buildingDef.requiredEnvironmentTypes.Contains(env.environmentType);
+
+            bool tileTypeOk = buildingDef.requiredEnvironmentTileTypes == null
+                || buildingDef.requiredEnvironmentTileTypes.Count == 0
+                || buildingDef.requiredEnvironmentTileTypes.Contains(env.environmentTileType);
+
+            bool sizeOk = env.tileSize == buildingDef.requiredTileSize;
+
+            if (typeOk && tileTypeOk && sizeOk)
+                candidates.Add(env);
+        }
+
+        if (candidates.Count == 0)
+            return;
+
+        EnvironmentControl target = candidates[Random.Range(0, candidates.Count)];
+        Vector3 worldPos = target.transform.position;
+        Vector3 envForward = target.transform.forward;
+
+        GameObject prefab = buildingDef.finalBuildingPrefab != null
+            ? buildingDef.finalBuildingPrefab
+            : buildingDef.buildingPrefab;
+
+        if (prefab != null)
+            Instantiate(prefab, worldPos, target.transform.rotation);
+
+        // Remove environment tile the same way BuildingPlacementManager does
+        TileControl tileControl = target.GetComponent<TileControl>();
+        GameObject toDestroy = (tileControl != null && tileControl.transform.parent != null)
+            ? tileControl.transform.parent.gameObject
+            : target.gameObject;
+        Destroy(toDestroy);
+
+        _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
     }
 
     private Button FindNextButton(GameObject part)
