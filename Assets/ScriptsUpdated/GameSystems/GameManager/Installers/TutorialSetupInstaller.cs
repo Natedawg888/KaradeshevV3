@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -42,6 +42,9 @@ public class TutorialSetupInstaller : MonoBehaviour
 
     private bool _waitingForUndiscoveredPanel;
     private UndiscoveredTilePanelControl _undiscoveredPanel;
+
+    private bool _waitingForDiscoveryDetails;
+    private DiscoveryDetailsPanelControl _discoveryDetailsPanel;
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -261,6 +264,16 @@ public class TutorialSetupInstaller : MonoBehaviour
                 }
                 break;
 
+            case PartType.OpenDiscoveryDetails:
+                if (_discoveryDetailsPanel == null)
+                    _discoveryDetailsPanel = FindFirstObjectByType<DiscoveryDetailsPanelControl>(FindObjectsInactive.Include);
+                if (_discoveryDetailsPanel != null)
+                {
+                    _discoveryDetailsPanel.OnOpen += OnDiscoveryDetailsPanelOpened;
+                    _waitingForDiscoveryDetails = true;
+                }
+                break;
+
             case PartType.HighlightAdjacent:
                 if (_cameraControl != null)
                 {
@@ -347,6 +360,15 @@ public class TutorialSetupInstaller : MonoBehaviour
         _waitingForUndiscoveredPanel = false;
         if (_undiscoveredPanel != null)
             _undiscoveredPanel.OnOpen -= OnUndiscoveredPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnDiscoveryDetailsPanelOpened()
+    {
+        if (!_waitingForDiscoveryDetails) return;
+        _waitingForDiscoveryDetails = false;
+        if (_discoveryDetailsPanel != null)
+            _discoveryDetailsPanel.OnOpen -= OnDiscoveryDetailsPanelOpened;
         ShowPart(_currentPart + 1);
     }
 
@@ -440,6 +462,12 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _undiscoveredPanel.OnOpen -= OnUndiscoveredPanelOpened;
             _waitingForUndiscoveredPanel = false;
+        }
+
+        if (_waitingForDiscoveryDetails && _discoveryDetailsPanel != null)
+        {
+            _discoveryDetailsPanel.OnOpen -= OnDiscoveryDetailsPanelOpened;
+            _waitingForDiscoveryDetails = false;
         }
     }
 

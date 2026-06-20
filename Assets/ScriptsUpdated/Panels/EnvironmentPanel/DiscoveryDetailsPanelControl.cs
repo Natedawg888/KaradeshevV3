@@ -18,6 +18,7 @@ public class DiscoveryDetailsPanelControl : MonoBehaviour
     public bool IsShowing => root != null ? root.activeInHierarchy : gameObject.activeInHierarchy;
 
     public event Action OnClose;
+    public event Action OnOpen;
 
     private void Start()
     {
@@ -55,6 +56,8 @@ public class DiscoveryDetailsPanelControl : MonoBehaviour
 
         if (root != null) root.SetActive(true);
         else gameObject.SetActive(true);
+
+        OnOpen?.Invoke();
 
         env.GetPreTechDiscovery(out int preTechTurns, out float preTechFail);
         env.GetEffectiveDiscovery(out int effTurns, out float effFail);
