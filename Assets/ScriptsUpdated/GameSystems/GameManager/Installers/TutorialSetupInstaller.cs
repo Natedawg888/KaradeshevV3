@@ -30,6 +30,10 @@ public class TutorialSetupInstaller : MonoBehaviour
     [SerializeField] private MapGenerator _mapGenerator;
     [SerializeField] private MapTilePlacer _mapTilePlacer;
 
+    [Header("Tutorial Building Selection")]
+    [SerializeField] private string tutorialGrasslandBuildingID = "";
+    [SerializeField] private string tutorialSavannaBuildingID = "";
+
     private CameraControl _cameraControl;
     private TileActivator _tileActivator;
     private int _currentPart = -1;
@@ -94,6 +98,7 @@ public class TutorialSetupInstaller : MonoBehaviour
 
     private bool _waitingForGrasslandOrSavannaSelect;
     private readonly List<TileControl> _grassSavannaHighlights = new List<TileControl>();
+    private EnvironmentType _selectedGrassOrSavannaType;
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -1137,7 +1142,19 @@ public class TutorialSetupInstaller : MonoBehaviour
         _discoveredTilePanel.TutorialBuildOverride = null;
         TileInteraction.ClearTutorialAllowedTile();
 
-        _discoveredTilePanel.buildingCatalogPanel?.ShowFor(env, _discoveredTilePanel);
+        var catalog = _discoveredTilePanel.buildingCatalogPanel;
+        if (catalog != null)
+        {
+            string targetID = _selectedGrassOrSavannaType == EnvironmentType.Savanna
+                ? tutorialSavannaBuildingID
+                : tutorialGrasslandBuildingID;
+
+            if (!string.IsNullOrEmpty(targetID))
+                catalog.ShowForTutorial(env, _discoveredTilePanel, targetID);
+            else
+                catalog.ShowFor(env, _discoveredTilePanel);
+        }
+
         ShowPart(_currentPart + 1);
         return true;
     }
@@ -1186,6 +1203,16 @@ public class TutorialSetupInstaller : MonoBehaviour
         _grassSavannaHighlights.Clear();
 
         TileInteraction.ClearTutorialAllowedTiles();
+
+        // Store the selected env so ClickBuildButton can focus on this tile and
+        // so OnTutorialBuildClicked knows which building variant to show.
+        var env = tile.GetComponentInChildren<EnvironmentControl>(true);
+        if (env != null)
+        {
+            _trackedDiscoveryEnv = env;
+            _selectedGrassOrSavannaType = env.environmentType;
+        }
+
         ShowPart(_currentPart + 1);
     }
 

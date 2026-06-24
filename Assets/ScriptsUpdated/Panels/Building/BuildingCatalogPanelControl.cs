@@ -88,6 +88,37 @@ public class BuildingCatalogPanelControl : MonoBehaviour
         }
     }
 
+    public void ShowForTutorial(EnvironmentControl env, DiscoveredTilePanelControl owner, string buildingID)
+    {
+        if (!env || string.IsNullOrEmpty(buildingID)) { ShowFor(env, owner); return; }
+
+        ownerPanel = owner;
+
+        if (!buildingItemPrefab) return;
+
+        if (root) root.SetActive(true);
+
+        var available = PlayerBuildingManager.Instance
+            ? PlayerBuildingManager.Instance.GetAvailableBuildingsForTile(
+                env.tileSize, env.environmentType, env.environmentTileType)
+            : new List<Building>();
+
+        ClearContent();
+
+        foreach (var b in available)
+        {
+            if (!string.Equals(b.buildingID, buildingID, System.StringComparison.OrdinalIgnoreCase)) continue;
+
+            var go = Instantiate(buildingItemPrefab, contentArea);
+            var ui = go.GetComponent<BuildingCatalogItem>();
+            if (ui != null)
+            {
+                ui.Bind(b, env, this, ownerPanel);
+                spawnedItems.Add(ui);
+            }
+        }
+    }
+
     public void Hide()
     {
         if (root) root.SetActive(false);
