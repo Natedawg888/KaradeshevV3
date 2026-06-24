@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -130,6 +130,9 @@ public class TutorialSetupInstaller : MonoBehaviour
     private BuildingRepair _placedBuildingRepair;
     private bool _waitingForRepairAndDamagedClose;
     private Coroutine _fastForwardRepairRoutine;
+
+    private bool _waitingForResearchPanelOpen;
+    private ResearchPanelControl _researchPanel;
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -1028,6 +1031,45 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.OpenResearchPanel:
+            {
+                if (_researchPanel == null)
+                    _researchPanel = FindFirstObjectByType<ResearchPanelControl>(FindObjectsInactive.Include);
+                if (_researchPanel != null)
+                {
+                    if (_researchPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        ResearchPanelControl.TutorialShowAllTech = true;
+
+                        // Allow the player to select the placed building so they can reach the panel
+                        TileControl buildingTile = _placedBuildingTile ?? FindTileControlNear(_placedBuildingWorldPos);
+                        if (buildingTile != null)
+                        {
+                            if (_cameraControl != null)
+                                _cameraControl.SetTutorialInputRestrictions(
+                                    restrictInput: true,
+                                    allowWorldDrag: true,
+                                    allowZoom: true,
+                                    allowMinimapRotation: true);
+                            TileInteraction.SetTutorialAllowedTile(buildingTile);
+                            TileInteraction.SetSelectionEnabled(true);
+                        }
+
+                        _researchPanel.OnOpen += OnResearchPanelOpened;
+                        _waitingForResearchPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.CloseShelterPanel:
             {
                 if (_shelterPanel == null)
@@ -1794,6 +1836,15 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnResearchPanelOpened()
+    {
+        if (!_waitingForResearchPanelOpen) return;
+        _waitingForResearchPanelOpen = false;
+        if (_researchPanel != null) _researchPanel.OnOpen -= OnResearchPanelOpened;
+        TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
+    }
+
     private IEnumerator FastForwardRepairCoroutine(BuildingRepair repair)
     {
         while (repair != null && repair.IsRepairing)
@@ -2213,6 +2264,14 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _buildingPanel.OnClose -= OnBuildingPanelClosed;
             _waitingForBuildingPanelClose = false;
+        }
+
+        if (_waitingForResearchPanelOpen && _researchPanel != null)
+        {
+            _researchPanel.OnOpen -= OnResearchPanelOpened;
+            _waitingForResearchPanelOpen = false;
+            ResearchPanelControl.TutorialShowAllTech = false;
+            TileInteraction.ClearTutorialAllowedTile();
         }
 
         BuildingPlacementPanelControl.TutorialDisableCancelButton = false;

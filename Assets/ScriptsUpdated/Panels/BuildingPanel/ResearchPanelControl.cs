@@ -14,7 +14,12 @@ public class ResearchPanelControl : MonoBehaviour
 
     private BuildingControl _station;
 
+    public static bool TutorialShowAllTech = false;
+
     public bool IsShowing => root != null ? root.activeInHierarchy : gameObject.activeInHierarchy;
+
+    public event System.Action OnOpen;
+    public event System.Action OnClose;
 
     private void Awake()
     {
@@ -34,24 +39,40 @@ public class ResearchPanelControl : MonoBehaviour
         if (root) root.SetActive(true);
         gameObject.SetActive(true);
 
-        var bt = station ? station.GetComponent<BuildingTechnology>() : null;
         List<Technology> source;
 
-        if (bt != null)
+        if (TutorialShowAllTech && station != null)
         {
-            source = bt.GetAvailableAtPlayerLevel();
-
-            // ✅ Hide researched and currently-being-researched
-            if (PlayerResearchManager.Instance)
-                source = PlayerResearchManager.Instance.FilterOutResearchedAndActive(source, station);
+            source = new List<Technology>();
+            var all = TechnologyManager.Instance?.GetAll();
+            if (all != null)
+            {
+                foreach (var t in all)
+                {
+                    if (t != null && t.IsResearchableBy(station.buildingID))
+                        source.Add(t);
+                }
+            }
         }
         else
         {
-            source = new List<Technology>();
-            //Debug.LogWarning("[ResearchPanel] No BuildingTechnology on station; showing empty.");
+            var bt = station ? station.GetComponent<BuildingTechnology>() : null;
+
+            if (bt != null)
+            {
+                source = bt.GetAvailableAtPlayerLevel();
+
+                if (PlayerResearchManager.Instance)
+                    source = PlayerResearchManager.Instance.FilterOutResearchedAndActive(source, station);
+            }
+            else
+            {
+                source = new List<Technology>();
+            }
         }
 
         PopulateList(station, source);
+        OnOpen?.Invoke();
     }
 
     public void Close()
@@ -59,6 +80,7 @@ public class ResearchPanelControl : MonoBehaviour
         if (root) root.SetActive(false);
         ClearList();
         _station = null;
+        OnClose?.Invoke();
     }
 
     public void RefreshNow()

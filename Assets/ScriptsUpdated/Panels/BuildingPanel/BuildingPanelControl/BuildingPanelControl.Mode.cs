@@ -202,6 +202,13 @@ public partial class BuildingPanelControl : MonoBehaviour
         bool destroyed = currentStatus && currentStatus.CurrentState == BuildingState.Destroyed;
         bool hasResearch = !destroyed && currentTechnology != null;
 
+        if (ResearchPanelControl.TutorialShowAllTech)
+        {
+            openResearchButton.gameObject.SetActive(hasResearch);
+            openResearchButton.interactable = hasResearch;
+            return;
+        }
+
         bool hasAvailable = false;
         if (hasResearch)
         {
