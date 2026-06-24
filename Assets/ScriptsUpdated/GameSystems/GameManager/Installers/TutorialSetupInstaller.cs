@@ -570,12 +570,14 @@ public class TutorialSetupInstaller : MonoBehaviour
 
             case PartType.OpenCollectedGoodsPanel:
             {
+                PlayerInventoryManager.TutorialBypassCapacity = true;
                 if (_collectedGoodsPanel == null)
                     _collectedGoodsPanel = FindFirstObjectByType<CollectedGoodsPanelControl>(FindObjectsInactive.Include);
                 if (_collectedGoodsPanel != null)
                 {
                     if (_collectedGoodsPanel.IsShowing)
                     {
+                        _collectedGoodsPanel.RefreshList();
                         ShowPart(_currentPart + 1);
                     }
                     else
