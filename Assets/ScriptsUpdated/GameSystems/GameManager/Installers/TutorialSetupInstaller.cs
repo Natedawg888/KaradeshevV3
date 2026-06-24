@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -99,6 +99,11 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForGrasslandOrSavannaSelect;
     private readonly List<TileControl> _grassSavannaHighlights = new List<TileControl>();
     private EnvironmentType _selectedGrassOrSavannaType;
+
+    private bool _waitingForCostPanelOpen;
+    private bool _waitingForCostPanelClose;
+    private bool _waitingForCatalogBuild;
+    private BuildingCatalogItem _tutorialCatalogItem;
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -702,6 +707,69 @@ public class TutorialSetupInstaller : MonoBehaviour
                 _regenRoutine = StartCoroutine(TutorialRegenerateMapWithDiscoveredCoroutine());
                 break;
 
+            case PartType.OpenBuildingCostPanel:
+            {
+                _tutorialCatalogItem = GetTutorialCatalogItem();
+                if (_tutorialCatalogItem != null)
+                {
+                    if (_tutorialCatalogItem.IsCostsPanelShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _tutorialCatalogItem.OnCostsPanelShown += OnCostsPanelShown;
+                        _waitingForCostPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.CloseBuildingCostPanel:
+            {
+                if (_tutorialCatalogItem == null)
+                    _tutorialCatalogItem = GetTutorialCatalogItem();
+                if (_tutorialCatalogItem != null)
+                {
+                    if (!_tutorialCatalogItem.IsCostsPanelShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _tutorialCatalogItem.OnCostsPanelHidden += OnCostsPanelHidden;
+                        _waitingForCostPanelClose = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.ClickCatalogBuildButton:
+            {
+                if (_tutorialCatalogItem == null)
+                    _tutorialCatalogItem = GetTutorialCatalogItem();
+                if (_tutorialCatalogItem != null)
+                {
+                    _tutorialCatalogItem.TutorialForceGreenCostsButton = true;
+                    _tutorialCatalogItem.TutorialBuildOverride = OnTutorialCatalogBuildButtonClicked;
+                    _waitingForCatalogBuild = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+
             case PartType.SelectTinyGrasslandOrSavanna:
             {
                 if (_cameraControl != null)
@@ -1216,6 +1284,59 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private BuildingCatalogItem GetTutorialCatalogItem()
+    {
+        var catalog = _discoveredTilePanel != null ? _discoveredTilePanel.buildingCatalogPanel : null;
+        if (catalog == null)
+            catalog = FindFirstObjectByType<BuildingCatalogPanelControl>(FindObjectsInactive.Include);
+        return catalog != null && catalog.SpawnedItems.Count > 0 ? catalog.SpawnedItems[0] : null;
+    }
+
+    private void OnCostsPanelShown()
+    {
+        if (!_waitingForCostPanelOpen) return;
+        _waitingForCostPanelOpen = false;
+        if (_tutorialCatalogItem != null) _tutorialCatalogItem.OnCostsPanelShown -= OnCostsPanelShown;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnCostsPanelHidden()
+    {
+        if (!_waitingForCostPanelClose) return;
+        _waitingForCostPanelClose = false;
+        if (_tutorialCatalogItem != null) _tutorialCatalogItem.OnCostsPanelHidden -= OnCostsPanelHidden;
+        ShowPart(_currentPart + 1);
+    }
+
+    private bool OnTutorialCatalogBuildButtonClicked(BuildingCatalogItem item)
+    {
+        if (!_waitingForCatalogBuild) return false;
+        _waitingForCatalogBuild = false;
+
+        if (item != null)
+        {
+            item.TutorialBuildOverride = null;
+            item.TutorialForceGreenCostsButton = false;
+        }
+        _tutorialCatalogItem = null;
+
+        // Bypass cost/pop checks and enter placement directly
+        if (item != null && item.Definition != null && item.TargetEnvironment != null)
+        {
+            BuildingPlacementPanelControl.TutorialDisableCancelButton = true;
+            BuildingPlacementManager.Instance?.BeginPlacement(item.Definition, item.TargetEnvironment);
+        }
+
+        // Panels are hidden by BuildingPlacementManager on placement start,
+        // but hide defensively in case it doesn't
+        var catalog = _discoveredTilePanel != null ? _discoveredTilePanel.buildingCatalogPanel : null;
+        catalog?.Hide();
+        _discoveredTilePanel?.Hide();
+
+        ShowPart(_currentPart + 1);
+        return true;
+    }
+
     private void HighlightTilesAroundShelter()
     {
         GridManager gm = GridManager.Instance;
@@ -1470,6 +1591,28 @@ public class TutorialSetupInstaller : MonoBehaviour
                 }
             }
         }
+
+        if (_waitingForCostPanelOpen && _tutorialCatalogItem != null)
+        {
+            _tutorialCatalogItem.OnCostsPanelShown -= OnCostsPanelShown;
+            _waitingForCostPanelOpen = false;
+        }
+
+        if (_waitingForCostPanelClose && _tutorialCatalogItem != null)
+        {
+            _tutorialCatalogItem.OnCostsPanelHidden -= OnCostsPanelHidden;
+            _waitingForCostPanelClose = false;
+        }
+
+        if (_waitingForCatalogBuild && _tutorialCatalogItem != null)
+        {
+            _tutorialCatalogItem.TutorialBuildOverride = null;
+            _tutorialCatalogItem.TutorialForceGreenCostsButton = false;
+            _waitingForCatalogBuild = false;
+        }
+
+        _tutorialCatalogItem = null;
+        BuildingPlacementPanelControl.TutorialDisableCancelButton = false;
     }
 
     private void UnbindActiveNextButton()

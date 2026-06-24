@@ -52,6 +52,9 @@ public class BuildingCatalogItem : MonoBehaviour
     private DiscoveredTilePanelControl discoveredPanelRef;
 
     public Func<BuildingCatalogItem, bool> TutorialBuildOverride;
+    public System.Action OnCostsPanelShown;
+    public System.Action OnCostsPanelHidden;
+    public bool TutorialForceGreenCostsButton = false;
 
     public Building Definition => def;
     public EnvironmentControl TargetEnvironment => env;
@@ -288,6 +291,12 @@ public class BuildingCatalogItem : MonoBehaviour
         Image img = costsButton.GetComponent<Image>();
         if (!img) return;
 
+        if (TutorialForceGreenCostsButton)
+        {
+            img.color = canAffordColor;
+            return;
+        }
+
         bool canAffordCurrent = InventoryQuery.CanAfford(def.GetActiveBuildCosts());
         bool anyOptionAffordable = def.CanAffordAnyCostOption();
 
@@ -304,16 +313,24 @@ public class BuildingCatalogItem : MonoBehaviour
         costPanelRoot.SetActive(show);
 
         if (show)
+        {
             PopulateCosts();
+            OnCostsPanelShown?.Invoke();
+        }
         else
+        {
             ClearCostContent();
+            OnCostsPanelHidden?.Invoke();
+        }
     }
 
     private void HideCostsPanel()
     {
         if (!costPanelRoot) return;
+        bool wasShowing = costPanelRoot.activeSelf;
         costPanelRoot.SetActive(false);
         ClearCostContent();
+        if (wasShowing) OnCostsPanelHidden?.Invoke();
     }
 
     private void PopulateCosts()

@@ -4,6 +4,8 @@ using TMPro;
 
 public class BuildingPlacementPanelControl : MonoBehaviour
 {
+    public static bool TutorialDisableCancelButton = false;
+
     [Header("Controls")]
     public Button rotateLeftButton;
     public Button rotateRightButton;
@@ -61,11 +63,16 @@ public class BuildingPlacementPanelControl : MonoBehaviour
             });
 
         if (cancelButton != null)
+        {
             cancelButton.onClick.AddListener(() =>
             {
                 if (mgr != null)
                     mgr.CancelPlacement();
             });
+
+            if (TutorialDisableCancelButton)
+                cancelButton.gameObject.SetActive(false);
+        }
 
         gameObject.SetActive(true);
     }
