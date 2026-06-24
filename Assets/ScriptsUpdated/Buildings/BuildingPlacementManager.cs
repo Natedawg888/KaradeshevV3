@@ -22,6 +22,8 @@ public class BuildingPlacementManager : MonoBehaviour
     private GameObject previewInstance;
     private string reservationId;
 
+    public event Action<BuildingConstruction> OnPlacementFinalized;
+
     private bool usedFinalAsPreview = false;
     private List<(Renderer r, bool wasEnabled)> envRenderersState;
 
@@ -205,6 +207,9 @@ public class BuildingPlacementManager : MonoBehaviour
 
             //Debug.Log("[Placement] Construction started successfully – destroying environment tile.");
             DestroyEnvironmentUnderConstruction();
+
+            var bc = constructionGO != null ? constructionGO.GetComponent<BuildingConstruction>() : null;
+            if (bc != null) OnPlacementFinalized?.Invoke(bc);
         }
 
         TileInteraction.SetSelectionEnabled(false);

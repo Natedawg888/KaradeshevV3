@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -105,6 +105,9 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForCatalogBuild;
     private bool _waitingForCostSwitchNext;
     private BuildingCatalogItem _tutorialCatalogItem;
+
+    private bool _waitingForPlacementConfirm;
+    private Coroutine _constructionGhostRoutine;
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -772,6 +775,20 @@ public class TutorialSetupInstaller : MonoBehaviour
             }
 
 
+            case PartType.ConfirmBuildingPlacement:
+            {
+                if (BuildingPlacementManager.Instance != null)
+                {
+                    BuildingPlacementManager.Instance.OnPlacementFinalized += OnBuildingPlacementFinalized;
+                    _waitingForPlacementConfirm = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.ShowCostSwitchButtons:
             {
                 if (_tutorialCatalogItem == null)
@@ -1333,6 +1350,31 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnBuildingPlacementFinalized(BuildingConstruction bc)
+    {
+        if (!_waitingForPlacementConfirm) return;
+        _waitingForPlacementConfirm = false;
+        if (BuildingPlacementManager.Instance != null)
+            BuildingPlacementManager.Instance.OnPlacementFinalized -= OnBuildingPlacementFinalized;
+
+        if (bc != null && PlayerConstructionManager.Instance != null)
+        {
+            if (_constructionGhostRoutine != null) StopCoroutine(_constructionGhostRoutine);
+            _constructionGhostRoutine = StartCoroutine(TutorialConstructionGhostCoroutine(bc));
+        }
+        else
+        {
+            ShowPart(_currentPart + 1);
+        }
+    }
+
+    private IEnumerator TutorialConstructionGhostCoroutine(BuildingConstruction bc)
+    {
+        yield return StartCoroutine(PlayerConstructionManager.Instance.TutorialGhostCompleteConstruction(bc));
+        _constructionGhostRoutine = null;
+        ShowPart(_currentPart + 1);
+    }
+
     private bool OnTutorialCatalogBuildButtonClicked(BuildingCatalogItem item)
     {
         if (!_waitingForCatalogBuild) return false;
@@ -1646,6 +1688,20 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         _tutorialCatalogItem = null;
+
+        if (_waitingForPlacementConfirm)
+        {
+            _waitingForPlacementConfirm = false;
+            if (BuildingPlacementManager.Instance != null)
+                BuildingPlacementManager.Instance.OnPlacementFinalized -= OnBuildingPlacementFinalized;
+        }
+
+        if (_constructionGhostRoutine != null)
+        {
+            StopCoroutine(_constructionGhostRoutine);
+            _constructionGhostRoutine = null;
+        }
+
         BuildingPlacementPanelControl.TutorialDisableCancelButton = false;
     }
 
