@@ -23,6 +23,7 @@ public class BuildingPlacementManager : MonoBehaviour
     private string reservationId;
 
     public event Action<BuildingConstruction> OnPlacementFinalized;
+    public static bool TutorialBypassCosts = false;
 
     private bool usedFinalAsPreview = false;
     private List<(Renderer r, bool wasEnabled)> envRenderersState;
@@ -159,7 +160,7 @@ public class BuildingPlacementManager : MonoBehaviour
             return;
         }
 
-        if (!ResourceDeduction.Deduct(selectedCostSnapshot))
+        if (!TutorialBypassCosts && !ResourceDeduction.Deduct(selectedCostSnapshot))
         {
             //Debug.LogWarning("[Placement] Resource deduction failed at finalize.");
             return;

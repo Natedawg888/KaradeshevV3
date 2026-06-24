@@ -1391,6 +1391,7 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (item != null && item.Definition != null && item.TargetEnvironment != null)
         {
             BuildingPlacementPanelControl.TutorialDisableCancelButton = true;
+            BuildingPlacementManager.TutorialBypassCosts = true;
             BuildingPlacementManager.Instance?.BeginPlacement(item.Definition, item.TargetEnvironment);
         }
 
@@ -1703,6 +1704,7 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         BuildingPlacementPanelControl.TutorialDisableCancelButton = false;
+        BuildingPlacementManager.TutorialBypassCosts = false;
     }
 
     private void UnbindActiveNextButton()
