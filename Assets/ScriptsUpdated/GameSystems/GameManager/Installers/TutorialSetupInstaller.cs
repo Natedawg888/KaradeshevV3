@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -135,6 +135,8 @@ public class TutorialSetupInstaller : MonoBehaviour
     private ResearchPanelControl _researchPanel;
 
     private bool _waitingForResearchNeedsPanelOpen;
+    private bool _waitingForResearchNeedsPanelClose;
+    private bool _waitingForResearchPanelClose;
     private TechnologyItem _trackedTechItem;
 
     public Scene LoadedScene => gameObject.scene;
@@ -1102,6 +1104,53 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.CloseResearchNeedsPanel:
+            {
+                if (_trackedTechItem == null && _researchPanel != null)
+                    _trackedTechItem = _researchPanel.GetComponentInChildren<TechnologyItem>(true);
+
+                if (_trackedTechItem != null)
+                {
+                    if (!_trackedTechItem.NeedsPanelActive)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _trackedTechItem.OnNeedsPanelHidden += OnResearchNeedsPanelHidden;
+                        _waitingForResearchNeedsPanelClose = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.CloseResearchPanel:
+            {
+                if (_researchPanel == null)
+                    _researchPanel = FindFirstObjectByType<ResearchPanelControl>(FindObjectsInactive.Include);
+                if (_researchPanel != null)
+                {
+                    if (!_researchPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _researchPanel.OnClose += OnResearchPanelClosed;
+                        _waitingForResearchPanelClose = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.CloseShelterPanel:
             {
                 if (_shelterPanel == null)
@@ -1886,6 +1935,23 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnResearchNeedsPanelHidden()
+    {
+        if (!_waitingForResearchNeedsPanelClose) return;
+        _waitingForResearchNeedsPanelClose = false;
+        if (_trackedTechItem != null) _trackedTechItem.OnNeedsPanelHidden -= OnResearchNeedsPanelHidden;
+        _trackedTechItem = null;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnResearchPanelClosed()
+    {
+        if (!_waitingForResearchPanelClose) return;
+        _waitingForResearchPanelClose = false;
+        if (_researchPanel != null) _researchPanel.OnClose -= OnResearchPanelClosed;
+        ShowPart(_currentPart + 1);
+    }
+
     private IEnumerator FastForwardRepairCoroutine(BuildingRepair repair)
     {
         while (repair != null && repair.IsRepairing)
@@ -2320,6 +2386,19 @@ public class TutorialSetupInstaller : MonoBehaviour
             _trackedTechItem.OnNeedsPanelShown -= OnResearchNeedsPanelShown;
             _waitingForResearchNeedsPanelOpen = false;
             _trackedTechItem = null;
+        }
+
+        if (_waitingForResearchNeedsPanelClose && _trackedTechItem != null)
+        {
+            _trackedTechItem.OnNeedsPanelHidden -= OnResearchNeedsPanelHidden;
+            _waitingForResearchNeedsPanelClose = false;
+            _trackedTechItem = null;
+        }
+
+        if (_waitingForResearchPanelClose && _researchPanel != null)
+        {
+            _researchPanel.OnClose -= OnResearchPanelClosed;
+            _waitingForResearchPanelClose = false;
         }
 
         BuildingPlacementPanelControl.TutorialDisableCancelButton = false;

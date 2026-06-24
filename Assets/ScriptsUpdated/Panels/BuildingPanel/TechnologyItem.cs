@@ -37,6 +37,7 @@ public class TechnologyItem : MonoBehaviour
     private ResearchPanelControl ownerPanel;
 
     public event System.Action OnNeedsPanelShown;
+    public event System.Action OnNeedsPanelHidden;
 
     public bool NeedsPanelActive => needsPanelRoot != null && needsPanelRoot.activeSelf;
 
@@ -204,12 +205,14 @@ public class TechnologyItem : MonoBehaviour
         bool show = !needsPanelRoot.activeSelf;
         needsPanelRoot.SetActive(show);
         if (show) { PopulateNeeds(); OnNeedsPanelShown?.Invoke(); }
+        else OnNeedsPanelHidden?.Invoke();
     }
 
     private void HideNeedsPanel()
     {
         if (!needsPanelRoot) return;
         needsPanelRoot.SetActive(false);
+        OnNeedsPanelHidden?.Invoke();
     }
 
     private void PopulateNeeds()
