@@ -713,6 +713,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                     if (env == null) continue;
                     if (env.tileSize != TileSize.Tiny) continue;
                     if (env.environmentType != EnvironmentType.Grassland && env.environmentType != EnvironmentType.Savanna) continue;
+                    if (env.environmentTileType != EnvironmentTileType.Land) continue;
                     var tc = env.GetComponentInParent<TileControl>();
                     if (tc != null && !_grassSavannaHighlights.Contains(tc))
                         _grassSavannaHighlights.Add(tc);
