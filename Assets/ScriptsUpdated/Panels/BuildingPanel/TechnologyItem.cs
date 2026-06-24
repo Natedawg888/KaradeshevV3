@@ -36,6 +36,10 @@ public class TechnologyItem : MonoBehaviour
     private BuildingControl station;
     private ResearchPanelControl ownerPanel;
 
+    public event System.Action OnNeedsPanelShown;
+
+    public bool NeedsPanelActive => needsPanelRoot != null && needsPanelRoot.activeSelf;
+
     public void Bind(Technology t, BuildingControl stationBuilding, ResearchPanelControl owner)
     {
         tech = t;
@@ -199,7 +203,7 @@ public class TechnologyItem : MonoBehaviour
         if (!needsPanelRoot) return;
         bool show = !needsPanelRoot.activeSelf;
         needsPanelRoot.SetActive(show);
-        if (show) PopulateNeeds();
+        if (show) { PopulateNeeds(); OnNeedsPanelShown?.Invoke(); }
     }
 
     private void HideNeedsPanel()
