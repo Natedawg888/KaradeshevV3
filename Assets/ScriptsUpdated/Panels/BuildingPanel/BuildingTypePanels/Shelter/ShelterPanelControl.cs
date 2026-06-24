@@ -47,6 +47,7 @@ public class ShelterPanelControl : MonoBehaviour
     public bool IsShowing => root != null && root.activeInHierarchy;
 
     public event System.Action OnOpen;
+    public event System.Action OnClose;
 
     private void Awake()
     {
@@ -163,6 +164,7 @@ public class ShelterPanelControl : MonoBehaviour
         }
 
         _suppressReopenOnHide = false;
+        OnClose?.Invoke();
     }
 
     // --- Pause birthing button logic ---

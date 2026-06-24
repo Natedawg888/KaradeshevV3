@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -112,7 +112,10 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForBuildingTileSelect;
 
     private bool _waitingForShelterPanelOpen;
+    private bool _waitingForShelterPanelClose;
+    private bool _waitingForBuildingPanelClose;
     private ShelterPanelControl _shelterPanel;
+    private BuildingPanelControl _buildingPanel;
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -862,6 +865,52 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.CloseShelterPanel:
+            {
+                if (_shelterPanel == null)
+                    _shelterPanel = FindFirstObjectByType<ShelterPanelControl>(FindObjectsInactive.Include);
+                if (_shelterPanel != null)
+                {
+                    if (!_shelterPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _shelterPanel.OnClose += OnShelterPanelClosed;
+                        _waitingForShelterPanelClose = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.CloseBuildingPanel:
+            {
+                if (_buildingPanel == null)
+                    _buildingPanel = FindFirstObjectByType<BuildingPanelControl>(FindObjectsInactive.Include);
+                if (_buildingPanel != null)
+                {
+                    if (!_buildingPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _buildingPanel.OnClose += OnBuildingPanelClosed;
+                        _waitingForBuildingPanelClose = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.SelectTinyGrasslandOrSavanna:
             {
                 if (_cameraControl != null)
@@ -1273,6 +1322,22 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (!_waitingForShelterPanelOpen) return;
         _waitingForShelterPanelOpen = false;
         if (_shelterPanel != null) _shelterPanel.OnOpen -= OnShelterPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnShelterPanelClosed()
+    {
+        if (!_waitingForShelterPanelClose) return;
+        _waitingForShelterPanelClose = false;
+        if (_shelterPanel != null) _shelterPanel.OnClose -= OnShelterPanelClosed;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnBuildingPanelClosed()
+    {
+        if (!_waitingForBuildingPanelClose) return;
+        _waitingForBuildingPanelClose = false;
+        if (_buildingPanel != null) _buildingPanel.OnClose -= OnBuildingPanelClosed;
         ShowPart(_currentPart + 1);
     }
 
@@ -1810,6 +1875,18 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _shelterPanel.OnOpen -= OnShelterPanelOpened;
             _waitingForShelterPanelOpen = false;
+        }
+
+        if (_waitingForShelterPanelClose && _shelterPanel != null)
+        {
+            _shelterPanel.OnClose -= OnShelterPanelClosed;
+            _waitingForShelterPanelClose = false;
+        }
+
+        if (_waitingForBuildingPanelClose && _buildingPanel != null)
+        {
+            _buildingPanel.OnClose -= OnBuildingPanelClosed;
+            _waitingForBuildingPanelClose = false;
         }
 
         BuildingPlacementPanelControl.TutorialDisableCancelButton = false;
