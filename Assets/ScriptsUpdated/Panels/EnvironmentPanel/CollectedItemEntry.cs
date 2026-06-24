@@ -139,12 +139,42 @@ public class CollectedItemEntry : MonoBehaviour
         }
     }
 
+    private static readonly Color _redColor    = new Color(1f, 0.25f, 0.25f);
+    private Color _normalButtonColor = Color.white;
+    private bool  _normalColorCached;
+
     private void RefreshButtons()
     {
         bool has = amount > 0;
         if (takeOneButton)  takeOneButton.interactable  = has;
         if (takeHalfButton) takeHalfButton.interactable = has && amount > 1;
         if (takeAllButton)  takeAllButton.interactable  = has;
+
+        if (!_normalColorCached)
+        {
+            Button src = takeOneButton ?? takeHalfButton ?? takeAllButton;
+            if (src != null)
+            {
+                _normalButtonColor = src.image != null ? src.image.color : Color.white;
+                _normalColorCached = true;
+            }
+        }
+
+        SetButtonCapacityColor(takeOneButton,  has ? 1 : 0);
+        SetButtonCapacityColor(takeHalfButton, has && amount > 1 ? Mathf.Max(1, amount / 2) : 0);
+        SetButtonCapacityColor(takeAllButton,  has ? amount : 0);
+    }
+
+    private void SetButtonCapacityColor(Button btn, int takeAmount)
+    {
+        if (btn == null || btn.image == null || def == null) return;
+        if (takeAmount <= 0 || PlayerInventoryManager.TutorialBypassCapacity)
+        {
+            btn.image.color = _normalButtonColor;
+            return;
+        }
+        bool fits = PlayerInventoryManager.Instance != null && PlayerInventoryManager.Instance.CanAdd(def, takeAmount);
+        btn.image.color = fits ? _normalButtonColor : _redColor;
     }
 
     private void TryTake(int desired)
