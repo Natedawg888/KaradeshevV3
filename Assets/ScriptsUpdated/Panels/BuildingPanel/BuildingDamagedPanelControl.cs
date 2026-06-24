@@ -42,6 +42,8 @@ public class BuildingDamagedPanelControl : MonoBehaviour
     private BuildingRepair   currentRepair;
     private TileControl      currentTile;
 
+    public bool IsShowing => root != null && root.activeInHierarchy;
+    public event Action OnShow;
     public event Action OnClose;
 
     private void Start()
@@ -114,6 +116,8 @@ public class BuildingDamagedPanelControl : MonoBehaviour
         RefreshRepairEntryState();
         RefreshDestroyButton();
         RefreshRepairProgressUI();
+
+        OnShow?.Invoke();
     }
 
     public void Hide()

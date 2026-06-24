@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -116,6 +116,11 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForBuildingPanelClose;
     private ShelterPanelControl _shelterPanel;
     private BuildingPanelControl _buildingPanel;
+
+    private Coroutine _damageBuildingRoutine;
+    private bool _waitingForDamagedPanelOpen;
+    private BuildingDamagedPanelControl _damagedPanel;
+    private TileControl _placedBuildingTile;
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -799,7 +804,7 @@ public class TutorialSetupInstaller : MonoBehaviour
 
             case PartType.SelectPlacedBuilding:
             {
-                TileControl buildingTile = FindTileControlNear(_placedBuildingWorldPos);
+                TileControl buildingTile = _placedBuildingTile ?? FindTileControlNear(_placedBuildingWorldPos);
                 if (buildingTile != null)
                 {
                     if (_cameraControl != null)
@@ -856,6 +861,57 @@ public class TutorialSetupInstaller : MonoBehaviour
                     {
                         _shelterPanel.OnOpen += OnShelterPanelOpened;
                         _waitingForShelterPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.DamageBuilding:
+            {
+                BuildingControl building = FindBuildingNear(_placedBuildingWorldPos);
+                if (building != null)
+                {
+                    if (_cameraControl != null)
+                        _cameraControl.FocusOnPoint(building.transform.position, building.transform.forward, 6f);
+
+                    if (_damageBuildingRoutine != null) StopCoroutine(_damageBuildingRoutine);
+                    _damageBuildingRoutine = StartCoroutine(DamageBuildingCoroutine(building));
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.SelectDamagedBuilding:
+            {
+                TileControl buildingTile = _placedBuildingTile ?? FindTileControlNear(_placedBuildingWorldPos);
+                if (_damagedPanel == null)
+                    _damagedPanel = FindFirstObjectByType<BuildingDamagedPanelControl>(FindObjectsInactive.Include);
+
+                if (buildingTile != null && _damagedPanel != null)
+                {
+                    if (_damagedPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        if (_cameraControl != null)
+                            _cameraControl.SetTutorialInputRestrictions(
+                                restrictInput: true,
+                                allowWorldDrag: true,
+                                allowZoom: true,
+                                allowMinimapRotation: true);
+                        TileInteraction.SetTutorialAllowedTile(buildingTile);
+                        TileInteraction.SetSelectionEnabled(true);
+                        _damagedPanel.OnShow += OnDamagedPanelOpened;
+                        _waitingForDamagedPanelOpen = true;
                     }
                 }
                 else
@@ -1503,6 +1559,12 @@ public class TutorialSetupInstaller : MonoBehaviour
     {
         yield return StartCoroutine(PlayerConstructionManager.Instance.TutorialGhostCompleteConstruction(bc));
         _constructionGhostRoutine = null;
+
+        // Cache the building's TileControl now that the final GO exists
+        BuildingControl placed = FindBuildingNear(_placedBuildingWorldPos);
+        if (placed != null)
+            _placedBuildingTile = placed.GetComponentInParent<TileControl>();
+
         ShowPart(_currentPart + 1);
     }
 
@@ -1532,6 +1594,60 @@ public class TutorialSetupInstaller : MonoBehaviour
             }
         }
         return best;
+    }
+
+    private static BuildingControl FindBuildingNear(Vector3 worldPos)
+    {
+        var all = FindObjectsByType<BuildingControl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        BuildingControl best = null;
+        float bestDist = float.PositiveInfinity;
+        for (int i = 0; i < all.Length; i++)
+        {
+            if (all[i] == null) continue;
+            float d = Vector3.SqrMagnitude(all[i].transform.position - worldPos);
+            if (d < bestDist)
+            {
+                bestDist = d;
+                best = all[i];
+            }
+        }
+        return best;
+    }
+
+    private IEnumerator DamageBuildingCoroutine(BuildingControl building)
+    {
+        var health = building.GetComponent<BuildingHealth>();
+        var status = building.GetComponent<BuildingStatus>();
+
+        if (health == null || status == null)
+        {
+            _damageBuildingRoutine = null;
+            ShowPart(_currentPart + 1);
+            yield break;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        int target = Mathf.FloorToInt(health.maxHealth * health.damagedThreshold);
+
+        while (health.CurrentHealth > target && status.CurrentState == BuildingState.Normal)
+        {
+            int chunk = Mathf.Max(1, Mathf.CeilToInt((health.CurrentHealth - target) / 5f));
+            health.ApplyDamage(chunk);
+            yield return new WaitForSeconds(0.12f);
+        }
+
+        _damageBuildingRoutine = null;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnDamagedPanelOpened()
+    {
+        if (!_waitingForDamagedPanelOpen) return;
+        _waitingForDamagedPanelOpen = false;
+        if (_damagedPanel != null) _damagedPanel.OnShow -= OnDamagedPanelOpened;
+        TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
     }
 
     private bool OnTutorialCatalogBuildButtonClicked(BuildingCatalogItem item)
@@ -1868,6 +1984,19 @@ public class TutorialSetupInstaller : MonoBehaviour
             _waitingForBuildingTileSelect = false;
             var ti = TileInteraction.GetInstance();
             if (ti != null) ti.OnTileSelected -= OnPlacedBuildingTileSelected;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_damageBuildingRoutine != null)
+        {
+            StopCoroutine(_damageBuildingRoutine);
+            _damageBuildingRoutine = null;
+        }
+
+        if (_waitingForDamagedPanelOpen && _damagedPanel != null)
+        {
+            _damagedPanel.OnShow -= OnDamagedPanelOpened;
+            _waitingForDamagedPanelOpen = false;
             TileInteraction.ClearTutorialAllowedTile();
         }
 

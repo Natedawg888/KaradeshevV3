@@ -825,10 +825,10 @@ public class TileInteraction : MonoBehaviour
         if (tile == null) return false;
 
         if (_tutorialAllowedTile != null)
-            return tile.tileContentType == TileContentType.Environment && tile == _tutorialAllowedTile;
+            return tile == _tutorialAllowedTile;
 
         if (_tutorialAllowedTiles.Count > 0)
-            return tile.tileContentType == TileContentType.Environment && _tutorialAllowedTiles.Contains(tile);
+            return _tutorialAllowedTiles.Contains(tile);
 
         if (!tile.IsInteractable()) return false;
 
