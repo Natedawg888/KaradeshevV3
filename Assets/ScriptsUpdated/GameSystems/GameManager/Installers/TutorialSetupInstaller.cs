@@ -1354,6 +1354,7 @@ public class TutorialSetupInstaller : MonoBehaviour
     {
         if (!_waitingForPlacementConfirm) return;
         _waitingForPlacementConfirm = false;
+        BuildingPlacementManager.TutorialBypassCosts = false;
         if (BuildingPlacementManager.Instance != null)
             BuildingPlacementManager.Instance.OnPlacementFinalized -= OnBuildingPlacementFinalized;
 
@@ -1693,6 +1694,7 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (_waitingForPlacementConfirm)
         {
             _waitingForPlacementConfirm = false;
+            BuildingPlacementManager.TutorialBypassCosts = false;
             if (BuildingPlacementManager.Instance != null)
                 BuildingPlacementManager.Instance.OnPlacementFinalized -= OnBuildingPlacementFinalized;
         }
@@ -1704,7 +1706,6 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         BuildingPlacementPanelControl.TutorialDisableCancelButton = false;
-        BuildingPlacementManager.TutorialBypassCosts = false;
     }
 
     private void UnbindActiveNextButton()
