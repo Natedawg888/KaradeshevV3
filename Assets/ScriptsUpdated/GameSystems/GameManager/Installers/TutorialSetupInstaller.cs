@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -108,6 +108,11 @@ public class TutorialSetupInstaller : MonoBehaviour
 
     private bool _waitingForPlacementConfirm;
     private Coroutine _constructionGhostRoutine;
+    private Vector3 _placedBuildingWorldPos;
+    private bool _waitingForBuildingTileSelect;
+
+    private bool _waitingForShelterPanelOpen;
+    private ShelterPanelControl _shelterPanel;
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -789,6 +794,33 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.SelectPlacedBuilding:
+            {
+                TileControl buildingTile = FindTileControlNear(_placedBuildingWorldPos);
+                if (buildingTile != null)
+                {
+                    if (_cameraControl != null)
+                        _cameraControl.SetTutorialInputRestrictions(
+                            restrictInput: true,
+                            allowWorldDrag: true,
+                            allowZoom: true,
+                            allowMinimapRotation: true);
+                    TileInteraction.SetTutorialAllowedTile(buildingTile);
+                    TileInteraction.SetSelectionEnabled(true);
+                    var ti = TileInteraction.GetInstance();
+                    if (ti != null)
+                    {
+                        ti.OnTileSelected += OnPlacedBuildingTileSelected;
+                        _waitingForBuildingTileSelect = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.ShowCostSwitchButtons:
             {
                 if (_tutorialCatalogItem == null)
@@ -803,6 +835,29 @@ public class TutorialSetupInstaller : MonoBehaviour
                     _activeNextButton.gameObject.SetActive(true);
                     _activeNextButton.interactable = true;
                     _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
+            }
+
+            case PartType.OpenShelterPanel:
+            {
+                if (_shelterPanel == null)
+                    _shelterPanel = FindFirstObjectByType<ShelterPanelControl>(FindObjectsInactive.Include);
+                if (_shelterPanel != null)
+                {
+                    if (_shelterPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _shelterPanel.OnOpen += OnShelterPanelOpened;
+                        _waitingForShelterPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
                 }
                 break;
             }
@@ -1213,6 +1268,14 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnShelterPanelOpened()
+    {
+        if (!_waitingForShelterPanelOpen) return;
+        _waitingForShelterPanelOpen = false;
+        if (_shelterPanel != null) _shelterPanel.OnOpen -= OnShelterPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
     private static List<(ResourceDefinition, int)> BuildGatherLoot(EnvironmentControl env)
     {
         var loot = new List<(ResourceDefinition, int)>();
@@ -1355,6 +1418,8 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (!_waitingForPlacementConfirm) return;
         _waitingForPlacementConfirm = false;
         BuildingPlacementManager.TutorialBypassCosts = false;
+        if (bc != null)
+            _placedBuildingWorldPos = bc.transform.position;
         if (BuildingPlacementManager.Instance != null)
             BuildingPlacementManager.Instance.OnPlacementFinalized -= OnBuildingPlacementFinalized;
 
@@ -1374,6 +1439,34 @@ public class TutorialSetupInstaller : MonoBehaviour
         yield return StartCoroutine(PlayerConstructionManager.Instance.TutorialGhostCompleteConstruction(bc));
         _constructionGhostRoutine = null;
         ShowPart(_currentPart + 1);
+    }
+
+    private void OnPlacedBuildingTileSelected(TileControl tile)
+    {
+        if (!_waitingForBuildingTileSelect) return;
+        _waitingForBuildingTileSelect = false;
+        var ti = TileInteraction.GetInstance();
+        if (ti != null) ti.OnTileSelected -= OnPlacedBuildingTileSelected;
+        TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
+    }
+
+    private static TileControl FindTileControlNear(Vector3 worldPos)
+    {
+        var all = FindObjectsByType<TileControl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        TileControl best = null;
+        float bestDist = float.PositiveInfinity;
+        for (int i = 0; i < all.Length; i++)
+        {
+            if (all[i] == null) continue;
+            float d = Vector3.SqrMagnitude(all[i].transform.position - worldPos);
+            if (d < bestDist)
+            {
+                bestDist = d;
+                best = all[i];
+            }
+        }
+        return best;
     }
 
     private bool OnTutorialCatalogBuildButtonClicked(BuildingCatalogItem item)
@@ -1703,6 +1796,20 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             StopCoroutine(_constructionGhostRoutine);
             _constructionGhostRoutine = null;
+        }
+
+        if (_waitingForBuildingTileSelect)
+        {
+            _waitingForBuildingTileSelect = false;
+            var ti = TileInteraction.GetInstance();
+            if (ti != null) ti.OnTileSelected -= OnPlacedBuildingTileSelected;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForShelterPanelOpen && _shelterPanel != null)
+        {
+            _shelterPanel.OnOpen -= OnShelterPanelOpened;
+            _waitingForShelterPanelOpen = false;
         }
 
         BuildingPlacementPanelControl.TutorialDisableCancelButton = false;

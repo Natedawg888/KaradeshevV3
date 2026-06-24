@@ -46,6 +46,8 @@ public class ShelterPanelControl : MonoBehaviour
 
     public bool IsShowing => root != null && root.activeInHierarchy;
 
+    public event System.Action OnOpen;
+
     private void Awake()
     {
         if (root != null)
@@ -129,6 +131,8 @@ public class ShelterPanelControl : MonoBehaviour
             _cg.interactable = true;
             _cg.blocksRaycasts = true;
         }
+
+        OnOpen?.Invoke();
     }
 
     // We DO NOT reopen via Show(); we simply soft-show the existing Building panel instantly.
