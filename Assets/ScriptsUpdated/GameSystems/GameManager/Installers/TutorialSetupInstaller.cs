@@ -1085,9 +1085,9 @@ public class TutorialSetupInstaller : MonoBehaviour
                 if (_researchPanel == null)
                     _researchPanel = FindFirstObjectByType<ResearchPanelControl>(FindObjectsInactive.Include);
 
-                _trackedTechItem = _researchPanel != null
-                    ? _researchPanel.GetComponentInChildren<TechnologyItem>(true)
-                    : null;
+                _trackedTechItem = null;
+                if (_researchPanel != null && _researchPanel.contentRoot != null)
+                    _trackedTechItem = _researchPanel.contentRoot.GetComponentInChildren<TechnologyItem>(true);
 
                 if (_trackedTechItem != null)
                 {
@@ -1157,8 +1157,8 @@ public class TutorialSetupInstaller : MonoBehaviour
 
             case PartType.CloseResearchNeedsPanel:
             {
-                if (_trackedTechItem == null && _researchPanel != null)
-                    _trackedTechItem = _researchPanel.GetComponentInChildren<TechnologyItem>(true);
+                if (_trackedTechItem == null && _researchPanel != null && _researchPanel.contentRoot != null)
+                    _trackedTechItem = _researchPanel.contentRoot.GetComponentInChildren<TechnologyItem>(true);
 
                 if (_trackedTechItem != null)
                 {
