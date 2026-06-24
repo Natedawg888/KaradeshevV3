@@ -96,26 +96,23 @@ public class BuildingCatalogPanelControl : MonoBehaviour
 
         if (!buildingItemPrefab) return;
 
-        if (root) root.SetActive(true);
+        // Bypass known/unlock filters — look up directly by ID
+        var building = BuildingManager.Instance != null
+            ? BuildingManager.Instance.GetBuildingByID(buildingID)
+            : null;
 
-        var available = PlayerBuildingManager.Instance
-            ? PlayerBuildingManager.Instance.GetAvailableBuildingsForTile(
-                env.tileSize, env.environmentType, env.environmentTileType)
-            : new List<Building>();
+        if (building == null) { ShowFor(env, owner); return; }
+
+        if (root) root.SetActive(true);
 
         ClearContent();
 
-        foreach (var b in available)
+        var go = Instantiate(buildingItemPrefab, contentArea);
+        var ui = go.GetComponent<BuildingCatalogItem>();
+        if (ui != null)
         {
-            if (!string.Equals(b.buildingID, buildingID, System.StringComparison.OrdinalIgnoreCase)) continue;
-
-            var go = Instantiate(buildingItemPrefab, contentArea);
-            var ui = go.GetComponent<BuildingCatalogItem>();
-            if (ui != null)
-            {
-                ui.Bind(b, env, this, ownerPanel);
-                spawnedItems.Add(ui);
-            }
+            ui.Bind(building, env, this, ownerPanel);
+            spawnedItems.Add(ui);
         }
     }
 
