@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -138,6 +138,9 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForResearchNeedsPanelClose;
     private bool _waitingForResearchPanelClose;
     private TechnologyItem _trackedTechItem;
+
+    private bool _waitingForLevelInfoPanelOpen;
+    private TechPanelControl _techPanel;
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -1104,6 +1107,29 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.OpenLevelInfoPanel:
+            {
+                if (_techPanel == null)
+                    _techPanel = FindFirstObjectByType<TechPanelControl>(FindObjectsInactive.Include);
+                if (_techPanel != null)
+                {
+                    if (_techPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _techPanel.OnOpen += OnLevelInfoPanelOpened;
+                        _waitingForLevelInfoPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.CloseResearchNeedsPanel:
             {
                 if (_trackedTechItem == null && _researchPanel != null)
@@ -1952,6 +1978,14 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnLevelInfoPanelOpened()
+    {
+        if (!_waitingForLevelInfoPanelOpen) return;
+        _waitingForLevelInfoPanelOpen = false;
+        if (_techPanel != null) _techPanel.OnOpen -= OnLevelInfoPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
     private IEnumerator FastForwardRepairCoroutine(BuildingRepair repair)
     {
         while (repair != null && repair.IsRepairing)
@@ -2399,6 +2433,12 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _researchPanel.OnClose -= OnResearchPanelClosed;
             _waitingForResearchPanelClose = false;
+        }
+
+        if (_waitingForLevelInfoPanelOpen && _techPanel != null)
+        {
+            _techPanel.OnOpen -= OnLevelInfoPanelOpened;
+            _waitingForLevelInfoPanelOpen = false;
         }
 
         BuildingPlacementPanelControl.TutorialDisableCancelButton = false;

@@ -54,6 +54,11 @@ public class TechPanelControl : MonoBehaviour
     public TechUnitDetailPanel          unitDetailPanel;
     public TechnologyDetailPanelControl techDetailPanel;
 
+    public bool IsShowing => root != null ? root.activeInHierarchy : gameObject.activeInHierarchy;
+
+    public event System.Action OnOpen;
+    public event System.Action OnClose;
+
     private enum FilterMode { Resources, Buildings, Crafting, Production, Units, Technologies }
     private FilterMode _currentFilter = FilterMode.Resources;
 
@@ -122,6 +127,7 @@ public class TechPanelControl : MonoBehaviour
         RefreshHeader();
         RefreshXP();
         RefreshList();
+        OnOpen?.Invoke();
     }
 
     public void Close()
@@ -134,6 +140,7 @@ public class TechPanelControl : MonoBehaviour
 
         HideAllDetailPanels();
         if (root) root.SetActive(false);
+        OnClose?.Invoke();
     }
 
     // ── Header ────────────────────────────────────────────────────────────────
