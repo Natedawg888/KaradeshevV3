@@ -278,6 +278,16 @@ public class PlayerGatheringManager : MonoBehaviour
         return true;
     }
 
+    public void ForceReleaseReservation(EnvironmentControl env)
+    {
+        if (env == null || !inProgress.TryGetValue(env, out var info)) return;
+        if (!string.IsNullOrEmpty(info.reservationId))
+            populationManager?.ReleaseReservation(info.reservationId);
+        inProgress.Remove(env);
+        MarkJobsDirty();
+        PlayersPopulationManager.Instance?.ForceSyncUI();
+    }
+
     public void CancelGathering(EnvironmentControl env)
     {
         if (env == null) return;

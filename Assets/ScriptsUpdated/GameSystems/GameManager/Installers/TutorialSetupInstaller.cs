@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -103,6 +103,7 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForCostPanelOpen;
     private bool _waitingForCostPanelClose;
     private bool _waitingForCatalogBuild;
+    private bool _waitingForCostSwitchNext;
     private BuildingCatalogItem _tutorialCatalogItem;
 
     public Scene LoadedScene => gameObject.scene;
@@ -377,6 +378,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
 
             case PartType.FastForwardDiscovery:
+                EnvironmentControl.TutorialBypassTaskFailure = true;
                 TurnSystem.OnStartOfTurn += OnTurnCompletedForFastForward;
                 _waitingForTurnComplete = true;
                 break;
@@ -770,6 +772,24 @@ public class TutorialSetupInstaller : MonoBehaviour
             }
 
 
+            case PartType.ShowCostSwitchButtons:
+            {
+                if (_tutorialCatalogItem == null)
+                    _tutorialCatalogItem = GetTutorialCatalogItem();
+                if (_tutorialCatalogItem != null)
+                    _tutorialCatalogItem.ForceShowCostSwitchButtonsForTutorial();
+
+                _waitingForCostSwitchNext = true;
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
+            }
+
             case PartType.SelectTinyGrasslandOrSavanna:
             {
                 if (_cameraControl != null)
@@ -904,6 +924,8 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         env.CompleteTutorialDiscoveryNow();
+        PlayerDiscoveryManager.Instance?.ForceReleaseReservation(env);
+        EnvironmentControl.TutorialBypassTaskFailure = false;
         yield return null;
         ShowPart(_currentPart + 1);
     }
@@ -1030,6 +1052,7 @@ public class TutorialSetupInstaller : MonoBehaviour
             _discoveredTilePanel.TutorialGatherOverride == (System.Func<EnvironmentControl, bool>)OnTutorialGatherClicked)
             _discoveredTilePanel.TutorialGatherOverride = null;
 
+        EnvironmentControl.TutorialBypassTaskFailure = true;
         env.BeginGatheringVisuals();
 
         if (_discoveredTilePanel != null)
@@ -1078,6 +1101,8 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         _fastForwardGatherRoutine = null;
+        PlayerGatheringManager.Instance?.ForceReleaseReservation(env);
+        EnvironmentControl.TutorialBypassTaskFailure = false;
         TileInteraction.SetSelectionEnabled(false);
         TileInteraction.GetInstance()?.EnableSelectionAfter(0.01f);
         ShowPart(_currentPart + 1);
@@ -1429,6 +1454,8 @@ public class TutorialSetupInstaller : MonoBehaviour
             _waitingForTurnComplete = false;
         }
 
+        EnvironmentControl.TutorialBypassTaskFailure = false;
+
         if (_fastForwardRoutine != null)
         {
             StopCoroutine(_fastForwardRoutine);
@@ -1609,6 +1636,13 @@ public class TutorialSetupInstaller : MonoBehaviour
             _tutorialCatalogItem.TutorialBuildOverride = null;
             _tutorialCatalogItem.TutorialForceGreenCostsButton = false;
             _waitingForCatalogBuild = false;
+        }
+
+        if (_waitingForCostSwitchNext)
+        {
+            _waitingForCostSwitchNext = false;
+            if (_tutorialCatalogItem != null)
+                _tutorialCatalogItem.RestoreCostSwitchButtonVisibility();
         }
 
         _tutorialCatalogItem = null;

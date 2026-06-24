@@ -268,6 +268,15 @@ public class PlayerDiscoveryManager : MonoBehaviour
         return true;
     }
 
+    public void ForceReleaseReservation(EnvironmentControl env)
+    {
+        if (env == null || !inProgress.TryGetValue(env, out var info)) return;
+        if (!string.IsNullOrEmpty(info.reservationId))
+            populationManager?.ReleaseReservation(info.reservationId);
+        inProgress.Remove(env);
+        PlayersPopulationManager.Instance?.ForceSyncUI();
+    }
+
     public void CancelDiscovery(EnvironmentControl env)
     {
         if (env == null) return;

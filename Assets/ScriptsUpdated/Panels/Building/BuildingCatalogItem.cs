@@ -196,6 +196,17 @@ public class BuildingCatalogItem : MonoBehaviour
         HideInfoPanel();
     }
 
+    public void ForceShowCostSwitchButtonsForTutorial()
+    {
+        if (prevCostSetButton) prevCostSetButton.gameObject.SetActive(true);
+        if (nextCostSetButton) nextCostSetButton.gameObject.SetActive(true);
+    }
+
+    public void RestoreCostSwitchButtonVisibility()
+    {
+        RefreshCostSetHeader();
+    }
+
     private void RefreshLimitUI()
     {
         if (def == null) return;

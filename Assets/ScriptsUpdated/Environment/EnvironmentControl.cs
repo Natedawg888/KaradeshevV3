@@ -555,6 +555,8 @@ public class EnvironmentControl : MonoBehaviour
         GetEffectiveDiscovery(out effTurns, out effFail, out _);
     }
 
+    public static bool TutorialBypassTaskFailure = false;
+
     public void GetEffectiveDiscovery(out int effTurns, out float effFail, out int effRequiredPop)
     {
         // existing logic (your current method contents)...
@@ -568,13 +570,13 @@ public class EnvironmentControl : MonoBehaviour
 
         var buffs = PlayerTechBuffs.Instance;
         effTurns = baseTurns;
-        effFail = baseFail;
+        effFail = TutorialBypassTaskFailure ? 0f : baseFail;
 
         if (buffs != null)
-            (effFail, effTurns) = buffs.GetDiscoveryEffective(this, baseFail, baseTurns);
+            (effFail, effTurns) = buffs.GetDiscoveryEffective(this, effFail, baseTurns);
 
         effTurns = Mathf.Max(1, effTurns);
-        effFail = Mathf.Clamp(effFail, 0f, 100f);
+        effFail = TutorialBypassTaskFailure ? 0f : Mathf.Clamp(effFail, 0f, 100f);
 
         // NEW: required population
         int basePop = Mathf.Max(1, _baseDiscoveryRequiredPop);
@@ -602,13 +604,13 @@ public class EnvironmentControl : MonoBehaviour
 
         var buffs = PlayerTechBuffs.Instance;
         effTurns = baseTurns;
-        effFail = baseFail;
+        effFail = TutorialBypassTaskFailure ? 0f : baseFail;
 
         if (buffs != null)
-            (effFail, effTurns) = buffs.GetGatheringEffective(this, baseFail, baseTurns);
+            (effFail, effTurns) = buffs.GetGatheringEffective(this, effFail, baseTurns);
 
         effTurns = Mathf.Max(1, effTurns);
-        effFail = Mathf.Clamp(effFail, 0f, 100f);
+        effFail = TutorialBypassTaskFailure ? 0f : Mathf.Clamp(effFail, 0f, 100f);
 
         // NEW: required population
         int basePop = Mathf.Max(1, _baseGatheringRequiredPop);
