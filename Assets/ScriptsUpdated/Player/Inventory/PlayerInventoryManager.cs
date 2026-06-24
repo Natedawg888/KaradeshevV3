@@ -177,6 +177,8 @@ public partial class PlayerInventoryManager : MonoBehaviour
         return HasSpaceFor(def, SpaceFor(def, amount));
     }
 
+    public static bool TutorialBypassCapacity = false;
+
     public bool TryAdd(ResourceDefinition def, int amount)
     {
         if (def == null || amount <= 0) return false;
@@ -185,9 +187,12 @@ public partial class PlayerInventoryManager : MonoBehaviour
         var targetList = GetListFor(def.resourceType);
         if (targetList == null) return false;
 
-        // capacity check
-        float incomingSpace = SpaceFor(def, amount);
-        if (!HasSpaceFor(def, incomingSpace)) return false;
+        // capacity check (skipped during tutorial collect-goods phase)
+        if (!TutorialBypassCapacity)
+        {
+            float incomingSpace = SpaceFor(def, amount);
+            if (!HasSpaceFor(def, incomingSpace)) return false;
+        }
 
         // merge with existing stack (by resourceID)
         var stack = targetList.FirstOrDefault(s => s.definition.resourceID == def.resourceID);

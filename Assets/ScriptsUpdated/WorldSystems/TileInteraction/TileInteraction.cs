@@ -68,6 +68,33 @@ public class TileInteraction : MonoBehaviour
 
     private bool _suppressAutoDeselect = false;
 
+    private TileControl _tutorialAllowedTile = null;
+    private readonly HashSet<TileControl> _tutorialAllowedTiles = new HashSet<TileControl>();
+
+    public static void SetTutorialAllowedTile(TileControl tile)
+    {
+        if (Instance != null) Instance._tutorialAllowedTile = tile;
+    }
+
+    public static void ClearTutorialAllowedTile()
+    {
+        if (Instance != null) Instance._tutorialAllowedTile = null;
+    }
+
+    public static void SetTutorialAllowedTiles(IEnumerable<TileControl> tiles)
+    {
+        if (Instance == null) return;
+        Instance._tutorialAllowedTiles.Clear();
+        if (tiles != null)
+            foreach (var t in tiles)
+                if (t != null) Instance._tutorialAllowedTiles.Add(t);
+    }
+
+    public static void ClearTutorialAllowedTiles()
+    {
+        if (Instance != null) Instance._tutorialAllowedTiles.Clear();
+    }
+
     // NonAlloc buffers
     private RaycastHit[] _rayHits;
 
@@ -87,6 +114,8 @@ public class TileInteraction : MonoBehaviour
     // NonAlloc neighbor buffer
     private Collider[] _neighborHits;
 
+    private int _constructionLayer = -1;
+
     public static TileInteraction GetInstance() => Instance;
     public TileControl GetCurrentSelected() => _currentSelected;
 
@@ -105,6 +134,8 @@ public class TileInteraction : MonoBehaviour
 
         if (maxNeighborHits < 8) maxNeighborHits = 8;
         _neighborHits = new Collider[maxNeighborHits];
+
+        _constructionLayer = LayerMask.NameToLayer("ConstructionLayer");
 
         SubscribePanelEvents();
     }
@@ -421,7 +452,7 @@ public class TileInteraction : MonoBehaviour
             }
         }
 
-        if (bestTile == null || !bestTile.IsInteractable())
+        if (bestTile == null || (!bestTile.IsInteractable() && bestTile != _tutorialAllowedTile && !_tutorialAllowedTiles.Contains(bestTile)))
         {
             DeselectCurrent();
             return;
@@ -792,10 +823,21 @@ public class TileInteraction : MonoBehaviour
     private bool CanSelectTile(TileControl tile)
     {
         if (tile == null) return false;
+
+        if (_tutorialAllowedTile != null)
+            return tile.tileContentType == TileContentType.Environment && tile == _tutorialAllowedTile;
+
+        if (_tutorialAllowedTiles.Count > 0)
+            return tile.tileContentType == TileContentType.Environment && _tutorialAllowedTiles.Contains(tile);
+
         if (!tile.IsInteractable()) return false;
 
         // Building tiles are always selectable
         if (tile.tileContentType == TileContentType.Building)
+            return true;
+
+        // ConstructionLayer tiles are selectable even when undiscovered
+        if (_constructionLayer >= 0 && tile.gameObject.layer == _constructionLayer)
             return true;
 
         // Only Environment tiles can be selected (in this rule set)
@@ -854,6 +896,10 @@ public class TileInteraction : MonoBehaviour
 
             // Neighbor building => OK
             if (neighborTile.tileContentType == TileContentType.Building)
+                return true;
+
+            // Neighbor ConstructionLayer tile => OK
+            if (_constructionLayer >= 0 && neighborTile.gameObject.layer == _constructionLayer)
                 return true;
 
             // Neighbor discovered environment => OK

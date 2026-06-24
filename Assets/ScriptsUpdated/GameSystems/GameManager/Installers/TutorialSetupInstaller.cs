@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -21,6 +21,14 @@ public class TutorialSetupInstaller : MonoBehaviour
 
     [Header("Shelter Placement Part")]
     [SerializeField] private string shelterBuildingID = "";
+
+    [Header("Remove Spoiled Food Part")]
+    [SerializeField] private ResourceDefinition tutorialSpoiledFoodDef;
+    [SerializeField] private int tutorialSpoiledFoodAmount = 3;
+
+    [Header("Map Regeneration Part")]
+    [SerializeField] private MapGenerator _mapGenerator;
+    [SerializeField] private MapTilePlacer _mapTilePlacer;
 
     private CameraControl _cameraControl;
     private TileActivator _tileActivator;
@@ -52,6 +60,40 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForDiscoveryDetails;
     private bool _waitingForDiscoveryDetailsClose;
     private DiscoveryDetailsPanelControl _discoveryDetailsPanel;
+
+    private bool _waitingForConsumptionDismiss;
+
+    private bool _waitingForInventoryOpen;
+    private bool _waitingForInventoryClose;
+    private InventoryPanelControl _inventoryPanel;
+
+    private bool _waitingForSpoiledFoodRemoval;
+    private string _spoiledFoodTargetId;
+
+    private bool _waitingForDiscoveredTileSelect;
+
+    private bool _waitingForSurveyComplete;
+    private DiscoveredTilePanelControl _discoveredTilePanel;
+
+    private bool _waitingForSurveyPanelOpen;
+    private bool _waitingForSurveyPanelClose;
+    private SurveyPanelControl _surveyPanel;
+
+    private bool _waitingForGatherClick;
+    private Coroutine _fastForwardGatherRoutine;
+
+    private bool _waitingForCollectedGoodsOpen;
+    private bool _waitingForCollectedGoodsClose;
+    private CollectedGoodsPanelControl _collectedGoodsPanel;
+
+    private bool _waitingForBuildButtonClick;
+    private bool _waitingForBuildingItemSelect;
+
+    private GameObject _placedShelterBuilding;
+    private Coroutine _regenRoutine;
+
+    private bool _waitingForGrasslandOrSavannaSelect;
+    private readonly List<TileControl> _grassSavannaHighlights = new List<TileControl>();
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -135,6 +177,32 @@ public class TutorialSetupInstaller : MonoBehaviour
                 }
             }
             return;
+        }
+
+        if (_waitingForSpoiledFoodRemoval && !string.IsNullOrEmpty(_spoiledFoodTargetId))
+        {
+            var inv = PlayerInventoryManager.Instance;
+            if (inv == null) return;
+
+            bool stillPresent = false;
+            var stacks = inv.GetStacks(ResourceType.Food);
+            for (int i = 0; i < stacks.Count; i++)
+            {
+                var s = stacks[i];
+                if (s?.definition == null) continue;
+                if (string.Equals(s.definition.resourceID, _spoiledFoodTargetId, System.StringComparison.OrdinalIgnoreCase) && s.amount > 0)
+                {
+                    stillPresent = true;
+                    break;
+                }
+            }
+
+            if (!stillPresent)
+            {
+                _waitingForSpoiledFoodRemoval = false;
+                _spoiledFoodTargetId = null;
+                ShowPart(_currentPart + 1);
+            }
         }
     }
 
@@ -303,6 +371,142 @@ public class TutorialSetupInstaller : MonoBehaviour
                 _waitingForTurnComplete = true;
                 break;
 
+            case PartType.TriggerConsumption:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnTriggerConsumptionNextPressed);
+                }
+                break;
+
+            case PartType.WaitForConsumptionDismiss:
+                PopulationConsumptionPanel.OnDismissed += OnConsumptionPanelDismissed;
+                _waitingForConsumptionDismiss = true;
+                break;
+
+            case PartType.OpenInventoryPanel:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                if (_inventoryPanel == null)
+                    _inventoryPanel = FindFirstObjectByType<InventoryPanelControl>(FindObjectsInactive.Include);
+                if (_inventoryPanel != null)
+                {
+                    _inventoryPanel.OnOpen += OnInventoryPanelOpenedSwitchToFood;
+                    _waitingForInventoryOpen = true;
+                }
+                break;
+
+            case PartType.CloseInventoryPanel:
+                if (_inventoryPanel == null)
+                    _inventoryPanel = FindFirstObjectByType<InventoryPanelControl>(FindObjectsInactive.Include);
+                if (_inventoryPanel != null)
+                {
+                    _inventoryPanel.OnClose += OnInventoryPanelClosed;
+                    _waitingForInventoryClose = true;
+                }
+                break;
+
+            case PartType.RemoveSpoiledFood:
+                if (tutorialSpoiledFoodDef != null)
+                {
+                    PlayerInventoryManager.Instance?.TryAdd(tutorialSpoiledFoodDef, tutorialSpoiledFoodAmount);
+                    if (_inventoryPanel == null)
+                        _inventoryPanel = FindFirstObjectByType<InventoryPanelControl>(FindObjectsInactive.Include);
+                    _spoiledFoodTargetId = tutorialSpoiledFoodDef.resourceID;
+                    _inventoryPanel?.Refresh();
+                    _inventoryPanel?.PinResourceToFirst(_spoiledFoodTargetId);
+                    _waitingForSpoiledFoodRemoval = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+
+            case PartType.SelectDiscoveredTile:
+            {
+                TileControl allowedTile = null;
+                if (_trackedDiscoveryEnv != null)
+                    allowedTile = _trackedDiscoveryEnv.GetComponentInParent<TileControl>();
+
+                if (allowedTile != null)
+                {
+                    if (_cameraControl != null)
+                        _cameraControl.SetTutorialInputRestrictions(
+                            restrictInput: true,
+                            allowWorldDrag: true,
+                            allowZoom: true,
+                            allowMinimapRotation: true);
+                    TileInteraction.SetTutorialAllowedTile(allowedTile);
+                    TileInteraction.SetSelectionEnabled(true);
+                    var ti = TileInteraction.GetInstance();
+                    if (ti != null)
+                    {
+                        ti.OnTileSelected += OnDiscoveredTileSelected;
+                        _waitingForDiscoveredTileSelect = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.ClickSurveyButton:
+            {
+                if (_discoveredTilePanel == null)
+                    _discoveredTilePanel = FindFirstObjectByType<DiscoveredTilePanelControl>(FindObjectsInactive.Include);
+
+                if (_discoveredTilePanel != null && PlayerSurveyManager.Instance != null)
+                {
+                    _discoveredTilePanel.TutorialSurveyOverride = OnTutorialSurveyClicked;
+                    PlayerSurveyManager.Instance.OnSurveyCompleted += OnSurveyCompletedForTutorial;
+                    _waitingForSurveyComplete = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OpenSurveyPanel:
+                if (_surveyPanel == null)
+                    _surveyPanel = FindFirstObjectByType<SurveyPanelControl>(FindObjectsInactive.Include);
+                if (_discoveredTilePanel == null)
+                    _discoveredTilePanel = FindFirstObjectByType<DiscoveredTilePanelControl>(FindObjectsInactive.Include);
+                if (_surveyPanel != null)
+                {
+                    _surveyPanel.OnOpen += OnSurveyPanelOpened;
+                    _waitingForSurveyPanelOpen = true;
+                    if (_discoveredTilePanel != null)
+                        _discoveredTilePanel.TutorialSurveyOverride = OnTutorialSurveyPanelOpenClicked;
+                }
+                break;
+
+            case PartType.CloseSurveyPanel:
+                if (_surveyPanel == null)
+                    _surveyPanel = FindFirstObjectByType<SurveyPanelControl>(FindObjectsInactive.Include);
+                if (_surveyPanel != null)
+                {
+                    _surveyPanel.OnClose += OnSurveyPanelClosed;
+                    _waitingForSurveyPanelClose = true;
+                }
+                break;
+
             case PartType.ClickDiscoverButton:
                 if (_undiscoveredPanel == null)
                     _undiscoveredPanel = FindFirstObjectByType<UndiscoveredTilePanelControl>(FindObjectsInactive.Include);
@@ -333,6 +537,130 @@ public class TutorialSetupInstaller : MonoBehaviour
                 }
                 break;
 
+            case PartType.ClickGatherButton:
+            {
+                if (_discoveredTilePanel == null)
+                    _discoveredTilePanel = FindFirstObjectByType<DiscoveredTilePanelControl>(FindObjectsInactive.Include);
+                if (_discoveredTilePanel != null)
+                {
+                    _discoveredTilePanel.TutorialGatherOverride = OnTutorialGatherClicked;
+                    _waitingForGatherClick = true;
+
+                    TileControl allowedTile = _trackedDiscoveryEnv != null
+                        ? _trackedDiscoveryEnv.GetComponentInParent<TileControl>()
+                        : null;
+                    if (allowedTile != null)
+                    {
+                        if (_cameraControl != null)
+                            _cameraControl.SetTutorialInputRestrictions(
+                                restrictInput: true,
+                                allowWorldDrag: true,
+                                allowZoom: true,
+                                allowMinimapRotation: true);
+                        TileInteraction.SetTutorialAllowedTile(allowedTile);
+                        TileInteraction.SetSelectionEnabled(true);
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OpenCollectedGoodsPanel:
+            {
+                if (_collectedGoodsPanel == null)
+                    _collectedGoodsPanel = FindFirstObjectByType<CollectedGoodsPanelControl>(FindObjectsInactive.Include);
+                if (_collectedGoodsPanel != null)
+                {
+                    if (_collectedGoodsPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _collectedGoodsPanel.OnOpen += OnCollectedGoodsPanelOpened;
+                        _waitingForCollectedGoodsOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.CloseCollectedGoodsPanel:
+            {
+                if (_collectedGoodsPanel == null)
+                    _collectedGoodsPanel = FindFirstObjectByType<CollectedGoodsPanelControl>(FindObjectsInactive.Include);
+                if (_collectedGoodsPanel != null)
+                {
+                    _collectedGoodsPanel.OnClose += OnCollectedGoodsPanelClosed;
+                    _waitingForCollectedGoodsClose = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.ClickBuildButton:
+            {
+                if (_discoveredTilePanel == null)
+                    _discoveredTilePanel = FindFirstObjectByType<DiscoveredTilePanelControl>(FindObjectsInactive.Include);
+                if (_discoveredTilePanel != null)
+                {
+                    _discoveredTilePanel.TutorialBuildOverride = OnTutorialBuildClicked;
+                    _waitingForBuildButtonClick = true;
+
+                    TileControl allowedTile = _trackedDiscoveryEnv != null
+                        ? _trackedDiscoveryEnv.GetComponentInParent<TileControl>()
+                        : null;
+                    if (allowedTile != null)
+                    {
+                        if (_cameraControl != null)
+                            _cameraControl.SetTutorialInputRestrictions(
+                                restrictInput: true,
+                                allowWorldDrag: true,
+                                allowZoom: true,
+                                allowMinimapRotation: true);
+                        TileInteraction.SetTutorialAllowedTile(allowedTile);
+                        TileInteraction.SetSelectionEnabled(true);
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.SelectBuildingItem:
+            {
+                var catalog = _discoveredTilePanel != null ? _discoveredTilePanel.buildingCatalogPanel : null;
+                if (catalog == null)
+                    catalog = FindFirstObjectByType<BuildingCatalogPanelControl>(FindObjectsInactive.Include);
+
+                var items = catalog != null ? catalog.SpawnedItems : null;
+                if (items != null && items.Count > 0)
+                {
+                    for (int i = 0; i < items.Count; i++)
+                    {
+                        if (items[i] != null)
+                            items[i].TutorialBuildOverride = OnTutorialBuildingItemSelected;
+                    }
+                    _waitingForBuildingItemSelect = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.HighlightAdjacent:
                 if (_cameraControl != null)
                 {
@@ -354,6 +682,58 @@ public class TutorialSetupInstaller : MonoBehaviour
                     _activeNextButton.onClick.AddListener(OnNextPressed);
                 }
                 break;
+
+            case PartType.RegenerateMapDiscovered:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                TileInteraction.SetSelectionEnabled(false);
+                if (_regenRoutine != null) StopCoroutine(_regenRoutine);
+                _regenRoutine = StartCoroutine(TutorialRegenerateMapWithDiscoveredCoroutine());
+                break;
+
+            case PartType.SelectTinyGrasslandOrSavanna:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: true,
+                        allowZoom: true,
+                        allowMinimapRotation: false);
+
+                _grassSavannaHighlights.Clear();
+                var allEnvs = FindObjectsByType<EnvironmentControl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+                foreach (var env in allEnvs)
+                {
+                    if (env == null) continue;
+                    if (env.tileSize != TileSize.Tiny) continue;
+                    if (env.environmentType != EnvironmentType.Grassland && env.environmentType != EnvironmentType.Savanna) continue;
+                    var tc = env.GetComponentInParent<TileControl>();
+                    if (tc != null && !_grassSavannaHighlights.Contains(tc))
+                        _grassSavannaHighlights.Add(tc);
+                }
+
+                foreach (var tc in _grassSavannaHighlights)
+                    tc.SelectTile();
+
+                TileInteraction.SetTutorialAllowedTiles(_grassSavannaHighlights);
+                TileInteraction.SetSelectionEnabled(true);
+
+                var ti = TileInteraction.GetInstance();
+                if (ti != null)
+                {
+                    ti.OnTileSelected += OnGrasslandOrSavannaSelected;
+                    _waitingForGrasslandOrSavannaSelect = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
         }
     }
 
@@ -401,7 +781,7 @@ public class TutorialSetupInstaller : MonoBehaviour
             : buildingDef.buildingPrefab;
 
         if (prefab != null)
-            Instantiate(prefab, worldPos, target.transform.rotation);
+            _placedShelterBuilding = Instantiate(prefab, worldPos, target.transform.rotation);
 
         // Remove environment tile the same way BuildingPlacementManager does
         TileControl tileControl = target.GetComponent<TileControl>();
@@ -500,6 +880,309 @@ public class TutorialSetupInstaller : MonoBehaviour
         _waitingForDiscoveryDetailsClose = false;
         if (_discoveryDetailsPanel != null)
             _discoveryDetailsPanel.OnClose -= OnDiscoveryDetailsPanelClosed;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnTriggerConsumptionNextPressed()
+    {
+        PlayerAggregatedPopulationSimulationManager.Instance?.ForceConsumptionCycle();
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnConsumptionPanelDismissed()
+    {
+        if (!_waitingForConsumptionDismiss) return;
+        _waitingForConsumptionDismiss = false;
+        PopulationConsumptionPanel.OnDismissed -= OnConsumptionPanelDismissed;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnInventoryPanelOpenedSwitchToFood()
+    {
+        if (!_waitingForInventoryOpen) return;
+        _waitingForInventoryOpen = false;
+        if (_inventoryPanel != null)
+        {
+            _inventoryPanel.OnOpen -= OnInventoryPanelOpenedSwitchToFood;
+            _inventoryPanel.ShowFoodTab();
+        }
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnInventoryPanelClosed()
+    {
+        if (!_waitingForInventoryClose) return;
+        _waitingForInventoryClose = false;
+        if (_inventoryPanel != null) _inventoryPanel.OnClose -= OnInventoryPanelClosed;
+        ShowPart(_currentPart + 1);
+    }
+
+    private bool OnTutorialSurveyClicked(EnvironmentControl env)
+    {
+        if (PlayerSurveyManager.Instance != null)
+        {
+            PlayerSurveyManager.Instance.StartSurvey(env);
+            PlayerSurveyManager.Instance.ForceCompleteSurvey(env);
+        }
+        return true;
+    }
+
+    private bool OnTutorialSurveyPanelOpenClicked(EnvironmentControl env)
+    {
+        if (_surveyPanel == null || env == null) return false;
+
+        var node = env.GetComponent<EnvironmentResourceNode>();
+        if (node == null || node.SpawnedResources == null) return false;
+
+        var entries = new List<SurveyPanelControl.TutorialSurveyEntry>();
+        for (int i = 0; i < node.SpawnedResources.Count; i++)
+        {
+            var e = node.SpawnedResources[i];
+            if (e == null || e.definition == null || e.amount <= 0) continue;
+            entries.Add(new SurveyPanelControl.TutorialSurveyEntry { definition = e.definition, amount = e.amount });
+        }
+
+        _surveyPanel.ShowTutorialEntries(entries);
+        return true;
+    }
+
+    private bool OnTutorialGatherClicked(EnvironmentControl env)
+    {
+        if (env == null) return false;
+        _waitingForGatherClick = false;
+        if (_discoveredTilePanel != null &&
+            _discoveredTilePanel.TutorialGatherOverride == (System.Func<EnvironmentControl, bool>)OnTutorialGatherClicked)
+            _discoveredTilePanel.TutorialGatherOverride = null;
+
+        env.BeginGatheringVisuals();
+
+        if (_discoveredTilePanel != null)
+        {
+            _discoveredTilePanel.SuppressSelectionReenableOnHide = true;
+            _discoveredTilePanel.cameraControl?.PopInputLock();
+        }
+
+        TileInteraction.SetSelectionEnabled(false);
+
+        if (_cameraControl != null)
+            _cameraControl.FocusOnPoint(env.transform.position, env.transform.forward, 6f);
+
+        if (_fastForwardGatherRoutine != null)
+            StopCoroutine(_fastForwardGatherRoutine);
+        _fastForwardGatherRoutine = StartCoroutine(FastForwardGatheringCoroutine(env));
+        return true;
+    }
+
+    private IEnumerator FastForwardGatheringCoroutine(EnvironmentControl env)
+    {
+        if (env == null) { ShowPart(_currentPart + 1); yield break; }
+
+        while (env.gatheringTurnsLeft > 0)
+        {
+            bool finalTick = env.gatheringTurnsLeft <= 1;
+
+            if (TurnSystem.Instance != null)
+            {
+                yield return TurnSystem.Instance.StartCoroutine(
+                    TurnSystem.Instance.RunGhostPhaseAdvance(() =>
+                    {
+                        if (finalTick)
+                            env.StorePendingLoot(BuildGatherLoot(env));
+                        env.AdvanceGatheringTurn();
+                    })
+                );
+            }
+            else
+            {
+                if (finalTick)
+                    env.StorePendingLoot(BuildGatherLoot(env));
+                env.AdvanceGatheringTurn();
+                yield return null;
+            }
+        }
+
+        _fastForwardGatherRoutine = null;
+        TileInteraction.SetSelectionEnabled(false);
+        TileInteraction.GetInstance()?.EnableSelectionAfter(0.01f);
+        ShowPart(_currentPart + 1);
+    }
+
+    private IEnumerator TutorialRegenerateMapWithDiscoveredCoroutine()
+    {
+        // Unsubscribe so OnTilesActivated doesn't restart the tutorial from part 0
+        if (_tileActivator != null)
+            _tileActivator.OnTilesActivated -= OnWorldSpawned;
+
+        // Close the discovered tile panel (it stays open after collected goods panel closes)
+        if (_discoveredTilePanel == null)
+            _discoveredTilePanel = FindFirstObjectByType<DiscoveredTilePanelControl>(FindObjectsInactive.Include);
+        _discoveredTilePanel?.Hide();
+
+        // Destroy the shelter building placed during ShelterPlacement
+        if (_placedShelterBuilding != null)
+        {
+            Destroy(_placedShelterBuilding);
+            _placedShelterBuilding = null;
+        }
+
+        if (_mapGenerator == null)
+            _mapGenerator = FindFirstObjectByType<MapGenerator>();
+        if (_mapTilePlacer == null)
+            _mapTilePlacer = FindFirstObjectByType<MapTilePlacer>();
+
+        if (_mapGenerator == null || _mapTilePlacer == null || _tileActivator == null)
+        {
+            _regenRoutine = null;
+            ShowPart(_currentPart + 1);
+            yield break;
+        }
+
+        _mapTilePlacer.ClearPlacedTilesAndState();
+        yield return null; // let Destroy() calls process
+
+        MapTilePlacer.ResetWorldReady();
+        _mapGenerator.enabled = true;
+        _mapTilePlacer.enabled = true;
+
+        yield return StartCoroutine(_mapGenerator.RegenerateCoroutine());
+
+        _mapTilePlacer.BeginPlacement();
+        yield return new WaitUntil(() => MapTilePlacer.WorldReady);
+
+        _tileActivator.BeginActivation(_tileActivator.timerUI, true, true);
+        yield return new WaitUntil(() => !_tileActivator.IsRunning);
+
+        // Mark every environment tile as already discovered
+        var allEnvs = FindObjectsByType<EnvironmentControl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        for (int i = 0; i < allEnvs.Length; i++)
+        {
+            if (allEnvs[i] != null)
+                allEnvs[i].CompleteTutorialDiscoveryNow();
+        }
+
+        _regenRoutine = null;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnSurveyCompletedForTutorial(EnvironmentControl env)
+    {
+        if (!_waitingForSurveyComplete) return;
+        _waitingForSurveyComplete = false;
+        if (PlayerSurveyManager.Instance != null)
+            PlayerSurveyManager.Instance.OnSurveyCompleted -= OnSurveyCompletedForTutorial;
+        if (_discoveredTilePanel != null &&
+            _discoveredTilePanel.TutorialSurveyOverride == (System.Func<EnvironmentControl, bool>)OnTutorialSurveyClicked)
+            _discoveredTilePanel.TutorialSurveyOverride = null;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnSurveyPanelOpened()
+    {
+        if (!_waitingForSurveyPanelOpen) return;
+        _waitingForSurveyPanelOpen = false;
+        if (_surveyPanel != null) _surveyPanel.OnOpen -= OnSurveyPanelOpened;
+        if (_discoveredTilePanel != null &&
+            _discoveredTilePanel.TutorialSurveyOverride == (System.Func<EnvironmentControl, bool>)OnTutorialSurveyPanelOpenClicked)
+            _discoveredTilePanel.TutorialSurveyOverride = null;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnSurveyPanelClosed()
+    {
+        if (!_waitingForSurveyPanelClose) return;
+        _waitingForSurveyPanelClose = false;
+        if (_surveyPanel != null) _surveyPanel.OnClose -= OnSurveyPanelClosed;
+        ShowPart(_currentPart + 1);
+    }
+
+    private static List<(ResourceDefinition, int)> BuildGatherLoot(EnvironmentControl env)
+    {
+        var loot = new List<(ResourceDefinition, int)>();
+        var node = env.GetComponent<EnvironmentResourceNode>();
+        if (node == null || node.SpawnedResources == null) return loot;
+        for (int i = 0; i < node.SpawnedResources.Count; i++)
+        {
+            var s = node.SpawnedResources[i];
+            if (s != null && s.definition != null && s.amount > 0)
+                loot.Add((s.definition, s.amount));
+        }
+        return loot;
+    }
+
+    private void OnCollectedGoodsPanelOpened()
+    {
+        if (!_waitingForCollectedGoodsOpen) return;
+        _waitingForCollectedGoodsOpen = false;
+        if (_collectedGoodsPanel != null) _collectedGoodsPanel.OnOpen -= OnCollectedGoodsPanelOpened;
+        PlayerInventoryManager.TutorialBypassCapacity = true;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnCollectedGoodsPanelClosed()
+    {
+        if (!_waitingForCollectedGoodsClose) return;
+        _waitingForCollectedGoodsClose = false;
+        PlayerInventoryManager.TutorialBypassCapacity = false;
+        if (_collectedGoodsPanel != null) _collectedGoodsPanel.OnClose -= OnCollectedGoodsPanelClosed;
+        ShowPart(_currentPart + 1);
+    }
+
+    private bool OnTutorialBuildClicked(EnvironmentControl env)
+    {
+        if (env == null) return false;
+        _waitingForBuildButtonClick = false;
+        _discoveredTilePanel.TutorialBuildOverride = null;
+        TileInteraction.ClearTutorialAllowedTile();
+
+        _discoveredTilePanel.buildingCatalogPanel?.ShowFor(env, _discoveredTilePanel);
+        ShowPart(_currentPart + 1);
+        return true;
+    }
+
+    private bool OnTutorialBuildingItemSelected(BuildingCatalogItem item)
+    {
+        if (!_waitingForBuildingItemSelect) return false;
+        _waitingForBuildingItemSelect = false;
+
+        var catalog = _discoveredTilePanel != null ? _discoveredTilePanel.buildingCatalogPanel : null;
+        if (catalog != null)
+        {
+            var items = catalog.SpawnedItems;
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i] != null &&
+                    items[i].TutorialBuildOverride == (System.Func<BuildingCatalogItem, bool>)OnTutorialBuildingItemSelected)
+                    items[i].TutorialBuildOverride = null;
+            }
+        }
+
+        ShowPart(_currentPart + 1);
+        return true;
+    }
+
+    private void OnDiscoveredTileSelected(TileControl tile)
+    {
+        if (!_waitingForDiscoveredTileSelect) return;
+        _waitingForDiscoveredTileSelect = false;
+        TileInteraction.GetInstance().OnTileSelected -= OnDiscoveredTileSelected;
+        TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnGrasslandOrSavannaSelected(TileControl tile)
+    {
+        if (!_waitingForGrasslandOrSavannaSelect) return;
+        if (!_grassSavannaHighlights.Contains(tile)) return;
+
+        _waitingForGrasslandOrSavannaSelect = false;
+        var ti = TileInteraction.GetInstance();
+        if (ti != null) ti.OnTileSelected -= OnGrasslandOrSavannaSelected;
+
+        foreach (var tc in _grassSavannaHighlights)
+            if (tc != null && tc != tile) tc.DeselectTile();
+        _grassSavannaHighlights.Clear();
+
+        TileInteraction.ClearTutorialAllowedTiles();
         ShowPart(_currentPart + 1);
     }
 
@@ -631,6 +1314,132 @@ public class TutorialSetupInstaller : MonoBehaviour
             _discoveryDetailsPanel.OnClose -= OnDiscoveryDetailsPanelClosed;
             _waitingForDiscoveryDetailsClose = false;
         }
+
+        if (_waitingForConsumptionDismiss)
+        {
+            PopulationConsumptionPanel.OnDismissed -= OnConsumptionPanelDismissed;
+            _waitingForConsumptionDismiss = false;
+        }
+
+        if (_waitingForInventoryOpen && _inventoryPanel != null)
+        {
+            _inventoryPanel.OnOpen -= OnInventoryPanelOpenedSwitchToFood;
+            _waitingForInventoryOpen = false;
+        }
+
+        if (_waitingForInventoryClose && _inventoryPanel != null)
+        {
+            _inventoryPanel.OnClose -= OnInventoryPanelClosed;
+            _waitingForInventoryClose = false;
+        }
+
+        if (_waitingForSpoiledFoodRemoval)
+        {
+            _waitingForSpoiledFoodRemoval = false;
+            _spoiledFoodTargetId = null;
+        }
+
+        if (_waitingForDiscoveredTileSelect)
+        {
+            _waitingForDiscoveredTileSelect = false;
+            var ti = TileInteraction.GetInstance();
+            if (ti != null) ti.OnTileSelected -= OnDiscoveredTileSelected;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForGrasslandOrSavannaSelect)
+        {
+            _waitingForGrasslandOrSavannaSelect = false;
+            var ti = TileInteraction.GetInstance();
+            if (ti != null) ti.OnTileSelected -= OnGrasslandOrSavannaSelected;
+            foreach (var tc in _grassSavannaHighlights)
+                if (tc != null) tc.DeselectTile();
+            _grassSavannaHighlights.Clear();
+            TileInteraction.ClearTutorialAllowedTiles();
+        }
+
+        if (_waitingForSurveyComplete)
+        {
+            _waitingForSurveyComplete = false;
+            if (PlayerSurveyManager.Instance != null)
+                PlayerSurveyManager.Instance.OnSurveyCompleted -= OnSurveyCompletedForTutorial;
+            if (_discoveredTilePanel != null &&
+                _discoveredTilePanel.TutorialSurveyOverride == (System.Func<EnvironmentControl, bool>)OnTutorialSurveyClicked)
+                _discoveredTilePanel.TutorialSurveyOverride = null;
+        }
+
+        if (_waitingForSurveyPanelOpen && _surveyPanel != null)
+        {
+            _surveyPanel.OnOpen -= OnSurveyPanelOpened;
+            _waitingForSurveyPanelOpen = false;
+            if (_discoveredTilePanel != null &&
+                _discoveredTilePanel.TutorialSurveyOverride == (System.Func<EnvironmentControl, bool>)OnTutorialSurveyPanelOpenClicked)
+                _discoveredTilePanel.TutorialSurveyOverride = null;
+        }
+
+        if (_waitingForSurveyPanelClose && _surveyPanel != null)
+        {
+            _surveyPanel.OnClose -= OnSurveyPanelClosed;
+            _waitingForSurveyPanelClose = false;
+        }
+
+        if (_waitingForGatherClick && _discoveredTilePanel != null)
+        {
+            if (_discoveredTilePanel.TutorialGatherOverride == (System.Func<EnvironmentControl, bool>)OnTutorialGatherClicked)
+                _discoveredTilePanel.TutorialGatherOverride = null;
+            _waitingForGatherClick = false;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_fastForwardGatherRoutine != null)
+        {
+            StopCoroutine(_fastForwardGatherRoutine);
+            _fastForwardGatherRoutine = null;
+        }
+
+        if (_regenRoutine != null)
+        {
+            StopCoroutine(_regenRoutine);
+            _regenRoutine = null;
+        }
+
+        if (_waitingForCollectedGoodsOpen && _collectedGoodsPanel != null)
+        {
+            _collectedGoodsPanel.OnOpen -= OnCollectedGoodsPanelOpened;
+            _waitingForCollectedGoodsOpen = false;
+        }
+
+        if (_waitingForCollectedGoodsClose && _collectedGoodsPanel != null)
+        {
+            _collectedGoodsPanel.OnClose -= OnCollectedGoodsPanelClosed;
+            _waitingForCollectedGoodsClose = false;
+        }
+
+        PlayerInventoryManager.TutorialBypassCapacity = false;
+
+        if (_waitingForBuildButtonClick && _discoveredTilePanel != null)
+        {
+            if (_discoveredTilePanel.TutorialBuildOverride == (System.Func<EnvironmentControl, bool>)OnTutorialBuildClicked)
+                _discoveredTilePanel.TutorialBuildOverride = null;
+            _waitingForBuildButtonClick = false;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForBuildingItemSelect)
+        {
+            _waitingForBuildingItemSelect = false;
+            var catalog = _discoveredTilePanel != null ? _discoveredTilePanel.buildingCatalogPanel : null;
+            if (catalog != null)
+            {
+                var items = catalog.SpawnedItems;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i] != null &&
+                        items[i].TutorialBuildOverride == (System.Func<BuildingCatalogItem, bool>)OnTutorialBuildingItemSelected)
+                        items[i].TutorialBuildOverride = null;
+                }
+            }
+        }
     }
 
     private void UnbindActiveNextButton()
@@ -638,6 +1447,7 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (_activeNextButton != null)
         {
             _activeNextButton.onClick.RemoveListener(OnNextPressed);
+            _activeNextButton.onClick.RemoveListener(OnTriggerConsumptionNextPressed);
             _activeNextButton = null;
         }
     }
