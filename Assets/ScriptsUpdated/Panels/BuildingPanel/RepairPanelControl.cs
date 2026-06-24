@@ -47,6 +47,10 @@ public class RepairPanelControl : MonoBehaviour
 
     public bool IsShowing => RootGO != null && RootGO.activeInHierarchy;
 
+    public event System.Action OnOpen;
+    public event System.Action OnClose;
+    public event System.Action OnFullTierClicked;
+
     public void Awake()
     {
         if (closeButton)
@@ -68,7 +72,7 @@ public class RepairPanelControl : MonoBehaviour
         if (fullBtn)
         {
             fullBtn.onClick.RemoveAllListeners();
-            fullBtn.onClick.AddListener(() => SelectTier(RepairOption.Full));
+            fullBtn.onClick.AddListener(() => { SelectTier(RepairOption.Full); OnFullTierClicked?.Invoke(); });
         }
 
         if (repairButton)
@@ -134,6 +138,8 @@ public class RepairPanelControl : MonoBehaviour
         PaintTierButtons();
         RefreshWorkUI();
         RebuildCosts(); // will keep costsRoot true when repairable, or keep it hidden if we showed a hint
+
+        OnOpen?.Invoke();
     }
 
     public void Hide()
@@ -147,6 +153,8 @@ public class RepairPanelControl : MonoBehaviour
         _building = null;
         _health   = null;
         _repair   = null;
+
+        OnClose?.Invoke();
     }
 
     // -------- internals --------
@@ -193,7 +201,7 @@ public class RepairPanelControl : MonoBehaviour
         if (costsRoot)     costsRoot.SetActive(true);
 
         var lines = _repair.GetRepairCosts(_selected);
-        bool canAfford = _repair.CanAfford(_selected); // will fix this next
+        bool canAfford = BuildingRepair.TutorialBypassCosts || _repair.CanAfford(_selected);
 
         if (lines != null)
         {

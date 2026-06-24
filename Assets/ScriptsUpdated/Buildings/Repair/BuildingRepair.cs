@@ -31,6 +31,8 @@ public class BuildingRepair : MonoBehaviour, IBuildingTurnTickable
     private float _perTurnHeal;       // float per-turn HP
     private float _healAcc;           // carry precision, apply ceil ints
 
+    public static bool TutorialBypassCosts = false;
+
     public bool IsRepairing   => _isRepairing;
     public int  TurnsRemaining=> Mathf.Max(0, _turnsRemaining);
 
@@ -127,23 +129,26 @@ public class BuildingRepair : MonoBehaviour, IBuildingTurnTickable
             return false;
 
         var costs = CalculateCosts(option);
-        if (!CanAfford(costs))
+        if (!TutorialBypassCosts && !CanAfford(costs))
             return false;
 
         var (turns, pop) = GetScaledWork(option);
         turns = Mathf.Max(1, turns);
         pop = Mathf.Max(1, pop);
 
-        if (!TryReservePopulation(pop, out _reservationId))
+        if (!TutorialBypassCosts)
         {
-            //Debug.LogWarning("[BuildingRepair] Not enough population available for repair.");
-            return false;
+            if (!TryReservePopulation(pop, out _reservationId))
+            {
+                //Debug.LogWarning("[BuildingRepair] Not enough population available for repair.");
+                return false;
+            }
         }
 
         _reservedPopulationCount = pop;
         PlayersPopulationManager.Instance?.ForceSyncUI();
 
-        if (!Spend(costs))
+        if (!TutorialBypassCosts && !Spend(costs))
         {
             TryReleaseReservation();
             return false;

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -121,6 +121,15 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForDamagedPanelOpen;
     private BuildingDamagedPanelControl _damagedPanel;
     private TileControl _placedBuildingTile;
+
+    private bool _waitingForRepairPanelOpen;
+    private RepairPanelControl _repairPanel;
+
+    private bool _waitingForFullRepairTier;
+    private bool _waitingForRepairStart;
+    private BuildingRepair _placedBuildingRepair;
+    private bool _waitingForRepairAndDamagedClose;
+    private Coroutine _fastForwardRepairRoutine;
 
     public Scene LoadedScene => gameObject.scene;
 
@@ -921,6 +930,104 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.OpenRepairPanel:
+            {
+                if (_repairPanel == null)
+                    _repairPanel = FindFirstObjectByType<RepairPanelControl>(FindObjectsInactive.Include);
+                if (_repairPanel != null)
+                {
+                    if (_repairPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _repairPanel.OnOpen += OnRepairPanelOpened;
+                        _waitingForRepairPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.ClickFullRepairButton:
+            {
+                if (_repairPanel == null)
+                    _repairPanel = FindFirstObjectByType<RepairPanelControl>(FindObjectsInactive.Include);
+                if (_repairPanel != null)
+                {
+                    BuildingRepair.TutorialBypassCosts = true;
+                    _repairPanel.OnFullTierClicked += OnFullRepairTierClicked;
+                    _waitingForFullRepairTier = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.ClickRepairButton:
+            {
+                BuildingControl building = FindBuildingNear(_placedBuildingWorldPos);
+                _placedBuildingRepair = building != null ? building.GetComponent<BuildingRepair>() : null;
+                if (_placedBuildingRepair != null)
+                {
+                    _placedBuildingRepair.OnRepairStarted += OnRepairStarted;
+                    _waitingForRepairStart = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.CloseRepairAndDamagedPanels:
+            {
+                if (_damagedPanel == null)
+                    _damagedPanel = FindFirstObjectByType<BuildingDamagedPanelControl>(FindObjectsInactive.Include);
+                if (_damagedPanel != null)
+                {
+                    if (!_damagedPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _damagedPanel.OnClose += OnRepairAndDamagedPanelsClosed;
+                        _waitingForRepairAndDamagedClose = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.FastForwardRepair:
+            {
+                if (_placedBuildingRepair == null)
+                {
+                    BuildingControl building = FindBuildingNear(_placedBuildingWorldPos);
+                    _placedBuildingRepair = building != null ? building.GetComponent<BuildingRepair>() : null;
+                }
+                if (_placedBuildingRepair != null && _placedBuildingRepair.IsRepairing)
+                {
+                    if (_fastForwardRepairRoutine != null) StopCoroutine(_fastForwardRepairRoutine);
+                    _fastForwardRepairRoutine = StartCoroutine(FastForwardRepairCoroutine(_placedBuildingRepair));
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.CloseShelterPanel:
             {
                 if (_shelterPanel == null)
@@ -1650,6 +1757,64 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnRepairPanelOpened()
+    {
+        if (!_waitingForRepairPanelOpen) return;
+        _waitingForRepairPanelOpen = false;
+        if (_repairPanel != null) _repairPanel.OnOpen -= OnRepairPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnFullRepairTierClicked()
+    {
+        if (!_waitingForFullRepairTier) return;
+        _waitingForFullRepairTier = false;
+        if (_repairPanel != null) _repairPanel.OnFullTierClicked -= OnFullRepairTierClicked;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnRepairStarted(RepairOption opt, int totalTurns)
+    {
+        if (!_waitingForRepairStart) return;
+        _waitingForRepairStart = false;
+        BuildingRepair.TutorialBypassCosts = false;
+        if (_placedBuildingRepair != null) _placedBuildingRepair.OnRepairStarted -= OnRepairStarted;
+
+        _repairPanel?.Close();
+        _damagedPanel?.Hide();
+
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnRepairAndDamagedPanelsClosed()
+    {
+        if (!_waitingForRepairAndDamagedClose) return;
+        _waitingForRepairAndDamagedClose = false;
+        if (_damagedPanel != null) _damagedPanel.OnClose -= OnRepairAndDamagedPanelsClosed;
+        ShowPart(_currentPart + 1);
+    }
+
+    private IEnumerator FastForwardRepairCoroutine(BuildingRepair repair)
+    {
+        while (repair != null && repair.IsRepairing)
+        {
+            if (TurnSystem.Instance != null)
+            {
+                yield return TurnSystem.Instance.StartCoroutine(
+                    TurnSystem.Instance.RunGhostPhaseAdvance(() => repair.TurnTick())
+                );
+            }
+            else
+            {
+                repair.TurnTick();
+                yield return null;
+            }
+        }
+
+        _fastForwardRepairRoutine = null;
+        ShowPart(_currentPart + 1);
+    }
+
     private bool OnTutorialCatalogBuildButtonClicked(BuildingCatalogItem item)
     {
         if (!_waitingForCatalogBuild) return false;
@@ -1998,6 +2163,38 @@ public class TutorialSetupInstaller : MonoBehaviour
             _damagedPanel.OnShow -= OnDamagedPanelOpened;
             _waitingForDamagedPanelOpen = false;
             TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForRepairPanelOpen && _repairPanel != null)
+        {
+            _repairPanel.OnOpen -= OnRepairPanelOpened;
+            _waitingForRepairPanelOpen = false;
+        }
+
+        if (_waitingForFullRepairTier && _repairPanel != null)
+        {
+            _repairPanel.OnFullTierClicked -= OnFullRepairTierClicked;
+            _waitingForFullRepairTier = false;
+            BuildingRepair.TutorialBypassCosts = false;
+        }
+
+        if (_waitingForRepairStart && _placedBuildingRepair != null)
+        {
+            _placedBuildingRepair.OnRepairStarted -= OnRepairStarted;
+            _waitingForRepairStart = false;
+            BuildingRepair.TutorialBypassCosts = false;
+        }
+
+        if (_waitingForRepairAndDamagedClose && _damagedPanel != null)
+        {
+            _damagedPanel.OnClose -= OnRepairAndDamagedPanelsClosed;
+            _waitingForRepairAndDamagedClose = false;
+        }
+
+        if (_fastForwardRepairRoutine != null)
+        {
+            StopCoroutine(_fastForwardRepairRoutine);
+            _fastForwardRepairRoutine = null;
         }
 
         if (_waitingForShelterPanelOpen && _shelterPanel != null)
