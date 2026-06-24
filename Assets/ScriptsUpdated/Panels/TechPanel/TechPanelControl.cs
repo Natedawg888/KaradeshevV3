@@ -54,6 +54,8 @@ public class TechPanelControl : MonoBehaviour
     public TechUnitDetailPanel          unitDetailPanel;
     public TechnologyDetailPanelControl techDetailPanel;
 
+    public static bool TutorialShowAll = false;
+
     public bool IsShowing => root != null ? root.activeInHierarchy : gameObject.activeInHierarchy;
 
     public event System.Action OnOpen;
@@ -123,6 +125,9 @@ public class TechPanelControl : MonoBehaviour
             cameraControl.PushInputLock();
 
         TileInteraction.SetSelectionEnabled(false);
+
+        if (TutorialShowAll)
+            _currentFilter = FilterMode.Technologies;
 
         RefreshHeader();
         RefreshXP();
@@ -371,8 +376,24 @@ public class TechPanelControl : MonoBehaviour
 
     private void PopulateTechnologies()
     {
+        if (techEntryPrefab == null || contentRoot == null) return;
+
+        if (TutorialShowAll)
+        {
+            var all = TechnologyManager.Instance?.GetAll();
+            if (all == null) return;
+            foreach (var tech in all)
+            {
+                if (tech == null) continue;
+                var entry = Instantiate(techEntryPrefab, contentRoot);
+                entry.Bind(tech, OnTechEntryClicked);
+                _spawnedEntries.Add(entry.gameObject);
+            }
+            return;
+        }
+
         var mgr = PlayerKnownTechnologyManager.Instance;
-        if (mgr == null || techEntryPrefab == null || contentRoot == null) return;
+        if (mgr == null) return;
 
         int playerLevel = PlayerLevel.Instance != null ? PlayerLevel.Instance.GetCurrentLevel() : 1;
 

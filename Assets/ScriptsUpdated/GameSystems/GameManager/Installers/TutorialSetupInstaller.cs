@@ -1114,6 +1114,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                     _techPanel = FindFirstObjectByType<TechPanelControl>(FindObjectsInactive.Include);
                 if (_techPanel != null)
                 {
+                    TechPanelControl.TutorialShowAll = true;
                     if (_techPanel.IsShowing)
                     {
                         ShowPart(_currentPart + 1);
@@ -2015,6 +2016,7 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (!_waitingForLevelInfoPanelClose) return;
         _waitingForLevelInfoPanelClose = false;
         if (_techPanel != null) _techPanel.OnClose -= OnLevelInfoPanelClosed;
+        TechPanelControl.TutorialShowAll = false;
         ShowPart(_currentPart + 1);
     }
 
@@ -2471,12 +2473,14 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _techPanel.OnOpen -= OnLevelInfoPanelOpened;
             _waitingForLevelInfoPanelOpen = false;
+            TechPanelControl.TutorialShowAll = false;
         }
 
         if (_waitingForLevelInfoPanelClose && _techPanel != null)
         {
             _techPanel.OnClose -= OnLevelInfoPanelClosed;
             _waitingForLevelInfoPanelClose = false;
+            TechPanelControl.TutorialShowAll = false;
         }
 
         BuildingPlacementPanelControl.TutorialDisableCancelButton = false;
