@@ -17,8 +17,9 @@ public class PopStatsHealthView : PopStatsSubviewBase
     public TMP_Text adultText;
     public TMP_Text elderText;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         Setup(childSlider);
         Setup(teenSlider);
         Setup(adultSlider);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,12 +29,20 @@ public class PopulationConsumptionPanel : MonoBehaviour
 
     [Header("Dismiss")]
     [SerializeField] private Button dismissButton;
+    
+    public static event Action OnDismissed;
+
+    public CameraControl cameraControl;
 
     private readonly List<BuildingCostEntry> _rows = new();
 
     private void Awake()
     {
         if (dismissButton) dismissButton.onClick.AddListener(Hide);
+
+        if (cameraControl == null)
+            cameraControl = FindObjectOfType<CameraControl>();
+
         Hide();
     }
 
@@ -135,6 +144,27 @@ public class PopulationConsumptionPanel : MonoBehaviour
         _rows.Clear();
     }
 
-    private void Show() { if (panelRoot) panelRoot.SetActive(true); }
-    private void Hide() { if (panelRoot) panelRoot.SetActive(false); }
+    private void Show() 
+    { 
+        if (panelRoot) panelRoot.SetActive(true); 
+
+        if (cameraControl != null)
+            cameraControl.PushInputLock();
+
+        TileInteraction.SetSelectionEnabled(false);
+    }
+    private void Hide()
+    {
+        bool wasShowing = panelRoot != null && panelRoot.activeSelf;
+        if (panelRoot) panelRoot.SetActive(false);
+
+        TileInteraction.SetSelectionEnabled(false);
+        TileInteraction.GetInstance()?.EnableSelectionAfter(0.01f);
+
+        if (cameraControl != null)
+            cameraControl.PopInputLock();
+
+        if (wasShowing)
+            OnDismissed?.Invoke();
+    }
 }

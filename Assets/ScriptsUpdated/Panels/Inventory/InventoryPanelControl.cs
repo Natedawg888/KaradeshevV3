@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -29,6 +30,9 @@ public class InventoryPanelControl : MonoBehaviour
     public TMP_Text capacityText;
 
     public CameraControl cameraControl;
+
+    public event Action OnOpen;
+    public event Action OnClose;
 
     private enum Tab { Materials, Food, Water }
     private Tab _currentTab = Tab.Materials;
@@ -83,6 +87,8 @@ public class InventoryPanelControl : MonoBehaviour
         ApplyGridSettings();
     }
 
+    public void ShowFoodTab() => SetTab(Tab.Food);
+
     private void SetTab(Tab tab)
     {
         _currentTab = tab;
@@ -104,6 +110,7 @@ public class InventoryPanelControl : MonoBehaviour
         ApplyGridSettings();
         cameraControl.PushInputLock();
         Refresh();
+        OnOpen?.Invoke();
     }
 
     public void Hide()
@@ -115,6 +122,7 @@ public class InventoryPanelControl : MonoBehaviour
         root?.SetActive(false);
         Clear();
         if (capacityText != null) capacityText.text = string.Empty;
+        OnClose?.Invoke();
     }
 
     public void Refresh()
@@ -183,6 +191,26 @@ public class InventoryPanelControl : MonoBehaviour
         float max = PlayerInventoryManager.Instance.GetMaxSpace(type);
 
         capacityText.text = $"{Mathf.CeilToInt(used)}/{Mathf.CeilToInt(max)}";
+    }
+
+    public void PinResourceToFirst(string resourceId)
+    {
+        if (contentParent == null || string.IsNullOrEmpty(resourceId)) return;
+
+        for (int i = 0; i < contentParent.childCount; i++)
+        {
+            var ui = contentParent.GetChild(i).GetComponent<InventoryItemUI>();
+            if (ui == null) continue;
+
+            var stack = ui.GetStack();
+            if (stack?.definition == null) continue;
+
+            if (string.Equals(stack.definition.resourceID, resourceId, System.StringComparison.OrdinalIgnoreCase))
+            {
+                contentParent.GetChild(i).SetAsFirstSibling();
+                return;
+            }
+        }
     }
 
     public void ApplyInventoryItemPrefab(GameObject newPrefab, bool repopulate = true)

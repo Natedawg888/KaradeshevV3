@@ -74,6 +74,9 @@ public partial class PlayerInventoryManager : MonoBehaviour
     private readonly List<InventoryStack> _food = new();
     private readonly List<InventoryStack> _water = new();
 
+    // Building placement reservations (resourceID → amount locked for pending build cost)
+    private readonly Dictionary<string, int> _reservedResources = new();
+
     // Cached spoiled definition
     private ResourceDefinition _spoiledDef;
     private static Dictionary<string, ResourceDefinition> _resourceDefinitionCache;
@@ -246,7 +249,11 @@ public partial class PlayerInventoryManager : MonoBehaviour
         var stack = targetList?.FirstOrDefault(s => s.definition.resourceID == def.resourceID);
         if (stack == null) return false;
 
-        int actual = Mathf.Min(removeAmount, stack.amount);
+        int reserved  = GetReservedAmount(def);
+        int available = Mathf.Max(0, stack.amount - reserved);
+        int actual    = Mathf.Min(removeAmount, available);
+        if (actual <= 0) return false;
+
         stack.amount -= actual;
 
         if (stack.amount <= 0)
@@ -254,7 +261,30 @@ public partial class PlayerInventoryManager : MonoBehaviour
 
         MarkKnowledgeDirty();
 
-        return actual > 0;
+        return true;
+    }
+
+    public void ReserveResources(IEnumerable<ResourceCost> costs)
+    {
+        if (costs == null) return;
+        foreach (var c in costs)
+        {
+            if (c?.resource == null || c.amount <= 0 || c.resource.isGroup) continue;
+            _reservedResources.TryGetValue(c.resource.resourceID, out int existing);
+            _reservedResources[c.resource.resourceID] = existing + c.amount;
+        }
+    }
+
+    public void ClearResourceReservation()
+    {
+        _reservedResources.Clear();
+    }
+
+    public int GetReservedAmount(ResourceDefinition def)
+    {
+        if (def == null || def.isGroup || string.IsNullOrEmpty(def.resourceID)) return 0;
+        _reservedResources.TryGetValue(def.resourceID, out int reserved);
+        return reserved;
     }
 
     public bool TryRemoveHalf(ResourceDefinition def)

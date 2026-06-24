@@ -59,6 +59,8 @@ public class TechPanelControl : MonoBehaviour
 
     private readonly List<GameObject> _spawnedEntries = new();
 
+    public CameraControl cameraControl;
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -72,6 +74,9 @@ public class TechPanelControl : MonoBehaviour
         BindFilter(filterProduction,   FilterMode.Production);
         BindFilter(filterUnits,        FilterMode.Units);
         BindFilter(filterTechnologies, FilterMode.Technologies);
+
+        if (cameraControl == null)
+            cameraControl = FindObjectOfType<CameraControl>();
 
         if (root) root.SetActive(false);
     }
@@ -109,6 +114,11 @@ public class TechPanelControl : MonoBehaviour
 
         ResourceSourceCache.BuildCache();
 
+        if (cameraControl != null)
+            cameraControl.PushInputLock();
+
+        TileInteraction.SetSelectionEnabled(false);
+
         RefreshHeader();
         RefreshXP();
         RefreshList();
@@ -116,6 +126,12 @@ public class TechPanelControl : MonoBehaviour
 
     public void Close()
     {
+        TileInteraction.SetSelectionEnabled(false);
+        TileInteraction.GetInstance()?.EnableSelectionAfter(0.01f);
+
+        if (cameraControl != null)
+            cameraControl.PopInputLock();
+
         HideAllDetailPanels();
         if (root) root.SetActive(false);
     }

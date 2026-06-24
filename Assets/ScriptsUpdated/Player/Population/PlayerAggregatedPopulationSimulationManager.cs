@@ -239,6 +239,59 @@ public class PlayerAggregatedPopulationSimulationManager : MonoBehaviour
             playerPop.MarkUIDirty();
     }
 
+    public void ForceConsumptionCycle()
+    {
+        if (general == null || playerPop == null) return;
+
+        var inv = PlayerInventoryManager.Instance;
+        var defMap  = new Dictionary<string, ResourceDefinition>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, int> preSnap = inv != null ? SnapshotInventory(inv, defMap) : null;
+
+        float totalFoodNeeded = 0f, totalFoodProvided = 0f;
+        float totalWaterNeeded = 0f, totalWaterProvided = 0f;
+        float ppp = general.pointsPerPersonScale > 0f ? general.pointsPerPersonScale : 100f;
+
+        var all = playerPop.AllPopulations;
+        for (int gi = 0; gi < all.Count; gi++)
+        {
+            var group = all[gi];
+            if (group.count <= 0) continue;
+
+            IncreaseNeeds_Player(group);
+            float preH = group.hungerLevel, preT = group.thirstLevel;
+            totalFoodNeeded  += preH * ppp * group.count;
+            totalWaterNeeded += preT * ppp * group.count;
+
+            if (inv != null) group.SatisfyNeedsFromInventory(inv);
+
+            totalFoodProvided  += (preH - group.hungerLevel) * ppp * group.count;
+            totalWaterProvided += (preT - group.thirstLevel) * ppp * group.count;
+        }
+
+        if (preSnap != null && inv != null)
+        {
+            var postSnap = SnapshotInventory(inv, null);
+            var consumed = new List<ConsumedEntry>();
+            foreach (var kv in preSnap)
+            {
+                postSnap.TryGetValue(kv.Key, out int after);
+                int delta = kv.Value - after;
+                if (delta > 0 && defMap.TryGetValue(kv.Key, out var def))
+                    consumed.Add(new ConsumedEntry(def, delta));
+            }
+            OnConsumptionCycle?.Invoke(new ConsumptionCycleResult
+            {
+                FoodNeededPts    = totalFoodNeeded,
+                FoodProvidedPts  = totalFoodProvided,
+                WaterNeededPts   = totalWaterNeeded,
+                WaterProvidedPts = totalWaterProvided,
+                HungerSatisfied  = totalFoodNeeded  < 1f || totalFoodProvided  >= totalFoodNeeded  - 1f,
+                ThirstSatisfied  = totalWaterNeeded < 1f || totalWaterProvided >= totalWaterNeeded - 1f,
+                Consumed         = consumed,
+            });
+        }
+    }
+
     private PlayerHealthRulebook Rules => PlayerHealthRulebook.Instance;
 
     private void AgeOneTurn_Player(PopulationGroup g)

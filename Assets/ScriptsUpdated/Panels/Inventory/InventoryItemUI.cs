@@ -24,6 +24,8 @@ public class InventoryItemUI : MonoBehaviour
 
     private InventoryStack _stack;
 
+    public InventoryStack GetStack() => _stack;
+
     public void Bind(InventoryStack stack)
     {
         _stack = stack;

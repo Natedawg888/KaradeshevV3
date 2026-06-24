@@ -11,6 +11,17 @@ public partial class StageThemeApplier
     private static void SetSpriteKeepType(Image img, Sprite sprite)
     { if (!img) return; img.sprite = sprite; }
 
+    private static void SetRadialFillSprite(Image img, Sprite sprite)
+    {
+        if (!img) return;
+        img.sprite = sprite;
+        img.type = Image.Type.Filled;
+        img.fillMethod = Image.FillMethod.Radial360;
+        img.fillOrigin = (int)Image.Origin360.Top;
+        img.fillClockwise = true;
+        img.preserveAspect = true;
+    }
+
     private static void ApplyTmpTextTheme(TMP_Text text, StageTheme theme)
     { if (!text || theme == null) return; text.font = theme.tmpFont; text.color = theme.fontColor; }
 
@@ -149,7 +160,7 @@ public partial class StageThemeApplier
         Sprite fill = GetSeasonFillForTheme(theme, season);
 
         if (seasonIconTarget && icon) SetSimpleSprite(seasonIconTarget, icon);
-        if (seasonFillTarget && fill) SetSpriteKeepType(seasonFillTarget, fill);
+        if (seasonFillTarget && fill) SetRadialFillSprite(seasonFillTarget, fill);
     }
 
     private Sprite GetSeasonIconForTheme(StageTheme theme, SeasonDefinition season)
@@ -244,6 +255,6 @@ public partial class StageThemeApplier
         };
 
         if (phaseIconTarget && currentIcon) SetSimpleSprite(phaseIconTarget, currentIcon);
-        if (phaseFillTarget && theme.phaseFill) SetSpriteKeepType(phaseFillTarget, theme.phaseFill);
+        if (phaseFillTarget && theme.phaseFill) SetRadialFillSprite(phaseFillTarget, theme.phaseFill);
     }
 }

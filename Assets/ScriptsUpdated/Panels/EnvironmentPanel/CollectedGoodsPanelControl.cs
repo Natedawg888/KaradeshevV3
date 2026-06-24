@@ -19,6 +19,7 @@ public class CollectedGoodsPanelControl : MonoBehaviour
     private readonly List<CollectedItemEntry> pooled = new();
     private readonly List<(ResourceDefinition def, int amount)> _leftBehindBuffer = new();
 
+    public event Action OnOpen;
     public event Action OnClose;
 
     public bool IsShowing => root != null ? root.activeInHierarchy : gameObject.activeInHierarchy;
@@ -50,6 +51,9 @@ public class CollectedGoodsPanelControl : MonoBehaviour
             headerText.text = $"{env.environmentName} — Collected Goods";
 
         RefreshList();
+
+        if (IsShowing)
+            OnOpen?.Invoke();
     }
 
     public void Hide()

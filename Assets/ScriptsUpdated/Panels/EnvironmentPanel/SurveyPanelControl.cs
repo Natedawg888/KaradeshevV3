@@ -30,6 +30,9 @@ public class SurveyPanelControl : MonoBehaviour
     private bool _showTutorialEntriesOnly;
     private readonly List<TutorialSurveyEntry> _tutorialEntries = new();
 
+    public event Action OnOpen;
+    public event Action OnClose;
+
     public bool IsShowing => root != null ? root.activeInHierarchy : gameObject.activeInHierarchy;
 
     private void Awake()
@@ -100,6 +103,7 @@ public class SurveyPanelControl : MonoBehaviour
             root.SetActive(true);
 
         PopulateResourceList();
+        OnOpen?.Invoke();
     }
 
     public void ShowTutorialEntries(List<TutorialSurveyEntry> entries)
@@ -128,10 +132,12 @@ public class SurveyPanelControl : MonoBehaviour
             root.SetActive(true);
 
         PopulateResourceList();
+        OnOpen?.Invoke();
     }
 
     public void Hide()
     {
+        bool wasShowing = root != null && root.activeSelf;
         if (root != null)
             root.SetActive(false);
 
@@ -139,6 +145,9 @@ public class SurveyPanelControl : MonoBehaviour
         _showTutorialEntriesOnly = false;
         _tutorialEntries.Clear();
         ClearResourceList();
+
+        if (wasShowing)
+            OnClose?.Invoke();
     }
 
     private void PopulateResourceList()

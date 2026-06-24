@@ -91,6 +91,9 @@ public class BuildingPlacementManager : MonoBehaviour
 
         PlayersPopulationManager.Instance?.ForceSyncUI();
 
+        if (!TutorialBypassCosts)
+            PlayerInventoryManager.Instance?.ReserveResources(selectedCostSnapshot);
+
         GameObject prefab = def.finalBuildingPrefab != null ? def.finalBuildingPrefab : def.buildingPrefab;
         usedFinalAsPreview = (prefab == def.finalBuildingPrefab);
 
@@ -159,6 +162,8 @@ public class BuildingPlacementManager : MonoBehaviour
             //Debug.Log("[Placement] Invalid placement.");
             return;
         }
+
+        PlayerInventoryManager.Instance?.ClearResourceReservation();
 
         if (!TutorialBypassCosts && !ResourceDeduction.Deduct(selectedCostSnapshot))
         {
@@ -272,6 +277,8 @@ public class BuildingPlacementManager : MonoBehaviour
 
     private void ReleaseReservation()
     {
+        PlayerInventoryManager.Instance?.ClearResourceReservation();
+
         if (!string.IsNullOrEmpty(reservationId))
         {
             PlayersPopulationManager.Instance.ReleaseReservation(reservationId);

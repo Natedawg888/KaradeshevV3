@@ -566,7 +566,10 @@ public class DiscoveredTilePanelControl : MonoBehaviour
         if (currentEnv == null) return;
 
         if (TutorialGatherOverride != null && TutorialGatherOverride.Invoke(currentEnv))
+        {
+            Hide();
             return;
+        }
 
         float failureChance01 = GetGatherFailureChance01(currentEnv);
         if (CivilizationDiscoverySystem.Instance != null &&

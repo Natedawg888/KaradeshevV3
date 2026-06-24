@@ -178,6 +178,31 @@ public class PlayerSurveyManager : MonoBehaviour
         return true;
     }
 
+    public void ForceCompleteSurvey(EnvironmentControl env)
+    {
+        if (env == null || env.IsSurveyed) return;
+
+        if (inProgress.TryGetValue(env, out var info))
+        {
+            if (!string.IsNullOrWhiteSpace(info.reservationId))
+                populationManager?.ReleaseReservation(info.reservationId);
+            inProgress.Remove(env);
+        }
+
+        PlayersPopulationManager.Instance?.ForceSyncUI();
+        env.CompleteSurveyVisuals();
+
+        if (!surveyed.Contains(env))
+            surveyed.Add(env);
+
+        OnSurveyCompleted?.Invoke(env);
+
+        var knownList = GetKnownSurveyEntries(env);
+        OnSurveyCompletedKnown?.Invoke(env, knownList);
+
+        MarkJobsDirty();
+    }
+
     public void CancelSurvey(EnvironmentControl env)
     {
         if (env == null || !inProgress.TryGetValue(env, out var info))
