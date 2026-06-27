@@ -2344,7 +2344,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                 List<EnvironmentControl> sizeMatches = new List<EnvironmentControl>();
                 foreach (EnvironmentControl env in allEnvs)
                 {
-                    if (env.tileSize == fallbackDef.requiredTileSize && env.environmentTileType == EnvironmentTileType.Land)
+                    if (env.tileSize == fallbackDef.requiredTileSize && (env.environmentTileType == EnvironmentTileType.Land || env.environmentTileType == EnvironmentTileType.Cave || env.environmentTileType == EnvironmentTileType.Mountain))
                         sizeMatches.Add(env);
                 }
                 if (sizeMatches.Count > 0)
@@ -2417,7 +2417,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                 List<EnvironmentControl> sizeMatches = new List<EnvironmentControl>();
                 foreach (EnvironmentControl env in allEnvs)
                 {
-                    if (env.tileSize == fallbackDef.requiredTileSize && env.environmentTileType == EnvironmentTileType.Land)
+                    if (env.tileSize == fallbackDef.requiredTileSize && (env.environmentTileType == EnvironmentTileType.Land || env.environmentTileType == EnvironmentTileType.Cave || env.environmentTileType == EnvironmentTileType.Mountain))
                         sizeMatches.Add(env);
                 }
                 if (sizeMatches.Count > 0)
@@ -2498,7 +2498,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                 List<EnvironmentControl> sizeMatches = new List<EnvironmentControl>();
                 foreach (EnvironmentControl env in allEnvs)
                 {
-                    if (env.tileSize == fallbackDef.requiredTileSize && env.environmentTileType == EnvironmentTileType.Land)
+                    if (env.tileSize == fallbackDef.requiredTileSize && (env.environmentTileType == EnvironmentTileType.Land || env.environmentTileType == EnvironmentTileType.Cave || env.environmentTileType == EnvironmentTileType.Mountain))
                         sizeMatches.Add(env);
                 }
                 if (sizeMatches.Count > 0)
@@ -2571,7 +2571,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                 List<EnvironmentControl> sizeMatches = new List<EnvironmentControl>();
                 foreach (EnvironmentControl env in allEnvs)
                 {
-                    if (env.tileSize == fallbackDef.requiredTileSize && env.environmentTileType == EnvironmentTileType.Land)
+                    if (env.tileSize == fallbackDef.requiredTileSize && (env.environmentTileType == EnvironmentTileType.Land || env.environmentTileType == EnvironmentTileType.Cave || env.environmentTileType == EnvironmentTileType.Mountain))
                         sizeMatches.Add(env);
                 }
                 if (sizeMatches.Count > 0)
@@ -3007,7 +3007,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                 List<EnvironmentControl> sizeMatches = new List<EnvironmentControl>();
                 foreach (EnvironmentControl env in allEnvs)
                 {
-                    if (env.tileSize == fallbackDef.requiredTileSize && env.environmentTileType == EnvironmentTileType.Land)
+                    if (env.tileSize == fallbackDef.requiredTileSize && (env.environmentTileType == EnvironmentTileType.Land || env.environmentTileType == EnvironmentTileType.Cave || env.environmentTileType == EnvironmentTileType.Mountain))
                         sizeMatches.Add(env);
                 }
                 if (sizeMatches.Count > 0)
