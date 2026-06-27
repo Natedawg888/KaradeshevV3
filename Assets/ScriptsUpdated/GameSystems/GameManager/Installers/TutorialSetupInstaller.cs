@@ -1556,7 +1556,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                             restrictInput: true,
                             allowWorldDrag: true,
                             allowZoom: true,
-                            allowMinimapRotation: false);
+                            allowMinimapRotation: true);
                         _cameraControl.ZoomByUnits(10f);
                     }
                     ProductionSelectionController.OnSelectionCompleted += OnProductionSelectionCompleted;
