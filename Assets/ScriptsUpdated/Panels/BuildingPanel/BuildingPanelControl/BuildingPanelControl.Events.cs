@@ -25,6 +25,8 @@ public partial class BuildingPanelControl : MonoBehaviour
     private BuildingTechnology currentTechnology;
 
     public event Action OnClose;
+    public event Action OnOpen;
+    public event Action OnBuildingTypeSwitched;
 
     [Header("References")]
     [SerializeField] private CameraControl cameraControl;
@@ -78,6 +80,7 @@ public partial class BuildingPanelControl : MonoBehaviour
                 RefreshModeSpecificButtons();
                 RefreshResearchEntryState();
                 RefreshUpgradeEntryState();
+                OnBuildingTypeSwitched?.Invoke();
             });
         }
 
@@ -92,6 +95,7 @@ public partial class BuildingPanelControl : MonoBehaviour
                 RefreshModeSpecificButtons();
                 RefreshResearchEntryState();
                 RefreshUpgradeEntryState();
+                OnBuildingTypeSwitched?.Invoke();
             });
         }
 
@@ -394,6 +398,8 @@ public partial class BuildingPanelControl : MonoBehaviour
             renameContainer.SetActive(false);
         if (renameButton != null)
             renameButton.gameObject.SetActive(true);
+
+        OnOpen?.Invoke();
     }
 
     public void ReopenForCurrent()

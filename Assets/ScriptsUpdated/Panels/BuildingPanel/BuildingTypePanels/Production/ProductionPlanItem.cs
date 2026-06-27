@@ -46,6 +46,9 @@ public class ProductionPlanItem : MonoBehaviour
     [Header("Start Production")]
     public Button startProductionButton;   // assign in Inspector
 
+    public static bool TutorialBypassCosts = false;
+    public event System.Action OnProductionStarted;
+
     // --- runtime ---
     private ProductionPlan _plan;
     private bool _showingOutput = false;
@@ -144,7 +147,7 @@ public class ProductionPlanItem : MonoBehaviour
             if (_plan == null || _productionBuilding == null)
                 return;
 
-            if (!HasEnoughPopulation() || !CanAffordPlanResources())
+            if (!TutorialBypassCosts && (!HasEnoughPopulation() || !CanAffordPlanResources()))
             {
                 //Debug.Log("[ProductionPlanItem] Start blocked: not enough pop or resources.");
                 return;
@@ -158,6 +161,8 @@ public class ProductionPlanItem : MonoBehaviour
             {
                 _productionBuilding.StartProduction(_plan);
             }
+
+            OnProductionStarted?.Invoke();
         });
 
         startProductionButton.gameObject.SetActive(_plan != null);
@@ -167,7 +172,7 @@ public class ProductionPlanItem : MonoBehaviour
     // ----------------- helpers for gating start button -----------------
     private bool CanAffordPlanResources()
     {
-        if (_plan == null) return true;
+        if (TutorialBypassCosts || _plan == null) return true;
 
         var costs = _plan.GetActiveRunningCosts();
         if (costs == null || costs.Count == 0)
@@ -188,7 +193,7 @@ public class ProductionPlanItem : MonoBehaviour
 
     private bool HasEnoughPopulation()
     {
-        if (_plan == null) return true;
+        if (TutorialBypassCosts || _plan == null) return true;
 
         var popMgr = PlayersPopulationManager.Instance;
         if (!popMgr) return true;
@@ -203,9 +208,7 @@ public class ProductionPlanItem : MonoBehaviour
         if (startProductionButton == null || _plan == null)
             return;
 
-        bool canAfford = CanAffordPlanResources();
-        bool hasPop = HasEnoughPopulation();
-        bool canStart = canAfford && hasPop;
+        bool canStart = TutorialBypassCosts || (CanAffordPlanResources() && HasEnoughPopulation());
 
         startProductionButton.interactable = canStart;
 

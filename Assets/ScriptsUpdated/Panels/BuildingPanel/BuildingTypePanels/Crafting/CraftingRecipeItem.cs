@@ -45,6 +45,9 @@ public class CraftingRecipeItem : MonoBehaviour
     public Color popEnoughColor = new(0.20f, 0.70f, 0.20f);
     public Color popNotEnoughColor = new(0.80f, 0.20f, 0.20f);
 
+    public event System.Action OnCostsPanelShown;
+    public event System.Action OnOutputViewShown;
+
     private CraftingRecipe _def;
     private CraftingBuildingControl _crafting;
     private System.Action _onCraftStarted;
@@ -222,6 +225,7 @@ public class CraftingRecipeItem : MonoBehaviour
         {
             if (_showingOutput) PopulateOutputs();
             else PopulateCosts();
+            OnCostsPanelShown?.Invoke();
         }
         else ClearCostContent();
     }
@@ -235,7 +239,11 @@ public class CraftingRecipeItem : MonoBehaviour
 
         if (costPanelRoot.activeSelf)
         {
-            if (_showingOutput) PopulateOutputs();
+            if (_showingOutput)
+            {
+                PopulateOutputs();
+                OnOutputViewShown?.Invoke();
+            }
             else PopulateCosts();
         }
     }

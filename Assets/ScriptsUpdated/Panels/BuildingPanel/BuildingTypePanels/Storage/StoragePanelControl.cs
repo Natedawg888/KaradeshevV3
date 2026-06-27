@@ -62,6 +62,7 @@ public class StoragePanelControl : MonoBehaviour
     private int _invActiveCount = 0;
 
     public bool IsShowing => root != null && root.activeInHierarchy;
+    public event System.Action OnClose;
 
     private void Awake()
     {
@@ -119,6 +120,8 @@ public class StoragePanelControl : MonoBehaviour
 
         if (_parentPanel != null)
             _parentPanel.SoftShowFromChild();
+
+        OnClose?.Invoke();
     }
 
     public void Refresh()

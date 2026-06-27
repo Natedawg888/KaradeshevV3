@@ -421,6 +421,16 @@ public class CameraControl : MonoBehaviour
         StartCoroutine(DeferredCapture());
     }
 
+    public void ZoomByUnits(float units)
+    {
+        Vector3 p = transform.position;
+        p.y = Mathf.Clamp(p.y + units, minZoom, maxZoom);
+        transform.position = ClampPositionToGridBounds(p);
+
+        minimapNeedsUpdate = true;
+        StartCoroutine(DeferredCapture());
+    }
+
     public void ResetCameraRotation()
     {
         transform.rotation = Quaternion.Euler(45f, 0f, 0f);

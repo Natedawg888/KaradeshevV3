@@ -38,6 +38,12 @@ public class ProductionBuildingPanelControl : MonoBehaviour
 
     [SerializeField] private ProductionTutorial productionTutorial;
 
+    public static bool TutorialShowAllPlans = false;
+
+    public bool IsShowing => root != null && root.activeSelf;
+    public event System.Action OnOpen;
+    public event System.Action OnClose;
+
     private void Awake()
     {
         if (root != null)
@@ -103,6 +109,8 @@ public class ProductionBuildingPanelControl : MonoBehaviour
 
         if (productionTutorial != null && productionTutorial.ShouldRunTutorial())
             productionTutorial.BeginTutorial();
+
+        OnOpen?.Invoke();
     }
 
     public void Hide()
@@ -119,6 +127,8 @@ public class ProductionBuildingPanelControl : MonoBehaviour
         _building = null;
         _production = null;
         _tile = null;
+
+        OnClose?.Invoke();
     }
 
     private void RefreshList()
@@ -128,39 +138,56 @@ public class ProductionBuildingPanelControl : MonoBehaviour
 
         ClearList();
 
-        if (knownProductionManager == null || productionPlanManager == null || _production == null)
+        if (productionPlanManager == null || _production == null)
             return;
 
-        IReadOnlyCollection<string> knownIDs = knownProductionManager.GetKnownIDs();
-        if (knownIDs == null || knownIDs.Count == 0)
-            return;
+        List<ProductionPlan> list;
 
-        HashSet<string> knownSet = BuildNormalizedKnownSet(knownIDs);
-        if (knownSet.Count == 0)
-            return;
-
-        List<ProductionPlan> list = new List<ProductionPlan>(knownSet.Count);
-
-        foreach (string knownId in knownSet)
+        if (TutorialShowAllPlans)
         {
-            ProductionPlan plan = productionPlanManager.GetByID(knownId);
-            if (plan == null)
+            IReadOnlyList<ProductionPlan> allPlans = productionPlanManager.GetAll();
+            if (allPlans == null || allPlans.Count == 0)
+                return;
+
+            list = new List<ProductionPlan>(allPlans.Count);
+            foreach (ProductionPlan plan in allPlans)
             {
-                //Debug.LogWarning($"[ProductionPanel] Known production id '{knownId}' NOT found in ProductionPlanManager.");
-                continue;
+                if (plan == null)
+                    continue;
+                if (!_production.IsPlanAllowed(plan.productionID))
+                    continue;
+                list.Add(plan);
             }
+        }
+        else
+        {
+            if (knownProductionManager == null)
+                return;
 
-            // Extra safety: if the plan was unlearned between refreshes, do not show it.
-            if (!IsPlanKnown(plan.productionID))
-                continue;
+            IReadOnlyCollection<string> knownIDs = knownProductionManager.GetKnownIDs();
+            if (knownIDs == null || knownIDs.Count == 0)
+                return;
 
-            if (!_production.IsPlanAllowed(plan.productionID))
+            HashSet<string> knownSet = BuildNormalizedKnownSet(knownIDs);
+            if (knownSet.Count == 0)
+                return;
+
+            list = new List<ProductionPlan>(knownSet.Count);
+
+            foreach (string knownId in knownSet)
             {
-                //Debug.Log($"[ProductionPanel] Plan '{plan.productionID}' exists but NOT allowed for building '{_building?.buildingID}'.");
-                continue;
-            }
+                ProductionPlan plan = productionPlanManager.GetByID(knownId);
+                if (plan == null)
+                    continue;
 
-            list.Add(plan);
+                if (!IsPlanKnown(plan.productionID))
+                    continue;
+
+                if (!_production.IsPlanAllowed(plan.productionID))
+                    continue;
+
+                list.Add(plan);
+            }
         }
 
         list.Sort(ComparePlansForDisplay);
@@ -168,7 +195,7 @@ public class ProductionBuildingPanelControl : MonoBehaviour
         for (int i = 0; i < list.Count; i++)
         {
             ProductionPlan plan = list[i];
-            if (plan == null || !IsPlanKnown(plan.productionID))
+            if (plan == null)
                 continue;
 
             ProductionPlanItem item = Instantiate(planItemPrefab, contentRoot);
@@ -296,6 +323,11 @@ public class ProductionBuildingPanelControl : MonoBehaviour
             knownProductionManager.OnKnownProductionChanged -= RefreshList;
 
         _subscribedToKnownProduction = false;
+    }
+
+    public void RefreshForTutorial()
+    {
+        RefreshList();
     }
 
     public void InstallRuntimeRefs(

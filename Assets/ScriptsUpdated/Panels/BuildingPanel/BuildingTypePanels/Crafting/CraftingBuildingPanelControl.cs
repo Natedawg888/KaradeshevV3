@@ -42,7 +42,11 @@ public class CraftingBuildingPanelControl : MonoBehaviour
 
     [SerializeField] private CraftingTutorial craftingTutorial;
 
+    public static bool TutorialShowAllRecipes = false;
+
     public bool IsShowing => root != null && root.activeInHierarchy;
+    public event System.Action OnOpen;
+    public event System.Action OnClose;
 
     private void Awake()
     {
@@ -125,6 +129,8 @@ public class CraftingBuildingPanelControl : MonoBehaviour
             _cg.interactable = true;
             _cg.blocksRaycasts = true;
         }
+
+        OnOpen?.Invoke();
     }
 
     public void Hide()
@@ -152,6 +158,8 @@ public class CraftingBuildingPanelControl : MonoBehaviour
         _building = null;
         _crafting = null;
         _tile = null;
+
+        OnClose?.Invoke();
     }
 
     private void RefreshAll()
@@ -167,36 +175,57 @@ public class CraftingBuildingPanelControl : MonoBehaviour
 
         ClearChildren(contentRoot);
 
-        if (knownCraftingManager == null || craftingRecipeManager == null || _crafting == null)
+        if (craftingRecipeManager == null || _crafting == null)
             return;
 
-        IReadOnlyCollection<string> knownIDs = knownCraftingManager.GetKnownIDs();
-        if (knownIDs == null || knownIDs.Count == 0)
-            return;
+        List<CraftingRecipe> list;
 
-        HashSet<string> knownSet = BuildNormalizedKnownSet(knownIDs);
-        if (knownSet.Count == 0)
-            return;
-
-        List<CraftingRecipe> list = new List<CraftingRecipe>(knownSet.Count);
-
-        foreach (string knownId in knownSet)
+        if (TutorialShowAllRecipes)
         {
-            CraftingRecipe recipe = craftingRecipeManager.GetByID(knownId);
-            if (recipe == null)
+            // Show every recipe the building can craft, known or not.
+            IReadOnlyList<CraftingRecipe> allRecipes = craftingRecipeManager.GetAll();
+            if (allRecipes == null || allRecipes.Count == 0)
+                return;
+
+            list = new List<CraftingRecipe>(allRecipes.Count);
+            foreach (CraftingRecipe recipe in allRecipes)
             {
-                //Debug.LogWarning($"[CraftingPanel] Known crafting id '{knownId}' NOT found in CraftingRecipeManager.");
-                continue;
+                if (recipe == null)
+                    continue;
+                if (!CanCraftHereTutorial(recipe))
+                    continue;
+                list.Add(recipe);
             }
+        }
+        else
+        {
+            if (knownCraftingManager == null)
+                return;
 
-            // Extra safety: if the recipe was unlearned between refreshes, do not show it.
-            if (!IsRecipeKnown(recipe.craftingID))
-                continue;
+            IReadOnlyCollection<string> knownIDs = knownCraftingManager.GetKnownIDs();
+            if (knownIDs == null || knownIDs.Count == 0)
+                return;
 
-            if (!CanCraftHere(recipe))
-                continue;
+            HashSet<string> knownSet = BuildNormalizedKnownSet(knownIDs);
+            if (knownSet.Count == 0)
+                return;
 
-            list.Add(recipe);
+            list = new List<CraftingRecipe>(knownSet.Count);
+
+            foreach (string knownId in knownSet)
+            {
+                CraftingRecipe recipe = craftingRecipeManager.GetByID(knownId);
+                if (recipe == null)
+                    continue;
+
+                if (!IsRecipeKnown(recipe.craftingID))
+                    continue;
+
+                if (!CanCraftHere(recipe))
+                    continue;
+
+                list.Add(recipe);
+            }
         }
 
         list.Sort(CompareRecipesForDisplay);
@@ -204,7 +233,7 @@ public class CraftingBuildingPanelControl : MonoBehaviour
         for (int i = 0; i < list.Count; i++)
         {
             CraftingRecipe recipe = list[i];
-            if (recipe == null || !IsRecipeKnown(recipe.craftingID))
+            if (recipe == null)
                 continue;
 
             CraftingRecipeItem item = Instantiate(recipeItemPrefab, contentRoot);
@@ -214,6 +243,18 @@ public class CraftingBuildingPanelControl : MonoBehaviour
                 onCraftStarted: HandleCraftStarted
             );
         }
+    }
+
+    private bool CanCraftHereTutorial(CraftingRecipe recipe)
+    {
+        if (recipe == null || _crafting == null)
+            return false;
+
+        List<string> allowed = _crafting.allowedRecipeIDs;
+        if (allowed != null && allowed.Count > 0 && !allowed.Contains(recipe.craftingID))
+            return false;
+
+        return true;
     }
 
     private HashSet<string> BuildNormalizedKnownSet(IReadOnlyCollection<string> rawKnownIds)
@@ -358,6 +399,11 @@ public class CraftingBuildingPanelControl : MonoBehaviour
             knownCraftingManager.OnKnownCraftingChanged -= RefreshRecipeList;
 
         _subscribedToKnownCrafting = false;
+    }
+
+    public void RefreshForTutorial()
+    {
+        RefreshRecipeList();
     }
 
     public void InstallRuntimeRefs(

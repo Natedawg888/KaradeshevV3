@@ -57,6 +57,10 @@ public class ProductionRunningPanelControl : MonoBehaviour
 
     [SerializeField] private ProductionRunningTutorial productionRunningTutorial;
 
+    public bool IsShowing => root != null && root.activeSelf;
+    public event System.Action OnOpen;
+    public event System.Action OnClose;
+
     private void Awake()
     {
         if (root != null)
@@ -167,6 +171,8 @@ public class ProductionRunningPanelControl : MonoBehaviour
 
         if (productionRunningTutorial != null && productionRunningTutorial.ShouldRunTutorial())
             productionRunningTutorial.BeginTutorial();
+
+        OnOpen?.Invoke();
     }
 
     public void Hide()
@@ -177,6 +183,8 @@ public class ProductionRunningPanelControl : MonoBehaviour
             detailsRoot.SetActive(false);
 
         _parentPanel?.SoftShowFromChild();
+
+        OnClose?.Invoke();
     }
 
     // ----------------- UI REFRESH -----------------

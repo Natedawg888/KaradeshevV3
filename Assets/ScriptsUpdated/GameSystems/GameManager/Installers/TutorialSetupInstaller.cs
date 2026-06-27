@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -33,6 +33,17 @@ public class TutorialSetupInstaller : MonoBehaviour
     [Header("Tutorial Building Selection")]
     [SerializeField] private string tutorialGrasslandBuildingID = "";
     [SerializeField] private string tutorialSavannaBuildingID = "";
+
+    [Header("Second Building Placement Part")]
+    [SerializeField] private string secondBuildingID = "";
+
+    [Header("Third Building Placement Part")]
+    [SerializeField] private string thirdBuildingID = "";
+    [SerializeField] private string thirdBuildingAlternateID = "";
+
+    [Header("Fourth Building Placement Part")]
+    [SerializeField] private string fourthBuildingID = "";
+    [SerializeField] private string fourthBuildingAlternateID = "";
 
     private CameraControl _cameraControl;
     private TileActivator _tileActivator;
@@ -94,6 +105,29 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForBuildingItemSelect;
 
     private GameObject _placedShelterBuilding;
+    private GameObject _placedSecondBuilding;
+    private Vector3 _placedSecondBuildingWorldPos;
+    private GameObject _placedThirdBuilding;
+    private Vector3 _placedThirdBuildingWorldPos;
+    private bool _waitingForThirdBuildingPanel;
+    private GameObject _placedFourthBuilding;
+    private Vector3 _placedFourthBuildingWorldPos;
+    private bool _waitingForFourthBuildingPanel;
+    private ProductionBuildingPanelControl _productionPanel;
+    private bool _waitingForProductionPanelOpen;
+    private ProductionRunningPanelControl _productionRunningPanel;
+    private bool _waitingForProductionRunningPanelOpen;
+    private ProductionPlanItem _tutorialProductionItem;
+    private bool _waitingForProductionStart;
+    private bool _waitingForProductionTargets;
+    private bool _waitingForBuildingTypeSwitch;
+    private CraftingBuildingPanelControl _craftingPanel;
+    private bool _waitingForCraftingPanelOpen;
+    private bool _waitingForCraftingPanelClose;
+    private CraftingRecipeItem _tutorialCraftingItem;
+    private bool _waitingForCraftingCostPanel;
+    private bool _waitingForCraftingOutputView;
+    private bool _waitingForSecondBuildingPanel;
     private Coroutine _regenRoutine;
 
     private bool _waitingForGrasslandOrSavannaSelect;
@@ -116,6 +150,9 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForBuildingPanelClose;
     private ShelterPanelControl _shelterPanel;
     private BuildingPanelControl _buildingPanel;
+    private StoragePanelControl _storagePanel;
+    private bool _waitingForStoragePanelOpen;
+    private bool _waitingForStoragePanelClose;
 
     private Coroutine _damageBuildingRoutine;
     private bool _waitingForDamagedPanelOpen;
@@ -223,6 +260,17 @@ public class TutorialSetupInstaller : MonoBehaviour
                     _waitingForRotate = false;
                     ShowPart(_currentPart + 1);
                 }
+            }
+            return;
+        }
+
+
+        if (_waitingForStoragePanelOpen)
+        {
+            if (_storagePanel != null && _storagePanel.IsShowing)
+            {
+                _waitingForStoragePanelOpen = false;
+                ShowPart(_currentPart + 1);
             }
             return;
         }
@@ -1155,6 +1203,375 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.SecondBuildingPlacement:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                PlaceSecondBuildingOnMap();
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
+
+            case PartType.ThirdBuildingPlacement:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                PlaceThirdBuildingOnMap();
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
+
+            case PartType.SelectSecondBuilding:
+            {
+                TileControl buildingTile = _placedSecondBuilding != null
+                    ? _placedSecondBuilding.GetComponentInParent<TileControl>()
+                    : null;
+                buildingTile ??= FindTileControlNear(_placedSecondBuildingWorldPos);
+
+                if (_buildingPanel == null)
+                    _buildingPanel = FindFirstObjectByType<BuildingPanelControl>(FindObjectsInactive.Include);
+
+                if (buildingTile != null && _buildingPanel != null)
+                {
+                    if (_cameraControl != null)
+                        _cameraControl.SetTutorialInputRestrictions(
+                            restrictInput: true,
+                            allowWorldDrag: true,
+                            allowZoom: true,
+                            allowMinimapRotation: true);
+                    TileInteraction.SetTutorialAllowedTile(buildingTile);
+                    TileInteraction.SetSelectionEnabled(true);
+                    _waitingForSecondBuildingPanel = true;
+                    var ti = TileInteraction.GetInstance();
+                    if (ti != null) ti.OnTileSelected += OnSecondBuildingTileSelectedForPanel;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.SelectThirdBuilding:
+            {
+                TileControl buildingTile = _placedThirdBuilding != null
+                    ? _placedThirdBuilding.GetComponentInParent<TileControl>()
+                    : null;
+                buildingTile ??= FindTileControlNear(_placedThirdBuildingWorldPos);
+
+                if (_buildingPanel == null)
+                    _buildingPanel = FindFirstObjectByType<BuildingPanelControl>(FindObjectsInactive.Include);
+
+                if (buildingTile != null && _buildingPanel != null)
+                {
+                    if (_cameraControl != null)
+                        _cameraControl.SetTutorialInputRestrictions(
+                            restrictInput: true,
+                            allowWorldDrag: true,
+                            allowZoom: true,
+                            allowMinimapRotation: true);
+                    TileInteraction.SetTutorialAllowedTile(buildingTile);
+                    TileInteraction.SetSelectionEnabled(true);
+                    _waitingForThirdBuildingPanel = true;
+                    var ti = TileInteraction.GetInstance();
+                    if (ti != null) ti.OnTileSelected += OnThirdBuildingTileSelected;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.ClickSwitchBuildingType:
+            {
+                if (_buildingPanel == null)
+                    _buildingPanel = FindFirstObjectByType<BuildingPanelControl>(FindObjectsInactive.Include);
+                if (_buildingPanel != null)
+                {
+                    _buildingPanel.OnBuildingTypeSwitched += OnBuildingTypeSwitched;
+                    _waitingForBuildingTypeSwitch = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OpenCraftingPanel:
+            {
+                CraftingBuildingPanelControl.TutorialShowAllRecipes = true;
+                if (_craftingPanel == null)
+                    _craftingPanel = FindFirstObjectByType<CraftingBuildingPanelControl>(FindObjectsInactive.Include);
+                if (_craftingPanel != null)
+                {
+                    if (_craftingPanel.IsShowing)
+                    {
+                        _craftingPanel.RefreshForTutorial();
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _craftingPanel.OnOpen += OnCraftingPanelOpened;
+                        _waitingForCraftingPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OpenCraftingCostPanel:
+            {
+                if (_craftingPanel == null)
+                    _craftingPanel = FindFirstObjectByType<CraftingBuildingPanelControl>(FindObjectsInactive.Include);
+                _tutorialCraftingItem = _craftingPanel != null
+                    ? _craftingPanel.contentRoot.GetComponentInChildren<CraftingRecipeItem>(true)
+                    : null;
+                if (_tutorialCraftingItem != null)
+                {
+                    if (_tutorialCraftingItem.costPanelRoot != null && _tutorialCraftingItem.costPanelRoot.activeSelf)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _tutorialCraftingItem.OnCostsPanelShown += OnCraftingCostPanelShown;
+                        _waitingForCraftingCostPanel = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.ClickCraftingOutputView:
+            {
+                if (_tutorialCraftingItem == null && _craftingPanel != null)
+                    _tutorialCraftingItem = _craftingPanel.contentRoot.GetComponentInChildren<CraftingRecipeItem>(true);
+                if (_tutorialCraftingItem != null)
+                {
+                    _tutorialCraftingItem.OnOutputViewShown += OnCraftingOutputViewShown;
+                    _waitingForCraftingOutputView = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.CloseCraftingPanel:
+            {
+                if (_craftingPanel == null)
+                    _craftingPanel = FindFirstObjectByType<CraftingBuildingPanelControl>(FindObjectsInactive.Include);
+                if (_craftingPanel != null)
+                {
+                    if (!_craftingPanel.IsShowing)
+                    {
+                        CraftingBuildingPanelControl.TutorialShowAllRecipes = false;
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _craftingPanel.OnClose += OnCraftingPanelClosed;
+                        _waitingForCraftingPanelClose = true;
+                    }
+                }
+                else
+                {
+                    CraftingBuildingPanelControl.TutorialShowAllRecipes = false;
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.FourthBuildingPlacement:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                PlaceFourthBuildingOnMap();
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
+
+            case PartType.SelectFourthBuilding:
+            {
+                TileControl buildingTile = _placedFourthBuilding != null
+                    ? _placedFourthBuilding.GetComponentInParent<TileControl>()
+                    : null;
+                buildingTile ??= FindTileControlNear(_placedFourthBuildingWorldPos);
+
+                if (_buildingPanel == null)
+                    _buildingPanel = FindFirstObjectByType<BuildingPanelControl>(FindObjectsInactive.Include);
+
+                if (buildingTile != null && _buildingPanel != null)
+                {
+                    if (_cameraControl != null)
+                        _cameraControl.SetTutorialInputRestrictions(
+                            restrictInput: true,
+                            allowWorldDrag: true,
+                            allowZoom: true,
+                            allowMinimapRotation: true);
+                    TileInteraction.SetTutorialAllowedTile(buildingTile);
+                    TileInteraction.SetSelectionEnabled(true);
+                    _waitingForFourthBuildingPanel = true;
+                    var ti = TileInteraction.GetInstance();
+                    if (ti != null) ti.OnTileSelected += OnFourthBuildingTileSelected;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OpenProductionPanel:
+            {
+                ProductionBuildingPanelControl.TutorialShowAllPlans = true;
+                if (_productionPanel == null)
+                    _productionPanel = FindFirstObjectByType<ProductionBuildingPanelControl>(FindObjectsInactive.Include);
+                if (_productionPanel != null)
+                {
+                    if (_productionPanel.IsShowing)
+                    {
+                        _productionPanel.RefreshForTutorial();
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _productionPanel.OnOpen += OnProductionPanelOpened;
+                        _waitingForProductionPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.StartProductionPlan:
+            {
+                if (_productionPanel == null)
+                    _productionPanel = FindFirstObjectByType<ProductionBuildingPanelControl>(FindObjectsInactive.Include);
+                _tutorialProductionItem = _productionPanel != null
+                    ? _productionPanel.contentRoot.GetComponentInChildren<ProductionPlanItem>(true)
+                    : null;
+                if (_tutorialProductionItem != null)
+                {
+                    ProductionPlanItem.TutorialBypassCosts = true;
+                    _tutorialProductionItem.OnProductionStarted += OnProductionPlanStarted;
+                    _waitingForProductionStart = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.SelectProductionTargets:
+            {
+                if (!ProductionSelectionController.IsSelectionActive)
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                else
+                {
+                    if (_cameraControl != null)
+                    {
+                        _cameraControl.SetTutorialInputRestrictions(
+                            restrictInput: true,
+                            allowWorldDrag: true,
+                            allowZoom: true,
+                            allowMinimapRotation: false);
+                        _cameraControl.ZoomByUnits(10f);
+                    }
+                    ProductionSelectionController.OnSelectionCompleted += OnProductionSelectionCompleted;
+                    _waitingForProductionTargets = true;
+                }
+                break;
+            }
+
+            case PartType.OpenProductionRunningPanel:
+                ShowPart(_currentPart + 1);
+                break;
+
+            case PartType.OpenStoragePanel:
+            {
+                if (_storagePanel == null)
+                    _storagePanel = FindFirstObjectByType<StoragePanelControl>(FindObjectsInactive.Include);
+                if (_storagePanel != null)
+                {
+                    if (_storagePanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _waitingForStoragePanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.CloseStoragePanel:
+            {
+                if (_storagePanel == null)
+                    _storagePanel = FindFirstObjectByType<StoragePanelControl>(FindObjectsInactive.Include);
+                if (_storagePanel != null)
+                {
+                    if (!_storagePanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _storagePanel.OnClose += OnStoragePanelClosed;
+                        _waitingForStoragePanelClose = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.CloseResearchNeedsPanel:
             {
                 if (_trackedTechItem == null && _researchPanel != null && _researchPanel.contentRoot != null)
@@ -1347,6 +1764,232 @@ public class TutorialSetupInstaller : MonoBehaviour
         _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
     }
 
+    private void PlaceSecondBuildingOnMap()
+    {
+        if (string.IsNullOrEmpty(secondBuildingID) || BuildingManager.Instance == null)
+            return;
+
+        Building buildingDef = BuildingManager.Instance.GetBuildingByID(secondBuildingID);
+        if (buildingDef == null)
+            return;
+
+        EnvironmentControl[] allEnvs = FindObjectsByType<EnvironmentControl>(FindObjectsSortMode.None);
+        List<EnvironmentControl> candidates = new List<EnvironmentControl>();
+
+        foreach (EnvironmentControl env in allEnvs)
+        {
+            bool typeOk = buildingDef.requiredEnvironmentTypes == null
+                || buildingDef.requiredEnvironmentTypes.Count == 0
+                || buildingDef.requiredEnvironmentTypes.Contains(env.environmentType);
+
+            bool tileTypeOk = buildingDef.requiredEnvironmentTileTypes == null
+                || buildingDef.requiredEnvironmentTileTypes.Count == 0
+                || buildingDef.requiredEnvironmentTileTypes.Contains(env.environmentTileType);
+
+            bool sizeOk = env.tileSize == buildingDef.requiredTileSize;
+
+            if (typeOk && tileTypeOk && sizeOk)
+                candidates.Add(env);
+        }
+
+        if (candidates.Count == 0)
+            return;
+
+        EnvironmentControl target = candidates[Random.Range(0, candidates.Count)];
+        Vector3 worldPos = target.transform.position;
+        Vector3 envForward = target.transform.forward;
+
+        GameObject prefab = buildingDef.finalBuildingPrefab != null
+            ? buildingDef.finalBuildingPrefab
+            : buildingDef.buildingPrefab;
+
+        _placedSecondBuildingWorldPos = worldPos;
+
+        if (prefab != null)
+            _placedSecondBuilding = Instantiate(prefab, worldPos, target.transform.rotation);
+
+        TileControl tileControl = target.GetComponent<TileControl>();
+        GameObject toDestroy = (tileControl != null && tileControl.transform.parent != null)
+            ? tileControl.transform.parent.gameObject
+            : target.gameObject;
+        Destroy(toDestroy);
+
+        _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
+    }
+
+    private void PlaceThirdBuildingOnMap()
+    {
+        if (BuildingManager.Instance == null)
+            return;
+
+        EnvironmentControl[] allEnvs = FindObjectsByType<EnvironmentControl>(FindObjectsSortMode.None);
+
+        // Try primary building ID, then alternate, then same-size fallback.
+        Building primaryDef = !string.IsNullOrEmpty(thirdBuildingID)
+            ? BuildingManager.Instance.GetBuildingByID(thirdBuildingID)
+            : null;
+
+        Building alternateDef = !string.IsNullOrEmpty(thirdBuildingAlternateID)
+            ? BuildingManager.Instance.GetBuildingByID(thirdBuildingAlternateID)
+            : null;
+
+        Building chosenDef = null;
+        EnvironmentControl chosenEnv = null;
+
+        // 1. Try primary
+        if (primaryDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, primaryDef);
+            if (env != null) { chosenDef = primaryDef; chosenEnv = env; }
+        }
+
+        // 2. Try alternate
+        if (chosenEnv == null && alternateDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, alternateDef);
+            if (env != null) { chosenDef = alternateDef; chosenEnv = env; }
+        }
+
+        // 3. Same-size fallback: use primary def (or alternate) but ignore environment type/tile type
+        if (chosenEnv == null)
+        {
+            Building fallbackDef = primaryDef ?? alternateDef;
+            if (fallbackDef != null)
+            {
+                List<EnvironmentControl> sizeMatches = new List<EnvironmentControl>();
+                foreach (EnvironmentControl env in allEnvs)
+                {
+                    if (env.tileSize == fallbackDef.requiredTileSize && env.environmentTileType == EnvironmentTileType.Land)
+                        sizeMatches.Add(env);
+                }
+                if (sizeMatches.Count > 0)
+                {
+                    chosenDef = fallbackDef;
+                    chosenEnv = sizeMatches[Random.Range(0, sizeMatches.Count)];
+                }
+            }
+        }
+
+        if (chosenDef == null || chosenEnv == null)
+            return;
+
+        Vector3 worldPos = chosenEnv.transform.position;
+        Vector3 envForward = chosenEnv.transform.forward;
+
+        GameObject prefab = chosenDef.finalBuildingPrefab != null
+            ? chosenDef.finalBuildingPrefab
+            : chosenDef.buildingPrefab;
+
+        _placedThirdBuildingWorldPos = worldPos;
+
+        if (prefab != null)
+            _placedThirdBuilding = Instantiate(prefab, worldPos, chosenEnv.transform.rotation);
+
+        TileControl tileControl = chosenEnv.GetComponent<TileControl>();
+        GameObject toDestroy = (tileControl != null && tileControl.transform.parent != null)
+            ? tileControl.transform.parent.gameObject
+            : chosenEnv.gameObject;
+        Destroy(toDestroy);
+
+        _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
+    }
+
+    private void PlaceFourthBuildingOnMap()
+    {
+        if (BuildingManager.Instance == null)
+            return;
+
+        EnvironmentControl[] allEnvs = FindObjectsByType<EnvironmentControl>(FindObjectsSortMode.None);
+
+        Building primaryDef = !string.IsNullOrEmpty(fourthBuildingID)
+            ? BuildingManager.Instance.GetBuildingByID(fourthBuildingID)
+            : null;
+
+        Building alternateDef = !string.IsNullOrEmpty(fourthBuildingAlternateID)
+            ? BuildingManager.Instance.GetBuildingByID(fourthBuildingAlternateID)
+            : null;
+
+        Building chosenDef = null;
+        EnvironmentControl chosenEnv = null;
+
+        if (primaryDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, primaryDef);
+            if (env != null) { chosenDef = primaryDef; chosenEnv = env; }
+        }
+
+        if (chosenEnv == null && alternateDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, alternateDef);
+            if (env != null) { chosenDef = alternateDef; chosenEnv = env; }
+        }
+
+        if (chosenEnv == null)
+        {
+            Building fallbackDef = primaryDef ?? alternateDef;
+            if (fallbackDef != null)
+            {
+                List<EnvironmentControl> sizeMatches = new List<EnvironmentControl>();
+                foreach (EnvironmentControl env in allEnvs)
+                {
+                    if (env.tileSize == fallbackDef.requiredTileSize && env.environmentTileType == EnvironmentTileType.Land)
+                        sizeMatches.Add(env);
+                }
+                if (sizeMatches.Count > 0)
+                {
+                    chosenDef = fallbackDef;
+                    chosenEnv = sizeMatches[Random.Range(0, sizeMatches.Count)];
+                }
+            }
+        }
+
+        if (chosenDef == null || chosenEnv == null)
+            return;
+
+        Vector3 worldPos = chosenEnv.transform.position;
+        Vector3 envForward = chosenEnv.transform.forward;
+
+        GameObject prefab = chosenDef.finalBuildingPrefab != null
+            ? chosenDef.finalBuildingPrefab
+            : chosenDef.buildingPrefab;
+
+        _placedFourthBuildingWorldPos = worldPos;
+
+        if (prefab != null)
+            _placedFourthBuilding = Instantiate(prefab, worldPos, chosenEnv.transform.rotation);
+
+        TileControl tileControl = chosenEnv.GetComponent<TileControl>();
+        GameObject toDestroy = (tileControl != null && tileControl.transform.parent != null)
+            ? tileControl.transform.parent.gameObject
+            : chosenEnv.gameObject;
+        Destroy(toDestroy);
+
+        _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
+    }
+
+    private EnvironmentControl FindBuildingCandidate(EnvironmentControl[] allEnvs, Building buildingDef)
+    {
+        List<EnvironmentControl> candidates = new List<EnvironmentControl>();
+
+        foreach (EnvironmentControl env in allEnvs)
+        {
+            bool typeOk = buildingDef.requiredEnvironmentTypes == null
+                || buildingDef.requiredEnvironmentTypes.Count == 0
+                || buildingDef.requiredEnvironmentTypes.Contains(env.environmentType);
+
+            bool tileTypeOk = buildingDef.requiredEnvironmentTileTypes == null
+                || buildingDef.requiredEnvironmentTileTypes.Count == 0
+                || buildingDef.requiredEnvironmentTileTypes.Contains(env.environmentTileType);
+
+            bool sizeOk = env.tileSize == buildingDef.requiredTileSize;
+
+            if (typeOk && tileTypeOk && sizeOk)
+                candidates.Add(env);
+        }
+
+        return candidates.Count > 0 ? candidates[Random.Range(0, candidates.Count)] : null;
+    }
+
     private void OnTurnCompletedForFastForward()
     {
         if (!_waitingForTurnComplete) return;
@@ -1510,6 +2153,7 @@ public class TutorialSetupInstaller : MonoBehaviour
             _discoveredTilePanel.TutorialGatherOverride == (System.Func<EnvironmentControl, bool>)OnTutorialGatherClicked)
             _discoveredTilePanel.TutorialGatherOverride = null;
 
+        PlayerInventoryManager.TutorialBypassCapacity = true;
         EnvironmentControl.TutorialBypassTaskFailure = true;
         env.BeginGatheringVisuals();
 
@@ -1675,6 +2319,14 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (!_waitingForBuildingPanelClose) return;
         _waitingForBuildingPanelClose = false;
         if (_buildingPanel != null) _buildingPanel.OnClose -= OnBuildingPanelClosed;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnStoragePanelClosed()
+    {
+        if (!_waitingForStoragePanelClose) return;
+        _waitingForStoragePanelClose = false;
+        if (_storagePanel != null) _storagePanel.OnClose -= OnStoragePanelClosed;
         ShowPart(_currentPart + 1);
     }
 
@@ -1856,6 +2508,110 @@ public class TutorialSetupInstaller : MonoBehaviour
         var ti = TileInteraction.GetInstance();
         if (ti != null) ti.OnTileSelected -= OnPlacedBuildingTileSelected;
         TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnSecondBuildingTileSelectedForPanel(TileControl tile)
+    {
+        if (!_waitingForSecondBuildingPanel) return;
+        _waitingForSecondBuildingPanel = false;
+        var ti = TileInteraction.GetInstance();
+        if (ti != null) ti.OnTileSelected -= OnSecondBuildingTileSelectedForPanel;
+        TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnThirdBuildingTileSelected(TileControl tile)
+    {
+        if (!_waitingForThirdBuildingPanel) return;
+        _waitingForThirdBuildingPanel = false;
+        var ti = TileInteraction.GetInstance();
+        if (ti != null) ti.OnTileSelected -= OnThirdBuildingTileSelected;
+        TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnFourthBuildingTileSelected(TileControl tile)
+    {
+        if (!_waitingForFourthBuildingPanel) return;
+        _waitingForFourthBuildingPanel = false;
+        var ti = TileInteraction.GetInstance();
+        if (ti != null) ti.OnTileSelected -= OnFourthBuildingTileSelected;
+        TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnProductionPanelOpened()
+    {
+        if (!_waitingForProductionPanelOpen) return;
+        _waitingForProductionPanelOpen = false;
+        if (_productionPanel != null) _productionPanel.OnOpen -= OnProductionPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnProductionRunningPanelOpened()
+    {
+        if (!_waitingForProductionRunningPanelOpen) return;
+        _waitingForProductionRunningPanelOpen = false;
+        if (_productionRunningPanel != null) _productionRunningPanel.OnOpen -= OnProductionRunningPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnProductionPlanStarted()
+    {
+        if (!_waitingForProductionStart) return;
+        _waitingForProductionStart = false;
+        ProductionPlanItem.TutorialBypassCosts = false;
+        if (_tutorialProductionItem != null) _tutorialProductionItem.OnProductionStarted -= OnProductionPlanStarted;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnProductionSelectionCompleted(ProductionBuildingControl building, ProductionPlan plan)
+    {
+        if (!_waitingForProductionTargets) return;
+        _waitingForProductionTargets = false;
+        ProductionSelectionController.OnSelectionCompleted -= OnProductionSelectionCompleted;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnBuildingTypeSwitched()
+    {
+        if (!_waitingForBuildingTypeSwitch) return;
+        _waitingForBuildingTypeSwitch = false;
+        if (_buildingPanel != null) _buildingPanel.OnBuildingTypeSwitched -= OnBuildingTypeSwitched;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnCraftingPanelOpened()
+    {
+        if (!_waitingForCraftingPanelOpen) return;
+        _waitingForCraftingPanelOpen = false;
+        if (_craftingPanel != null) _craftingPanel.OnOpen -= OnCraftingPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnCraftingPanelClosed()
+    {
+        if (!_waitingForCraftingPanelClose) return;
+        _waitingForCraftingPanelClose = false;
+        if (_craftingPanel != null) _craftingPanel.OnClose -= OnCraftingPanelClosed;
+        CraftingBuildingPanelControl.TutorialShowAllRecipes = false;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnCraftingCostPanelShown()
+    {
+        if (!_waitingForCraftingCostPanel) return;
+        _waitingForCraftingCostPanel = false;
+        if (_tutorialCraftingItem != null) _tutorialCraftingItem.OnCostsPanelShown -= OnCraftingCostPanelShown;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnCraftingOutputViewShown()
+    {
+        if (!_waitingForCraftingOutputView) return;
+        _waitingForCraftingOutputView = false;
+        if (_tutorialCraftingItem != null) _tutorialCraftingItem.OnOutputViewShown -= OnCraftingOutputViewShown;
         ShowPart(_currentPart + 1);
     }
 
@@ -2376,6 +3132,97 @@ public class TutorialSetupInstaller : MonoBehaviour
             var ti = TileInteraction.GetInstance();
             if (ti != null) ti.OnTileSelected -= OnPlacedBuildingTileSelected;
             TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForSecondBuildingPanel)
+        {
+            _waitingForSecondBuildingPanel = false;
+            var ti = TileInteraction.GetInstance();
+            if (ti != null) ti.OnTileSelected -= OnSecondBuildingTileSelectedForPanel;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForThirdBuildingPanel)
+        {
+            _waitingForThirdBuildingPanel = false;
+            var ti = TileInteraction.GetInstance();
+            if (ti != null) ti.OnTileSelected -= OnThirdBuildingTileSelected;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForFourthBuildingPanel)
+        {
+            _waitingForFourthBuildingPanel = false;
+            var ti = TileInteraction.GetInstance();
+            if (ti != null) ti.OnTileSelected -= OnFourthBuildingTileSelected;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForProductionPanelOpen && _productionPanel != null)
+        {
+            _productionPanel.OnOpen -= OnProductionPanelOpened;
+            _waitingForProductionPanelOpen = false;
+        }
+
+        if (_waitingForProductionRunningPanelOpen && _productionRunningPanel != null)
+        {
+            _productionRunningPanel.OnOpen -= OnProductionRunningPanelOpened;
+            _waitingForProductionRunningPanelOpen = false;
+        }
+
+        if (_waitingForProductionStart && _tutorialProductionItem != null)
+        {
+            _tutorialProductionItem.OnProductionStarted -= OnProductionPlanStarted;
+            _waitingForProductionStart = false;
+        }
+        ProductionPlanItem.TutorialBypassCosts = false;
+
+        if (_waitingForProductionTargets)
+        {
+            ProductionSelectionController.OnSelectionCompleted -= OnProductionSelectionCompleted;
+            _waitingForProductionTargets = false;
+        }
+
+        ProductionBuildingPanelControl.TutorialShowAllPlans = false;
+
+        if (_waitingForBuildingTypeSwitch && _buildingPanel != null)
+        {
+            _buildingPanel.OnBuildingTypeSwitched -= OnBuildingTypeSwitched;
+            _waitingForBuildingTypeSwitch = false;
+        }
+
+        if (_waitingForCraftingPanelOpen && _craftingPanel != null)
+        {
+            _craftingPanel.OnOpen -= OnCraftingPanelOpened;
+            _waitingForCraftingPanelOpen = false;
+        }
+
+        if (_waitingForCraftingPanelClose && _craftingPanel != null)
+        {
+            _craftingPanel.OnClose -= OnCraftingPanelClosed;
+            _waitingForCraftingPanelClose = false;
+        }
+
+        if (_waitingForCraftingCostPanel && _tutorialCraftingItem != null)
+        {
+            _tutorialCraftingItem.OnCostsPanelShown -= OnCraftingCostPanelShown;
+            _waitingForCraftingCostPanel = false;
+        }
+
+        if (_waitingForCraftingOutputView && _tutorialCraftingItem != null)
+        {
+            _tutorialCraftingItem.OnOutputViewShown -= OnCraftingOutputViewShown;
+            _waitingForCraftingOutputView = false;
+        }
+
+        CraftingBuildingPanelControl.TutorialShowAllRecipes = false;
+
+        _waitingForStoragePanelOpen = false;
+
+        if (_waitingForStoragePanelClose && _storagePanel != null)
+        {
+            _storagePanel.OnClose -= OnStoragePanelClosed;
+            _waitingForStoragePanelClose = false;
         }
 
         if (_damageBuildingRoutine != null)
