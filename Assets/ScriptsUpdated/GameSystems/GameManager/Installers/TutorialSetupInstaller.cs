@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -126,6 +126,10 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForTraderPanelOpen;
     private OfferingPanelControl _offeringPanel;
     private bool _waitingForOfferingPanelOpen;
+    private bool _waitingForPlayerOffer;
+    private bool _waitingForTradeAccepted;
+    private bool _waitingForTraderPanelClose;
+    private bool _waitingForTradePanelClose;
     private ProductionBuildingPanelControl _productionPanel;
     private bool _waitingForProductionPanelOpen;
     private ProductionRunningPanelControl _productionRunningPanel;
@@ -1684,6 +1688,84 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.OfferResources:
+            {
+                if (_offeringPanel == null)
+                    _offeringPanel = FindFirstObjectByType<OfferingPanelControl>(FindObjectsInactive.Include);
+                if (_offeringPanel != null)
+                {
+                    _offeringPanel.OnPlayerOfferAdded += OnPlayerOfferAdded;
+                    _waitingForPlayerOffer = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.FinishTrade:
+            {
+                if (_offeringPanel == null)
+                    _offeringPanel = FindFirstObjectByType<OfferingPanelControl>(FindObjectsInactive.Include);
+                if (_offeringPanel != null)
+                {
+                    _offeringPanel.OnTradeAccepted += OnTradeAccepted;
+                    _waitingForTradeAccepted = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.CloseTraderPanel:
+            {
+                if (_traderPanel == null)
+                    _traderPanel = FindFirstObjectByType<TraderPanelControl>(FindObjectsInactive.Include);
+                if (_traderPanel != null)
+                {
+                    if (!_traderPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _traderPanel.OnClose += OnTraderPanelClosed;
+                        _waitingForTraderPanelClose = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.CloseTradePanel:
+            {
+                if (_tradePanel == null)
+                    _tradePanel = FindFirstObjectByType<TradePanelControl>(FindObjectsInactive.Include);
+                if (_tradePanel != null)
+                {
+                    if (!_tradePanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _tradePanel.OnClose += OnTradePanelClosed;
+                        _waitingForTradePanelClose = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.OpenStoragePanel:
             {
                 if (_storagePanel == null)
@@ -2814,6 +2896,38 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnPlayerOfferAdded()
+    {
+        if (!_waitingForPlayerOffer) return;
+        _waitingForPlayerOffer = false;
+        if (_offeringPanel != null) _offeringPanel.OnPlayerOfferAdded -= OnPlayerOfferAdded;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnTradeAccepted()
+    {
+        if (!_waitingForTradeAccepted) return;
+        _waitingForTradeAccepted = false;
+        if (_offeringPanel != null) _offeringPanel.OnTradeAccepted -= OnTradeAccepted;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnTraderPanelClosed()
+    {
+        if (!_waitingForTraderPanelClose) return;
+        _waitingForTraderPanelClose = false;
+        if (_traderPanel != null) _traderPanel.OnClose -= OnTraderPanelClosed;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnTradePanelClosed()
+    {
+        if (!_waitingForTradePanelClose) return;
+        _waitingForTradePanelClose = false;
+        if (_tradePanel != null) _tradePanel.OnClose -= OnTradePanelClosed;
+        ShowPart(_currentPart + 1);
+    }
+
     private void OnProductionPanelOpened()
     {
         if (!_waitingForProductionPanelOpen) return;
@@ -3466,6 +3580,30 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _offeringPanel.OnOpen -= OnOfferingPanelOpened;
             _waitingForOfferingPanelOpen = false;
+        }
+
+        if (_waitingForPlayerOffer && _offeringPanel != null)
+        {
+            _offeringPanel.OnPlayerOfferAdded -= OnPlayerOfferAdded;
+            _waitingForPlayerOffer = false;
+        }
+
+        if (_waitingForTradeAccepted && _offeringPanel != null)
+        {
+            _offeringPanel.OnTradeAccepted -= OnTradeAccepted;
+            _waitingForTradeAccepted = false;
+        }
+
+        if (_waitingForTraderPanelClose && _traderPanel != null)
+        {
+            _traderPanel.OnClose -= OnTraderPanelClosed;
+            _waitingForTraderPanelClose = false;
+        }
+
+        if (_waitingForTradePanelClose && _tradePanel != null)
+        {
+            _tradePanel.OnClose -= OnTradePanelClosed;
+            _waitingForTradePanelClose = false;
         }
 
         if (_waitingForProductionPanelOpen && _productionPanel != null)

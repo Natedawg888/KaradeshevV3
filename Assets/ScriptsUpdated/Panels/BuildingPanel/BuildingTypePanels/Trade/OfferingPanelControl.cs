@@ -58,6 +58,8 @@ public class OfferingPanelControl : MonoBehaviour
     public bool IsShowing => panelRoot != null && panelRoot.activeSelf;
     public event System.Action OnOpen;
     public event System.Action OnClose;
+    public event System.Action OnPlayerOfferAdded;
+    public event System.Action OnTradeAccepted;
 
     private void Awake()
     {
@@ -207,6 +209,9 @@ public class OfferingPanelControl : MonoBehaviour
         }
 
         UpdateLiveFeedback();
+
+        if (_playerGiving.Count > 0 || _playerGivingPopulation.Count > 0)
+            OnPlayerOfferAdded?.Invoke();
     }
 
     // ── Available lists (always shows both resources and population) ──
@@ -333,7 +338,10 @@ public class OfferingPanelControl : MonoBehaviour
         SetFeedback(result.message);
 
         if (result.resultType == TradeResultType.Accepted)
+        {
+            OnTradeAccepted?.Invoke();
             Hide();
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────
