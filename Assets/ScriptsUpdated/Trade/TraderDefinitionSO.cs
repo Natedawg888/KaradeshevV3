@@ -74,6 +74,8 @@ public class TraderDefinitionSO : ScriptableObject
     public string feedbackAcceptable        = "";
     public string feedbackGenerous          = "";
     public string feedbackMassivelyGenerous = "";
+    [Tooltip("Shown when the player offers something this trader refuses. Leave blank for default: \"Won't accept: [items].\"")]
+    public string feedbackRefused           = "";
 
     [Header("Season Restrictions")]
     [Tooltip("If empty, this trader can appear in any season. Otherwise only in the listed season IDs.")]

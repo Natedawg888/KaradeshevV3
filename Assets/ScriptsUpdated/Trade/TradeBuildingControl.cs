@@ -315,6 +315,7 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTurnTickable
             rejectedResources           = new List<ResourceDefinition>(def.rejectedResources),
             rejectedAgeGroups           = new List<AgeGroup>(def.rejectedAgeGroups),
             rejectedGenders             = new List<Gender>(def.rejectedGenders),
+            feedbackRefused             = def.feedbackRefused,
             acceptsPopulationFromPlayer = def.acceptsPopulationFromPlayer,
             childValue                  = def.childValue,
             teenValue                   = def.teenValue,
@@ -451,7 +452,10 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTurnTickable
         var unique = new List<string>();
         foreach (var s in refused) if (seen.Add(s)) unique.Add(s);
 
-        return $"Won't accept: {string.Join(", ", unique)}.";
+        string prefix = !string.IsNullOrEmpty(currentTraderOffer.feedbackRefused)
+            ? currentTraderOffer.feedbackRefused
+            : $"Won't accept: {string.Join(", ", unique)}.";
+        return prefix;
     }
 
     private float ComputePlayerOfferValue(TradeOffer offer)
