@@ -2931,6 +2931,14 @@ public class TutorialSetupInstaller : MonoBehaviour
         _placedFifthBuilding = null;
         _placedSixthBuilding = null;
 
+        // Sweep for any BuildingControl instances that weren't tracked (e.g. spawned by subsystems)
+        BuildingControl[] allBuildings = FindObjectsByType<BuildingControl>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (BuildingControl bc in allBuildings)
+        {
+            if (bc != null && bc.gameObject != null)
+                Destroy(bc.gameObject);
+        }
+
         if (_mapGenerator == null)
             _mapGenerator = FindFirstObjectByType<MapGenerator>();
         if (_mapTilePlacer == null)
