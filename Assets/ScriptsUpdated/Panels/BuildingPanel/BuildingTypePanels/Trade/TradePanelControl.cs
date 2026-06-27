@@ -23,6 +23,10 @@ public class TradePanelControl : MonoBehaviour
     private TradeBuildingControl _building;
     private BuildingPanelControl _buildingPanel;
 
+    public bool IsShowing => panelRoot != null && panelRoot.activeSelf;
+    public event System.Action OnOpen;
+    public event System.Action OnClose;
+
     private void Awake()
     {
         if (closeButton != null)
@@ -38,6 +42,7 @@ public class TradePanelControl : MonoBehaviour
         _buildingPanel = buildingPanel;
         panelRoot?.SetActive(true);
         Refresh();
+        OnOpen?.Invoke();
     }
 
     public void Hide()
@@ -47,6 +52,7 @@ public class TradePanelControl : MonoBehaviour
         _buildingPanel?.SoftShowFromChild();
         _building = null;
         _buildingPanel = null;
+        OnClose?.Invoke();
     }
 
     private void Refresh()

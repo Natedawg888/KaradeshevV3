@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -44,6 +44,10 @@ public class TutorialSetupInstaller : MonoBehaviour
     [Header("Fourth Building Placement Part")]
     [SerializeField] private string fourthBuildingID = "";
     [SerializeField] private string fourthBuildingAlternateID = "";
+
+    [Header("Fifth Building Placement Part")]
+    [SerializeField] private string fifthBuildingID = "";
+    [SerializeField] private string fifthBuildingAlternateID = "";
 
     private CameraControl _cameraControl;
     private TileActivator _tileActivator;
@@ -113,6 +117,11 @@ public class TutorialSetupInstaller : MonoBehaviour
     private GameObject _placedFourthBuilding;
     private Vector3 _placedFourthBuildingWorldPos;
     private bool _waitingForFourthBuildingPanel;
+    private GameObject _placedFifthBuilding;
+    private Vector3 _placedFifthBuildingWorldPos;
+    private bool _waitingForFifthBuildingPanel;
+    private TradePanelControl _tradePanel;
+    private bool _waitingForTradePanelOpen;
     private ProductionBuildingPanelControl _productionPanel;
     private bool _waitingForProductionPanelOpen;
     private ProductionRunningPanelControl _productionRunningPanel;
@@ -1553,6 +1562,77 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.FifthBuildingPlacement:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                PlaceFifthBuildingOnMap();
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
+
+            case PartType.SelectFifthBuilding:
+            {
+                TileControl buildingTile = _placedFifthBuilding != null
+                    ? _placedFifthBuilding.GetComponentInParent<TileControl>()
+                    : null;
+                buildingTile ??= FindTileControlNear(_placedFifthBuildingWorldPos);
+
+                if (_buildingPanel == null)
+                    _buildingPanel = FindFirstObjectByType<BuildingPanelControl>(FindObjectsInactive.Include);
+
+                if (buildingTile != null && _buildingPanel != null)
+                {
+                    if (_cameraControl != null)
+                        _cameraControl.SetTutorialInputRestrictions(
+                            restrictInput: true,
+                            allowWorldDrag: true,
+                            allowZoom: true,
+                            allowMinimapRotation: true);
+                    TileInteraction.SetTutorialAllowedTile(buildingTile);
+                    TileInteraction.SetSelectionEnabled(true);
+                    _waitingForFifthBuildingPanel = true;
+                    var ti = TileInteraction.GetInstance();
+                    if (ti != null) ti.OnTileSelected += OnFifthBuildingTileSelected;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OpenTradePanel:
+            {
+                if (_tradePanel == null)
+                    _tradePanel = FindFirstObjectByType<TradePanelControl>(FindObjectsInactive.Include);
+                if (_tradePanel != null)
+                {
+                    if (_tradePanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _tradePanel.OnOpen += OnTradePanelOpened;
+                        _waitingForTradePanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.OpenStoragePanel:
             {
                 if (_storagePanel == null)
@@ -1910,6 +1990,79 @@ public class TutorialSetupInstaller : MonoBehaviour
 
         if (prefab != null)
             _placedThirdBuilding = Instantiate(prefab, worldPos, chosenEnv.transform.rotation);
+
+        TileControl tileControl = chosenEnv.GetComponent<TileControl>();
+        GameObject toDestroy = (tileControl != null && tileControl.transform.parent != null)
+            ? tileControl.transform.parent.gameObject
+            : chosenEnv.gameObject;
+        Destroy(toDestroy);
+
+        _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
+    }
+
+    private void PlaceFifthBuildingOnMap()
+    {
+        if (BuildingManager.Instance == null)
+            return;
+
+        EnvironmentControl[] allEnvs = FindObjectsByType<EnvironmentControl>(FindObjectsSortMode.None);
+
+        Building primaryDef = !string.IsNullOrEmpty(fifthBuildingID)
+            ? BuildingManager.Instance.GetBuildingByID(fifthBuildingID)
+            : null;
+
+        Building alternateDef = !string.IsNullOrEmpty(fifthBuildingAlternateID)
+            ? BuildingManager.Instance.GetBuildingByID(fifthBuildingAlternateID)
+            : null;
+
+        Building chosenDef = null;
+        EnvironmentControl chosenEnv = null;
+
+        if (primaryDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, primaryDef);
+            if (env != null) { chosenDef = primaryDef; chosenEnv = env; }
+        }
+
+        if (chosenEnv == null && alternateDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, alternateDef);
+            if (env != null) { chosenDef = alternateDef; chosenEnv = env; }
+        }
+
+        if (chosenEnv == null)
+        {
+            Building fallbackDef = primaryDef ?? alternateDef;
+            if (fallbackDef != null)
+            {
+                List<EnvironmentControl> sizeMatches = new List<EnvironmentControl>();
+                foreach (EnvironmentControl env in allEnvs)
+                {
+                    if (env.tileSize == fallbackDef.requiredTileSize && env.environmentTileType == EnvironmentTileType.Land)
+                        sizeMatches.Add(env);
+                }
+                if (sizeMatches.Count > 0)
+                {
+                    chosenDef = fallbackDef;
+                    chosenEnv = sizeMatches[Random.Range(0, sizeMatches.Count)];
+                }
+            }
+        }
+
+        if (chosenDef == null || chosenEnv == null)
+            return;
+
+        Vector3 worldPos = chosenEnv.transform.position;
+        Vector3 envForward = chosenEnv.transform.forward;
+
+        GameObject prefab = chosenDef.finalBuildingPrefab != null
+            ? chosenDef.finalBuildingPrefab
+            : chosenDef.buildingPrefab;
+
+        _placedFifthBuildingWorldPos = worldPos;
+
+        if (prefab != null)
+            _placedFifthBuilding = Instantiate(prefab, worldPos, chosenEnv.transform.rotation);
 
         TileControl tileControl = chosenEnv.GetComponent<TileControl>();
         GameObject toDestroy = (tileControl != null && tileControl.transform.parent != null)
@@ -2567,6 +2720,24 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnFifthBuildingTileSelected(TileControl tile)
+    {
+        if (!_waitingForFifthBuildingPanel) return;
+        _waitingForFifthBuildingPanel = false;
+        var ti = TileInteraction.GetInstance();
+        if (ti != null) ti.OnTileSelected -= OnFifthBuildingTileSelected;
+        TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnTradePanelOpened()
+    {
+        if (!_waitingForTradePanelOpen) return;
+        _waitingForTradePanelOpen = false;
+        if (_tradePanel != null) _tradePanel.OnOpen -= OnTradePanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
     private void OnProductionPanelOpened()
     {
         if (!_waitingForProductionPanelOpen) return;
@@ -3191,6 +3362,20 @@ public class TutorialSetupInstaller : MonoBehaviour
             var ti = TileInteraction.GetInstance();
             if (ti != null) ti.OnTileSelected -= OnFourthBuildingTileSelected;
             TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForFifthBuildingPanel)
+        {
+            _waitingForFifthBuildingPanel = false;
+            var ti = TileInteraction.GetInstance();
+            if (ti != null) ti.OnTileSelected -= OnFifthBuildingTileSelected;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForTradePanelOpen && _tradePanel != null)
+        {
+            _tradePanel.OnOpen -= OnTradePanelOpened;
+            _waitingForTradePanelOpen = false;
         }
 
         if (_waitingForProductionPanelOpen && _productionPanel != null)
