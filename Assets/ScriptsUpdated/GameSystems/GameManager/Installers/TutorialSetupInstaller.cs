@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual, SelectSummoningSpirit }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual, SelectSummoningSpirit, RegenerateMapClearBuildings, SeventhBuildingPlacement, SelectSeventhBuilding }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -52,6 +52,10 @@ public class TutorialSetupInstaller : MonoBehaviour
     [Header("Sixth Building Placement Part")]
     [SerializeField] private string sixthBuildingID = "";
     [SerializeField] private string sixthBuildingAlternateID = "";
+
+    [Header("Seventh Building Placement Part")]
+    [SerializeField] private string seventhBuildingID = "";
+    [SerializeField] private string seventhBuildingAlternateID = "";
 
     private CameraControl _cameraControl;
     private TileActivator _tileActivator;
@@ -127,6 +131,9 @@ public class TutorialSetupInstaller : MonoBehaviour
     private GameObject _placedSixthBuilding;
     private Vector3 _placedSixthBuildingWorldPos;
     private bool _waitingForSixthBuildingPanel;
+    private GameObject _placedSeventhBuilding;
+    private Vector3 _placedSeventhBuildingWorldPos;
+    private bool _waitingForSeventhBuildingPanel;
     private ReligiousBuildingPanelControl _religiousPanel;
     private bool _waitingForReligiousPanelOpen;
     private ReligiousRitualPanelControl _ritualPanel;
@@ -1945,6 +1952,66 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.RegenerateMapClearBuildings:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                TileInteraction.SetSelectionEnabled(false);
+                if (_regenRoutine != null) StopCoroutine(_regenRoutine);
+                _regenRoutine = StartCoroutine(TutorialRegenerateMapClearBuildingsCoroutine());
+                break;
+
+            case PartType.SeventhBuildingPlacement:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                PlaceSeventhBuildingOnMap();
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
+
+            case PartType.SelectSeventhBuilding:
+            {
+                TileControl buildingTile = _placedSeventhBuilding != null
+                    ? _placedSeventhBuilding.GetComponentInParent<TileControl>()
+                    : null;
+                buildingTile ??= FindTileControlNear(_placedSeventhBuildingWorldPos);
+
+                if (_buildingPanel == null)
+                    _buildingPanel = FindFirstObjectByType<BuildingPanelControl>(FindObjectsInactive.Include);
+
+                if (buildingTile != null && _buildingPanel != null)
+                {
+                    if (_cameraControl != null)
+                        _cameraControl.SetTutorialInputRestrictions(
+                            restrictInput: true,
+                            allowWorldDrag: true,
+                            allowZoom: true,
+                            allowMinimapRotation: true);
+                    TileInteraction.SetTutorialAllowedTile(buildingTile);
+                    TileInteraction.SetSelectionEnabled(true);
+                    _waitingForSeventhBuildingPanel = true;
+                    var ti = TileInteraction.GetInstance();
+                    if (ti != null) ti.OnTileSelected += OnSeventhBuildingTileSelected;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.OpenStoragePanel:
             {
                 if (_storagePanel == null)
@@ -2839,6 +2906,142 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private IEnumerator TutorialRegenerateMapClearBuildingsCoroutine()
+    {
+        if (_tileActivator != null)
+            _tileActivator.OnTilesActivated -= OnWorldSpawned;
+
+        if (_discoveredTilePanel == null)
+            _discoveredTilePanel = FindFirstObjectByType<DiscoveredTilePanelControl>(FindObjectsInactive.Include);
+        _discoveredTilePanel?.Hide();
+
+        GameObject[] placedBuildings = new[]
+        {
+            _placedShelterBuilding, _placedSecondBuilding, _placedThirdBuilding,
+            _placedFourthBuilding, _placedFifthBuilding, _placedSixthBuilding
+        };
+        foreach (GameObject b in placedBuildings)
+        {
+            if (b != null) Destroy(b);
+        }
+        _placedShelterBuilding = null;
+        _placedSecondBuilding = null;
+        _placedThirdBuilding = null;
+        _placedFourthBuilding = null;
+        _placedFifthBuilding = null;
+        _placedSixthBuilding = null;
+
+        if (_mapGenerator == null)
+            _mapGenerator = FindFirstObjectByType<MapGenerator>();
+        if (_mapTilePlacer == null)
+            _mapTilePlacer = FindFirstObjectByType<MapTilePlacer>();
+
+        if (_mapGenerator == null || _mapTilePlacer == null || _tileActivator == null)
+        {
+            _regenRoutine = null;
+            ShowPart(_currentPart + 1);
+            yield break;
+        }
+
+        _mapTilePlacer.ClearPlacedTilesAndState();
+        yield return null;
+
+        MapTilePlacer.ResetWorldReady();
+        _mapGenerator.enabled = true;
+        _mapTilePlacer.enabled = true;
+
+        yield return StartCoroutine(_mapGenerator.RegenerateCoroutine());
+
+        _mapTilePlacer.BeginPlacement();
+        yield return new WaitUntil(() => MapTilePlacer.WorldReady);
+
+        _tileActivator.BeginActivation(_tileActivator.timerUI, true, true);
+        yield return new WaitUntil(() => !_tileActivator.IsRunning);
+
+        var allEnvs = FindObjectsByType<EnvironmentControl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        for (int i = 0; i < allEnvs.Length; i++)
+        {
+            if (allEnvs[i] != null)
+                allEnvs[i].CompleteTutorialDiscoveryNow();
+        }
+
+        _regenRoutine = null;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void PlaceSeventhBuildingOnMap()
+    {
+        if (BuildingManager.Instance == null)
+            return;
+
+        EnvironmentControl[] allEnvs = FindObjectsByType<EnvironmentControl>(FindObjectsSortMode.None);
+
+        Building primaryDef = !string.IsNullOrEmpty(seventhBuildingID)
+            ? BuildingManager.Instance.GetBuildingByID(seventhBuildingID)
+            : null;
+
+        Building alternateDef = !string.IsNullOrEmpty(seventhBuildingAlternateID)
+            ? BuildingManager.Instance.GetBuildingByID(seventhBuildingAlternateID)
+            : null;
+
+        Building chosenDef = null;
+        EnvironmentControl chosenEnv = null;
+
+        if (primaryDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, primaryDef);
+            if (env != null) { chosenDef = primaryDef; chosenEnv = env; }
+        }
+
+        if (chosenEnv == null && alternateDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, alternateDef);
+            if (env != null) { chosenDef = alternateDef; chosenEnv = env; }
+        }
+
+        if (chosenEnv == null)
+        {
+            Building fallbackDef = primaryDef ?? alternateDef;
+            if (fallbackDef != null)
+            {
+                List<EnvironmentControl> sizeMatches = new List<EnvironmentControl>();
+                foreach (EnvironmentControl env in allEnvs)
+                {
+                    if (env.tileSize == fallbackDef.requiredTileSize && env.environmentTileType == EnvironmentTileType.Land)
+                        sizeMatches.Add(env);
+                }
+                if (sizeMatches.Count > 0)
+                {
+                    chosenDef = fallbackDef;
+                    chosenEnv = sizeMatches[Random.Range(0, sizeMatches.Count)];
+                }
+            }
+        }
+
+        if (chosenDef == null || chosenEnv == null)
+            return;
+
+        Vector3 worldPos = chosenEnv.transform.position;
+        Vector3 envForward = chosenEnv.transform.forward;
+
+        GameObject prefab = chosenDef.finalBuildingPrefab != null
+            ? chosenDef.finalBuildingPrefab
+            : chosenDef.buildingPrefab;
+
+        _placedSeventhBuildingWorldPos = worldPos;
+
+        if (prefab != null)
+            _placedSeventhBuilding = Instantiate(prefab, worldPos, chosenEnv.transform.rotation);
+
+        TileControl tileControl = chosenEnv.GetComponent<TileControl>();
+        GameObject toDestroy = (tileControl != null && tileControl.transform.parent != null)
+            ? tileControl.transform.parent.gameObject
+            : chosenEnv.gameObject;
+        Destroy(toDestroy);
+
+        _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
+    }
+
     private void OnSurveyCompletedForTutorial(EnvironmentControl env)
     {
         if (!_waitingForSurveyComplete) return;
@@ -3129,6 +3332,16 @@ public class TutorialSetupInstaller : MonoBehaviour
         _waitingForSixthBuildingPanel = false;
         var ti = TileInteraction.GetInstance();
         if (ti != null) ti.OnTileSelected -= OnSixthBuildingTileSelected;
+        TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnSeventhBuildingTileSelected(TileControl tile)
+    {
+        if (!_waitingForSeventhBuildingPanel) return;
+        _waitingForSeventhBuildingPanel = false;
+        var ti = TileInteraction.GetInstance();
+        if (ti != null) ti.OnTileSelected -= OnSeventhBuildingTileSelected;
         TileInteraction.ClearTutorialAllowedTile();
         ShowPart(_currentPart + 1);
     }
@@ -3903,6 +4116,14 @@ public class TutorialSetupInstaller : MonoBehaviour
             _waitingForSixthBuildingPanel = false;
             var ti = TileInteraction.GetInstance();
             if (ti != null) ti.OnTileSelected -= OnSixthBuildingTileSelected;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForSeventhBuildingPanel)
+        {
+            _waitingForSeventhBuildingPanel = false;
+            var ti = TileInteraction.GetInstance();
+            if (ti != null) ti.OnTileSelected -= OnSeventhBuildingTileSelected;
             TileInteraction.ClearTutorialAllowedTile();
         }
 
