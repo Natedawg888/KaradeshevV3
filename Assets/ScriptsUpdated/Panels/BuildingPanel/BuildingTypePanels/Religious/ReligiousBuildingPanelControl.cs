@@ -5,7 +5,10 @@ using UnityEngine.UI;
 
 public class ReligiousBuildingPanelControl : MonoBehaviour
 {
+    public event Action OnOpen;
     public event Action OnClose;
+
+    public bool IsShowing => RootObject != null && RootObject.activeSelf;
 
     [Header("Roots")]
     public GameObject root;
@@ -107,6 +110,8 @@ public class ReligiousBuildingPanelControl : MonoBehaviour
             _cg.interactable = true;
             _cg.blocksRaycasts = true;
         }
+
+        OnOpen?.Invoke();
     }
 
     public void Hide()
