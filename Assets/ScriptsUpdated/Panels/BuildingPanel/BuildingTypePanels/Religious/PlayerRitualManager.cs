@@ -37,6 +37,8 @@ public class PlayerRitualManager : MonoBehaviour
 
     private PendingSummoningChoice _activeChoice;
 
+    public static bool TutorialBypassSpiritFilter = false;
+
     public PendingSummoningChoice ActiveChoice => _activeChoice;
     public bool HasActiveChoice => _activeChoice != null && !_activeChoice.consumed;
 
@@ -249,6 +251,9 @@ public class PlayerRitualManager : MonoBehaviour
     {
         if (spirit == null)
             return false;
+
+        if (TutorialBypassSpiritFilter)
+            return true;
 
         if (spirit.beliefSystem != beliefSystem)
             return false;

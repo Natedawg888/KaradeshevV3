@@ -1904,6 +1904,8 @@ public class TutorialSetupInstaller : MonoBehaviour
                 if (_religiousPanel != null && _religiousPanel.IsShowing) _religiousPanel.Hide();
                 if (_buildingPanel != null && _buildingPanel.IsShowing) _buildingPanel.Hide();
 
+                PlayerRitualManager.TutorialBypassSpiritFilter = true;
+
                 if (_ritualBuildingControl != null && _ritualBuildingControl.HasActiveRitual)
                 {
                     if (_fastForwardRitualRoutine != null) StopCoroutine(_fastForwardRitualRoutine);
@@ -1911,6 +1913,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                 }
                 else
                 {
+                    PlayerRitualManager.TutorialBypassSpiritFilter = false;
                     ShowPart(_currentPart + 1);
                 }
                 break;
@@ -3511,6 +3514,15 @@ public class TutorialSetupInstaller : MonoBehaviour
         _fastForwardRitualRoutine = null;
         ReligiousRitualPanelControl.TutorialShowOnlySummoningRitual = false;
         ReligiousBuildingControl.TutorialBypassChecks = false;
+        PlayerRitualManager.TutorialBypassSpiritFilter = false;
+
+        // If EnqueueSummoningChoice succeeded but the panel ref was null, retry now
+        if (_summoningOfferPanel == null)
+            _summoningOfferPanel = FindFirstObjectByType<SummoningSpiritOfferPanelControl>(FindObjectsInactive.Include);
+        PlayerRitualManager mgr = PlayerRitualManager.Instance;
+        if (mgr != null && mgr.HasActiveChoice && _summoningOfferPanel != null && !_summoningOfferPanel.IsShowing)
+            _summoningOfferPanel.OpenFor(mgr.ActiveChoice);
+
         ShowPart(_currentPart + 1);
     }
 
@@ -3899,6 +3911,7 @@ public class TutorialSetupInstaller : MonoBehaviour
 
         ReligiousRitualPanelControl.TutorialShowOnlySummoningRitual = false;
         ReligiousBuildingControl.TutorialBypassChecks = false;
+        PlayerRitualManager.TutorialBypassSpiritFilter = false;
 
         if (_waitingForRitualPanelOpen && _ritualPanel != null)
         {
