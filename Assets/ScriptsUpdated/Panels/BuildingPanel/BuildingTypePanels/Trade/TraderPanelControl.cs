@@ -25,6 +25,8 @@ public class TraderPanelControl : MonoBehaviour
     private TravelingTraderOffer _offer;
     private TradeBuildingControl _building;
 
+    public static bool TutorialShowAllOfferings = false;
+
     public bool IsShowing => panelRoot != null && panelRoot.activeSelf;
     public event System.Action OnOpen;
     public event System.Action OnClose;
@@ -76,7 +78,7 @@ public class TraderPanelControl : MonoBehaviour
             foreach (var resource in _offer.offeredResources)
             {
                 if (resource?.resource == null) continue;
-                if (PlayerKnownResourcesManager.Instance == null || !PlayerKnownResourcesManager.Instance.IsKnown(resource.resource)) continue;
+                if (!TutorialShowAllOfferings && (PlayerKnownResourcesManager.Instance == null || !PlayerKnownResourcesManager.Instance.IsKnown(resource.resource))) continue;
 
                 var go = Instantiate(offeringItemPrefab, offeringsContent);
                 var item = go.GetComponent<OfferingItemUI>();

@@ -1639,6 +1639,7 @@ public class TutorialSetupInstaller : MonoBehaviour
 
             case PartType.SelectTraderEntry:
             {
+                TraderPanelControl.TutorialShowAllOfferings = true;
                 if (_traderPanel == null)
                     _traderPanel = FindFirstObjectByType<TraderPanelControl>(FindObjectsInactive.Include);
                 if (_traderPanel != null)
@@ -2801,6 +2802,7 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (!_waitingForTraderPanelOpen) return;
         _waitingForTraderPanelOpen = false;
         if (_traderPanel != null) _traderPanel.OnOpen -= OnTraderPanelOpened;
+        TraderPanelControl.TutorialShowAllOfferings = false;
         ShowPart(_currentPart + 1);
     }
 
@@ -3457,6 +3459,8 @@ public class TutorialSetupInstaller : MonoBehaviour
             _traderPanel.OnOpen -= OnTraderPanelOpened;
             _waitingForTraderPanelOpen = false;
         }
+
+        TraderPanelControl.TutorialShowAllOfferings = false;
 
         if (_waitingForOfferingPanelOpen && _offeringPanel != null)
         {
