@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -117,6 +117,7 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForProductionPanelOpen;
     private ProductionRunningPanelControl _productionRunningPanel;
     private bool _waitingForProductionRunningPanelOpen;
+    private bool _waitingForProductionRunningPanelClose;
     private ProductionPlanItem _tutorialProductionItem;
     private bool _waitingForProductionStart;
     private bool _waitingForProductionTargets;
@@ -1527,6 +1528,31 @@ public class TutorialSetupInstaller : MonoBehaviour
                 ShowPart(_currentPart + 1);
                 break;
 
+            case PartType.CloseProductionRunningPanel:
+            {
+                if (_productionRunningPanel == null)
+                    _productionRunningPanel = FindFirstObjectByType<ProductionRunningPanelControl>(FindObjectsInactive.Include);
+                if (_productionRunningPanel != null)
+                {
+                    if (!_productionRunningPanel.IsShowing)
+                    {
+                        ProductionBuildingPanelControl.TutorialShowAllPlans = false;
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _productionRunningPanel.OnClose += OnProductionRunningPanelClosed;
+                        _waitingForProductionRunningPanelClose = true;
+                    }
+                }
+                else
+                {
+                    ProductionBuildingPanelControl.TutorialShowAllPlans = false;
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.OpenStoragePanel:
             {
                 if (_storagePanel == null)
@@ -2557,6 +2583,15 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnProductionRunningPanelClosed()
+    {
+        if (!_waitingForProductionRunningPanelClose) return;
+        _waitingForProductionRunningPanelClose = false;
+        if (_productionRunningPanel != null) _productionRunningPanel.OnClose -= OnProductionRunningPanelClosed;
+        ProductionBuildingPanelControl.TutorialShowAllPlans = false;
+        ShowPart(_currentPart + 1);
+    }
+
     private void OnProductionPlanStarted()
     {
         if (!_waitingForProductionStart) return;
@@ -3168,6 +3203,12 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _productionRunningPanel.OnOpen -= OnProductionRunningPanelOpened;
             _waitingForProductionRunningPanelOpen = false;
+        }
+
+        if (_waitingForProductionRunningPanelClose && _productionRunningPanel != null)
+        {
+            _productionRunningPanel.OnClose -= OnProductionRunningPanelClosed;
+            _waitingForProductionRunningPanelClose = false;
         }
 
         if (_waitingForProductionStart && _tutorialProductionItem != null)
