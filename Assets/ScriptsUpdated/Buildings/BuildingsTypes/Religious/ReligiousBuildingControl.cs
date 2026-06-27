@@ -72,7 +72,9 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler, IBu
         ? Mathf.Max(1, activeRitual.totalTurns)
         : 0;
 
+    public static bool TutorialBypassChecks = false;
     public event Action BuildingReligionChanged;
+    public event Action OnRitualStarted;
 
     private void Awake()
     {
@@ -371,13 +373,13 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler, IBu
         }
 
         PlayerKnownRitualsManager knownMgr = PlayerKnownRitualsManager.Instance;
-        if (knownMgr != null && !knownMgr.IsKnown(ritual))
+        if (!TutorialBypassChecks && knownMgr != null && !knownMgr.IsKnown(ritual))
         {
             reason = "This ritual is not yet known.";
             return false;
         }
 
-        if (!ritual.MatchesBeliefSystem(religion.currentBeliefSystem))
+        if (!TutorialBypassChecks && !ritual.MatchesBeliefSystem(religion.currentBeliefSystem))
         {
             reason = "This ritual does not match the current belief system.";
             return false;
@@ -437,6 +439,7 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler, IBu
         BeginRitualVisuals();
         MarkReligionDirty();
         NotifyChanged();
+        OnRitualStarted?.Invoke();
         return true;
     }
 
@@ -580,7 +583,7 @@ public class ReligiousBuildingControl : MonoBehaviour, IBuildingTypeHandler, IBu
         reservationId = null;
         reason = null;
 
-        if (ritual == null || ritual.workerCount <= 0)
+        if (TutorialBypassChecks || ritual == null || ritual.workerCount <= 0)
             return true;
 
         PlayersPopulationManager population = PlayersPopulationManager.Instance;

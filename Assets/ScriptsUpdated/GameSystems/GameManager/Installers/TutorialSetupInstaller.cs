@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -129,6 +129,11 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForSixthBuildingPanel;
     private ReligiousBuildingPanelControl _religiousPanel;
     private bool _waitingForReligiousPanelOpen;
+    private ReligiousRitualPanelControl _ritualPanel;
+    private bool _waitingForRitualPanelOpen;
+    private ReligiousBuildingControl _ritualBuildingControl;
+    private bool _waitingForRitualStart;
+    private Coroutine _fastForwardRitualRoutine;
     private TradePanelControl _tradePanel;
     private bool _waitingForTradePanelOpen;
     private TraderPanelControl _traderPanel;
@@ -1846,6 +1851,68 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.OpenRitualPanel:
+            {
+                if (_ritualPanel == null)
+                    _ritualPanel = FindFirstObjectByType<ReligiousRitualPanelControl>(FindObjectsInactive.Include);
+                ReligiousRitualPanelControl.TutorialShowOnlySummoningRitual = true;
+                if (_ritualPanel != null)
+                {
+                    if (_ritualPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _ritualPanel.OnOpen += OnRitualPanelOpened;
+                        _waitingForRitualPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.StartInitialSummoningRitual:
+            {
+                ReligiousBuildingControl.TutorialBypassChecks = true;
+                if (_ritualBuildingControl == null && _religiousPanel != null)
+                    _ritualBuildingControl = _religiousPanel.CurrentControl;
+                if (_ritualBuildingControl != null)
+                {
+                    _ritualBuildingControl.OnRitualStarted += OnRitualStarted;
+                    _waitingForRitualStart = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.FastForwardRitual:
+            {
+                if (_ritualBuildingControl == null && _religiousPanel != null)
+                    _ritualBuildingControl = _religiousPanel.CurrentControl;
+
+                if (_ritualPanel != null && _ritualPanel.IsShowing) _ritualPanel.Hide();
+                if (_religiousPanel != null && _religiousPanel.IsShowing) _religiousPanel.Hide();
+                if (_buildingPanel != null && _buildingPanel.IsShowing) _buildingPanel.Hide();
+
+                if (_ritualBuildingControl != null && _ritualBuildingControl.HasActiveRitual)
+                {
+                    if (_fastForwardRitualRoutine != null) StopCoroutine(_fastForwardRitualRoutine);
+                    _fastForwardRitualRoutine = StartCoroutine(FastForwardRitualCoroutine(_ritualBuildingControl));
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.OpenStoragePanel:
             {
                 if (_storagePanel == null)
@@ -3042,6 +3109,22 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnRitualPanelOpened()
+    {
+        if (!_waitingForRitualPanelOpen) return;
+        _waitingForRitualPanelOpen = false;
+        if (_ritualPanel != null) _ritualPanel.OnOpen -= OnRitualPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnRitualStarted()
+    {
+        if (!_waitingForRitualStart) return;
+        _waitingForRitualStart = false;
+        if (_ritualBuildingControl != null) _ritualBuildingControl.OnRitualStarted -= OnRitualStarted;
+        ShowPart(_currentPart + 1);
+    }
+
     private void OnTradePanelOpened()
     {
         if (!_waitingForTradePanelOpen) return;
@@ -3361,6 +3444,29 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         _fastForwardRepairRoutine = null;
+        ShowPart(_currentPart + 1);
+    }
+
+    private IEnumerator FastForwardRitualCoroutine(ReligiousBuildingControl control)
+    {
+        while (control != null && control.HasActiveRitual)
+        {
+            if (TurnSystem.Instance != null)
+            {
+                yield return TurnSystem.Instance.StartCoroutine(
+                    TurnSystem.Instance.RunGhostPhaseAdvance(() => control.TurnTick())
+                );
+            }
+            else
+            {
+                control.TurnTick();
+                yield return null;
+            }
+        }
+
+        _fastForwardRitualRoutine = null;
+        ReligiousRitualPanelControl.TutorialShowOnlySummoningRitual = false;
+        ReligiousBuildingControl.TutorialBypassChecks = false;
         ShowPart(_currentPart + 1);
     }
 
@@ -3745,6 +3851,27 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _religiousPanel.OnOpen -= OnReligiousPanelOpened;
             _waitingForReligiousPanelOpen = false;
+        }
+
+        ReligiousRitualPanelControl.TutorialShowOnlySummoningRitual = false;
+        ReligiousBuildingControl.TutorialBypassChecks = false;
+
+        if (_waitingForRitualPanelOpen && _ritualPanel != null)
+        {
+            _ritualPanel.OnOpen -= OnRitualPanelOpened;
+            _waitingForRitualPanelOpen = false;
+        }
+
+        if (_waitingForRitualStart && _ritualBuildingControl != null)
+        {
+            _ritualBuildingControl.OnRitualStarted -= OnRitualStarted;
+            _waitingForRitualStart = false;
+        }
+
+        if (_fastForwardRitualRoutine != null)
+        {
+            StopCoroutine(_fastForwardRitualRoutine);
+            _fastForwardRitualRoutine = null;
         }
 
         if (_waitingForTradePanelOpen && _tradePanel != null)

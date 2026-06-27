@@ -6,7 +6,11 @@ using UnityEngine.UI;
 
 public class ReligiousRitualPanelControl : MonoBehaviour
 {
+    public event Action OnOpen;
     public event Action OnClose;
+
+    public bool IsShowing => RootObject != null && RootObject.activeSelf;
+    public static bool TutorialShowOnlySummoningRitual = false;
 
     [Header("Roots")]
     public GameObject root;
@@ -112,6 +116,7 @@ public class ReligiousRitualPanelControl : MonoBehaviour
         }
 
         RebuildList();
+        OnOpen?.Invoke();
     }
 
     public void Hide()
@@ -163,6 +168,20 @@ public class ReligiousRitualPanelControl : MonoBehaviour
             selectedSpiritText.text = selectedSpirit != null
                 ? $"Spirit: {selectedSpirit.displayName}"
                 : "Spirit: None selected";
+        }
+
+        if (TutorialShowOnlySummoningRitual)
+        {
+            for (int i = 0; i < _control.ritualOptions.Count; i++)
+            {
+                ReligionRitualDefinitionSO ritual = _control.ritualOptions[i];
+                if (ritual == null || !ritual.IsSummoningRitual) continue;
+                if (ritualItemPrefab == null || ritualListContent == null) continue;
+                ReligiousRitualItemUI item = Instantiate(ritualItemPrefab, ritualListContent);
+                item.Setup(ritual, _control, _parentPanel, this);
+                _spawned.Add(item);
+            }
+            return;
         }
 
         _control.GetKnownRitualsForSelectedSpirit(selectedSpirit, _ritualBuffer);
