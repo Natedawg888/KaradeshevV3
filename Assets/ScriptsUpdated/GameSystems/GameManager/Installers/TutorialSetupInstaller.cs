@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual, SelectSummoningSpirit }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -134,6 +134,9 @@ public class TutorialSetupInstaller : MonoBehaviour
     private ReligiousBuildingControl _ritualBuildingControl;
     private bool _waitingForRitualStart;
     private Coroutine _fastForwardRitualRoutine;
+    private SummoningSpiritOfferPanelControl _summoningOfferPanel;
+    private bool _waitingForSummoningPanelOpen;
+    private bool _waitingForSpiritChosen;
     private TradePanelControl _tradePanel;
     private bool _waitingForTradePanelOpen;
     private TraderPanelControl _traderPanel;
@@ -1913,6 +1916,30 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.SelectSummoningSpirit:
+            {
+                if (_summoningOfferPanel == null)
+                    _summoningOfferPanel = FindFirstObjectByType<SummoningSpiritOfferPanelControl>(FindObjectsInactive.Include);
+                if (_summoningOfferPanel != null)
+                {
+                    if (_summoningOfferPanel.IsShowing)
+                    {
+                        _summoningOfferPanel.OnSpiritChosen += OnSpiritChosenCallback;
+                        _waitingForSpiritChosen = true;
+                    }
+                    else
+                    {
+                        _summoningOfferPanel.OnOpen += OnSummoningPanelOpened;
+                        _waitingForSummoningPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.OpenStoragePanel:
             {
                 if (_storagePanel == null)
@@ -3125,6 +3152,23 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnSummoningPanelOpened()
+    {
+        if (!_waitingForSummoningPanelOpen) return;
+        _waitingForSummoningPanelOpen = false;
+        if (_summoningOfferPanel != null) _summoningOfferPanel.OnOpen -= OnSummoningPanelOpened;
+        _summoningOfferPanel.OnSpiritChosen += OnSpiritChosenCallback;
+        _waitingForSpiritChosen = true;
+    }
+
+    private void OnSpiritChosenCallback()
+    {
+        if (!_waitingForSpiritChosen) return;
+        _waitingForSpiritChosen = false;
+        if (_summoningOfferPanel != null) _summoningOfferPanel.OnSpiritChosen -= OnSpiritChosenCallback;
+        ShowPart(_currentPart + 1);
+    }
+
     private void OnTradePanelOpened()
     {
         if (!_waitingForTradePanelOpen) return;
@@ -3872,6 +3916,18 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             StopCoroutine(_fastForwardRitualRoutine);
             _fastForwardRitualRoutine = null;
+        }
+
+        if (_waitingForSummoningPanelOpen && _summoningOfferPanel != null)
+        {
+            _summoningOfferPanel.OnOpen -= OnSummoningPanelOpened;
+            _waitingForSummoningPanelOpen = false;
+        }
+
+        if (_waitingForSpiritChosen && _summoningOfferPanel != null)
+        {
+            _summoningOfferPanel.OnSpiritChosen -= OnSpiritChosenCallback;
+            _waitingForSpiritChosen = false;
         }
 
         if (_waitingForTradePanelOpen && _tradePanel != null)

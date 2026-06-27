@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -5,6 +6,11 @@ using UnityEngine.UI;
 
 public class SummoningSpiritOfferPanelControl : MonoBehaviour
 {
+    public event Action OnOpen;
+    public event Action OnSpiritChosen;
+
+    public bool IsShowing => RootObject != null && RootObject.activeSelf;
+
     [Header("Root")]
     public GameObject root;
     public TMP_Text titleText;
@@ -39,6 +45,7 @@ public class SummoningSpiritOfferPanelControl : MonoBehaviour
 
         RootObject.SetActive(true);
         Rebuild();
+        OnOpen?.Invoke();
     }
 
     public void Hide()
@@ -85,9 +92,10 @@ public class SummoningSpiritOfferPanelControl : MonoBehaviour
         if (PlayerRitualManager.Instance == null)
             return;
 
-        if (!PlayerRitualManager.Instance.TryAcceptSummoningChoice(spirit, out string reason))
+        if (PlayerRitualManager.Instance.TryAcceptSummoningChoice(spirit, out string reason))
         {
-            //Debug.LogWarning($"[SummoningSpiritOfferPanel] Failed to accept spirit choice: {reason}");
+            OnSpiritChosen?.Invoke();
         }
+        //else Debug.LogWarning($"[SummoningSpiritOfferPanel] Failed to accept spirit choice: {reason}");
     }
 }
