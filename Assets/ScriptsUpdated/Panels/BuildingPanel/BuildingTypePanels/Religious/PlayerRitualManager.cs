@@ -191,8 +191,20 @@ public class PlayerRitualManager : MonoBehaviour
         _tmpCandidates.Clear();
         _tmpUnique.Clear();
 
-        AddKnownSpiritCandidates(request.beliefSystem, request.sourceBuilding, _tmpCandidates);
-        AddDatabaseCandidates(request.beliefSystem, request.sourceBuilding, _tmpCandidates);
+        if (TutorialBypassSpiritFilter && ReligionManager.Instance != null)
+        {
+            IReadOnlyList<SpiritDefinitionSO> all = ReligionManager.Instance.AllSpirits;
+            for (int i = 0; i < all.Count; i++)
+            {
+                if (all[i] != null)
+                    _tmpCandidates.Add(all[i]);
+            }
+        }
+        else
+        {
+            AddKnownSpiritCandidates(request.beliefSystem, request.sourceBuilding, _tmpCandidates);
+            AddDatabaseCandidates(request.beliefSystem, request.sourceBuilding, _tmpCandidates);
+        }
 
         ShuffleInPlace(_tmpCandidates);
 
