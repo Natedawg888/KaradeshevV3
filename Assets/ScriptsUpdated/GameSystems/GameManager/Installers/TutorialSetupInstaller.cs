@@ -1921,6 +1921,7 @@ public class TutorialSetupInstaller : MonoBehaviour
 
             case PartType.SelectSummoningSpirit:
             {
+                PlayerReligionManager.TutorialBypassAcceptChecks = true;
                 if (_summoningOfferPanel == null)
                     _summoningOfferPanel = FindFirstObjectByType<SummoningSpiritOfferPanelControl>(FindObjectsInactive.Include);
                 if (_summoningOfferPanel != null)
@@ -1938,6 +1939,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                 }
                 else
                 {
+                    PlayerReligionManager.TutorialBypassAcceptChecks = false;
                     ShowPart(_currentPart + 1);
                 }
                 break;
@@ -3169,6 +3171,7 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (!_waitingForSpiritChosen) return;
         _waitingForSpiritChosen = false;
         if (_summoningOfferPanel != null) _summoningOfferPanel.OnSpiritChosen -= OnSpiritChosenCallback;
+        PlayerReligionManager.TutorialBypassAcceptChecks = false;
         ShowPart(_currentPart + 1);
     }
 
@@ -3942,6 +3945,8 @@ public class TutorialSetupInstaller : MonoBehaviour
             _summoningOfferPanel.OnSpiritChosen -= OnSpiritChosenCallback;
             _waitingForSpiritChosen = false;
         }
+
+        PlayerReligionManager.TutorialBypassAcceptChecks = false;
 
         if (_waitingForTradePanelOpen && _tradePanel != null)
         {

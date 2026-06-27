@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerReligionManager : MonoBehaviour
 {
     public static PlayerReligionManager Instance { get; private set; }
+    public static bool TutorialBypassAcceptChecks = false;
 
     [Header("Current Belief System")]
     public BeliefSystemType currentBeliefSystem = BeliefSystemType.Animism;
@@ -173,14 +174,14 @@ public class PlayerReligionManager : MonoBehaviour
             return false;
         }
 
-        if (spirit.beliefSystem != currentBeliefSystem)
+        if (!TutorialBypassAcceptChecks && spirit.beliefSystem != currentBeliefSystem)
         {
             reason = "Spirit does not belong to the current belief system.";
             return false;
         }
 
         PlayerKnownSpiritsManager knownMgr = PlayerKnownSpiritsManager.Instance;
-        if (knownMgr != null && !knownMgr.IsKnown(spirit))
+        if (!TutorialBypassAcceptChecks && knownMgr != null && !knownMgr.IsKnown(spirit))
         {
             reason = "Spirit is not yet known.";
             return false;
