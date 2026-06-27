@@ -25,6 +25,10 @@ public class TraderPanelControl : MonoBehaviour
     private TravelingTraderOffer _offer;
     private TradeBuildingControl _building;
 
+    public bool IsShowing => panelRoot != null && panelRoot.activeSelf;
+    public event System.Action OnOpen;
+    public event System.Action OnClose;
+
     private void Awake()
     {
         if (backButton != null)
@@ -50,6 +54,7 @@ public class TraderPanelControl : MonoBehaviour
 
         panelRoot?.SetActive(true);
         PopulateOfferings();
+        OnOpen?.Invoke();
     }
 
     public void Hide()
@@ -58,6 +63,7 @@ public class TraderPanelControl : MonoBehaviour
         panelRoot?.SetActive(false);
         _offer = null;
         _building = null;
+        OnClose?.Invoke();
     }
 
     private void PopulateOfferings()

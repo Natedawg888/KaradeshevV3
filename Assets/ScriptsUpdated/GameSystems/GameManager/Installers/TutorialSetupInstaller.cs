@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -122,6 +122,10 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForFifthBuildingPanel;
     private TradePanelControl _tradePanel;
     private bool _waitingForTradePanelOpen;
+    private TraderPanelControl _traderPanel;
+    private bool _waitingForTraderPanelOpen;
+    private OfferingPanelControl _offeringPanel;
+    private bool _waitingForOfferingPanelOpen;
     private ProductionBuildingPanelControl _productionPanel;
     private bool _waitingForProductionPanelOpen;
     private ProductionRunningPanelControl _productionRunningPanel;
@@ -1633,6 +1637,52 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.SelectTraderEntry:
+            {
+                if (_traderPanel == null)
+                    _traderPanel = FindFirstObjectByType<TraderPanelControl>(FindObjectsInactive.Include);
+                if (_traderPanel != null)
+                {
+                    if (_traderPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _traderPanel.OnOpen += OnTraderPanelOpened;
+                        _waitingForTraderPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OpenTraderOffering:
+            {
+                if (_offeringPanel == null)
+                    _offeringPanel = FindFirstObjectByType<OfferingPanelControl>(FindObjectsInactive.Include);
+                if (_offeringPanel != null)
+                {
+                    if (_offeringPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _offeringPanel.OnOpen += OnOfferingPanelOpened;
+                        _waitingForOfferingPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.OpenStoragePanel:
             {
                 if (_storagePanel == null)
@@ -2069,6 +2119,14 @@ public class TutorialSetupInstaller : MonoBehaviour
             ? tileControl.transform.parent.gameObject
             : chosenEnv.gameObject;
         Destroy(toDestroy);
+
+        // Force a trader to appear immediately so the trade panel shows one when opened
+        if (_placedFifthBuilding != null)
+        {
+            var tradeCtrl = _placedFifthBuilding.GetComponent<TradeBuildingControl>();
+            if (tradeCtrl != null && !tradeCtrl.HasActiveTrader())
+                tradeCtrl.GenerateTrader();
+        }
 
         _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
     }
@@ -2738,6 +2796,22 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnTraderPanelOpened()
+    {
+        if (!_waitingForTraderPanelOpen) return;
+        _waitingForTraderPanelOpen = false;
+        if (_traderPanel != null) _traderPanel.OnOpen -= OnTraderPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnOfferingPanelOpened()
+    {
+        if (!_waitingForOfferingPanelOpen) return;
+        _waitingForOfferingPanelOpen = false;
+        if (_offeringPanel != null) _offeringPanel.OnOpen -= OnOfferingPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
     private void OnProductionPanelOpened()
     {
         if (!_waitingForProductionPanelOpen) return;
@@ -3376,6 +3450,18 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _tradePanel.OnOpen -= OnTradePanelOpened;
             _waitingForTradePanelOpen = false;
+        }
+
+        if (_waitingForTraderPanelOpen && _traderPanel != null)
+        {
+            _traderPanel.OnOpen -= OnTraderPanelOpened;
+            _waitingForTraderPanelOpen = false;
+        }
+
+        if (_waitingForOfferingPanelOpen && _offeringPanel != null)
+        {
+            _offeringPanel.OnOpen -= OnOfferingPanelOpened;
+            _waitingForOfferingPanelOpen = false;
         }
 
         if (_waitingForProductionPanelOpen && _productionPanel != null)

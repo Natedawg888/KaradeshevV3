@@ -55,6 +55,10 @@ public class OfferingPanelControl : MonoBehaviour
     private readonly List<ResourceAmount> _playerGiving = new List<ResourceAmount>();
     private readonly List<TradePopulationEntry> _playerGivingPopulation = new List<TradePopulationEntry>();
 
+    public bool IsShowing => panelRoot != null && panelRoot.activeSelf;
+    public event System.Action OnOpen;
+    public event System.Action OnClose;
+
     private void Awake()
     {
         if (increaseDesiredButton != null)
@@ -86,6 +90,7 @@ public class OfferingPanelControl : MonoBehaviour
         RefreshTraderOfferingDisplay();
         RefreshPlayerOfferList();
         RefreshAllAvailableLists();
+        OnOpen?.Invoke();
     }
 
     public void Show(TradePopulationEntry populationEntry, TravelingTraderOffer traderOffer, TradeBuildingControl building)
@@ -104,6 +109,7 @@ public class OfferingPanelControl : MonoBehaviour
         RefreshTraderOfferingDisplay();
         RefreshPlayerOfferList();
         RefreshAllAvailableLists();
+        OnOpen?.Invoke();
     }
 
     public void Hide()
@@ -115,6 +121,7 @@ public class OfferingPanelControl : MonoBehaviour
         _traderOffer = null;
         _building = null;
         panelRoot?.SetActive(false);
+        OnClose?.Invoke();
     }
 
     // ── Desired amount ────────────────────────────────────────────
