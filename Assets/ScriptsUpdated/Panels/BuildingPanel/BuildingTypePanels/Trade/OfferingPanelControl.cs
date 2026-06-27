@@ -399,6 +399,8 @@ public class OfferingPanelControl : MonoBehaviour
 
         if (confirmButton != null) confirmButton.interactable = ratio >= 1.00f;
 
+        string refusal = _building.GetRefusalFeedback(offer);
+
         string msg;
         if      (ratio < 0.75f) msg = !string.IsNullOrEmpty(def?.feedbackNeedMore)          ? def.feedbackNeedMore          : "More.";
         else if (ratio < 1.00f) msg = !string.IsNullOrEmpty(def?.feedbackAlittleMore)        ? def.feedbackAlittleMore        : "A little more.";
@@ -406,7 +408,7 @@ public class OfferingPanelControl : MonoBehaviour
         else if (ratio < 1.75f) msg = !string.IsNullOrEmpty(def?.feedbackGenerous)           ? def.feedbackGenerous           : "Generous.";
         else                    msg = !string.IsNullOrEmpty(def?.feedbackMassivelyGenerous)   ? def.feedbackMassivelyGenerous  : "Massively generous!";
 
-        SetFeedback(msg);
+        SetFeedback(string.IsNullOrEmpty(refusal) ? msg : $"{refusal} {msg}");
     }
 
     private TradeOffer BuildCurrentOffer()

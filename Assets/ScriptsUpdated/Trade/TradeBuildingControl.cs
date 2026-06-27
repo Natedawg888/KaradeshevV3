@@ -313,6 +313,8 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTurnTickable
             flavorDescription           = def.flavorDescription,
             preferences                 = new List<TradeResourcePreference>(def.resourcePreferences),
             rejectedResources           = new List<ResourceDefinition>(def.rejectedResources),
+            rejectedAgeGroups           = new List<AgeGroup>(def.rejectedAgeGroups),
+            rejectedGenders             = new List<Gender>(def.rejectedGenders),
             acceptsPopulationFromPlayer = def.acceptsPopulationFromPlayer,
             childValue                  = def.childValue,
             teenValue                   = def.teenValue,
@@ -405,6 +407,53 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTurnTickable
         return false;
     }
 
+    private bool IsPopulationRejected(AgeGroup age, Gender gender)
+    {
+        if (currentTraderOffer == null) return false;
+        if (!currentTraderOffer.acceptsPopulationFromPlayer) return true;
+        if (currentTraderOffer.rejectedAgeGroups != null && currentTraderOffer.rejectedAgeGroups.Contains(age)) return true;
+        if (currentTraderOffer.rejectedGenders   != null && currentTraderOffer.rejectedGenders.Contains(gender))  return true;
+        return false;
+    }
+
+    public string GetRefusalFeedback(TradeOffer offer)
+    {
+        if (currentTraderOffer == null || offer == null) return null;
+
+        var refused = new List<string>();
+
+        if (offer.playerGivesResources != null)
+            foreach (var r in offer.playerGivesResources)
+                if (r?.resource != null && r.amount > 0 && IsRejected(r.resource))
+                    refused.Add(r.resource.resourceName);
+
+        if (offer.playerGivesPopulation?.entries != null)
+        {
+            bool noPopAtAll = !currentTraderOffer.acceptsPopulationFromPlayer;
+            bool addedPeopleLabel = false;
+            foreach (var e in offer.playerGivesPopulation.entries)
+            {
+                if (e == null || e.count <= 0 || !IsPopulationRejected(e.ageGroup, e.gender)) continue;
+                if (noPopAtAll)
+                {
+                    if (!addedPeopleLabel) { refused.Add("people"); addedPeopleLabel = true; }
+                }
+                else if (currentTraderOffer.rejectedAgeGroups?.Contains(e.ageGroup) == true)
+                    refused.Add($"{e.ageGroup}s");
+                else if (currentTraderOffer.rejectedGenders?.Contains(e.gender) == true)
+                    refused.Add($"{e.gender} people");
+            }
+        }
+
+        if (refused.Count == 0) return null;
+
+        var seen   = new HashSet<string>(StringComparer.Ordinal);
+        var unique = new List<string>();
+        foreach (var s in refused) if (seen.Add(s)) unique.Add(s);
+
+        return $"Won't accept: {string.Join(", ", unique)}.";
+    }
+
     private float ComputePlayerOfferValue(TradeOffer offer)
     {
         float total = 0f;
@@ -412,7 +461,10 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTurnTickable
             foreach (var r in offer.playerGivesResources)
                 if (r?.resource != null && !IsRejected(r.resource))
                     total += r.amount * GetBaseValue(r.resource) * GetPreferenceMult(r.resource);
-        total += PopValue(offer.playerGivesPopulation);
+        if (offer.playerGivesPopulation?.entries != null)
+            foreach (var e in offer.playerGivesPopulation.entries)
+                if (e != null && e.count > 0 && !IsPopulationRejected(e.ageGroup, e.gender))
+                    total += e.count * GetPopValue(e.ageGroup, e.gender);
         return total;
     }
 
@@ -747,6 +799,15 @@ public class TradeBuildingControl : MonoBehaviour, IBuildingTurnTickable
             preferences                 = sourceDef != null
                                           ? new List<TradeResourcePreference>(sourceDef.resourcePreferences)
                                           : new List<TradeResourcePreference>(),
+            rejectedResources           = sourceDef != null
+                                          ? new List<ResourceDefinition>(sourceDef.rejectedResources)
+                                          : new List<ResourceDefinition>(),
+            rejectedAgeGroups           = sourceDef != null
+                                          ? new List<AgeGroup>(sourceDef.rejectedAgeGroups)
+                                          : new List<AgeGroup>(),
+            rejectedGenders             = sourceDef != null
+                                          ? new List<Gender>(sourceDef.rejectedGenders)
+                                          : new List<Gender>(),
             acceptsPopulationFromPlayer = sourceDef?.acceptsPopulationFromPlayer ?? true,
             childValue                  = sourceDef?.childValue ?? 1f,
             teenValue                   = sourceDef?.teenValue  ?? 2f,

@@ -36,6 +36,10 @@ public class TraderDefinitionSO : ScriptableObject
     [Tooltip("Resources the trader will never accept from the player. They count as zero value regardless of other settings.")]
     public List<ResourceDefinition> rejectedResources = new List<ResourceDefinition>();
     public bool acceptsPopulationFromPlayer = true;
+    [Tooltip("Age groups this trader refuses from the player. Population of these ages counts as zero value.")]
+    public List<AgeGroup> rejectedAgeGroups = new List<AgeGroup>();
+    [Tooltip("Genders this trader refuses from the player. Population of these genders counts as zero value.")]
+    public List<Gender> rejectedGenders = new List<Gender>();
     [Tooltip("Multiplier on the PopulationValueManager base value. 1 = neutral, 2 = this trader values children twice as much.")]
     public float childValue = 1f;
     [Tooltip("Multiplier on the PopulationValueManager base value.")]

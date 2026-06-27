@@ -9,6 +9,8 @@ public class TravelingTraderOffer
     public TradePopulationAmount offeredPopulation = new TradePopulationAmount();
     public List<TradeResourcePreference> preferences = new List<TradeResourcePreference>();
     public List<ResourceDefinition> rejectedResources = new List<ResourceDefinition>();
+    public List<AgeGroup> rejectedAgeGroups = new List<AgeGroup>();
+    public List<Gender> rejectedGenders = new List<Gender>();
     public float greedMultiplier = 1.15f;
     public float counterOfferTolerance = 0.75f;
     public bool acceptsPopulationFromPlayer = true;
