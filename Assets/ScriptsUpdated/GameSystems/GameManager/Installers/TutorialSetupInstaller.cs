@@ -6,21 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, 
-    OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, 
-    FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, 
-    RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, 
-    OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, 
-    SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, 
-    ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, 
-    SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, 
-    OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, 
-    SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, 
-    ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, 
-    FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets,
-    OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel,
-    SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel,
-    SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -58,6 +44,14 @@ public class TutorialSetupInstaller : MonoBehaviour
     [Header("Fourth Building Placement Part")]
     [SerializeField] private string fourthBuildingID = "";
     [SerializeField] private string fourthBuildingAlternateID = "";
+
+    [Header("Fifth Building Placement Part")]
+    [SerializeField] private string fifthBuildingID = "";
+    [SerializeField] private string fifthBuildingAlternateID = "";
+
+    [Header("Sixth Building Placement Part")]
+    [SerializeField] private string sixthBuildingID = "";
+    [SerializeField] private string sixthBuildingAlternateID = "";
 
     private CameraControl _cameraControl;
     private TileActivator _tileActivator;
@@ -127,10 +121,29 @@ public class TutorialSetupInstaller : MonoBehaviour
     private GameObject _placedFourthBuilding;
     private Vector3 _placedFourthBuildingWorldPos;
     private bool _waitingForFourthBuildingPanel;
+    private GameObject _placedFifthBuilding;
+    private Vector3 _placedFifthBuildingWorldPos;
+    private bool _waitingForFifthBuildingPanel;
+    private GameObject _placedSixthBuilding;
+    private Vector3 _placedSixthBuildingWorldPos;
+    private bool _waitingForSixthBuildingPanel;
+    private ReligiousBuildingPanelControl _religiousPanel;
+    private bool _waitingForReligiousPanelOpen;
+    private TradePanelControl _tradePanel;
+    private bool _waitingForTradePanelOpen;
+    private TraderPanelControl _traderPanel;
+    private bool _waitingForTraderPanelOpen;
+    private OfferingPanelControl _offeringPanel;
+    private bool _waitingForOfferingPanelOpen;
+    private bool _waitingForPlayerOffer;
+    private bool _waitingForTradeAccepted;
+    private bool _waitingForTraderPanelClose;
+    private bool _waitingForTradePanelClose;
     private ProductionBuildingPanelControl _productionPanel;
     private bool _waitingForProductionPanelOpen;
     private ProductionRunningPanelControl _productionRunningPanel;
     private bool _waitingForProductionRunningPanelOpen;
+    private bool _waitingForProductionRunningPanelClose;
     private ProductionPlanItem _tutorialProductionItem;
     private bool _waitingForProductionStart;
     private bool _waitingForProductionTargets;
@@ -1529,6 +1542,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                             allowWorldDrag: true,
                             allowZoom: true,
                             allowMinimapRotation: false);
+                        _cameraControl.ZoomByUnits(10f);
                     }
                     ProductionSelectionController.OnSelectionCompleted += OnProductionSelectionCompleted;
                     _waitingForProductionTargets = true;
@@ -1537,19 +1551,292 @@ public class TutorialSetupInstaller : MonoBehaviour
             }
 
             case PartType.OpenProductionRunningPanel:
+                ShowPart(_currentPart + 1);
+                break;
+
+            case PartType.CloseProductionRunningPanel:
             {
                 if (_productionRunningPanel == null)
                     _productionRunningPanel = FindFirstObjectByType<ProductionRunningPanelControl>(FindObjectsInactive.Include);
                 if (_productionRunningPanel != null)
                 {
-                    if (_productionRunningPanel.IsShowing)
+                    if (!_productionRunningPanel.IsShowing)
+                    {
+                        ProductionBuildingPanelControl.TutorialShowAllPlans = false;
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _productionRunningPanel.OnClose += OnProductionRunningPanelClosed;
+                        _waitingForProductionRunningPanelClose = true;
+                    }
+                }
+                else
+                {
+                    ProductionBuildingPanelControl.TutorialShowAllPlans = false;
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.FifthBuildingPlacement:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                PlaceFifthBuildingOnMap();
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
+
+            case PartType.SelectFifthBuilding:
+            {
+                TileControl buildingTile = _placedFifthBuilding != null
+                    ? _placedFifthBuilding.GetComponentInParent<TileControl>()
+                    : null;
+                buildingTile ??= FindTileControlNear(_placedFifthBuildingWorldPos);
+
+                if (_buildingPanel == null)
+                    _buildingPanel = FindFirstObjectByType<BuildingPanelControl>(FindObjectsInactive.Include);
+
+                if (buildingTile != null && _buildingPanel != null)
+                {
+                    if (_cameraControl != null)
+                        _cameraControl.SetTutorialInputRestrictions(
+                            restrictInput: true,
+                            allowWorldDrag: true,
+                            allowZoom: true,
+                            allowMinimapRotation: true);
+                    TileInteraction.SetTutorialAllowedTile(buildingTile);
+                    TileInteraction.SetSelectionEnabled(true);
+                    _waitingForFifthBuildingPanel = true;
+                    var ti = TileInteraction.GetInstance();
+                    if (ti != null) ti.OnTileSelected += OnFifthBuildingTileSelected;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OpenTradePanel:
+            {
+                if (_tradePanel == null)
+                    _tradePanel = FindFirstObjectByType<TradePanelControl>(FindObjectsInactive.Include);
+                if (_tradePanel != null)
+                {
+                    if (_tradePanel.IsShowing)
                     {
                         ShowPart(_currentPart + 1);
                     }
                     else
                     {
-                        _productionRunningPanel.OnOpen += OnProductionRunningPanelOpened;
-                        _waitingForProductionRunningPanelOpen = true;
+                        _tradePanel.OnOpen += OnTradePanelOpened;
+                        _waitingForTradePanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.SelectTraderEntry:
+            {
+                TraderPanelControl.TutorialShowAllOfferings = true;
+                if (_traderPanel == null)
+                    _traderPanel = FindFirstObjectByType<TraderPanelControl>(FindObjectsInactive.Include);
+                if (_traderPanel != null)
+                {
+                    if (_traderPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _traderPanel.OnOpen += OnTraderPanelOpened;
+                        _waitingForTraderPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OpenTraderOffering:
+            {
+                if (_offeringPanel == null)
+                    _offeringPanel = FindFirstObjectByType<OfferingPanelControl>(FindObjectsInactive.Include);
+                if (_offeringPanel != null)
+                {
+                    if (_offeringPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _offeringPanel.OnOpen += OnOfferingPanelOpened;
+                        _waitingForOfferingPanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OfferResources:
+            {
+                if (_offeringPanel == null)
+                    _offeringPanel = FindFirstObjectByType<OfferingPanelControl>(FindObjectsInactive.Include);
+                if (_offeringPanel != null)
+                {
+                    _offeringPanel.OnPlayerOfferAdded += OnPlayerOfferAdded;
+                    _waitingForPlayerOffer = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.FinishTrade:
+            {
+                if (_offeringPanel == null)
+                    _offeringPanel = FindFirstObjectByType<OfferingPanelControl>(FindObjectsInactive.Include);
+                if (_offeringPanel != null)
+                {
+                    _offeringPanel.OnTradeAccepted += OnTradeAccepted;
+                    _waitingForTradeAccepted = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.CloseTraderPanel:
+            {
+                if (_traderPanel == null)
+                    _traderPanel = FindFirstObjectByType<TraderPanelControl>(FindObjectsInactive.Include);
+                if (_traderPanel != null)
+                {
+                    if (!_traderPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _traderPanel.OnClose += OnTraderPanelClosed;
+                        _waitingForTraderPanelClose = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.CloseTradePanel:
+            {
+                if (_tradePanel == null)
+                    _tradePanel = FindFirstObjectByType<TradePanelControl>(FindObjectsInactive.Include);
+                if (_tradePanel != null)
+                {
+                    if (!_tradePanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _tradePanel.OnClose += OnTradePanelClosed;
+                        _waitingForTradePanelClose = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.SixthBuildingPlacement:
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                PlaceSixthBuildingOnMap();
+                _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+                if (_activeNextButton != null)
+                {
+                    _activeNextButton.gameObject.SetActive(true);
+                    _activeNextButton.interactable = true;
+                    _activeNextButton.onClick.AddListener(OnNextPressed);
+                }
+                break;
+
+            case PartType.SelectSixthBuilding:
+            {
+                TileControl buildingTile = _placedSixthBuilding != null
+                    ? _placedSixthBuilding.GetComponentInParent<TileControl>()
+                    : null;
+                buildingTile ??= FindTileControlNear(_placedSixthBuildingWorldPos);
+
+                if (_buildingPanel == null)
+                    _buildingPanel = FindFirstObjectByType<BuildingPanelControl>(FindObjectsInactive.Include);
+
+                if (buildingTile != null && _buildingPanel != null)
+                {
+                    if (_cameraControl != null)
+                        _cameraControl.SetTutorialInputRestrictions(
+                            restrictInput: true,
+                            allowWorldDrag: true,
+                            allowZoom: true,
+                            allowMinimapRotation: true);
+                    TileInteraction.SetTutorialAllowedTile(buildingTile);
+                    TileInteraction.SetSelectionEnabled(true);
+                    _waitingForSixthBuildingPanel = true;
+                    var ti = TileInteraction.GetInstance();
+                    if (ti != null) ti.OnTileSelected += OnSixthBuildingTileSelected;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OpenReligiousPanel:
+            {
+                if (_religiousPanel == null)
+                    _religiousPanel = FindFirstObjectByType<ReligiousBuildingPanelControl>(FindObjectsInactive.Include);
+                if (_religiousPanel != null)
+                {
+                    if (_religiousPanel.IsShowing)
+                    {
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _religiousPanel.OnOpen += OnReligiousPanelOpened;
+                        _waitingForReligiousPanelOpen = true;
                     }
                 }
                 else
@@ -1916,6 +2203,160 @@ public class TutorialSetupInstaller : MonoBehaviour
 
         if (prefab != null)
             _placedThirdBuilding = Instantiate(prefab, worldPos, chosenEnv.transform.rotation);
+
+        TileControl tileControl = chosenEnv.GetComponent<TileControl>();
+        GameObject toDestroy = (tileControl != null && tileControl.transform.parent != null)
+            ? tileControl.transform.parent.gameObject
+            : chosenEnv.gameObject;
+        Destroy(toDestroy);
+
+        _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
+    }
+
+    private void PlaceFifthBuildingOnMap()
+    {
+        if (BuildingManager.Instance == null)
+            return;
+
+        EnvironmentControl[] allEnvs = FindObjectsByType<EnvironmentControl>(FindObjectsSortMode.None);
+
+        Building primaryDef = !string.IsNullOrEmpty(fifthBuildingID)
+            ? BuildingManager.Instance.GetBuildingByID(fifthBuildingID)
+            : null;
+
+        Building alternateDef = !string.IsNullOrEmpty(fifthBuildingAlternateID)
+            ? BuildingManager.Instance.GetBuildingByID(fifthBuildingAlternateID)
+            : null;
+
+        Building chosenDef = null;
+        EnvironmentControl chosenEnv = null;
+
+        if (primaryDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, primaryDef);
+            if (env != null) { chosenDef = primaryDef; chosenEnv = env; }
+        }
+
+        if (chosenEnv == null && alternateDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, alternateDef);
+            if (env != null) { chosenDef = alternateDef; chosenEnv = env; }
+        }
+
+        if (chosenEnv == null)
+        {
+            Building fallbackDef = primaryDef ?? alternateDef;
+            if (fallbackDef != null)
+            {
+                List<EnvironmentControl> sizeMatches = new List<EnvironmentControl>();
+                foreach (EnvironmentControl env in allEnvs)
+                {
+                    if (env.tileSize == fallbackDef.requiredTileSize && env.environmentTileType == EnvironmentTileType.Land)
+                        sizeMatches.Add(env);
+                }
+                if (sizeMatches.Count > 0)
+                {
+                    chosenDef = fallbackDef;
+                    chosenEnv = sizeMatches[Random.Range(0, sizeMatches.Count)];
+                }
+            }
+        }
+
+        if (chosenDef == null || chosenEnv == null)
+            return;
+
+        Vector3 worldPos = chosenEnv.transform.position;
+        Vector3 envForward = chosenEnv.transform.forward;
+
+        GameObject prefab = chosenDef.finalBuildingPrefab != null
+            ? chosenDef.finalBuildingPrefab
+            : chosenDef.buildingPrefab;
+
+        _placedFifthBuildingWorldPos = worldPos;
+
+        if (prefab != null)
+            _placedFifthBuilding = Instantiate(prefab, worldPos, chosenEnv.transform.rotation);
+
+        TileControl tileControl = chosenEnv.GetComponent<TileControl>();
+        GameObject toDestroy = (tileControl != null && tileControl.transform.parent != null)
+            ? tileControl.transform.parent.gameObject
+            : chosenEnv.gameObject;
+        Destroy(toDestroy);
+
+        // Force a trader to appear immediately so the trade panel shows one when opened
+        if (_placedFifthBuilding != null)
+        {
+            var tradeCtrl = _placedFifthBuilding.GetComponent<TradeBuildingControl>();
+            if (tradeCtrl != null && !tradeCtrl.HasActiveTrader())
+                tradeCtrl.GenerateTrader();
+        }
+
+        _cameraControl?.FocusOnPoint(worldPos, envForward, 6f);
+    }
+
+    private void PlaceSixthBuildingOnMap()
+    {
+        if (BuildingManager.Instance == null)
+            return;
+
+        EnvironmentControl[] allEnvs = FindObjectsByType<EnvironmentControl>(FindObjectsSortMode.None);
+
+        Building primaryDef = !string.IsNullOrEmpty(sixthBuildingID)
+            ? BuildingManager.Instance.GetBuildingByID(sixthBuildingID)
+            : null;
+
+        Building alternateDef = !string.IsNullOrEmpty(sixthBuildingAlternateID)
+            ? BuildingManager.Instance.GetBuildingByID(sixthBuildingAlternateID)
+            : null;
+
+        Building chosenDef = null;
+        EnvironmentControl chosenEnv = null;
+
+        if (primaryDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, primaryDef);
+            if (env != null) { chosenDef = primaryDef; chosenEnv = env; }
+        }
+
+        if (chosenEnv == null && alternateDef != null)
+        {
+            EnvironmentControl env = FindBuildingCandidate(allEnvs, alternateDef);
+            if (env != null) { chosenDef = alternateDef; chosenEnv = env; }
+        }
+
+        if (chosenEnv == null)
+        {
+            Building fallbackDef = primaryDef ?? alternateDef;
+            if (fallbackDef != null)
+            {
+                List<EnvironmentControl> sizeMatches = new List<EnvironmentControl>();
+                foreach (EnvironmentControl env in allEnvs)
+                {
+                    if (env.tileSize == fallbackDef.requiredTileSize && env.environmentTileType == EnvironmentTileType.Land)
+                        sizeMatches.Add(env);
+                }
+                if (sizeMatches.Count > 0)
+                {
+                    chosenDef = fallbackDef;
+                    chosenEnv = sizeMatches[Random.Range(0, sizeMatches.Count)];
+                }
+            }
+        }
+
+        if (chosenDef == null || chosenEnv == null)
+            return;
+
+        Vector3 worldPos = chosenEnv.transform.position;
+        Vector3 envForward = chosenEnv.transform.forward;
+
+        GameObject prefab = chosenDef.finalBuildingPrefab != null
+            ? chosenDef.finalBuildingPrefab
+            : chosenDef.buildingPrefab;
+
+        _placedSixthBuildingWorldPos = worldPos;
+
+        if (prefab != null)
+            _placedSixthBuilding = Instantiate(prefab, worldPos, chosenEnv.transform.rotation);
 
         TileControl tileControl = chosenEnv.GetComponent<TileControl>();
         GameObject toDestroy = (tileControl != null && tileControl.transform.parent != null)
@@ -2573,6 +3014,91 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnFifthBuildingTileSelected(TileControl tile)
+    {
+        if (!_waitingForFifthBuildingPanel) return;
+        _waitingForFifthBuildingPanel = false;
+        var ti = TileInteraction.GetInstance();
+        if (ti != null) ti.OnTileSelected -= OnFifthBuildingTileSelected;
+        TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnSixthBuildingTileSelected(TileControl tile)
+    {
+        if (!_waitingForSixthBuildingPanel) return;
+        _waitingForSixthBuildingPanel = false;
+        var ti = TileInteraction.GetInstance();
+        if (ti != null) ti.OnTileSelected -= OnSixthBuildingTileSelected;
+        TileInteraction.ClearTutorialAllowedTile();
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnReligiousPanelOpened()
+    {
+        if (!_waitingForReligiousPanelOpen) return;
+        _waitingForReligiousPanelOpen = false;
+        if (_religiousPanel != null) _religiousPanel.OnOpen -= OnReligiousPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnTradePanelOpened()
+    {
+        if (!_waitingForTradePanelOpen) return;
+        _waitingForTradePanelOpen = false;
+        if (_tradePanel != null) _tradePanel.OnOpen -= OnTradePanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnTraderPanelOpened()
+    {
+        if (!_waitingForTraderPanelOpen) return;
+        _waitingForTraderPanelOpen = false;
+        if (_traderPanel != null) _traderPanel.OnOpen -= OnTraderPanelOpened;
+        TraderPanelControl.TutorialShowAllOfferings = false;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnOfferingPanelOpened()
+    {
+        if (!_waitingForOfferingPanelOpen) return;
+        _waitingForOfferingPanelOpen = false;
+        if (_offeringPanel != null) _offeringPanel.OnOpen -= OnOfferingPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnPlayerOfferAdded()
+    {
+        if (!_waitingForPlayerOffer) return;
+        _waitingForPlayerOffer = false;
+        if (_offeringPanel != null) _offeringPanel.OnPlayerOfferAdded -= OnPlayerOfferAdded;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnTradeAccepted()
+    {
+        if (!_waitingForTradeAccepted) return;
+        _waitingForTradeAccepted = false;
+        if (_offeringPanel != null) _offeringPanel.OnTradeAccepted -= OnTradeAccepted;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnTraderPanelClosed()
+    {
+        if (!_waitingForTraderPanelClose) return;
+        _waitingForTraderPanelClose = false;
+        if (_traderPanel != null) _traderPanel.OnClose -= OnTraderPanelClosed;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnTradePanelClosed()
+    {
+        if (!_waitingForTradePanelClose) return;
+        _waitingForTradePanelClose = false;
+        if (_tradePanel != null) _tradePanel.OnClose -= OnTradePanelClosed;
+        ShowPart(_currentPart + 1);
+    }
+
     private void OnProductionPanelOpened()
     {
         if (!_waitingForProductionPanelOpen) return;
@@ -2586,6 +3112,15 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (!_waitingForProductionRunningPanelOpen) return;
         _waitingForProductionRunningPanelOpen = false;
         if (_productionRunningPanel != null) _productionRunningPanel.OnOpen -= OnProductionRunningPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnProductionRunningPanelClosed()
+    {
+        if (!_waitingForProductionRunningPanelClose) return;
+        _waitingForProductionRunningPanelClose = false;
+        if (_productionRunningPanel != null) _productionRunningPanel.OnClose -= OnProductionRunningPanelClosed;
+        ProductionBuildingPanelControl.TutorialShowAllPlans = false;
         ShowPart(_currentPart + 1);
     }
 
@@ -3190,6 +3725,72 @@ public class TutorialSetupInstaller : MonoBehaviour
             TileInteraction.ClearTutorialAllowedTile();
         }
 
+        if (_waitingForFifthBuildingPanel)
+        {
+            _waitingForFifthBuildingPanel = false;
+            var ti = TileInteraction.GetInstance();
+            if (ti != null) ti.OnTileSelected -= OnFifthBuildingTileSelected;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForSixthBuildingPanel)
+        {
+            _waitingForSixthBuildingPanel = false;
+            var ti = TileInteraction.GetInstance();
+            if (ti != null) ti.OnTileSelected -= OnSixthBuildingTileSelected;
+            TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForReligiousPanelOpen && _religiousPanel != null)
+        {
+            _religiousPanel.OnOpen -= OnReligiousPanelOpened;
+            _waitingForReligiousPanelOpen = false;
+        }
+
+        if (_waitingForTradePanelOpen && _tradePanel != null)
+        {
+            _tradePanel.OnOpen -= OnTradePanelOpened;
+            _waitingForTradePanelOpen = false;
+        }
+
+        if (_waitingForTraderPanelOpen && _traderPanel != null)
+        {
+            _traderPanel.OnOpen -= OnTraderPanelOpened;
+            _waitingForTraderPanelOpen = false;
+        }
+
+        TraderPanelControl.TutorialShowAllOfferings = false;
+
+        if (_waitingForOfferingPanelOpen && _offeringPanel != null)
+        {
+            _offeringPanel.OnOpen -= OnOfferingPanelOpened;
+            _waitingForOfferingPanelOpen = false;
+        }
+
+        if (_waitingForPlayerOffer && _offeringPanel != null)
+        {
+            _offeringPanel.OnPlayerOfferAdded -= OnPlayerOfferAdded;
+            _waitingForPlayerOffer = false;
+        }
+
+        if (_waitingForTradeAccepted && _offeringPanel != null)
+        {
+            _offeringPanel.OnTradeAccepted -= OnTradeAccepted;
+            _waitingForTradeAccepted = false;
+        }
+
+        if (_waitingForTraderPanelClose && _traderPanel != null)
+        {
+            _traderPanel.OnClose -= OnTraderPanelClosed;
+            _waitingForTraderPanelClose = false;
+        }
+
+        if (_waitingForTradePanelClose && _tradePanel != null)
+        {
+            _tradePanel.OnClose -= OnTradePanelClosed;
+            _waitingForTradePanelClose = false;
+        }
+
         if (_waitingForProductionPanelOpen && _productionPanel != null)
         {
             _productionPanel.OnOpen -= OnProductionPanelOpened;
@@ -3200,6 +3801,12 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             _productionRunningPanel.OnOpen -= OnProductionRunningPanelOpened;
             _waitingForProductionRunningPanelOpen = false;
+        }
+
+        if (_waitingForProductionRunningPanelClose && _productionRunningPanel != null)
+        {
+            _productionRunningPanel.OnClose -= OnProductionRunningPanelClosed;
+            _waitingForProductionRunningPanelClose = false;
         }
 
         if (_waitingForProductionStart && _tutorialProductionItem != null)
