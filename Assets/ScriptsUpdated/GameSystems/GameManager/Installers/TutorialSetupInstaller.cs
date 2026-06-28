@@ -3580,6 +3580,7 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         _fastForwardAnimalRoutine = null;
+        _cameraControl?.RestoreCameraPose();
         ShowPart(_currentPart + 1);
     }
 
