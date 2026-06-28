@@ -72,6 +72,7 @@ public class UnitOrderItemUI : MonoBehaviour
 
     public static bool TutorialBypassCosts = false;
     public event Action OnOrderConfirmed;
+    public event Action<int> OnMultiplierChanged;
 
     private MilitiaUnit _unit;
     private KineticWarfareControl _ownerControl;
@@ -408,6 +409,7 @@ public class UnitOrderItemUI : MonoBehaviour
         PopulateInfo();             // info depends on multiplier (population + output)
         UpdateConfirmButtonState();
         RefreshCostButtonColor();
+        OnMultiplierChanged?.Invoke(_multiplier);
     }
 
     private void DecreaseMultiplier()
