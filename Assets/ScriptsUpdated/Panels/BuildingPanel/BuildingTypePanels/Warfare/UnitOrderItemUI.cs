@@ -463,6 +463,12 @@ public class UnitOrderItemUI : MonoBehaviour
         return available >= needed;
     }
 
+    public void RefreshTutorialBypassState()
+    {
+        UpdateConfirmButtonState();
+        RefreshCostButtonColor();
+    }
+
     public void SetTutorialMultiplier(int value)
     {
         _multiplier = Mathf.Clamp(value, 1, maxMultiplier);

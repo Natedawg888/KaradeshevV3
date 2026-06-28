@@ -3488,6 +3488,7 @@ public class TutorialSetupInstaller : MonoBehaviour
 
         var items = _kineticWarfarePanel?.SpawnedOrderItems;
         _tutorialOrderItem = (items != null && items.Count > 0) ? items[0] : null;
+        _tutorialOrderItem?.RefreshTutorialBypassState();
 
         ShowPart(_currentPart + 1);
     }
