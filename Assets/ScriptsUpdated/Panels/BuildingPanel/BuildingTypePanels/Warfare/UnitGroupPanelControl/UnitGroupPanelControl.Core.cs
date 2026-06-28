@@ -100,6 +100,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
     private KineticWarfarePanelControl _kineticPanel;
     private BuildingPanelControl       _buildingPanel;
 
+    public event Action OnOpen;
     public event Action OnClose;
 
     private int    _initialRemainingServiceTurns = -1;
@@ -249,6 +250,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
             root.SetActive(true);
 
         Refresh();
+        OnOpen?.Invoke();
     }
 
     public void Hide()
