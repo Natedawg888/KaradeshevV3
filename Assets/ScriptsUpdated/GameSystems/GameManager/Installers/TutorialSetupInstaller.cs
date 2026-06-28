@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual, SelectSummoningSpirit, RegenerateMapClearBuildings, SeventhBuildingPlacement, SelectSeventhBuilding, OpenKineticWarfarePanel, ClickOrderButton, IncreaseOrderMultiplier, TrainUnits }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual, SelectSummoningSpirit, RegenerateMapClearBuildings, SeventhBuildingPlacement, SelectSeventhBuilding, OpenKineticWarfarePanel, ClickOrderButton, IncreaseOrderMultiplier, TrainUnits, ClickToggleViewButton, FastForwardAnimalSimulation }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -142,6 +142,8 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForTrainingConfirm;
     private UnitOrderItemUI _tutorialOrderItem;
     private Coroutine _fastForwardTrainingRoutine;
+    private bool _waitingForViewToggle;
+    private Coroutine _fastForwardAnimalRoutine;
 
     private ReligiousBuildingPanelControl _religiousPanel;
     private bool _waitingForReligiousPanelOpen;
@@ -2092,8 +2094,12 @@ public class TutorialSetupInstaller : MonoBehaviour
                         allowWorldDrag: false,
                         allowZoom: false,
                         allowMinimapRotation: false);
+                KineticWarfareControl.TutorialBypassKnownCheck = true;
+                UnitOrderItemUI.TutorialBypassCosts = true;
+                KineticWarfareControl.TutorialBypassCosts = true;
                 if (_tutorialOrderItem != null)
                 {
+                    _tutorialOrderItem.RefreshTutorialBypassState();
                     _tutorialOrderItem.OnMultiplierChanged += OnTutorialMultiplierChanged;
                     _waitingForMultiplierIncrease = true;
                 }
@@ -2112,8 +2118,12 @@ public class TutorialSetupInstaller : MonoBehaviour
                         allowWorldDrag: false,
                         allowZoom: false,
                         allowMinimapRotation: false);
+                KineticWarfareControl.TutorialBypassKnownCheck = true;
+                UnitOrderItemUI.TutorialBypassCosts = true;
+                KineticWarfareControl.TutorialBypassCosts = true;
                 if (_tutorialOrderItem != null)
                 {
+                    _tutorialOrderItem.RefreshTutorialBypassState();
                     _tutorialOrderItem.OnOrderConfirmed += OnTrainingOrderConfirmed;
                     _waitingForTrainingConfirm = true;
                 }
@@ -2123,6 +2133,42 @@ public class TutorialSetupInstaller : MonoBehaviour
                     UnitOrderItemUI.TutorialBypassCosts = false;
                     ShowPart(_currentPart + 1);
                 }
+                break;
+            }
+
+            case PartType.ClickToggleViewButton:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                WorldCanvasMode.OnChanged += OnViewToggled;
+                _waitingForViewToggle = true;
+                break;
+            }
+
+            case PartType.FastForwardAnimalSimulation:
+            {
+                if (_cameraControl != null)
+                {
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                    _cameraControl.SaveCameraPose();
+                    var gm = GridManager.Instance;
+                    if (gm != null)
+                    {
+                        float cx = (gm.columns / 2f) * gm.cellSize;
+                        float cz = (gm.rows / 2f) * gm.cellSize;
+                        _cameraControl.FocusTopDownOnPoint(new Vector3(cx, 0f, cz), 9999f);
+                    }
+                }
+                if (_fastForwardAnimalRoutine != null) StopCoroutine(_fastForwardAnimalRoutine);
+                _fastForwardAnimalRoutine = StartCoroutine(FastForwardAnimalSimulationCoroutine(200));
                 break;
             }
 
@@ -3065,6 +3111,8 @@ public class TutorialSetupInstaller : MonoBehaviour
             yield break;
         }
 
+        AnimalSimulationAccess.Current?.ClearAllGroups(true);
+
         _mapTilePlacer.ClearPlacedTilesAndState();
         yield return null;
 
@@ -3499,6 +3547,39 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (value < 5) return;
         _waitingForMultiplierIncrease = false;
         if (_tutorialOrderItem != null) _tutorialOrderItem.OnMultiplierChanged -= OnTutorialMultiplierChanged;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnViewToggled(bool unitsOnly)
+    {
+        if (!_waitingForViewToggle) return;
+        _waitingForViewToggle = false;
+        WorldCanvasMode.OnChanged -= OnViewToggled;
+        ShowPart(_currentPart + 1);
+    }
+
+    private IEnumerator FastForwardAnimalSimulationCoroutine(int ticks)
+    {
+        var sim = AnimalSimulationAccess.Current;
+        int baseTurn = TurnSystem.GetCurrentTurn();
+
+        for (int i = 0; i < ticks; i++)
+        {
+            if (sim == null) break;
+
+            sim.BeginTurnTick(baseTurn + i);
+
+            bool done = false;
+            while (!done)
+            {
+                done = sim.TickSomeAnimals(1000);
+                if (!done) yield return null;
+            }
+
+            yield return null;
+        }
+
+        _fastForwardAnimalRoutine = null;
         ShowPart(_currentPart + 1);
     }
 
@@ -4385,6 +4466,18 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             StopCoroutine(_fastForwardTrainingRoutine);
             _fastForwardTrainingRoutine = null;
+        }
+
+        if (_waitingForViewToggle)
+        {
+            WorldCanvasMode.OnChanged -= OnViewToggled;
+            _waitingForViewToggle = false;
+        }
+
+        if (_fastForwardAnimalRoutine != null)
+        {
+            StopCoroutine(_fastForwardAnimalRoutine);
+            _fastForwardAnimalRoutine = null;
         }
 
         if (_waitingForReligiousPanelOpen && _religiousPanel != null)
