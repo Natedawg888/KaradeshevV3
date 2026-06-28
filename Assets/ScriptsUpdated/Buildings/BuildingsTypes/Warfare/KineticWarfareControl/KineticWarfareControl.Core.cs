@@ -49,6 +49,9 @@ public partial class KineticWarfareControl : MonoBehaviour
         public float fatigueBonusMovementSpeed;
     }
 
+    public static bool TutorialBypassKnownCheck = false;
+    public static bool TutorialBypassCosts = false;
+
     public event Action OnTrainingQueueChanged;
 
     [Header("Trainable Units")]
@@ -202,7 +205,7 @@ public partial class KineticWarfareControl : MonoBehaviour
             if (u.requiresAdvancementFrom != null) continue;
 
             // Player must know the unit
-            if (knownMgr != null && !knownMgr.IsKnown(u)) continue;
+            if (!TutorialBypassKnownCheck && knownMgr != null && !knownMgr.IsKnown(u)) continue;
 
             result.Add(u);
         }
@@ -254,36 +257,38 @@ public partial class KineticWarfareControl : MonoBehaviour
 
         multiplier = Mathf.Max(1, multiplier);
 
-        var popMgr = PlayersPopulationManager.Instance;
-        if (popMgr == null)
-        {
-            failReason = "Population system not found.";
-            return false;
-        }
-
         int populationRequired = Mathf.Max(0, unit.populationToTrain * multiplier);
         string reservationId = null;
         int expiryTurn = -1;
 
-        if (populationRequired > 0)
+        if (!TutorialBypassCosts)
         {
-            if (!popMgr.TryReservePopulation(
-                    populationRequired,
-                    PopulationReservationKind.Training,
-                    GetTrainingReservationOwnerId(),
-                    nameof(KineticWarfareControl),
-                    out reservationId))
+            var popMgr = PlayersPopulationManager.Instance;
+            if (popMgr == null)
             {
-                failReason = $"Not enough available population (needs {populationRequired}).";
+                failReason = "Population system not found.";
                 return false;
             }
 
-            TagTrainingReservation(reservationId);
-
-            // If this is a human unit, compute an expiry turn based on age → Elder.
-            if (unit.isHuman && !string.IsNullOrEmpty(reservationId))
+            if (populationRequired > 0)
             {
-                popMgr.TryComputeAndStoreReservationExpiryTurn(reservationId, out expiryTurn);
+                if (!popMgr.TryReservePopulation(
+                        populationRequired,
+                        PopulationReservationKind.Training,
+                        GetTrainingReservationOwnerId(),
+                        nameof(KineticWarfareControl),
+                        out reservationId))
+                {
+                    failReason = $"Not enough available population (needs {populationRequired}).";
+                    return false;
+                }
+
+                TagTrainingReservation(reservationId);
+
+                if (unit.isHuman && !string.IsNullOrEmpty(reservationId))
+                {
+                    popMgr.TryComputeAndStoreReservationExpiryTurn(reservationId, out expiryTurn);
+                }
             }
         }
 

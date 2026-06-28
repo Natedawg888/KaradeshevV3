@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -68,6 +69,9 @@ public class UnitOrderItemUI : MonoBehaviour
     [Tooltip("Maximum multiplier allowed per order (UI limit).")]
     [Min(1)]
     public int maxMultiplier = 10;
+
+    public static bool TutorialBypassCosts = false;
+    public event Action OnOrderConfirmed;
 
     private MilitiaUnit _unit;
     private KineticWarfareControl _ownerControl;
@@ -427,6 +431,7 @@ public class UnitOrderItemUI : MonoBehaviour
 
     private bool CanAffordTrainingCosts()
     {
+        if (TutorialBypassCosts) return true;
         if (_unit == null) return true;
 
         var inv = PlayerInventoryManager.Instance;
@@ -447,12 +452,22 @@ public class UnitOrderItemUI : MonoBehaviour
 
     private bool HasEnoughPopulation()
     {
+        if (TutorialBypassCosts) return true;
         var popMgr = PlayersPopulationManager.Instance;
         if (!popMgr) return true; // fail-open
 
         int needed    = Mathf.Max(1, _unit.populationToTrain * _multiplier);
         int available = popMgr.GetAvailableTaskPopulation();
         return available >= needed;
+    }
+
+    public void SetTutorialMultiplier(int value)
+    {
+        _multiplier = Mathf.Clamp(value, 1, maxMultiplier);
+        if (multiplierText) multiplierText.text = _multiplier.ToString();
+        PopulateInfo();
+        UpdateConfirmButtonState();
+        RefreshCostButtonColor();
     }
 
     private void RefreshCostButtonColor()
@@ -522,6 +537,8 @@ public class UnitOrderItemUI : MonoBehaviour
             RefreshCostButtonColor();
             return;
         }
+
+        OnOrderConfirmed?.Invoke();
 
         // After a successful order, state will change as turns pass / resources are spent.
         UpdateConfirmButtonState();

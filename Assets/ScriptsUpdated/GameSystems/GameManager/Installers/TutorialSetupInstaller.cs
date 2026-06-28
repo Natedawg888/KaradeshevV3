@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual, SelectSummoningSpirit, RegenerateMapClearBuildings, SeventhBuildingPlacement, SelectSeventhBuilding }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual, SelectSummoningSpirit, RegenerateMapClearBuildings, SeventhBuildingPlacement, SelectSeventhBuilding, OpenKineticWarfarePanel, ClickOrderButton, TrainUnits }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -134,6 +134,14 @@ public class TutorialSetupInstaller : MonoBehaviour
     private GameObject _placedSeventhBuilding;
     private Vector3 _placedSeventhBuildingWorldPos;
     private bool _waitingForSeventhBuildingPanel;
+    private KineticWarfarePanelControl _kineticWarfarePanel;
+    private KineticWarfareControl _kineticWarfareControl;
+    private bool _waitingForKineticWarfarePanelOpen;
+    private bool _waitingForOrderViewShown;
+    private bool _waitingForTrainingConfirm;
+    private UnitOrderItemUI _tutorialOrderItem;
+    private Coroutine _fastForwardTrainingRoutine;
+
     private ReligiousBuildingPanelControl _religiousPanel;
     private bool _waitingForReligiousPanelOpen;
     private ReligiousRitualPanelControl _ritualPanel;
@@ -2012,6 +2020,93 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.OpenKineticWarfarePanel:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                if (_kineticWarfarePanel == null)
+                    _kineticWarfarePanel = FindFirstObjectByType<KineticWarfarePanelControl>(FindObjectsInactive.Include);
+                if (_kineticWarfarePanel != null)
+                {
+                    if (_kineticWarfarePanel.IsShowing)
+                    {
+                        _kineticWarfareControl = _kineticWarfarePanel.CurrentControl;
+                        ShowPart(_currentPart + 1);
+                    }
+                    else
+                    {
+                        _kineticWarfarePanel.OnOpen += OnKineticWarfarePanelOpened;
+                        _waitingForKineticWarfarePanelOpen = true;
+                    }
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.ClickOrderButton:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                KineticWarfareControl.TutorialBypassKnownCheck = true;
+                if (_kineticWarfarePanel == null)
+                    _kineticWarfarePanel = FindFirstObjectByType<KineticWarfarePanelControl>(FindObjectsInactive.Include);
+                if (_kineticWarfarePanel != null)
+                {
+                    if (_kineticWarfarePanel.IsOrderViewShowing)
+                    {
+                        _kineticWarfarePanel.RefreshOrderViewForTutorial();
+                        OnKineticWarfareOrderViewShown();
+                    }
+                    else
+                    {
+                        _kineticWarfarePanel.OnOrderViewShown += OnKineticWarfareOrderViewShown;
+                        _waitingForOrderViewShown = true;
+                    }
+                }
+                else
+                {
+                    KineticWarfareControl.TutorialBypassKnownCheck = false;
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.TrainUnits:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                var items = _kineticWarfarePanel?.SpawnedOrderItems;
+                UnitOrderItemUI firstItem = (items != null && items.Count > 0) ? items[0] : null;
+                if (firstItem != null)
+                {
+                    _tutorialOrderItem = firstItem;
+                    firstItem.OnOrderConfirmed += OnTrainingOrderConfirmed;
+                    _waitingForTrainingConfirm = true;
+                }
+                else
+                {
+                    KineticWarfareControl.TutorialBypassKnownCheck = false;
+                    UnitOrderItemUI.TutorialBypassCosts = false;
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
             case PartType.OpenStoragePanel:
             {
                 if (_storagePanel == null)
@@ -3354,6 +3449,98 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnKineticWarfarePanelOpened()
+    {
+        if (!_waitingForKineticWarfarePanelOpen) return;
+        _waitingForKineticWarfarePanelOpen = false;
+        if (_kineticWarfarePanel != null) _kineticWarfarePanel.OnOpen -= OnKineticWarfarePanelOpened;
+        _kineticWarfareControl = _kineticWarfarePanel?.CurrentControl;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnKineticWarfareOrderViewShown()
+    {
+        if (!_waitingForOrderViewShown) return;
+        _waitingForOrderViewShown = false;
+        if (_kineticWarfarePanel != null) _kineticWarfarePanel.OnOrderViewShown -= OnKineticWarfareOrderViewShown;
+
+        UnitOrderItemUI.TutorialBypassCosts = true;
+
+        var items = _kineticWarfarePanel?.SpawnedOrderItems;
+        if (items != null && items.Count > 0 && items[0] != null)
+            items[0].SetTutorialMultiplier(5);
+
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnTrainingOrderConfirmed()
+    {
+        if (!_waitingForTrainingConfirm) return;
+        _waitingForTrainingConfirm = false;
+        if (_tutorialOrderItem != null)
+        {
+            _tutorialOrderItem.OnOrderConfirmed -= OnTrainingOrderConfirmed;
+            _tutorialOrderItem = null;
+        }
+
+        KineticWarfareControl.TutorialBypassKnownCheck = false;
+        UnitOrderItemUI.TutorialBypassCosts = false;
+
+        _kineticWarfarePanel?.Hide();
+        _buildingPanel?.Hide();
+
+        if (_kineticWarfareControl == null && _placedSeventhBuilding != null)
+            _kineticWarfareControl = _placedSeventhBuilding.GetComponent<KineticWarfareControl>();
+
+        if (_kineticWarfareControl != null && _kineticWarfareControl.ActiveOrders.Count > 0)
+        {
+            if (_fastForwardTrainingRoutine != null) StopCoroutine(_fastForwardTrainingRoutine);
+            _fastForwardTrainingRoutine = StartCoroutine(FastForwardTrainingCoroutine(_kineticWarfareControl));
+        }
+        else
+        {
+            ShowPart(_currentPart + 1);
+        }
+    }
+
+    private IEnumerator FastForwardTrainingCoroutine(KineticWarfareControl control)
+    {
+        var completions = new List<KineticWarfareControl.TrainingCompletion>();
+
+        while (control != null && control.ActiveOrders.Count > 0)
+        {
+            completions.Clear();
+            if (TurnSystem.Instance != null)
+            {
+                yield return TurnSystem.Instance.StartCoroutine(
+                    TurnSystem.Instance.RunGhostPhaseAdvance(() => control.AdvanceTurnAndCollectCompletions(completions))
+                );
+            }
+            else
+            {
+                control.AdvanceTurnAndCollectCompletions(completions);
+                yield return null;
+            }
+
+            foreach (var tc in completions)
+            {
+                if (tc.tileGroupControl != null && tc.unit != null && tc.totalUnits > 0)
+                {
+                    tc.tileGroupControl.AddGroup(
+                        tc.unit,
+                        tc.totalUnits,
+                        tc.populationReservationId,
+                        tc.reservedPopulation,
+                        tc.expiryTurn);
+                }
+                tc.source?.OnOrderFinalizedExternally(tc.orderId);
+            }
+        }
+
+        _fastForwardTrainingRoutine = null;
+        ShowPart(_currentPart + 1);
+    }
+
     private void OnReligiousPanelOpened()
     {
         if (!_waitingForReligiousPanelOpen) return;
@@ -4133,6 +4320,35 @@ public class TutorialSetupInstaller : MonoBehaviour
             var ti = TileInteraction.GetInstance();
             if (ti != null) ti.OnTileSelected -= OnSeventhBuildingTileSelected;
             TileInteraction.ClearTutorialAllowedTile();
+        }
+
+        if (_waitingForKineticWarfarePanelOpen && _kineticWarfarePanel != null)
+        {
+            _kineticWarfarePanel.OnOpen -= OnKineticWarfarePanelOpened;
+            _waitingForKineticWarfarePanelOpen = false;
+        }
+
+        if (_waitingForOrderViewShown && _kineticWarfarePanel != null)
+        {
+            _kineticWarfarePanel.OnOrderViewShown -= OnKineticWarfareOrderViewShown;
+            _waitingForOrderViewShown = false;
+        }
+
+        if (_waitingForTrainingConfirm && _tutorialOrderItem != null)
+        {
+            _tutorialOrderItem.OnOrderConfirmed -= OnTrainingOrderConfirmed;
+            _waitingForTrainingConfirm = false;
+            _tutorialOrderItem = null;
+        }
+
+        KineticWarfareControl.TutorialBypassKnownCheck = false;
+        UnitOrderItemUI.TutorialBypassCosts = false;
+        KineticWarfareControl.TutorialBypassCosts = false;
+
+        if (_fastForwardTrainingRoutine != null)
+        {
+            StopCoroutine(_fastForwardTrainingRoutine);
+            _fastForwardTrainingRoutine = null;
         }
 
         if (_waitingForReligiousPanelOpen && _religiousPanel != null)

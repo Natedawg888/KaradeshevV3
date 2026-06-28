@@ -6,7 +6,9 @@ using UnityEngine.UI;
 
 public class KineticWarfarePanelControl : MonoBehaviour
 {
+    public event Action OnOpen;
     public event Action OnClose;
+    public event Action OnOrderViewShown;
 
     [Header("Roots")]
     [Tooltip("Root object for this panel.")]
@@ -40,6 +42,11 @@ public class KineticWarfarePanelControl : MonoBehaviour
     private BuildingControl _building;
     private TileControl _tile;
     private KineticWarfareControl _currentControl;
+
+    public bool IsShowing => (root != null ? root : gameObject).activeSelf;
+    public bool IsOrderViewShowing => orderContentRoot != null && orderContentRoot.activeSelf;
+    public KineticWarfareControl CurrentControl => _currentControl;
+    public IReadOnlyList<UnitOrderItemUI> SpawnedOrderItems => _spawnedOrderItems;
 
     private readonly List<UnitOrderItemUI> _spawnedOrderItems = new();
     private readonly List<UnitGroupManagementItemUI> _spawnedManagementItems = new();
@@ -140,6 +147,8 @@ public class KineticWarfarePanelControl : MonoBehaviour
             _cg.interactable = true;
             _cg.blocksRaycasts = true;
         }
+
+        OnOpen?.Invoke();
     }
 
     public void Show(KineticWarfareControl control)
@@ -185,6 +194,16 @@ public class KineticWarfarePanelControl : MonoBehaviour
 
         ClearManagementList();
         RebuildOrderList();
+        OnOrderViewShown?.Invoke();
+    }
+
+    public void RefreshOrderViewForTutorial()
+    {
+        if (orderContentRoot != null && orderContentRoot.activeSelf)
+        {
+            RebuildOrderList();
+            OnOrderViewShown?.Invoke();
+        }
     }
 
     private void HideOrderView()
