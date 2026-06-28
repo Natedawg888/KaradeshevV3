@@ -410,6 +410,7 @@ public partial class AnimalSimulationController : MonoBehaviour
     }
 
     public void BlockInitialAnimalSpawn() => _initialSpawnBlocked = true;
+    public void UnblockInitialAnimalSpawn() => _initialSpawnBlocked = false;
 
     public void InstallRuntimeRefs(
     TurnSystem newTurnSystem = null,

@@ -2159,7 +2159,7 @@ public class TutorialSetupInstaller : MonoBehaviour
                         allowZoom: false,
                         allowMinimapRotation: false);
                     _cameraControl.SaveCameraPose();
-                    var gm = GridManager.Instance;
+                    var gm = GridManager.Instance ?? FindFirstObjectByType<GridManager>();
                     if (gm != null)
                     {
                         float cx = (gm.columns / 2f) * gm.cellSize;
@@ -3112,6 +3112,7 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         AnimalSimulationAccess.Current?.ClearAllGroups(true);
+        FindFirstObjectByType<AnimalSimulationController>()?.UnblockInitialAnimalSpawn();
 
         _mapTilePlacer.ClearPlacedTilesAndState();
         yield return null;
