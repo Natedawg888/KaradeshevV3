@@ -4,6 +4,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 {
     public static event System.Action OnActionPanelOpened;
     public static event System.Action OnMeleeActionModeStarted;
+    public static event System.Action OnSurroundActionModeStarted;
 
     private void SetupActionsUI()
     {
@@ -182,6 +183,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         }
         else if (action is SurroundActionSO surroundAction)
         {
+            OnSurroundActionModeStarted?.Invoke();
             OpenSurroundTargetsPanel(surroundAction);
         }
         else

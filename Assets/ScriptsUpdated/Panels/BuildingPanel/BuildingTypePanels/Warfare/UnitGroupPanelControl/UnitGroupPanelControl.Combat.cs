@@ -4,6 +4,7 @@ using UnityEngine;
 public partial class UnitGroupPanelControl : MonoBehaviour
 {
     public static event System.Action OnMeleeTargetConfirmed;
+    public static event System.Action OnSurroundTargetConfirmed;
 
     private void OpenMeleeTargetsPanel(MeleeAttackActionSO meleeAction)
     {
@@ -419,6 +420,8 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         UnitGroupActionManager.Instance?.SetTrackedSurroundTargetMarker(_group);
         _owner.RefreshMarker(_group);
         UnitGroupActionManager.RaiseGroupActionStateChanged(_group);
+
+        OnSurroundTargetConfirmed?.Invoke();
 
         if (meleeTargetsPanelRoot) meleeTargetsPanelRoot.SetActive(false);
         CloseAllPanelsStayHere();
