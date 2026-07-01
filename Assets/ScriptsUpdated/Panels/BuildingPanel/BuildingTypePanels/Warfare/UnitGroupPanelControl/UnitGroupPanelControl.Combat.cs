@@ -3,6 +3,8 @@ using UnityEngine;
 
 public partial class UnitGroupPanelControl : MonoBehaviour
 {
+    public static event System.Action OnMeleeTargetConfirmed;
+
     private void OpenMeleeTargetsPanel(MeleeAttackActionSO meleeAction)
     {
         if (_group == null || _owner == null || meleeAction == null)
@@ -362,6 +364,8 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         UnitGroupActionManager.Instance?.SetTrackedMeleeTargetMarker(_group);
         _owner.RefreshMarker(_group);
         UnitGroupActionManager.RaiseGroupActionStateChanged(_group);
+
+        OnMeleeTargetConfirmed?.Invoke();
 
         if (meleeTargetsPanelRoot) meleeTargetsPanelRoot.SetActive(false);
         CloseAllPanelsStayHere();

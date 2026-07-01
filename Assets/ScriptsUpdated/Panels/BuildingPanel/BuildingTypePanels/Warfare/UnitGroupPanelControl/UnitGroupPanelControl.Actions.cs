@@ -2,6 +2,9 @@ using UnityEngine;
 
 public partial class UnitGroupPanelControl : MonoBehaviour
 {
+    public static event System.Action OnActionPanelOpened;
+    public static event System.Action OnMeleeActionModeStarted;
+
     private void SetupActionsUI()
     {
         if (actionOpenButton != null)
@@ -84,6 +87,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         RefreshActionList();
         actionPanelRoot.SetActive(true);
+        OnActionPanelOpened?.Invoke();
     }
 
     private void RefreshActionList()
@@ -169,6 +173,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         }
         else if (action is MeleeAttackActionSO meleeAction)
         {
+            OnMeleeActionModeStarted?.Invoke();
             OpenMeleeTargetsPanel(meleeAction);
         }
         else if (action is RangedAttackActionSO rangedAction)
