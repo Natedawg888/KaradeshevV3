@@ -3,6 +3,7 @@ using UnityEngine;
 public partial class UnitGroupPanelControl
 {
     public static event System.Action OnSplitPanelOpened;
+    public static event System.Action OnSplitConfirmed;
 
     private void SetupSplitUI()
     {
@@ -88,6 +89,14 @@ public partial class UnitGroupPanelControl
             splitConfirmButton.interactable = _group.unitCount > 1;
     }
 
+    public void SetTutorialSplitCount(int count)
+    {
+        if (_group == null) return;
+        int maxSplit = Mathf.Max(1, _group.unitCount - 1);
+        _pendingSplitCount = Mathf.Clamp(count, 1, maxSplit);
+        RefreshSplitPanelUI();
+    }
+
     private void CancelSplit()
     {
         if (splitPanelRoot != null)
@@ -126,6 +135,8 @@ public partial class UnitGroupPanelControl
             CancelSplit();
             return;
         }
+
+        OnSplitConfirmed?.Invoke();
 
         // Health fraction before splitting
         float healthFraction = _group.HealthFraction;
