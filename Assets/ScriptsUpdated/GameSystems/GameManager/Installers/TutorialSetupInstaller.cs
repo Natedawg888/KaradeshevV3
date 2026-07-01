@@ -29,6 +29,7 @@ public class TutorialSetupInstaller : MonoBehaviour
     [Header("Map Regeneration Part")]
     [SerializeField] private MapGenerator _mapGenerator;
     [SerializeField] private MapTilePlacer _mapTilePlacer;
+    [SerializeField] private EnvironmentPreset tutorialMapPreset;
 
     [Header("Tutorial Building Selection")]
     [SerializeField] private string tutorialGrasslandBuildingID = "";
@@ -3142,6 +3143,9 @@ public class TutorialSetupInstaller : MonoBehaviour
         _mapGenerator.enabled = true;
         _mapTilePlacer.enabled = true;
 
+        if (tutorialMapPreset != null && EnvironmentPresetManager.Instance != null)
+            EnvironmentPresetManager.Instance.ApplyPreset(tutorialMapPreset.presetID);
+
         yield return StartCoroutine(_mapGenerator.RegenerateCoroutine());
 
         _mapTilePlacer.BeginPlacement();
@@ -3216,6 +3220,9 @@ public class TutorialSetupInstaller : MonoBehaviour
         MapTilePlacer.ResetWorldReady();
         _mapGenerator.enabled = true;
         _mapTilePlacer.enabled = true;
+
+        if (tutorialMapPreset != null && EnvironmentPresetManager.Instance != null)
+            EnvironmentPresetManager.Instance.ApplyPreset(tutorialMapPreset.presetID);
 
         yield return StartCoroutine(_mapGenerator.RegenerateCoroutine());
 
@@ -3805,7 +3812,7 @@ public class TutorialSetupInstaller : MonoBehaviour
 
         // Focus camera on the destination
         if (_cameraControl != null && gridToTile.TryGetValue(animalTileGrid.Value, out var targetTile))
-            _cameraControl.FocusTopDownOnPoint(targetTile.transform.position, 9999f);
+            _cameraControl.FocusOnPoint(targetTile.transform.position, targetTile.transform.forward, 6f);
 
         // Fast-forward the movement step by step
         int safety = 0;
