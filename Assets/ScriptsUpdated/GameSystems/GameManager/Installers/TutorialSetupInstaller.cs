@@ -29,7 +29,8 @@ public class TutorialSetupInstaller : MonoBehaviour
     [Header("Map Regeneration Part")]
     [SerializeField] private MapGenerator _mapGenerator;
     [SerializeField] private MapTilePlacer _mapTilePlacer;
-    [SerializeField] private EnvironmentPreset tutorialMapPreset;
+    [SerializeField] private string tutorialMapPresetName = "";
+    [SerializeField] private int tutorialMapPresetID = -1;
 
     [Header("Tutorial Building Selection")]
     [SerializeField] private string tutorialGrasslandBuildingID = "";
@@ -2479,7 +2480,19 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         if (candidates.Count == 0)
+        {
+            GameObject fallbackPrefab = buildingDef.finalBuildingPrefab != null
+                ? buildingDef.finalBuildingPrefab : buildingDef.buildingPrefab;
+            if (!TryStealBuildingSlotOfSize(buildingDef.requiredTileSize, out Vector3 stolenPos, out Quaternion stolenRot))
+                return;
+            _placedShelterWorldPos = stolenPos;
+            if (GridManager.Instance != null)
+                _placedShelterGridPos = GridManager.Instance.GetGridPosition(stolenPos);
+            if (fallbackPrefab != null)
+                _placedShelterBuilding = Instantiate(fallbackPrefab, stolenPos, stolenRot);
+            _cameraControl?.FocusOnPoint(stolenPos, stolenRot * Vector3.forward, 6f);
             return;
+        }
 
         EnvironmentControl target = candidates[Random.Range(0, candidates.Count)];
         Vector3 worldPos = target.transform.position;
@@ -2535,7 +2548,17 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         if (candidates.Count == 0)
+        {
+            GameObject fallbackPrefab = buildingDef.finalBuildingPrefab != null
+                ? buildingDef.finalBuildingPrefab : buildingDef.buildingPrefab;
+            if (!TryStealBuildingSlotOfSize(buildingDef.requiredTileSize, out Vector3 stolenPos, out Quaternion stolenRot))
+                return;
+            _placedSecondBuildingWorldPos = stolenPos;
+            if (fallbackPrefab != null)
+                _placedSecondBuilding = Instantiate(fallbackPrefab, stolenPos, stolenRot);
+            _cameraControl?.FocusOnPoint(stolenPos, stolenRot * Vector3.forward, 6f);
             return;
+        }
 
         EnvironmentControl target = candidates[Random.Range(0, candidates.Count)];
         Vector3 worldPos = target.transform.position;
@@ -2613,7 +2636,16 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         if (chosenDef == null || chosenEnv == null)
+        {
+            Building steal = primaryDef ?? alternateDef;
+            if (steal == null) return;
+            GameObject fp = steal.finalBuildingPrefab != null ? steal.finalBuildingPrefab : steal.buildingPrefab;
+            if (!TryStealBuildingSlotOfSize(steal.requiredTileSize, out Vector3 sp, out Quaternion sr)) return;
+            _placedThirdBuildingWorldPos = sp;
+            if (fp != null) _placedThirdBuilding = Instantiate(fp, sp, sr);
+            _cameraControl?.FocusOnPoint(sp, sr * Vector3.forward, 6f);
             return;
+        }
 
         Vector3 worldPos = chosenEnv.transform.position;
         Vector3 envForward = chosenEnv.transform.forward;
@@ -2686,7 +2718,21 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         if (chosenDef == null || chosenEnv == null)
+        {
+            Building steal = primaryDef ?? alternateDef;
+            if (steal == null) return;
+            GameObject fp = steal.finalBuildingPrefab != null ? steal.finalBuildingPrefab : steal.buildingPrefab;
+            if (!TryStealBuildingSlotOfSize(steal.requiredTileSize, out Vector3 sp, out Quaternion sr)) return;
+            _placedFifthBuildingWorldPos = sp;
+            if (fp != null) _placedFifthBuilding = Instantiate(fp, sp, sr);
+            if (_placedFifthBuilding != null)
+            {
+                var tradeCtrl = _placedFifthBuilding.GetComponent<TradeBuildingControl>();
+                if (tradeCtrl != null && !tradeCtrl.HasActiveTrader()) tradeCtrl.GenerateTrader();
+            }
+            _cameraControl?.FocusOnPoint(sp, sr * Vector3.forward, 6f);
             return;
+        }
 
         Vector3 worldPos = chosenEnv.transform.position;
         Vector3 envForward = chosenEnv.transform.forward;
@@ -2767,7 +2813,16 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         if (chosenDef == null || chosenEnv == null)
+        {
+            Building steal = primaryDef ?? alternateDef;
+            if (steal == null) return;
+            GameObject fp = steal.finalBuildingPrefab != null ? steal.finalBuildingPrefab : steal.buildingPrefab;
+            if (!TryStealBuildingSlotOfSize(steal.requiredTileSize, out Vector3 sp, out Quaternion sr)) return;
+            _placedSixthBuildingWorldPos = sp;
+            if (fp != null) _placedSixthBuilding = Instantiate(fp, sp, sr);
+            _cameraControl?.FocusOnPoint(sp, sr * Vector3.forward, 6f);
             return;
+        }
 
         Vector3 worldPos = chosenEnv.transform.position;
         Vector3 envForward = chosenEnv.transform.forward;
@@ -2840,7 +2895,16 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         if (chosenDef == null || chosenEnv == null)
+        {
+            Building steal = primaryDef ?? alternateDef;
+            if (steal == null) return;
+            GameObject fp = steal.finalBuildingPrefab != null ? steal.finalBuildingPrefab : steal.buildingPrefab;
+            if (!TryStealBuildingSlotOfSize(steal.requiredTileSize, out Vector3 sp, out Quaternion sr)) return;
+            _placedFourthBuildingWorldPos = sp;
+            if (fp != null) _placedFourthBuilding = Instantiate(fp, sp, sr);
+            _cameraControl?.FocusOnPoint(sp, sr * Vector3.forward, 6f);
             return;
+        }
 
         Vector3 worldPos = chosenEnv.transform.position;
         Vector3 envForward = chosenEnv.transform.forward;
@@ -2884,6 +2948,30 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         return candidates.Count > 0 ? candidates[Random.Range(0, candidates.Count)] : null;
+    }
+
+    private bool TryStealBuildingSlotOfSize(TileSize requiredSize, out Vector3 worldPos, out Quaternion rotation)
+    {
+        worldPos = Vector3.zero;
+        rotation = Quaternion.identity;
+
+        if (BuildingManager.Instance == null)
+            return false;
+
+        var allBuildings = FindObjectsByType<BuildingControl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        for (int i = 0; i < allBuildings.Length; i++)
+        {
+            var bc = allBuildings[i];
+            if (bc == null) continue;
+            var def = BuildingManager.Instance.GetBuildingByID(bc.buildingID);
+            if (def == null || def.requiredTileSize != requiredSize) continue;
+
+            worldPos = bc.transform.position;
+            rotation = bc.transform.rotation;
+            Destroy(bc.transform.root.gameObject);
+            return true;
+        }
+        return false;
     }
 
     private void OnTurnCompletedForFastForward()
@@ -3143,8 +3231,8 @@ public class TutorialSetupInstaller : MonoBehaviour
         _mapGenerator.enabled = true;
         _mapTilePlacer.enabled = true;
 
-        if (tutorialMapPreset != null && EnvironmentPresetManager.Instance != null)
-            EnvironmentPresetManager.Instance.ApplyPreset(tutorialMapPreset.presetID);
+        if (tutorialMapPresetID >= 0 && EnvironmentPresetManager.Instance != null)
+            EnvironmentPresetManager.Instance.ApplyPreset(tutorialMapPresetID);
 
         yield return StartCoroutine(_mapGenerator.RegenerateCoroutine());
 
@@ -3221,8 +3309,8 @@ public class TutorialSetupInstaller : MonoBehaviour
         _mapGenerator.enabled = true;
         _mapTilePlacer.enabled = true;
 
-        if (tutorialMapPreset != null && EnvironmentPresetManager.Instance != null)
-            EnvironmentPresetManager.Instance.ApplyPreset(tutorialMapPreset.presetID);
+        if (tutorialMapPresetID >= 0 && EnvironmentPresetManager.Instance != null)
+            EnvironmentPresetManager.Instance.ApplyPreset(tutorialMapPresetID);
 
         yield return StartCoroutine(_mapGenerator.RegenerateCoroutine());
 
@@ -3293,7 +3381,16 @@ public class TutorialSetupInstaller : MonoBehaviour
         }
 
         if (chosenDef == null || chosenEnv == null)
+        {
+            Building steal = primaryDef ?? alternateDef;
+            if (steal == null) return;
+            GameObject fp = steal.finalBuildingPrefab != null ? steal.finalBuildingPrefab : steal.buildingPrefab;
+            if (!TryStealBuildingSlotOfSize(steal.requiredTileSize, out Vector3 sp, out Quaternion sr)) return;
+            _placedSeventhBuildingWorldPos = sp;
+            if (fp != null) _placedSeventhBuilding = Instantiate(fp, sp, sr);
+            _cameraControl?.FocusOnPoint(sp, sr * Vector3.forward, 6f);
             return;
+        }
 
         Vector3 worldPos = chosenEnv.transform.position;
         Vector3 envForward = chosenEnv.transform.forward;
@@ -3780,9 +3877,24 @@ public class TutorialSetupInstaller : MonoBehaviour
 
         if (animalTileGrid == null)
         {
-            _moveToAnimalTileRoutine = null;
-            ShowPart(_currentPart + 1);
-            yield break;
+            var currentPreset = EnvironmentPresetManager.Instance?.GetCurrentPreset();
+            var animalList = currentPreset?.animalsForThisPreset;
+            AnimalDefinition fallbackSpecies = null;
+            if (animalList != null)
+                for (int i = 0; i < animalList.Count; i++)
+                    if (animalList[i] != null) { fallbackSpecies = animalList[i]; break; }
+
+            if (fallbackSpecies != null && sim != null)
+            {
+                sim.SpawnGroup(fallbackSpecies, new TileCoord(startGrid.x, startGrid.y), 1);
+                animalTileGrid = startGrid;
+            }
+            else
+            {
+                _moveToAnimalTileRoutine = null;
+                ShowPart(_currentPart + 1);
+                yield break;
+            }
         }
 
         // Reconstruct path from start to target (excluding start)
@@ -3797,6 +3909,7 @@ public class TutorialSetupInstaller : MonoBehaviour
 
         if (path.Count == 0)
         {
+            // Animal spawned on the group's current tile — no movement needed
             _moveToAnimalTileRoutine = null;
             ShowPart(_currentPart + 1);
             yield break;
@@ -3812,7 +3925,7 @@ public class TutorialSetupInstaller : MonoBehaviour
 
         // Focus camera on the destination
         if (_cameraControl != null && gridToTile.TryGetValue(animalTileGrid.Value, out var targetTile))
-            _cameraControl.FocusOnPoint(targetTile.transform.position, targetTile.transform.forward, 6f);
+            _cameraControl.FocusOnPoint(targetTile.transform.position, targetTile.transform.forward, 12f);
 
         // Fast-forward the movement step by step
         int safety = 0;
