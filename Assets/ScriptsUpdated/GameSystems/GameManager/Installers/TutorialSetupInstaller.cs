@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual, SelectSummoningSpirit, RegenerateMapClearBuildings, SeventhBuildingPlacement, SelectSeventhBuilding, OpenKineticWarfarePanel, ClickOrderButton, IncreaseOrderMultiplier, TrainUnits, ClickToggleViewButton, FastForwardAnimalSimulation, SelectUnitGroupMarker, ClickMoveButton, ClickMoveModeButton, FinishMovement, FastForwardMovement, MoveGroupToAnimalTile, SelectUnitGroupMarkerForCombat, ClickActionButton, SelectMeleeAction, SelectMeleeTarget }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual, SelectSummoningSpirit, RegenerateMapClearBuildings, SeventhBuildingPlacement, SelectSeventhBuilding, OpenKineticWarfarePanel, ClickOrderButton, IncreaseOrderMultiplier, TrainUnits, ClickToggleViewButton, FastForwardAnimalSimulation, SelectUnitGroupMarker, ClickMoveButton, ClickMoveModeButton, FinishMovement, FastForwardMovement, MoveGroupToAnimalTile, SelectUnitGroupMarkerForCombat, ClickActionButton, SelectMeleeAction, SelectMeleeTarget, AnimalEscapeToNewTile, AnimalReturnToOriginalTile, SelectUnitGroupMarkerForSplit, OpenSplitPanel }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -155,10 +155,16 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForActionPanelOpen;
     private bool _waitingForMeleeActionSelected;
     private bool _waitingForMeleeTarget;
+    private bool _waitingForUnitGroupSplitMarkerSelect;
+    private bool _waitingForSplitPanelOpen;
+    private Coroutine _animalReturnRoutine;
     private TileUnitGroupData _trackedMovingGroup;
     private TileUnitGroupControl _trackedMovingOwner;
     private Coroutine _fastForwardMovementRoutine;
     private Coroutine _moveToAnimalTileRoutine;
+    private Coroutine _animalEscapeRoutine;
+    private int _escapedAnimalGroupId = -1;
+    private TileCoord _animalOriginalTile;
 
     private ReligiousBuildingPanelControl _religiousPanel;
     private bool _waitingForReligiousPanelOpen;
@@ -2321,6 +2327,76 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.AnimalEscapeToNewTile:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                int animalId = _trackedMovingGroup != null ? _trackedMovingGroup.activeMeleeTargetAnimalId : -1;
+                if (animalId >= 0)
+                {
+                    if (_animalEscapeRoutine != null) StopCoroutine(_animalEscapeRoutine);
+                    _animalEscapeRoutine = StartCoroutine(AnimalEscapeToNewTileCoroutine(animalId));
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.AnimalReturnToOriginalTile:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(
+                        restrictInput: true,
+                        allowWorldDrag: false,
+                        allowZoom: false,
+                        allowMinimapRotation: false);
+                if (_escapedAnimalGroupId >= 0)
+                {
+                    if (_animalReturnRoutine != null) StopCoroutine(_animalReturnRoutine);
+                    _animalReturnRoutine = StartCoroutine(AnimalReturnToOriginalTileCoroutine());
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.SelectUnitGroupMarkerForSplit:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(false, false, false, false);
+
+                if (_unitGroupPanel == null)
+                    _unitGroupPanel = FindFirstObjectByType<UnitGroupPanelControl>(FindObjectsInactive.Include);
+
+                if (_unitGroupPanel != null)
+                {
+                    _unitGroupPanel.OnOpen += OnUnitGroupPanelOpenedForSplit;
+                    _waitingForUnitGroupSplitMarkerSelect = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.OpenSplitPanel:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(false, false, false, false);
+                UnitGroupPanelControl.OnSplitPanelOpened += OnSplitPanelOpenedForTutorial;
+                _waitingForSplitPanelOpen = true;
+                break;
+            }
+
             case PartType.OpenStoragePanel:
             {
                 if (_storagePanel == null)
@@ -3993,6 +4069,56 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private IEnumerator AnimalEscapeToNewTileCoroutine(int animalGroupId)
+    {
+        var sim = AnimalSimulationAccess.Current;
+        if (sim == null || !sim.TryGetGroup(animalGroupId, out var animalGroup))
+        {
+            _animalEscapeRoutine = null;
+            ShowPart(_currentPart + 1);
+            yield break;
+        }
+
+        TileCoord currentTile = animalGroup.tile;
+        _animalOriginalTile = currentTile;
+        _escapedAnimalGroupId = animalGroupId;
+
+        // Find an adjacent cardinal tile that exists on the map
+        var cardinalOffsets = new (int dx, int dy)[] { (1,0), (-1,0), (0,1), (0,-1) };
+        var allTiles = FindObjectsByType<TileControl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        var gridToTile = new System.Collections.Generic.Dictionary<Vector2Int, TileControl>(allTiles.Length);
+        foreach (var t in allTiles)
+        {
+            if (t == null) continue;
+            var gp = t.GetGridPosition();
+            if (!gridToTile.ContainsKey(gp)) gridToTile[gp] = t;
+        }
+
+        TileCoord escapeTile = currentTile;
+        foreach (var (dx, dy) in cardinalOffsets)
+        {
+            var candidateGrid = new Vector2Int(currentTile.x + dx, currentTile.y + dy);
+            if (gridToTile.ContainsKey(candidateGrid))
+            {
+                escapeTile = new TileCoord(candidateGrid.x, candidateGrid.y);
+                break;
+            }
+        }
+
+        if (!escapeTile.Equals(currentTile))
+        {
+            sim.TryMoveGroupToTile(animalGroupId, escapeTile);
+
+            if (_cameraControl != null && gridToTile.TryGetValue(new Vector2Int(escapeTile.x, escapeTile.y), out var escapeTileCtrl))
+                _cameraControl.FocusOnPoint(escapeTileCtrl.transform.position, escapeTileCtrl.transform.forward, 12f);
+        }
+
+        yield return null;
+
+        _animalEscapeRoutine = null;
+        ShowPart(_currentPart + 1);
+    }
+
     private void OnUnitGroupPanelOpenedFromMarker()
     {
         if (!_waitingForUnitGroupMarkerSelect) return;
@@ -4025,6 +4151,49 @@ public class TutorialSetupInstaller : MonoBehaviour
         UnitGroupMovementManager.OnMovementRouteConfirmed -= OnMovementRouteConfirmed;
         _trackedMovingGroup = group;
         _trackedMovingOwner = owner;
+        ShowPart(_currentPart + 1);
+    }
+
+    private IEnumerator AnimalReturnToOriginalTileCoroutine()
+    {
+        var sim = AnimalSimulationAccess.Current;
+        if (sim != null && _escapedAnimalGroupId >= 0)
+        {
+            sim.TryMoveGroupToTile(_escapedAnimalGroupId, _animalOriginalTile);
+
+            var allTiles = FindObjectsByType<TileControl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (var t in allTiles)
+            {
+                if (t == null) continue;
+                var gp = t.GetGridPosition();
+                if (gp.x == _animalOriginalTile.x && gp.y == _animalOriginalTile.y)
+                {
+                    _cameraControl?.FocusOnPoint(t.transform.position, t.transform.forward, 12f);
+                    break;
+                }
+            }
+        }
+
+        yield return null;
+
+        _animalReturnRoutine = null;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnUnitGroupPanelOpenedForSplit()
+    {
+        if (!_waitingForUnitGroupSplitMarkerSelect) return;
+        _waitingForUnitGroupSplitMarkerSelect = false;
+        if (_unitGroupPanel != null)
+            _unitGroupPanel.OnOpen -= OnUnitGroupPanelOpenedForSplit;
+        ShowPart(_currentPart + 1);
+    }
+
+    private void OnSplitPanelOpenedForTutorial()
+    {
+        if (!_waitingForSplitPanelOpen) return;
+        _waitingForSplitPanelOpen = false;
+        UnitGroupPanelControl.OnSplitPanelOpened -= OnSplitPanelOpenedForTutorial;
         ShowPart(_currentPart + 1);
     }
 
@@ -5003,6 +5172,30 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             StopCoroutine(_moveToAnimalTileRoutine);
             _moveToAnimalTileRoutine = null;
+        }
+
+        if (_animalEscapeRoutine != null)
+        {
+            StopCoroutine(_animalEscapeRoutine);
+            _animalEscapeRoutine = null;
+        }
+
+        if (_animalReturnRoutine != null)
+        {
+            StopCoroutine(_animalReturnRoutine);
+            _animalReturnRoutine = null;
+        }
+
+        if (_waitingForUnitGroupSplitMarkerSelect && _unitGroupPanel != null)
+        {
+            _unitGroupPanel.OnOpen -= OnUnitGroupPanelOpenedForSplit;
+            _waitingForUnitGroupSplitMarkerSelect = false;
+        }
+
+        if (_waitingForSplitPanelOpen)
+        {
+            UnitGroupPanelControl.OnSplitPanelOpened -= OnSplitPanelOpenedForTutorial;
+            _waitingForSplitPanelOpen = false;
         }
 
         if (_waitingForUnitGroupCombatMarkerSelect && _unitGroupPanel != null)

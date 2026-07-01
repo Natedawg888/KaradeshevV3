@@ -2,6 +2,8 @@ using UnityEngine;
 
 public partial class UnitGroupPanelControl
 {
+    public static event System.Action OnSplitPanelOpened;
+
     private void SetupSplitUI()
     {
         if (splitButton != null)
@@ -53,6 +55,7 @@ public partial class UnitGroupPanelControl
         if (splitPanelRoot != null)
             splitPanelRoot.SetActive(true);
 
+        OnSplitPanelOpened?.Invoke();
         RefreshSplitPanelUI();
     }
 

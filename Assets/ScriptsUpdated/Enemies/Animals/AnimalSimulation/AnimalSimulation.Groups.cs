@@ -254,6 +254,18 @@ public partial class AnimalSimulation
     public bool TryGetGroup(int id, out AnimalGroupState group)
         => _groups.TryGetValue(id, out group);
 
+    public bool TryMoveGroupToTile(int groupId, TileCoord newTile)
+    {
+        if (!_groups.TryGetValue(groupId, out var group))
+            return false;
+
+        TileCoord oldTile = group.tile;
+        group.tile = newTile;
+        _groups[groupId] = group;
+        MoveGroupInTileIndex(groupId, oldTile, newTile);
+        return true;
+    }
+
     public HuntResult PlayerHuntGroup(int groupId, int huntersPower)
     {
         if (!_groups.TryGetValue(groupId, out var group))
