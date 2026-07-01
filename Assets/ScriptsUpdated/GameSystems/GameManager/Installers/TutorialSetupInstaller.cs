@@ -4055,7 +4055,7 @@ public class TutorialSetupInstaller : MonoBehaviour
             owner = FindOwnerForGroup(group) ?? owner;
             group.remainingTurnCostOnCurrentStep = 1f;
             mgr.ProcessMovementTickForGroup(group, owner);
-            yield return null;
+            yield return new WaitForSeconds(1f);
         }
 
         _fastForwardMovementRoutine = null;
@@ -4292,13 +4292,26 @@ public class TutorialSetupInstaller : MonoBehaviour
             sim.TryMoveGroupToTile(animalGroupId, escapeTile);
 
             if (_cameraControl != null && gridToTile.TryGetValue(new Vector2Int(escapeTile.x, escapeTile.y), out var escapeTileCtrl))
-                _cameraControl.FocusOnPoint(escapeTileCtrl.transform.position, escapeTileCtrl.transform.forward, 12f);
+            {
+                gridToTile.TryGetValue(new Vector2Int(currentTile.x, currentTile.y), out var unitTileCtrl);
+                Vector3 animalPos = escapeTileCtrl.transform.position;
+                Vector3 unitPos   = unitTileCtrl != null ? unitTileCtrl.transform.position : animalPos;
+                Vector3 dir       = animalPos - unitPos;
+                Vector3 forward   = dir.sqrMagnitude > 0.001f ? dir.normalized : escapeTileCtrl.transform.forward;
+                _cameraControl.FocusOnPoint(animalPos, forward, 12f);
+            }
         }
 
         yield return null;
 
         _animalEscapeRoutine = null;
-        ShowPart(_currentPart + 1);
+        _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+        if (_activeNextButton != null)
+        {
+            _activeNextButton.gameObject.SetActive(true);
+            _activeNextButton.interactable = true;
+            _activeNextButton.onClick.AddListener(OnNextPressed);
+        }
     }
 
     private void OnUnitGroupPanelOpenedFromMarker()
@@ -4341,25 +4354,43 @@ public class TutorialSetupInstaller : MonoBehaviour
         var sim = AnimalSimulationAccess.Current;
         if (sim != null && _escapedAnimalGroupId >= 0)
         {
+            // Capture escape tile before moving the animal back
+            TileCoord escapedTile = sim.TryGetGroup(_escapedAnimalGroupId, out var grp) ? grp.tile : _animalOriginalTile;
+
             sim.TryMoveGroupToTile(_escapedAnimalGroupId, _animalOriginalTile);
 
             var allTiles = FindObjectsByType<TileControl>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            TileControl originalTileCtrl = null;
+            TileControl escapedTileCtrl  = null;
             foreach (var t in allTiles)
             {
                 if (t == null) continue;
                 var gp = t.GetGridPosition();
-                if (gp.x == _animalOriginalTile.x && gp.y == _animalOriginalTile.y)
-                {
-                    _cameraControl?.FocusOnPoint(t.transform.position, t.transform.forward, 12f);
-                    break;
-                }
+                if (gp.x == _animalOriginalTile.x && gp.y == _animalOriginalTile.y) originalTileCtrl = t;
+                if (gp.x == escapedTile.x          && gp.y == escapedTile.y)         escapedTileCtrl  = t;
+                if (originalTileCtrl != null && escapedTileCtrl != null) break;
+            }
+
+            if (_cameraControl != null && originalTileCtrl != null)
+            {
+                Vector3 targetPos  = originalTileCtrl.transform.position;
+                Vector3 sourcePos  = escapedTileCtrl != null ? escapedTileCtrl.transform.position : targetPos;
+                Vector3 dir        = targetPos - sourcePos;
+                Vector3 forward    = dir.sqrMagnitude > 0.001f ? dir.normalized : originalTileCtrl.transform.forward;
+                _cameraControl.FocusOnPoint(targetPos, forward, 12f);
             }
         }
 
         yield return null;
 
         _animalReturnRoutine = null;
-        ShowPart(_currentPart + 1);
+        _activeNextButton = FindNextButton(tutorialParts[_currentPart]);
+        if (_activeNextButton != null)
+        {
+            _activeNextButton.gameObject.SetActive(true);
+            _activeNextButton.interactable = true;
+            _activeNextButton.onClick.AddListener(OnNextPressed);
+        }
     }
 
     private void OnUnitGroupPanelOpenedForSplit()
@@ -4384,6 +4415,7 @@ public class TutorialSetupInstaller : MonoBehaviour
         if (!_waitingForSplitConfirm) return;
         _waitingForSplitConfirm = false;
         UnitGroupPanelControl.OnSplitConfirmed -= OnSplitConfirmedForTutorial;
+        _unitGroupPanel?.ForceClose();
         ShowPart(_currentPart + 1);
     }
 

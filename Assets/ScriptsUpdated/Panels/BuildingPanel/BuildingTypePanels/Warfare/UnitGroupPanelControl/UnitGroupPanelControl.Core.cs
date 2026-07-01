@@ -105,6 +105,13 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
     public TileUnitGroupData ActiveGroup => _group;
 
+    public void ForceClose()
+    {
+        if (splitPanelRoot != null) splitPanelRoot.SetActive(false);
+        if (root != null) root.SetActive(false);
+        OnClose?.Invoke();
+    }
+
     private int    _initialRemainingServiceTurns = -1;
     private string _currentGroupId = null;
 
