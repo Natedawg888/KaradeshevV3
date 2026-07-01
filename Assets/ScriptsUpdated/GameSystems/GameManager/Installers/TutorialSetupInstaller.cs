@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TutorialSetupInstaller : MonoBehaviour
 {
-    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual, SelectSummoningSpirit, RegenerateMapClearBuildings, SeventhBuildingPlacement, SelectSeventhBuilding, OpenKineticWarfarePanel, ClickOrderButton, IncreaseOrderMultiplier, TrainUnits, ClickToggleViewButton, FastForwardAnimalSimulation, SelectUnitGroupMarker, ClickMoveButton, ClickMoveModeButton, FinishMovement, FastForwardMovement, MoveGroupToAnimalTile, SelectUnitGroupMarkerForCombat, ClickActionButton, SelectMeleeAction, SelectMeleeTarget, AnimalEscapeToNewTile, AnimalReturnToOriginalTile, SelectUnitGroupMarkerForSplit, OpenSplitPanel, ScriptedSetSplitCount, ConfirmSplitGroup, SelectUnitGroupMarkerForSurround, ClickActionButtonForSurround, SelectSurroundAction, SelectSurroundTarget }
+    public enum PartType { Static, CameraDrag, CameraZoom, MinimapRotate, ShelterPlacement, HighlightAdjacent, OpenUndiscoveredTile, OpenDiscoveryDetails, CloseDiscoveryDetails, ClickDiscoverButton, ResumeOrSpeedUp, FastForwardDiscovery, TriggerConsumption, WaitForConsumptionDismiss, OpenInventoryPanel, CloseInventoryPanel, RemoveSpoiledFood, SelectDiscoveredTile, ClickSurveyButton, OpenSurveyPanel, CloseSurveyPanel, ClickGatherButton, OpenCollectedGoodsPanel, CloseCollectedGoodsPanel, ClickBuildButton, SelectBuildingItem, RegenerateMapDiscovered, SelectTinyGrasslandOrSavanna, OpenBuildingCostPanel, CloseBuildingCostPanel, ClickCatalogBuildButton, ShowCostSwitchButtons, ConfirmBuildingPlacement, SelectPlacedBuilding, OpenShelterPanel, CloseShelterPanel, CloseBuildingPanel, DamageBuilding, SelectDamagedBuilding, OpenRepairPanel, ClickFullRepairButton, ClickRepairButton, CloseRepairAndDamagedPanels, FastForwardRepair, OpenResearchPanel, OpenResearchNeedsPanel, CloseResearchNeedsPanel, CloseResearchPanel, OpenLevelInfoPanel, CloseLevelInfoPanel, SecondBuildingPlacement, SelectSecondBuilding, OpenStoragePanel, CloseStoragePanel, ThirdBuildingPlacement, SelectThirdBuilding, ClickSwitchBuildingType, OpenCraftingPanel, OpenCraftingCostPanel, ClickCraftingOutputView, CloseCraftingPanel, FourthBuildingPlacement, SelectFourthBuilding, OpenProductionPanel, StartProductionPlan, SelectProductionTargets, OpenProductionRunningPanel, CloseProductionRunningPanel, FifthBuildingPlacement, SelectFifthBuilding, OpenTradePanel, SelectTraderEntry, OpenTraderOffering, OfferResources, FinishTrade, CloseTraderPanel, CloseTradePanel, SixthBuildingPlacement, SelectSixthBuilding, OpenReligiousPanel, OpenRitualPanel, StartInitialSummoningRitual, FastForwardRitual, SelectSummoningSpirit, RegenerateMapClearBuildings, SeventhBuildingPlacement, SelectSeventhBuilding, OpenKineticWarfarePanel, ClickOrderButton, IncreaseOrderMultiplier, TrainUnits, ClickToggleViewButton, FastForwardAnimalSimulation, SelectUnitGroupMarker, ClickMoveButton, ClickMoveModeButton, FinishMovement, FastForwardMovement, MoveGroupToAnimalTile, SelectUnitGroupMarkerForCombat, ClickActionButton, SelectMeleeAction, SelectMeleeTarget, AnimalEscapeToNewTile, AnimalReturnToOriginalTile, SelectUnitGroupMarkerForSplit, OpenSplitPanel, ScriptedSetSplitCount, ConfirmSplitGroup, SelectUnitGroupMarkerForSurround, ClickActionButtonForSurround, SelectSurroundAction, SelectSurroundTarget, SelectOtherUnitGroupMarker, ClickActionButtonForOtherGroup, SelectMeleeActionForOtherGroup, SelectMeleeTargetForOtherGroup }
 
     [Header("Tutorial Parts (shown in order)")]
     [SerializeField] private GameObject[] tutorialParts;
@@ -161,6 +161,7 @@ public class TutorialSetupInstaller : MonoBehaviour
     private bool _waitingForUnitGroupSurroundMarkerSelect;
     private bool _waitingForSurroundActionSelected;
     private bool _waitingForSurroundTarget;
+    private bool _waitingForOtherUnitGroupMarkerSelect;
     private Coroutine _animalReturnRoutine;
     private TileUnitGroupData _trackedMovingGroup;
     private TileUnitGroupControl _trackedMovingOwner;
@@ -2467,6 +2468,53 @@ public class TutorialSetupInstaller : MonoBehaviour
                 break;
             }
 
+            case PartType.SelectOtherUnitGroupMarker:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(false, false, false, false);
+
+                if (_unitGroupPanel == null)
+                    _unitGroupPanel = FindFirstObjectByType<UnitGroupPanelControl>(FindObjectsInactive.Include);
+
+                if (_unitGroupPanel != null)
+                {
+                    _unitGroupPanel.OnOpen += OnOtherUnitGroupPanelOpened;
+                    _waitingForOtherUnitGroupMarkerSelect = true;
+                }
+                else
+                {
+                    ShowPart(_currentPart + 1);
+                }
+                break;
+            }
+
+            case PartType.ClickActionButtonForOtherGroup:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(false, false, false, false);
+                UnitGroupPanelControl.OnActionPanelOpened += OnActionPanelOpenedForTutorial;
+                _waitingForActionPanelOpen = true;
+                break;
+            }
+
+            case PartType.SelectMeleeActionForOtherGroup:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(false, false, false, false);
+                UnitGroupPanelControl.OnMeleeActionModeStarted += OnMeleeActionModeStartedForTutorial;
+                _waitingForMeleeActionSelected = true;
+                break;
+            }
+
+            case PartType.SelectMeleeTargetForOtherGroup:
+            {
+                if (_cameraControl != null)
+                    _cameraControl.SetTutorialInputRestrictions(false, false, false, false);
+                UnitGroupPanelControl.OnMeleeTargetConfirmed += OnMeleeTargetConfirmedForTutorial;
+                _waitingForMeleeTarget = true;
+                break;
+            }
+
             case PartType.OpenStoragePanel:
             {
                 if (_storagePanel == null)
@@ -4300,6 +4348,19 @@ public class TutorialSetupInstaller : MonoBehaviour
         ShowPart(_currentPart + 1);
     }
 
+    private void OnOtherUnitGroupPanelOpened()
+    {
+        if (!_waitingForOtherUnitGroupMarkerSelect) return;
+        // Ignore if the player opened the group that is already doing the surround action
+        if (_unitGroupPanel != null && _trackedMovingGroup != null &&
+            _unitGroupPanel.ActiveGroup == _trackedMovingGroup)
+            return;
+        _waitingForOtherUnitGroupMarkerSelect = false;
+        if (_unitGroupPanel != null)
+            _unitGroupPanel.OnOpen -= OnOtherUnitGroupPanelOpened;
+        ShowPart(_currentPart + 1);
+    }
+
     private void OnUnitGroupPanelOpenedForCombat()
     {
         if (!_waitingForUnitGroupCombatMarkerSelect) return;
@@ -5323,6 +5384,12 @@ public class TutorialSetupInstaller : MonoBehaviour
         {
             UnitGroupPanelControl.OnSurroundTargetConfirmed -= OnSurroundTargetConfirmedForTutorial;
             _waitingForSurroundTarget = false;
+        }
+
+        if (_waitingForOtherUnitGroupMarkerSelect && _unitGroupPanel != null)
+        {
+            _unitGroupPanel.OnOpen -= OnOtherUnitGroupPanelOpened;
+            _waitingForOtherUnitGroupMarkerSelect = false;
         }
 
         if (_waitingForUnitGroupCombatMarkerSelect && _unitGroupPanel != null)

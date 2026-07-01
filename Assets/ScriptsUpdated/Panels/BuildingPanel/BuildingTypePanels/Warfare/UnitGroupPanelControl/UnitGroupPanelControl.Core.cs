@@ -103,6 +103,8 @@ public partial class UnitGroupPanelControl : MonoBehaviour
     public event Action OnOpen;
     public event Action OnClose;
 
+    public TileUnitGroupData ActiveGroup => _group;
+
     private int    _initialRemainingServiceTurns = -1;
     private string _currentGroupId = null;
 
@@ -670,10 +672,18 @@ public partial class UnitGroupPanelControl : MonoBehaviour
     private void OnEnable()
     {
         UnitGroupActionManager.GroupActionStateChanged += OnExternalGroupActionStateChanged;
+        TileUnitGroupControl.OnAnyUnitGroupChanged += OnAnyUnitGroupChanged;
     }
 
     private void OnDisable()
     {
         UnitGroupActionManager.GroupActionStateChanged -= OnExternalGroupActionStateChanged;
+        TileUnitGroupControl.OnAnyUnitGroupChanged -= OnAnyUnitGroupChanged;
+    }
+
+    private void OnAnyUnitGroupChanged()
+    {
+        if (_group != null)
+            Refresh();
     }
 }
