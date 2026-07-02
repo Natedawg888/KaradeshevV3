@@ -151,10 +151,9 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         if (targetTile == null || _group == null)
             return results;
 
+        // Units still require a friendly melee engager on the tile
         HashSet<string> targetedUnitIds = new HashSet<string>();
-        HashSet<int> targetedAnimalIds = new HashSet<int>();
-
-        CollectFriendlyActiveMeleeTargetsOnTile(targetTile, targetedUnitIds, targetedAnimalIds);
+        CollectFriendlyActiveMeleeTargetsOnTile(targetTile, targetedUnitIds, null);
 
         foreach (string unitId in targetedUnitIds)
         {
@@ -162,10 +161,23 @@ public partial class UnitGroupPanelControl : MonoBehaviour
                 results.Add(entry);
         }
 
-        foreach (int animalId in targetedAnimalIds)
+        // Any alive animal on the tile can be surrounded
+        var sim = AnimalSimulationAccess.Current;
+        if (sim != null)
         {
-            if (TryBuildAnimalEntryById(targetTile, animalId, out var entry))
-                results.Add(entry);
+            Vector2Int grid = targetTile.GetGridPosition();
+            TileCoord coord = new TileCoord { x = grid.x, y = grid.y };
+
+            _animalBuf.Clear();
+            sim.CollectGroupsOnTile(coord, _animalBuf);
+
+            for (int i = 0; i < _animalBuf.Count; i++)
+            {
+                var ag = _animalBuf[i];
+                if (ag == null || !ag.isAlive || ag.species == null) continue;
+
+                results.Add(BuildAnimalTargetEntry(ag));
+            }
         }
 
         return results;

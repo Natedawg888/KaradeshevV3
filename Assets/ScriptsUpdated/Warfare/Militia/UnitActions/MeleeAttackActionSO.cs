@@ -4,6 +4,7 @@ using System.Collections.Generic;
 [CreateAssetMenu(menuName = "Kardashev/Unit Actions/Melee Attack", fileName = "MeleeAttackAction")]
 public class MeleeAttackActionSO : UnitActionDefinitionSO, IPerTurnUnitAction
 {
+    public static bool TutorialPreventAnimalFlee = false;
     [Header("Targets")]
     public bool canTargetAnimals = true;
     public bool canTargetUnitGroups = true;
@@ -406,6 +407,7 @@ public class MeleeAttackActionSO : UnitActionDefinitionSO, IPerTurnUnitAction
         fleeSuccessChance = Mathf.Clamp01(fleeSuccessChance * (1f - surround.escapeSuccessReduction));
 
         bool flees =
+            !TutorialPreventAnimalFlee &&
             Random.value < fleeAttemptChance &&
             Random.value < fleeSuccessChance;
 

@@ -176,4 +176,27 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         RebuildLootList();
     }
+
+    public void OpenTutorialLootPanel()
+    {
+        OpenLootPanel();
+    }
+
+    public void TakeAllTutorialLoot()
+    {
+        if (_group == null || !_group.HasPendingLoot) return;
+
+        var toTake = new System.Collections.Generic.List<(ResourceDefinition res, int amount)>();
+        for (int i = 0; i < _group.pendingLoot.Count; i++)
+        {
+            var stack = _group.pendingLoot[i];
+            if (stack.resource != null && stack.amount > 0)
+                toTake.Add((stack.resource, stack.amount));
+        }
+
+        foreach (var (res, amt) in toTake)
+            TryTakeLoot(res, amt);
+
+        CloseLootPanel(discardLeftovers: true);
+    }
 }
