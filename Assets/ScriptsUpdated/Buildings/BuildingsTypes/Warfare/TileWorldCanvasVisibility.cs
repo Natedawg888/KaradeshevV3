@@ -57,6 +57,9 @@ public class TileWorldCanvasVisibility : MonoBehaviour
             }
         }
 
+        if (hasAny)
+            worldCanvas.gameObject.SetActive(true);
+
         worldCanvas.enabled = hasAny;
     }
 }

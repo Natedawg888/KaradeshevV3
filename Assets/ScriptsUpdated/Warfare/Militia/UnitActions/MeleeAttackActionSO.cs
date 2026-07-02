@@ -151,7 +151,9 @@ public class MeleeAttackActionSO : UnitActionDefinitionSO, IPerTurnUnitAction
             if (!targetStillInRange)
             {
                 attacker.meleeTargetFledLastTick = true;
+                int fleedAnimalId = attacker.activeMeleeTargetAnimalId;
                 UnitGroupActionManager.Instance?.CancelAnimalMeleeTarget(attacker);
+                UnitGroupActionManager.Instance?.CancelAllMeleeActionsTargetingAnimal(fleedAnimalId);
                 return true;
             }
 
@@ -432,6 +434,7 @@ public class MeleeAttackActionSO : UnitActionDefinitionSO, IPerTurnUnitAction
                 attacker.meleeTargetFledLastTick = true;
 
             UnitGroupActionManager.Instance?.CancelAnimalMeleeTarget(attacker);
+            UnitGroupActionManager.Instance?.CancelAllMeleeActionsTargetingAnimal(targetAnimalId);
             return true;
         }
 

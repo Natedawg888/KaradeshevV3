@@ -242,14 +242,16 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         _kineticPanel   = kineticPanel;
         _buildingPanel  = buildingPanel;
 
-        // ✅ Close tracking results UI whenever the unit panel opens
+        // Close any open sub-panels so stale callbacks from a previous group can't fire
+        if (meleeTargetsPanelRoot != null)
+            meleeTargetsPanelRoot.SetActive(false);
+
         if (trackingResultsPanelRoot != null)
             trackingResultsPanelRoot.SetActive(false);
 
         if (inCombatPanelRoot != null)
             inCombatPanelRoot.SetActive(false);
 
-        // (optional but nice: also close action list if it was open)
         if (actionPanelRoot != null)
             actionPanelRoot.SetActive(false);
 

@@ -36,6 +36,8 @@ public partial class UnitGroupPanelControl : MonoBehaviour
         UpdatePatrolButtonInteractable();
     }
 
+    public static event System.Action OnMovePanelOpened;
+
     private void OnMoveOpenClicked()
     {
         if (_group == null || _owner == null)
@@ -49,6 +51,7 @@ public partial class UnitGroupPanelControl : MonoBehaviour
 
         // Whenever we show the Move/Patrol panel, update patrol availability.
         UpdatePatrolButtonInteractable();
+        OnMovePanelOpened?.Invoke();
     }
 
     private void OnMoveCancelClicked()

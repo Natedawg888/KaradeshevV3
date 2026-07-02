@@ -173,6 +173,8 @@ public class TileUnitGroupControl : MonoBehaviour
         if (!_groups.Contains(group))
             _groups.Add(group);
 
+        OnAnyUnitGroupChanged?.Invoke();
+
         PlayerUnitManager.Instance?.RegisterGroup(group, this);
         SpawnMarker(group);
         RefreshUnitsOnlyEmptyCanvasState();

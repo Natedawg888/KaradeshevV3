@@ -113,6 +113,34 @@ public partial class UnitGroupActionManager
         ClearActiveAction(group);
     }
 
+    public void CancelAllMeleeActionsTargetingAnimal(int animalGroupId)
+    {
+        if (animalGroupId < 0)
+            return;
+
+        var pum = PlayerUnitManager.Instance;
+        if (pum == null)
+            return;
+
+        _groupInfoBuffer.Clear();
+        pum.GetAllGroups(_groupInfoBuffer);
+
+        for (int i = 0; i < _groupInfoBuffer.Count; i++)
+        {
+            var g = _groupInfoBuffer[i].data;
+            if (g == null) continue;
+            if (!(g.activeAction is MeleeAttackActionSO)) continue;
+            if (g.activeMeleeTargetType != MeleeTargetType.Animal) continue;
+            if (g.activeMeleeTargetAnimalId != animalGroupId) continue;
+            if (g.remainingActionTurns <= 0) continue;
+
+            var owner = _groupInfoBuffer[i].owner;
+            ClearActiveAction(g);
+            owner?.RefreshMarker(g);
+            RaiseGroupActionStateChanged(g);
+        }
+    }
+
     public void ClearTrackedSurroundTargetMarker(TileUnitGroupData group)
     {
         if (group == null)

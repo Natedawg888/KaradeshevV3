@@ -47,6 +47,9 @@ public class UnitGroupMovementManager : MonoBehaviour
     private static readonly List<UnitGroupMarker> s_markersCache = new();
     private static bool s_markersCacheDirty = true;
 
+    public static event System.Action OnMovementPlanningBegan;
+    public static event System.Action<TileUnitGroupData, TileUnitGroupControl> OnMovementRouteConfirmed;
+
     // Call when unit groups are added or removed from the scene
     public static void InvalidateUnitCaches()
     {
@@ -177,6 +180,7 @@ public class UnitGroupMovementManager : MonoBehaviour
         //Debug.Log($"[UnitGroupMovementManager] Starting movement planning for group {group.groupId} with {maxSteps} steps.");
 
         ShowStepOptions();
+        OnMovementPlanningBegan?.Invoke();
     }
 
     public void BeginPatrolForGroup(TileUnitGroupData group, TileUnitGroupControl owner)
@@ -473,6 +477,7 @@ public class UnitGroupMovementManager : MonoBehaviour
             //$"{group.plannedPathGridPositions.Count} steps, first step cost = {group.remainingTurnCostOnCurrentStep:0.0} turns.");
 
         NotifyGroupMovementUpdated(group);
+        OnMovementRouteConfirmed?.Invoke(group, ctx.owner);
     }
 
     private void BuildPatrolRouteFromContext(MovementContext ctx)
@@ -1122,5 +1127,18 @@ public class UnitGroupMovementManager : MonoBehaviour
         endMovementButton.onClick.RemoveAllListeners();
         endMovementButton.onClick.AddListener(OnConfirmMovementClicked);
         endMovementButton.gameObject.SetActive(false);
+    }
+
+    public void ProcessMovementTickForGroup(TileUnitGroupData group, TileUnitGroupControl owner)
+    {
+        ProcessGroupMovementForTurn(group, owner);
+    }
+
+    public bool GroupHasRoute(TileUnitGroupData g)
+    {
+        return g != null &&
+               g.plannedPathGridPositions != null &&
+               g.plannedPathGridPositions.Count > 0 &&
+               g.currentPathIndex < g.plannedPathGridPositions.Count;
     }
 }
